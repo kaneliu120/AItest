@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
         // 计算批量统计
         const successful = batchResults.filter(r => r.success).length;
         const failed = batchResults.filter(r => !r.success).length;
-        const responseTimes = batchResults.filter(r => r.success).map(r => r.data.responseTime);
+        const responseTimes = batchResults.filter(r => r.success).map(r => (r as any).data?.responseTime ?? 0);
         const avgResponseTime = responseTimes.length > 0 ? 
           responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
         

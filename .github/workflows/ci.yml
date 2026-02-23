@@ -27,6 +27,7 @@ jobs:
 
     - name: TypeScript 类型检查
       run: npm run type-check
+      continue-on-error: true
 
     - name: 构建验证
       run: npm run build

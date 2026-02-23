@@ -20,27 +20,32 @@ export async function POST(request: NextRequest) {
     let result;
     
     switch (workflow) {
-      case 'outsource-project':
+      case 'outsource-project': {
         // 外包项目管理工作流
         const { projectTitle, budget, deadline } = parameters || {};
         
         // 1. 知识增强分析
-        const analysis = await knowledgeEnhancedDevService.analyzeTask({
-          task: `外包项目: ${projectTitle}`,
-          context: { budget, deadline }
-        });
+        const analysis = await knowledgeEnhancedDevService.analyzeDevTask(
+          `外包项目: ${projectTitle}`,
+          { budget, deadline }
+        );
         
         // 2. 智能任务分发
         const dispatch = await intelligentTaskDispatcher.dispatchTask({
-          task: `管理外包项目: ${projectTitle}`,
+          id: `workflow-${Date.now()}`,
+          query: `管理外包项目: ${projectTitle}`,
           context: analysis
         });
         
         // 3. 自动化效率优化
-        const optimization = await automationEfficiencyService.processBatch({
-          tasks: [
-            { type: 'project-management', data: { title: projectTitle, analysis, dispatch } }
-          ]
+        const optimization = await automationEfficiencyService.processAutomationTask({
+          type: 'optimization',
+          priority: 'high',
+          complexity: 'medium',
+          estimatedTokenUsage: 1000,
+          estimatedTime: 5,
+          automationLevel: 'full',
+          data: { title: projectTitle, analysis, dispatch }
         });
         
         result = {
@@ -52,8 +57,9 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString()
         };
         break;
+      }
         
-      case 'product-development':
+      case 'product-development': {
         // 产品开发工作流
         const { feature, requirements } = parameters || {};
         
@@ -65,33 +71,37 @@ export async function POST(request: NextRequest) {
           priority: 'high'
         });
         
-        // 2. 知识增强开发
-        const devEnhancement = await knowledgeEnhancedDevService.enhanceTask({
-          task: `开发 ${feature}`,
-          context: gatewayResult,
-          enhancementLevel: 'high'
-        });
+        // 2. 知识增强分析
+        const devAnalysis = await knowledgeEnhancedDevService.analyzeDevTask(
+          `开发 ${feature}`,
+          { requirements, gatewayResult }
+        );
         
         // 3. 自动化处理
-        const automationResult = await automationEfficiencyService.processBatch({
-          tasks: [
-            { type: 'development', data: { feature, requirements, enhancement: devEnhancement } }
-          ]
+        const automationResult = await automationEfficiencyService.processAutomationTask({
+          type: 'code-generation',
+          priority: 'high',
+          complexity: 'high',
+          estimatedTokenUsage: 2000,
+          estimatedTime: 10,
+          automationLevel: 'assisted',
+          data: { feature, requirements, analysis: devAnalysis }
         });
         
         result = {
           workflow: 'product-development',
           steps: ['需求分析', '知识增强', '自动化处理'],
           gatewayResult,
-          devEnhancement,
+          devAnalysis,
           automationResult,
           timestamp: new Date().toISOString()
         };
         break;
+      }
         
-      case 'finance-monitoring':
+      case 'finance-monitoring': {
         // 财务监控工作流
-        const { period, metrics } = parameters || {};
+        const { period } = parameters || {};
         
         // 模拟财务数据
         const financeData = {
@@ -104,12 +114,11 @@ export async function POST(request: NextRequest) {
         
         financeData.profit = financeData.revenue - financeData.expenses;
         
-        // 知识归档
-        const archiveResult = await knowledgeEnhancedDevService.enhanceTask({
-          task: '财务报告归档',
-          context: financeData,
-          enhancementLevel: 'medium'
-        });
+        // 知识归档分析
+        const archiveResult = await knowledgeEnhancedDevService.analyzeDevTask(
+          '财务报告归档',
+          financeData
+        );
         
         result = {
           workflow: 'finance-monitoring',
@@ -119,6 +128,7 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString()
         };
         break;
+      }
         
       default:
         return NextResponse.json({

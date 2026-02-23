@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
           }
         ];
         
-        const testResults = await automationEfficiencyService.processBatchTasks(testTasks);
+        const testResults = await automationEfficiencyService.processBatchTasks(testTasks as any);
         
         const testCompleted = testResults.filter(r => r.status === 'completed').length;
         const testTokenSavings = testResults

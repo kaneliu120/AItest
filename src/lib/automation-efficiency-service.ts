@@ -73,6 +73,7 @@ export interface AutomationTask {
   estimatedTime: number; // 分钟
   automationLevel: 'manual' | 'assisted' | 'full';
   status: 'pending' | 'processing' | 'completed' | 'failed';
+  data?: any; // 自定义数据
   result?: any;
   metrics?: {
     actualTokenUsage: number;

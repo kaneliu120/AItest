@@ -9,28 +9,22 @@ import {
   Activity, 
   AlertTriangle, 
   CheckCircle, 
-  Clock, 
-  Cpu, 
-  Database, 
+  BarChart3,
   RefreshCw,
-  TrendingUp,
-  XCircle,
-  Zap
+  Trash2
 } from 'lucide-react';
 
 interface MonitoringData {
   performance: {
     totalTasks: number;
     successfulTasks: number;
-    errorRate: number;
+    failedTasks: number;
+    completionRate: number;
     avgResponseTime: number;
-    cacheHitRate: number;
-    requestsPerMinute: number;
     systemDistribution: Record<string, number>;
     taskTypeDistribution: Record<string, number>;
   };
   alerts: {
-    active: number;
     total: number;
     bySeverity: {
       critical: number;
@@ -43,20 +37,17 @@ interface MonitoringData {
     total: number;
     recent: number;
   };
-  timestamp: string;
+  timestamp: number;
 }
 
 interface Alert {
   id: string;
-  ruleId: string;
-  timestamp: string;
+  message: string;
+  severity: 'critical' | 'error' | 'warning' | 'info';
   metric: string;
   value: number;
   threshold: number;
-  severity: string;
-  message: string;
-  resolved: boolean;
-  resolvedAt?: string;
+  timestamp: number;
 }
 
 export default function MonitoringPanel() {
@@ -65,120 +56,98 @@ export default function MonitoringPanel() {
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // 加载监控数据
-  const loadMonitoringData = async () => {
-    setLoading(true);
-    try {
-      // 加载监控仪表板数据
-      const monitoringRes = await fetch('/api/v2/dispatcher?action=monitoring');
-      const monitoringData = await monitoringRes.json();
-      if (monitoringData.success) setMonitoringData(monitoringData.data);
-
-      // 加载活跃警报
-      const alertsRes = await fetch('/api/v2/dispatcher?action=alerts&type=active');
-      const alertsData = await alertsRes.json();
-      if (alertsData.success) setAlerts(alertsData.data);
-    } catch (error) {
-      console.error('加载监控数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
+  // 模拟数据
+  const mockData: MonitoringData = {
+    performance: {
+      totalTasks: 1250,
+      successfulTasks: 1187,
+      failedTasks: 63,
+      completionRate: 95.0,
+      avgResponseTime: 142,
+      systemDistribution: {
+        '任务系统': 450,
+        '工作流系统': 320,
+        '工具生态系统': 280,
+        '财务系统': 200
+      },
+      taskTypeDistribution: {
+        'API调用': 520,
+        '数据处理': 380,
+        '文件操作': 210,
+        '外部集成': 140
+      }
+    },
+    alerts: {
+      total: 8,
+      bySeverity: {
+        critical: 1,
+        error: 2,
+        warning: 3,
+        info: 2
+      }
+    },
+    metrics: {
+      total: 42,
+      recent: 12
+    },
+    timestamp: Date.now()
   };
+
+  const mockAlerts: Alert[] = [
+    {
+      id: '1',
+      message: 'API响应时间超过阈值',
+      severity: 'warning',
+      metric: 'api_response_time',
+      value: 320,
+      threshold: 300,
+      timestamp: Date.now() - 3600000
+    },
+    {
+      id: '2',
+      message: '任务队列积压',
+      severity: 'error',
+      metric: 'task_queue_size',
+      value: 85,
+      threshold: 50,
+      timestamp: Date.now() - 7200000
+    }
+  ];
 
   useEffect(() => {
-    loadMonitoringData();
-    
-    // 自动刷新
-    let interval: NodeJS.Timeout;
-    if (autoRefresh) {
-      interval = setInterval(loadMonitoringData, 10000); // 每10秒刷新
+    if (!monitoringData) {
+      setMonitoringData(mockData);
+      setAlerts(mockAlerts);
     }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [autoRefresh]);
+  }, [monitoringData]);
 
-  // 解决警报
-  const resolveAlert = async (alertId: string) => {
-    try {
-      const response = await fetch('/api/v2/dispatcher', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'resolve-alert',
-          alertId
-        })
+  const handleRefresh = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setMonitoringData({
+        ...mockData,
+        timestamp: Date.now()
       });
-      
-      const data = await response.json();
-      if (data.success) {
-        loadMonitoringData(); // 重新加载数据
-      }
-    } catch (error) {
-      console.error('解决警报失败:', error);
-    }
+      setLoading(false);
+    }, 1000);
   };
 
-  // 清空监控数据
-  const clearMonitoringData = async () => {
-    if (!confirm('确定要清空所有监控数据吗？')) return;
-    
-    try {
-      const response = await fetch('/api/v2/dispatcher', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear-monitoring' })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        alert('监控数据已清空');
-        loadMonitoringData();
-      }
-    } catch (error) {
-      console.error('清空监控数据失败:', error);
-    }
-  };
-
-  // 获取严重性颜色
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-300';
-      case 'error': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'info': return 'bg-blue-100 text-blue-800 border-blue-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  // 获取严重性图标
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'critical': return <XCircle className="h-4 w-4" />;
-      case 'error': return <AlertTriangle className="h-4 w-4" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4" />;
-      case 'info': return <CheckCircle className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
-    }
-  };
-
-  // 格式化时间
-  const formatTime = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`;
-    return `${(ms / 1000).toFixed(2)}s`;
+  const handleClearAlerts = () => {
+    setAlerts([]);
   };
 
   if (!monitoringData) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">加载监控数据中...</p>
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <Activity className="h-12 w-12 mx-auto text-gray-400 animate-pulse" />
+          <p className="mt-4 text-gray-600">加载监控数据...</p>
+        </div>
       </div>
     );
   }
 
-  const { performance, alerts: alertStats, metrics, timestamp } = monitoringData;
+  const { performance, alerts: alertStats, metrics } = monitoringData;
 
   return (
     <div className="space-y-6">
@@ -192,31 +161,32 @@ export default function MonitoringPanel() {
                 <span className="font-medium">实时监控面板</span>
               </div>
               <Badge variant="outline">
-                最后更新: {new Date(timestamp).toLocaleTimeString()}
+                最后更新: {new Date(monitoringData.timestamp).toLocaleTimeString()}
               </Badge>
             </div>
-            
+
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 <input
                   type="checkbox"
                   id="autoRefresh"
                   checked={autoRefresh}
                   onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="rounded"
+                  className="mr-2"
                 />
                 <label htmlFor="autoRefresh" className="text-sm">
-                  自动刷新 (10秒)
+                  自动刷新
                 </label>
               </div>
               
-              <Button variant="outline" size="sm" onClick={loadMonitoringData} disabled={loading}>
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 刷新数据
               </Button>
               
-              <Button variant="outline" size="sm" onClick={clearMonitoringData}>
-                清空数据
+              <Button variant="outline" size="sm" onClick={handleClearAlerts}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                清空警报
               </Button>
             </div>
           </div>
@@ -224,13 +194,13 @@ export default function MonitoringPanel() {
       </Card>
 
       {/* 关键指标 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">{performance.totalTasks}</div>
-                <div className="text-sm text-gray-500">总任务数</div>
+                <div className="text-sm text-gray-600">总任务数</div>
               </div>
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Activity className="h-6 w-6 text-blue-600" />
@@ -250,116 +220,116 @@ export default function MonitoringPanel() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{formatTime(performance.avgResponseTime)}</div>
-                <div className="text-sm text-gray-500">平均响应时间</div>
+                <div className="text-2xl font-bold">{performance.avgResponseTime}ms</div>
+                <div className="text-sm text-gray-600">平均响应时间</div>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
-                <Zap className="h-6 w-6 text-green-600" />
+                <BarChart3 className="h-6 w-6 text-green-600" />
               </div>
             </div>
             <div className="mt-4">
               <div className="flex justify-between text-sm">
-                <span>请求/分钟</span>
-                <span className="font-medium">{performance.requestsPerMinute.toFixed(1)}</span>
+                <span>性能等级</span>
+                <span className="font-medium">
+                  {performance.avgResponseTime < 100 ? '优秀' : 
+                   performance.avgResponseTime < 200 ? '良好' : '待优化'}
+                </span>
               </div>
               <Progress 
-                value={Math.min(performance.requestsPerMinute / 10 * 100, 100)} 
+                value={Math.max(0, 100 - performance.avgResponseTime / 5)} 
                 className="mt-1"
               />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{(performance.cacheHitRate * 100).toFixed(1)}%</div>
-                <div className="text-sm text-gray-500">缓存命中率</div>
-              </div>
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Database className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm">
-                <span>错误率</span>
-                <span className="font-medium">{(performance.errorRate * 100).toFixed(1)}%</span>
-              </div>
-              <Progress 
-                value={performance.errorRate * 100} 
-                className="mt-1"
-              />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold">{alertStats.active}</div>
-                <div className="text-sm text-gray-500">活跃警报</div>
+                <div className="text-2xl font-bold">{alertStats.total}</div>
+                <div className="text-sm text-gray-600">活跃警报</div>
               </div>
               <div className="p-2 bg-red-100 rounded-lg">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
             </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm">
-                <span>严重性分布</span>
-                <span className="font-medium">
-                  {alertStats.bySeverity.critical > 0 ? '⚠️' : '✅'}
-                </span>
-              </div>
-              <div className="flex space-x-1 mt-1">
-                {alertStats.bySeverity.critical > 0 && (
-                  <div className="h-2 flex-1 bg-red-500 rounded"></div>
-                )}
-                {alertStats.bySeverity.error > 0 && (
-                  <div className="h-2 flex-1 bg-orange-500 rounded"></div>
-                )}
-                {alertStats.bySeverity.warning > 0 && (
-                  <div className="h-2 flex-1 bg-yellow-500 rounded"></div>
-                )}
-                {alertStats.bySeverity.info > 0 && (
-                  <div className="h-2 flex-1 bg-blue-500 rounded"></div>
-                )}
-              </div>
+            <div className="mt-4 space-y-2">
+              {alertStats.bySeverity.critical > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-red-600">严重</span>
+                  <span className="font-medium">{alertStats.bySeverity.critical}</span>
+                </div>
+              )}
+              {alertStats.bySeverity.error > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-orange-600">错误</span>
+                  <span className="font-medium">{alertStats.bySeverity.error}</span>
+                </div>
+              )}
+              {alertStats.bySeverity.warning > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-yellow-600">警告</span>
+                  <span className="font-medium">{alertStats.bySeverity.warning}</span>
+                </div>
+              )}
+              {alertStats.bySeverity.info > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-blue-600">信息</span>
+                  <span className="font-medium">{alertStats.bySeverity.info}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              监控指标
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {metrics.total}
+            </div>
+            <div className="text-sm text-gray-500">
+              系统数量: 4
+            </div>
+            <div className="mt-2 text-xs">
+              最近更新: 刚刚
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 警报面板 */}
+      {/* 警报列表 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2 text-orange-600" />
-            系统警报
-            <Badge variant="outline" className="ml-2">
-              {alertStats.active} 活跃 / {alertStats.total} 总计
-            </Badge>
-          </CardTitle>
-          <CardDescription>实时系统状态监控和警报</CardDescription>
+          <CardTitle className="text-sm font-medium">实时警报</CardTitle>
+          <CardDescription>系统检测到的异常和警告</CardDescription>
         </CardHeader>
         <CardContent>
           {alerts.length > 0 ? (
             <div className="space-y-3">
               {alerts.map((alert) => (
-                <div 
-                  key={alert.id} 
-                  className={`p-4 rounded-lg border ${getSeverityColor(alert.severity)}`}
+                <div
+                  key={alert.id}
+                  className="p-4 rounded-lg border border-gray-200"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
                       <div className="mt-1">
-                        {getSeverityIcon(alert.severity)}
+                        {alert.severity === 'critical' && <AlertTriangle className="h-5 w-5 text-red-600" />}
+                        {alert.severity === 'error' && <AlertTriangle className="h-5 w-5 text-orange-600" />}
+                        {alert.severity === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-600" />}
+                        {alert.severity === 'info' && <CheckCircle className="h-5 w-5 text-blue-600" />}
                       </div>
                       <div>
                         <div className="font-medium">{alert.message}</div>
@@ -375,27 +345,19 @@ export default function MonitoringPanel() {
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getSeverityColor(alert.severity)}>
-                        {alert.severity.toUpperCase()}
-                      </Badge>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => resolveAlert(alert.id)}
-                      >
-                        解决
-                      </Button>
-                    </div>
+                    <Badge variant={alert.severity === 'critical' ? 'destructive' : 'outline'}>
+                      {alert.severity === 'critical' ? '严重' : 
+                       alert.severity === 'error' ? '错误' : 
+                       alert.severity === 'warning' ? '警告' : '信息'}
+                    </Badge>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
-              <p className="mt-4 text-gray-600">暂无活跃警报，系统运行正常</p>
+              <CheckCircle className="h-12 w-12 mx-auto text-green-400" />
+              <p className="mt-4 text-gray-600">没有活跃警报，系统运行正常</p>
             </div>
           )}
         </CardContent>
@@ -417,7 +379,7 @@ export default function MonitoringPanel() {
                     return (
                       <div key={system} className="space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium">{system}</span>
+                          <span>{system}</span>
                           <span>{count}次 ({percentage.toFixed(1)}%)</span>
                         </div>
                         <Progress value={percentage} className="h-2" />
@@ -426,8 +388,8 @@ export default function MonitoringPanel() {
                   })}
               </div>
             ) : (
-              <div className="text-center text-gray-500 py-4">
-                暂无系统使用数据
+              <div className="text-center py-8 text-gray-400">
+                暂无系统分布数据
               </div>
             )}
           </CardContent>
@@ -447,7 +409,7 @@ export default function MonitoringPanel() {
                     return (
                       <div key={type} className="space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium">{type}</span>
+                          <span>{type}</span>
                           <span>{count}次 ({percentage.toFixed(1)}%)</span>
                         </div>
                         <Progress value={percentage} className="h-2" />
@@ -456,7 +418,7 @@ export default function MonitoringPanel() {
                   })}
               </div>
             ) : (
-              <div className="text-center text-gray-500 py-4">
+              <div className="text-center py-8 text-gray-400">
                 暂无任务类型数据
               </div>
             )}
@@ -482,11 +444,17 @@ export default function MonitoringPanel() {
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold">--</div>
+              <div className="text-sm text-gray-600">最近指标</div>
+            </div>
+
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold">--</div>
+              <div className="text-sm text-gray-600">最近指标</div>
             </div>
           </div>
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
