@@ -506,7 +506,7 @@ export default function ContextCachePage() {
                         <span className="font-medium">{cacheStats.semanticHitRate}%</span>
                       </div>
                       
-                      <div className="flex items-center justify                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">部分命中率</span>
                         <span className="font-medium">{cacheStats.partialHitRate}%</span>
                       </div>
@@ -966,3 +966,12 @@ export default function ContextCachePage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="context-manager"><div className="text-center py-12 text-gray-400">上下文管理器开发中...</div></TabsContent>
+        <TabsContent value="performance"><div className="text-center py-12 text-gray-400">性能分析开发中...</div></TabsContent>
+        <TabsContent value="config"><div className="text-center py-12 text-gray-400">配置管理开发中...</div></TabsContent>
+      </Tabs>
+    </div>
+  );
+}

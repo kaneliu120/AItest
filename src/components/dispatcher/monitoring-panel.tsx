@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -482,4 +482,11 @@ export default function MonitoringPanel() {
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold">{performance.requests
+            </div>
+          </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

@@ -529,3 +529,8 @@ services:
     depends_on:
       - backend
     networks:
+
+      backend:
+        condition: service_healthy\`;
+  }
+}

@@ -375,4 +375,18 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
                             概率: {risk.probability === 'high' ? '高' : risk.probability === 'medium' ? '中' : '低'}
                           </span>
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
-                            影响: {risk
+                            影响: --
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

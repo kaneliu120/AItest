@@ -511,4 +511,15 @@ export default function UnifiedMonitoringPage() {
               </CardContent>
             </Card>
 
-            {/* */
+
+          </div>
+        </TabsContent>
+
+        <TabsContent value="alerts"><div className="text-center py-12 text-gray-400">告警中心功能开发中...</div></TabsContent>
+        <TabsContent value="health"><div className="text-center py-12 text-gray-400">系统健康功能开发中...</div></TabsContent>
+        <TabsContent value="metrics"><div className="text-center py-12 text-gray-400">监控指标功能开发中...</div></TabsContent>
+        <TabsContent value="rules"><div className="text-center py-12 text-gray-400">告警规则功能开发中...</div></TabsContent>
+      </Tabs>
+    </div>
+  );
+}

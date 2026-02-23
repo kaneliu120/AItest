@@ -539,3 +539,6 @@ ${categories.functional.map(req => `- ${req.id}: ${req.description} (优先级: 
    */
   private mapImpactToScore(impact: string): number {
     const map
+    return 5;
+  }
+}

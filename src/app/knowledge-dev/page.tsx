@@ -955,7 +955,7 @@ export default function KnowledgeDevPage() {
                     </CardContent>
                   </Card>
                 </div>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         </TabsContent>

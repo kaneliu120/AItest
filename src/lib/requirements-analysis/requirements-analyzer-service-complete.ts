@@ -544,3 +544,9 @@ export class RequirementsAnalyzerService {
     if (content.includes('集成') || content.includes('integration') || content.includes('第三方')) {
       risks.push({
         id:
+        id: `risk-${risks.length}`, title: '集成风险', description: '存在第三方集成风险', severity: 'medium', probability: 'medium', impact: 'medium', mitigation: '评估集成复杂度'
+      });
+    }
+    return risks;
+  }
+}

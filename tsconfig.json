@@ -37,6 +37,15 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/lib/requirements-analysis/grok-ai-service.ts",
+    "src/lib/requirements-analysis/requirements-analyzer-service.ts",
+    "src/lib/requirements-analysis/requirements-analyzer-service-complete.ts",
+    "src/lib/requirements-analysis/technical-document-generator.ts",
+    "src/lib/requirements-analysis/technical-document-generator-complete.ts",
+    "src/components/requirements-analysis/visual-dashboard.tsx",
+    "src/components/requirements-analysis/visualization-dashboard.tsx",
+    "src/app/page-backup.tsx",
+    "src/app/page-error.tsx"
   ]
 }

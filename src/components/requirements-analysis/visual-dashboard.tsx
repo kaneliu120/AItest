@@ -372,3 +372,11 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
         <div className="space-y-6">
           {/* 风险分布 */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
+
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

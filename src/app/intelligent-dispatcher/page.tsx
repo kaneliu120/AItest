@@ -517,7 +517,8 @@ export default function IntelligentDispatcherPage() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">总任务                        <span className="font-medium">{dispatchStats.totalTasks}</span>
+                        <span className="text-sm text-gray-600">总任务</span>
+                        <span className="font-medium">{dispatchStats.totalTasks}</span>
                       </div>
                       
                       <div className="flex items-center justify-between">
@@ -960,3 +961,15 @@ export default function IntelligentDispatcherPage() {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="realtime"><div className="text-center py-12 text-gray-400">实时监控开发中...</div></TabsContent>
+        <TabsContent value="performance"><div className="text-center py-12 text-gray-400">性能分析开发中...</div></TabsContent>
+      </Tabs>
+    </div>
+  );
+}

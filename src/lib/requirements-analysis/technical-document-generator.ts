@@ -513,4 +513,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API
+      - NEXT_PUBLIC_APIhttps://api.example.com\`;
+  }
+}
