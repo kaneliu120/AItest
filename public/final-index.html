@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Mission Control - 智能需求分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .loading { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-rocket text-blue-600 text-2xl mr-3"></i>
+                        <span class="text-xl font-bold text-gray-900">Mission Control</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">v1.0.0</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <div class="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                            <span class="text-sm text-gray-600">在线</span>
+                        </div>
+                        <button id="healthBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-heartbeat mr-2"></i>健康检查
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 英雄区域 -->
+        <div class="gradient-bg rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-2/3">
+                    <h1 class="text-4xl font-bold mb-4">🚀 智能需求分析系统</h1>
+                    <p class="text-xl mb-6 opacity-90">AI驱动的需求分析、技术文档生成和项目规划平台</p>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                            <div class="text-sm opacity-80">响应时间</div>
+                            <div class="text-lg font-semibold"><span id="responseTime">--</span>ms</div>
+                        </div>
+                        <div class="bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                            <div class="text-sm opacity-80">运行时间</div>
+                            <div class="text-lg font-semibold"><span id="uptime">--</span></div>
+                        </div>
+                        <div class="bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                            <div class="text-sm opacity-80">API状态</div>
+                            <div class="text-lg font-semibold" id="apiStatus">检查中...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 md:mt-0">
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">快速开始</h3>
+                        <button id="startAnalyzeBtn" class="w-full mb-3 inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-file-upload mr-2"></i>开始需求分析
+                        </button>
+                        <button id="testApiBtn" class="w-full inline-flex justify-center items-center px-4 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-vial mr-2"></i>测试API
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="card-hover bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4">
+                        <i class="fas fa-brain text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">智能需求分析</h3>
+                </div>
+                <p class="text-gray-600 mb-4">上传文档或输入文本，AI自动提取功能需求、技术要求和风险评估</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>多格式文档支持</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>AI语义理解</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>自动功能提取</li>
+                </ul>
+            </div>
+
+            <div class="card-hover bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-lg bg-green-100 text-green-600 mr-4">
+                        <i class="fas fa-file-code text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">文档自动生成</h3>
+                </div>
+                <p class="text-gray-600 mb-4">一键生成完整的技术文档，包括SRS、TDD、项目计划和部署指南</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>SRS文档</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>TDD文档</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>项目计划</li>
+                </ul>
+            </div>
+
+            <div class="card-hover bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-lg bg-purple-100 text-purple-600 mr-4">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">技术决策支持</h3>
+                </div>
+                <p class="text-gray-600 mb-4">基于最佳实践的技术栈推荐、复杂度评估和项目工作量估算</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>技术栈推荐</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>风险评估</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>工作量估算</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 需求分析区域 -->
+        <div id="analyzeSection" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">📋 需求分析</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 输入区域 -->
+                <div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">输入需求文本</label>
+                        <textarea id="requirementText" rows="12" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="输入您的项目需求，例如：
+# 电商平台项目
+
+## 核心功能
+1. 用户注册和登录
+2. 商品浏览和搜索
+3. 购物车和订单管理
+4. 支付系统集成
+
+## 技术要求
+- 响应时间 < 2秒
+- 支持1000并发用户
+- 数据安全加密
+- 移动端适配"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="generateDocs" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                            <span class="ml-2 text-sm text-gray-700">生成技术文档 (SRS, TDD, 项目计划)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button id="analyzeBtn" class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-play mr-2"></i>开始分析
+                        </button>
+                        <button id="loadExampleBtn" class="px-4 py-3 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-lightbulb mr-2"></i>加载示例
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 结果区域 -->
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">分析结果</label>
+                        <div id="resultArea" class="border border-gray-300 rounded-lg p-4 min-h-[300px] bg-gray-50">
+                            <div class="text-center py-12">
+                                <i class="fas fa-chart-bar text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">分析结果将显示在这里</p>
+                                <p class="text-sm text-gray-400 mt-2">开始分析后，结果将实时更新</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="loadingIndicator" class="hidden mb-4">
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="loading h-3 w-3 rounded-full bg-blue-600"></div>
+                            <div class="loading h-3 w-3 rounded-full bg-blue-600" style="animation-delay: 0.2s"></div>
+                            <div class="loading h-3 w-3 rounded-full bg-blue-600" style="animation-delay: 0.4s"></div>
+                            <span class="text-sm text-gray-600">正在分析需求...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API文档区域 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">📡 API文档</h2>
+            
+            <div class="space-y-6">
+                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                    <h3 class="font-semibold text-gray-900">健康检查端点</h3>
+                    <div class="mt-2">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-sm">GET /api/health</code>
+                        <p class="text-sm text-gray-600 mt-1">检查系统健康状态</p>
+                    </div>
+                </div>
+                
+                <div class="border-l-4 border-green-500 pl-4 py-2">
+                    <h3 class="font-semibold text-gray-900">需求分析端点</h3>
+                    <div class="mt-2">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-sm">POST /api/requirements-analysis</code>
+                        <p class="text-sm text-gray-600 mt-1">分析需求文档或文本</p>
+                        <div class="mt-2 text-sm">
+                            <span class="font-medium">参数:</span>
+                            <ul class="list-disc list-inside ml-4 text-gray-600">
+                                <li><code>text</code>: 需求文本内容</li>
+                                <li><code>file</code>: 上传的需求文档</li>
+                                <li><code>generateDocs</code>: 是否生成文档 (true/false)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-l-4 border-purple-500 pl-4 py-2">
+                    <h3 class="font-semibold text-gray-900">服务状态端点</h3>
+                    <div class="mt-2">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-sm">GET /api/requirements-analysis?action=status</code>
+                        <p class="text-sm text-gray-600 mt-1">获取服务能力和支持格式</p>
+                    </div>
+                </div>
+                
+                <div class="border-l-4 border-yellow-500 pl-4 py-2">
+                    <h3 class="font-semibold text-gray-900">监控指标端点</h3>
+                    <div class="mt-2">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-sm">GET /api/metrics</code>
+                        <p class="text-sm text-gray-600 mt-1">Prometheus格式的系统指标</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 监控区域 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">📊 系统监控</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-medium text-gray-700">API响应时间</h3>
+                        <i class="fas fa-clock text-blue-500"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-900" id="responseTimeDisplay">-- ms</div>
+                    <div class="text-sm text-gray-600 mt-1">等待测试</div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-medium text-gray-700">系统运行时间</h3>
+                        <i class="fas fa-server text-green-500"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-900" id="uptimeDisplay">--</div>
+                    <div class="text-sm text-gray-600 mt-1">等待检查</div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-medium text-gray-700">系统状态</h3>
+                        <i class="fas fa-heart text-red-500"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-900" id="systemStatusDisplay">检查中</div>
+                    <div class="text-sm text-gray-600 mt-1">等待健康检查</div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="refreshMonitorBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <i class="fas fa-sync-alt mr-2"></i>刷新监控数据
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex

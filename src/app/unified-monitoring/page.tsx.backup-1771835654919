@@ -1,0 +1,514 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { 
+  AlertTriangle,
+  CheckCircle,
+  Activity,
+  Bell,
+  Settings,
+  BarChart3,
+  Server,
+  Zap,
+  Brain,
+  Cpu,
+  Database,
+  Globe,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Play,
+  StopCircle,
+  TestTube,
+  Filter,
+  Search,
+  Download,
+  Upload
+} from 'lucide-react';
+
+interface SystemHealth {
+  system: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  metrics: any[];
+  lastCheck: string;
+  uptime: number;
+  errorRate: number;
+  responseTime: number;
+}
+
+interface Alert {
+  id: string;
+  ruleId: string;
+  system: string;
+  metric: string;
+  currentValue: number;
+  threshold: number;
+  severity: 'info' | 'warning' | 'critical';
+  message: string;
+  timestamp: string;
+  acknowledged: boolean;
+  resolved: boolean;
+}
+
+interface MonitoringMetric {
+  id: string;
+  system: string;
+  name: string;
+  value: number;
+  unit: string;
+  timestamp: string;
+  tags: Record<string, string>;
+}
+
+interface AlertRule {
+  id: string;
+  name: string;
+  description: string;
+  system: string;
+  metric: string;
+  condition: string;
+  threshold: number;
+  severity: 'info' | 'warning' | 'critical';
+  enabled: boolean;
+}
+
+export default function UnifiedMonitoringPage() {
+  const [serviceStatus, setServiceStatus] = useState<any>(null);
+  const [activeAlerts, setActiveAlerts] = useState<Alert[]>([]);
+  const [systemHealth, setSystemHealth] = useState<SystemHealth[]>([]);
+  const [metrics, setMetrics] = useState<MonitoringMetric[]>([]);
+  const [alertRules, setAlertRules] = useState<AlertRule[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedSystem, setSelectedSystem] = useState<string>('all');
+  const [autoRefresh, setAutoRefresh] = useState(true);
+
+  // 加载服务状态
+  const loadServiceStatus = async () => {
+    try {
+      const response = await fetch('/api/v6/monitoring?action=status');
+      const data = await response.json();
+      if (data.success) setServiceStatus(data.data);
+    } catch (error) {
+      console.error('加载服务状态失败:', error);
+    }
+  };
+
+  // 加载活跃告警
+  const loadActiveAlerts = async () => {
+    try {
+      const response = await fetch('/api/v6/monitoring?action=alerts');
+      const data = await response.json();
+      if (data.success) setActiveAlerts(data.data.alerts || []);
+    } catch (error) {
+      console.error('加载活跃告警失败:', error);
+    }
+  };
+
+  // 加载系统健康状态
+  const loadSystemHealth = async () => {
+    try {
+      const response = await fetch('/api/v6/monitoring?action=health');
+      const data = await response.json();
+      if (data.success) setSystemHealth(data.data.health || []);
+    } catch (error) {
+      console.error('加载系统健康状态失败:', error);
+    }
+  };
+
+  // 加载监控指标
+  const loadMetrics = async () => {
+    try {
+      const url = selectedSystem === 'all' 
+        ? '/api/v6/monitoring?action=metrics&limit=50'
+        : `/api/v6/monitoring?action=metrics&system=${selectedSystem}&limit=50`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.success) setMetrics(data.data.metrics || []);
+    } catch (error) {
+      console.error('加载监控指标失败:', error);
+    }
+  };
+
+  // 加载告警规则
+  const loadAlertRules = async () => {
+    try {
+      const url = selectedSystem === 'all'
+        ? '/api/v6/monitoring?action=rules'
+        : `/api/v6/monitoring?action=rules&system=${selectedSystem}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.success) setAlertRules(data.data.rules || []);
+    } catch (error) {
+      console.error('加载告警规则失败:', error);
+    }
+  };
+
+  // 加载所有数据
+  const loadAllData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        loadServiceStatus(),
+        loadActiveAlerts(),
+        loadSystemHealth(),
+        loadMetrics(),
+        loadAlertRules()
+      ]);
+    } catch (error) {
+      console.error('加载数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAllData();
+    
+    // 自动刷新
+    if (autoRefresh) {
+      const interval = setInterval(loadAllData, 30000); // 每30秒刷新
+      return () => clearInterval(interval);
+    }
+  }, [selectedSystem, autoRefresh]);
+
+  // 确认告警
+  const acknowledgeAlert = async (alertId: string) => {
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'acknowledge-alert',
+          alertId,
+          acknowledgedBy: 'user'
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadActiveAlerts();
+      }
+    } catch (error) {
+      console.error('确认告警失败:', error);
+    }
+  };
+
+  // 解决告警
+  const resolveAlert = async (alertId: string) => {
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'resolve-alert',
+          alertId
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadActiveAlerts();
+      }
+    } catch (error) {
+      console.error('解决告警失败:', error);
+    }
+  };
+
+  // 启动监控服务
+  const startMonitoring = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start' })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadServiceStatus();
+      }
+    } catch (error) {
+      console.error('启动监控服务失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 停止监控服务
+  const stopMonitoring = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadServiceStatus();
+      }
+    } catch (error) {
+      console.error('停止监控服务失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 测试告警
+  const testAlert = async () => {
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test-alert' })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadActiveAlerts();
+      }
+    } catch (error) {
+      console.error('测试告警失败:', error);
+    }
+  };
+
+  // 模拟指标
+  const simulateMetrics = async () => {
+    try {
+      const response = await fetch('/api/v6/monitoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'simulate-metrics',
+          system: 'test-system',
+          count: 5
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await loadMetrics();
+      }
+    } catch (error) {
+      console.error('模拟指标失败:', error);
+    }
+  };
+
+  // 获取状态颜色
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'bg-green-100 text-green-800';
+      case 'degraded': return 'bg-yellow-100 text-yellow-800';
+      case 'unhealthy': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // 获取严重性颜色
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'warning': return 'bg-yellow-100 text-yellow-800';
+      case 'info': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // 获取系统图标
+  const getSystemIcon = (system: string) => {
+    switch (system) {
+      case 'knowledge-enhanced-development': return <Brain className="h-5 w-5" />;
+      case 'intelligent-task-dispatch': return <Cpu className="h-5 w-5" />;
+      case 'context-aware-cache': return <Database className="h-5 w-5" />;
+      case 'unified-gateway': return <Globe className="h-5 w-5" />;
+      case 'automation-efficiency-optimization': return <Zap className="h-5 w-5" />;
+      default: return <Server className="h-5 w-5" />;
+    }
+  };
+
+  // 获取系统显示名称
+  const getSystemDisplayName = (system: string) => {
+    const names: Record<string, string> = {
+      'knowledge-enhanced-development': '知识增强开发',
+      'intelligent-task-dispatch': '智能任务分发',
+      'context-aware-cache': '上下文缓存',
+      'unified-gateway': '统一网关',
+      'automation-efficiency-optimization': '自动化效率优化'
+    };
+    return names[system] || system;
+  };
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* 标题和状态 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center">
+            <Activity className="h-8 w-8 mr-3 text-blue-600" />
+            统一监控和告警系统
+          </h1>
+          <p className="text-gray-600">实时监控所有子系统，智能告警和性能分析</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          {serviceStatus && (
+            <Badge className={getStatusColor(serviceStatus.overallStatus)}>
+              {serviceStatus.overallStatus === 'healthy' ? '健康' : 
+               serviceStatus.overallStatus === 'degraded' ? '降级' : '异常'}
+            </Badge>
+          )}
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={loadAllData} 
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              刷新
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setAutoRefresh(!autoRefresh)}
+            >
+              {autoRefresh ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {autoRefresh ? '停止自动刷新' : '开启自动刷新'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 系统筛选器 */}
+      <div className="flex items-center space-x-4">
+        <div className="text-sm font-medium">系统筛选:</div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={selectedSystem === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedSystem('all')}
+          >
+            全部系统
+          </Button>
+          {['knowledge-enhanced-development', 'intelligent-task-dispatch', 'context-aware-cache', 'unified-gateway', 'automation-efficiency-optimization'].map(system => (
+            <Button
+              key={system}
+              variant={selectedSystem === system ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedSystem(system)}
+            >
+              {getSystemIcon(system)}
+              <span className="ml-2">{getSystemDisplayName(system)}</span>
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="dashboard" className="flex items-center">
+            <Activity className="h-4 w-4 mr-2" />
+            仪表板
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="flex items-center">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            告警中心
+          </TabsTrigger>
+          <TabsTrigger value="health" className="flex items-center">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            系统健康
+          </TabsTrigger>
+          <TabsTrigger value="metrics" className="flex items-center">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            监控指标
+          </TabsTrigger>
+          <TabsTrigger value="rules" className="flex items-center">
+            <Settings className="h-4 w-4 mr-2" />
+            告警规则
+          </TabsTrigger>
+        </TabsList>
+
+        {/* 仪表板标签页 */}
+        <TabsContent value="dashboard" className="space-y-6">
+          {/* 关键指标卡片 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 整体状态 */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Activity className="h-4 w-4 mr-2" />
+                  整体状态
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {serviceStatus?.overallStatus === 'healthy' ? '健康' : 
+                   serviceStatus?.overallStatus === 'degraded' ? '降级' : '异常'}
+                </div>
+                <div className="text-sm text-gray-500">
+                  监控系统: {serviceStatus?.metrics?.totalChannels || 0}个
+                </div>
+                <Progress 
+                  value={serviceStatus?.overallStatus === 'healthy' ? 100 : 
+                         serviceStatus?.overallStatus === 'degraded' ? 50 : 10}
+                  className="mt-2"
+                />
+              </CardContent>
+            </Card>
+
+            {/* 活跃告警 */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  活跃告警
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {serviceStatus?.metrics?.activeAlerts || 0}
+                </div>
+                <div className="text-sm text-gray-500">
+                  总告警: {serviceStatus?.metrics?.totalAlerts || 0}
+                </div>
+                <div className="mt-2 text-xs">
+                  严重: {activeAlerts.filter(a => a.severity === 'critical').length}
+                  <span className="mx-1">•</span>
+                  警告: {activeAlerts.filter(a => a.severity === 'warning').length}
+                  <span className="mx-1">•</span>
+                  信息: {activeAlerts.filter(a => a.severity === 'info').length}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 监控指标 */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  监控指标
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {serviceStatus?.metrics?.totalMetrics?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-gray-500">
+                  系统数量: {serviceStatus?.systemHealth?.length || 0}
+                </div>
+                <div className="mt-2 text-xs">
+                  最近更新: {metrics[0] ? new Date(metrics[0].timestamp).toLocaleTimeString('zh-CN') : '无数据'}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/*

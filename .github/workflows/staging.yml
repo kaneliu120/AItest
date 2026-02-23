@@ -1,0 +1,73 @@
+name: 预发布环境部署
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 设置Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: 安装依赖
+      run: npm ci
+    
+    - name: 运行测试
+      run: npm test
+    
+    - name: 构建应用
+      run: npm run build
+      env:
+        NODE_ENV: staging
+    
+    - name: 部署到预发布环境
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USERNAME }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /opt/mission-control-staging
+          
+          # 使用PM2部署
+          pm2 stop mission-control-staging || true
+          pm2 delete mission-control-staging || true
+          
+          # 部署新版本
+          pm2 start npm --name "mission-control-staging" -- start
+          
+          # 等待服务启动
+          sleep 10
+          
+          # 健康检查
+          curl -f http://localhost:3002/health || exit 1
+          
+          echo "🚀 预发布环境部署成功!"
+    
+    - name: 运行集成测试
+      run: |
+        echo "运行集成测试..."
+        # 这里可以添加实际的集成测试脚本
+        npm run test:integration
+    
+    - name: 发送预发布通知
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#staging'
+        username: 'GitHub Actions'
+        icon_emoji: ':test_tube:'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always()

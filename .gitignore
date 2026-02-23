@@ -39,3 +39,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs & reports
+logs/
+*.log
+test-results/
+code-review-reports/
+evening-proactive-test-report.json
+core-system-health-report.json
+optimization-completion-report.json
+simple-workflow-test-report.json
+survival-workflows-creation-report.json
+business_integration_test_report.json
+simple_monitor_report.json
+
+# scripts & temp
+deep-check.sh
+run-tsc-check.sh
+check-compilation.js
+test-fix*.js
+test-server-start.js
+validate-all.sh
+health-check.js
+
+# monitoring & infra (local only)
+monitoring/
+nginx/
+prometheus.yml
+data/

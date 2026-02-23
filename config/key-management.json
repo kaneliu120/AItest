@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-02-23T06:09:32.700Z",
+  "keyRotation": {
+    "jwtSecret": "90 days",
+    "encryptionKey": "180 days",
+    "databasePassword": "365 days",
+    "apiKeys": "30 days"
+  },
+  "encryption": {
+    "algorithm": "aes-256-gcm",
+    "keyDerivation": "pbkdf2",
+    "iterations": 100000
+  },
+  "storage": {
+    "type": "environment-variables",
+    "backup": "encrypted-file",
+    "location": "/Users/kane/mission-control/config/keys.enc"
+  },
+  "accessControl": {
+    "read": [
+      "system",
+      "admin"
+    ],
+    "write": [
+      "admin"
+    ],
+    "rotate": [
+      "admin"
+    ]
+  }
+}

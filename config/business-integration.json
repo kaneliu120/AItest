@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-02-23T05:54:05.116Z",
+  "systems": {
+    "财务系统": {
+      "path": "/Users/kane/Finance",
+      "api": "/api/finance",
+      "status": "API不可用",
+      "apiStatus": "失败"
+    },
+    "外包系统": {
+      "path": "/Users/kane/Freelance",
+      "api": "/api/freelance",
+      "status": "运行中",
+      "apiStatus": "可访问"
+    },
+    "任务系统": {
+      "path": "/Users/kane/Tasks",
+      "api": "/api/tasks",
+      "status": "API不可用",
+      "apiStatus": "失败"
+    },
+    "知识管理系统": {
+      "path": "/Users/kane/knowledge-management-system",
+      "api": "http://localhost:8000/api/v1",
+      "status": "API不可用",
+      "apiStatus": "失败"
+    },
+    "My Skill Shop": {
+      "path": "/Users/kane/my-skill-shop",
+      "api": "https://skills-store-api-bjbddhaeathndkap.southeastasia-01.azurewebsites.net",
+      "status": "目录不存在",
+      "apiStatus": "未知"
+    }
+  },
+  "integrationEndpoints": {
+    "unifiedGateway": "http://localhost:3001/api/v1/unified",
+    "taskDispatcher": "http://localhost:3001/api/v2/dispatcher",
+    "knowledgeDev": "http://localhost:3001/api/v4/knowledge-dev",
+    "automation": "http://localhost:3001/api/v5/automation",
+    "monitoring": "http://localhost:3001/api/v6/monitoring"
+  },
+  "businessWorkflows": [
+    {
+      "name": "外包项目管理",
+      "description": "从外包平台获取项目 → 任务分配 → 知识库记录 → 财务跟踪",
+      "systems": [
+        "freelance",
+        "tasks",
+        "knowledge",
+        "finance"
+      ],
+      "apiSequence": [
+        "GET /api/freelance/projects",
+        "POST /api/tasks/create",
+        "POST /api/v4/knowledge-dev/enhance",
+        "POST /api/finance/record"
+      ]
+    },
+    {
+      "name": "产品开发流程",
+      "description": "需求分析 → 知识增强 → 任务分发 → 自动化测试",
+      "systems": [
+        "knowledge",
+        "taskDispatcher",
+        "automation"
+      ],
+      "apiSequence": [
+        "POST /api/v4/knowledge-dev/analyze",
+        "POST /api/v2/dispatcher/dispatch",
+        "POST /api/v5/automation/process-batch"
+      ]
+    },
+    {
+      "name": "财务监控分析",
+      "description": "收入跟踪 → 成本分析 → 报告生成 → 知识归档",
+      "systems": [
+        "finance",
+        "knowledge",
+        "monitoring"
+      ],
+      "apiSequence": [
+        "GET /api/finance/stats",
+        "POST /api/v4/knowledge-dev/archive",
+        "GET /api/v6/monitoring/alerts"
+      ]
+    }
+  ]
+}

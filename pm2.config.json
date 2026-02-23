@@ -1,0 +1,54 @@
+{
+  "apps": [
+    {
+      "name": "mission-control",
+      "script": "npm",
+      "args": "run start",
+      "cwd": "/Users/kane/mission-control",
+      "instances": "max",
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 3001
+      },
+      "max_memory_restart": "1G",
+      "watch": false,
+      "merge_logs": true,
+      "error_file": "/Users/kane/mission-control/logs/error.log",
+      "out_file": "/Users/kane/mission-control/logs/out.log",
+      "log_file": "/Users/kane/mission-control/logs/combined.log",
+      "time": true
+    },
+    {
+      "name": "knowledge-frontend",
+      "script": "npm",
+      "args": "run dev",
+      "cwd": "/Users/kane/knowledge-management-system/frontend",
+      "instances": 1,
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 3000
+      },
+      "max_memory_restart": "500M",
+      "watch": false,
+      "error_file": "/Users/kane/knowledge-management-system/logs/frontend-error.log",
+      "out_file": "/Users/kane/knowledge-management-system/logs/frontend-out.log"
+    },
+    {
+      "name": "knowledge-backend",
+      "script": "python",
+      "args": "main_fixed.py",
+      "cwd": "/Users/kane/knowledge-management-system/backend",
+      "interpreter": "python3",
+      "instances": 1,
+      "env": {
+        "FASTAPI_ENV": "production",
+        "PORT": 8000
+      },
+      "max_memory_restart": "500M",
+      "watch": false,
+      "error_file": "/Users/kane/knowledge-management-system/logs/backend-error.log",
+      "out_file": "/Users/kane/knowledge-management-system/logs/backend-out.log"
+    }
+  ]
+}

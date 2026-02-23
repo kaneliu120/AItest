@@ -1,0 +1,42 @@
+{
+  "name": "知识管理系统",
+  "description": "基于RAG技术的知识管理系统",
+  "version": "1.0.0",
+  "status": "active",
+  "endpoints": {
+    "api": "http://localhost:8000",
+    "frontend": "http://localhost:3002",
+    "docs": "http://localhost:8000/docs",
+    "health": "http://localhost:8000/health",
+    "monitoring": "http://localhost:3003"
+  },
+  "capabilities": {
+    "knowledge_retrieval": true,
+    "qa_system": true,
+    "vector_search": true,
+    "document_processing": true,
+    "integration": true,
+    "monitoring": true
+  },
+  "integration": {
+    "mission_control": true,
+    "memory_system": true,
+    "skill_system": true,
+    "task_system": true,
+    "finance_system": true,
+    "freelance_system": true
+  },
+  "sync_settings": {
+    "auto_sync": true,
+    "sync_interval": 3600,
+    "last_sync": null
+  },
+  "metadata": {
+    "created_at": "2026-02-22T10:45:11.244366Z",
+    "updated_at": "2026-02-22T10:45:11.244608Z",
+    "project_path": "/Users/kane/knowledge-management-system",
+    "backend_status": "building",
+    "last_health_check": "2026-02-22T12:06:42.769775Z",
+    "document_count": 9
+  }
+}

@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # Mission Control 主应用
+  mission-control:
+    build: .
+    container_name: mission-control
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/mission-control.db
+      - LOG_LEVEL=info
+    volumes:
+      - mission-control-data:/app/data
+      - mission-control-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+
+  # PostgreSQL 数据库 (可选，如果需要)
+  postgres:
+    image: postgres:15-alpine
+    container_name: mission-control-postgres
+    environment:
+      - POSTGRES_DB=mission_control
+      - POSTGRES_USER=mission_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mission_user"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis 缓存 (可选)
+  redis:
+    image: redis:7-alpine
+    container_name: mission-control-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx 反向代理 (可选)
+  nginx:
+    image: nginx:alpine
+    container_name: mission-control-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - mission-control
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+
+  # 监控服务 (Prometheus + Grafana)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mission-control-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mission-control-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - mission-control-network
+
+networks:
+  mission-control-network:
+    driver: bridge
+
+volumes:
+  mission-control-data:
+  mission-control-logs:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:

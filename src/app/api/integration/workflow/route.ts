@@ -1,0 +1,144 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { unifiedGatewayService } from '@/lib/unified-gateway-service';
+import { intelligentTaskDispatcher } from '@/lib/intelligent-task-dispatcher';
+import { knowledgeEnhancedDevService } from '@/lib/knowledge-enhanced-dev-service';
+import { automationEfficiencyService } from '@/lib/automation-efficiency-service';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { workflow, parameters } = body;
+    
+    if (!workflow) {
+      return NextResponse.json({
+        success: false,
+        error: '缺少 workflow 参数',
+        timestamp: new Date().toISOString()
+      }, { status: 400 });
+    }
+    
+    let result;
+    
+    switch (workflow) {
+      case 'outsource-project':
+        // 外包项目管理工作流
+        const { projectTitle, budget, deadline } = parameters || {};
+        
+        // 1. 知识增强分析
+        const analysis = await knowledgeEnhancedDevService.analyzeTask({
+          task: `外包项目: ${projectTitle}`,
+          context: { budget, deadline }
+        });
+        
+        // 2. 智能任务分发
+        const dispatch = await intelligentTaskDispatcher.dispatchTask({
+          task: `管理外包项目: ${projectTitle}`,
+          context: analysis
+        });
+        
+        // 3. 自动化效率优化
+        const optimization = await automationEfficiencyService.processBatch({
+          tasks: [
+            { type: 'project-management', data: { title: projectTitle, analysis, dispatch } }
+          ]
+        });
+        
+        result = {
+          workflow: 'outsource-project',
+          steps: ['知识分析', '任务分发', '效率优化'],
+          analysis,
+          dispatch,
+          optimization,
+          timestamp: new Date().toISOString()
+        };
+        break;
+        
+      case 'product-development':
+        // 产品开发工作流
+        const { feature, requirements } = parameters || {};
+        
+        // 1. 统一网关处理
+        const gatewayResult = await unifiedGatewayService.processRequest({
+          id: `dev_${Date.now()}`,
+          query: `开发功能: ${feature}`,
+          context: { requirements },
+          priority: 'high'
+        });
+        
+        // 2. 知识增强开发
+        const devEnhancement = await knowledgeEnhancedDevService.enhanceTask({
+          task: `开发 ${feature}`,
+          context: gatewayResult,
+          enhancementLevel: 'high'
+        });
+        
+        // 3. 自动化处理
+        const automationResult = await automationEfficiencyService.processBatch({
+          tasks: [
+            { type: 'development', data: { feature, requirements, enhancement: devEnhancement } }
+          ]
+        });
+        
+        result = {
+          workflow: 'product-development',
+          steps: ['需求分析', '知识增强', '自动化处理'],
+          gatewayResult,
+          devEnhancement,
+          automationResult,
+          timestamp: new Date().toISOString()
+        };
+        break;
+        
+      case 'finance-monitoring':
+        // 财务监控工作流
+        const { period, metrics } = parameters || {};
+        
+        // 模拟财务数据
+        const financeData = {
+          period: period || 'monthly',
+          revenue: Math.random() * 10000 + 5000,
+          expenses: Math.random() * 3000 + 1000,
+          profit: 0,
+          timestamp: new Date().toISOString()
+        };
+        
+        financeData.profit = financeData.revenue - financeData.expenses;
+        
+        // 知识归档
+        const archiveResult = await knowledgeEnhancedDevService.enhanceTask({
+          task: '财务报告归档',
+          context: financeData,
+          enhancementLevel: 'medium'
+        });
+        
+        result = {
+          workflow: 'finance-monitoring',
+          steps: ['数据收集', '分析计算', '知识归档'],
+          financeData,
+          archiveResult,
+          timestamp: new Date().toISOString()
+        };
+        break;
+        
+      default:
+        return NextResponse.json({
+          success: false,
+          error: `未知工作流: ${workflow}`,
+          timestamp: new Date().toISOString()
+        }, { status: 400 });
+    }
+    
+    return NextResponse.json({
+      success: true,
+      data: result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('业务工作流API错误:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : '未知错误',
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
+  }
+}
