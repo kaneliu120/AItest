@@ -11,8 +11,8 @@ COPY next.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装依赖（需要 devDeps 来运行 next build）
+RUN npm ci
 
 # 复制源代码
 COPY . .
