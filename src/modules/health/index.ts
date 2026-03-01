@@ -1,23 +1,23 @@
 /**
- * 健康监控模块导出
+ * Health monitoring module exports
  */
 
-// 类型导出
+// Type exports
 export * from './types';
 
-// 服务导出
+// Service exports
 export { healthService, HealthService } from './services/health.service';
 
-// 组件导出
+// Component exports
 export { default as HealthDashboard } from './components/HealthDashboard';
 
-// 工具函数
+// Utility functions
 export * from './utils/health.utils';
 
-// 模块配置
+// Module configuration
 export const healthModuleConfig = {
   name: 'health-monitoring',
   version: '1.0.0',
-  description: '系统健康监控模块',
+  description: 'System health monitoring module',
   dependencies: ['shared-types', 'shared-api']
 };

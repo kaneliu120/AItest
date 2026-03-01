@@ -31,7 +31,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
     metadata,
   } = tool;
 
-  // 状态颜色映射
+  // Status color mapping
   const statusColors: Record<string, string> = {
     active: 'bg-green-100 text-green-800 border-green-200',
     inactive: 'bg-gray-100 text-gray-800 border-gray-200',
@@ -40,21 +40,21 @@ const ToolCard: React.FC<ToolCardProps> = ({
     experimental: 'bg-purple-100 text-purple-800 border-purple-200',
   };
 
-  // 健康状态颜色映射
+  // Health status color mapping
   const healthColors: Record<string, string> = {
     healthy: 'bg-green-500',
     degraded: 'bg-yellow-500',
     unhealthy: 'bg-red-500',
   };
 
-  // 使用频率颜色映射
+  // Usage frequency color mapping
   const getUsageColor = (count: number) => {
     if (count > 1000) return 'text-green-600';
     if (count > 100) return 'text-yellow-600';
     return 'text-gray-600';
   };
 
-  // 格式化日期
+  // Format date
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Never';
     const date = new Date(dateString);
@@ -65,7 +65,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
     });
   };
 
-  // 格式化时间
+  // Format time
   const formatTime = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -75,21 +75,21 @@ const ToolCard: React.FC<ToolCardProps> = ({
     });
   };
 
-  // 处理配置点击
+  // Handle configure click
   const handleConfigure = () => {
     if (onConfigure) {
       onConfigure(id);
     }
   };
 
-  // 处理测试点击
+  // Handle test click
   const handleTest = () => {
     if (onTest) {
       onTest(id);
     }
   };
 
-  // 处理状态切换
+  // Handle status toggle
   const handleStatusToggle = () => {
     if (onStatusChange) {
       const newStatus = status === 'active' ? 'inactive' : 'active';
@@ -128,7 +128,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all">
-      {/* 头部 */}
+      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-4">
           {icon && (
@@ -155,7 +155,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </div>
 
-      {/* 元数据 */}
+      {/* Metadata */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
           <p className="text-sm font-medium text-gray-500">Category</p>
@@ -177,7 +177,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </div>
 
-      {/* 配置状态 */}
+      {/* Configuration status */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-medium text-gray-500">Configuration</p>
@@ -192,7 +192,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         )}
       </div>
 
-      {/* 使用信息 */}
+      {/* Usage info */}
       <div className="mb-6">
         <p className="text-sm font-medium text-gray-500 mb-2">Recent Activity</p>
         <div className="flex items-center justify-between text-sm">
@@ -205,7 +205,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </div>
 
-      {/* 健康状态 */}
+      {/* Health status */}
       <div className="mb-6">
         <p className="text-sm font-medium text-gray-500 mb-2">Health Status</p>
         <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </div>
 
-      {/* 操作按钮 */}
+      {/* Action buttons */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
         <div className="flex space-x-2">
           <button
@@ -258,7 +258,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </div>
 
-      {/* 标签 */}
+      {/* Tags */}
       {metadata.tags && metadata.tags.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex flex-wrap gap-2">

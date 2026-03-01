@@ -72,7 +72,7 @@ export default function ModulesManager() {
   });
   const [importData, setImportData] = useState('');
 
-  // 获取所有模块
+  // Fetch all modules
   const fetchModules = async () => {
     try {
       const response = await fetch('/api/automation?action=modules');
@@ -87,7 +87,7 @@ export default function ModulesManager() {
     }
   };
 
-  // 启用/禁用模块
+  // Enable/disable module
   const toggleModule = async (moduleId: string, enabled: boolean) => {
     try {
       const response = await fetch('/api/automation', {
@@ -108,7 +108,7 @@ export default function ModulesManager() {
     }
   };
 
-  // 注册新模块
+  // Register new module
   const registerModule = async () => {
     try {
       const response = await fetch('/api/automation', {
@@ -141,7 +141,7 @@ export default function ModulesManager() {
     }
   };
 
-  // 导入模块
+  // Import module
   const importModule = async () => {
     try {
       const response = await fetch('/api/automation', {
@@ -163,46 +163,46 @@ export default function ModulesManager() {
     }
   };
 
-  // 导出模块
+  // Export module
   const exportModule = async (moduleId: string) => {
     try {
-      // 这里需要实现导出逻辑
+      // TODO: implement export logic
       console.log('Export module:', moduleId);
     } catch (error) {
       console.error('Failed to export module:', error);
     }
   };
 
-  // 获取模块健康状态
+  // Get module health status
   const getModuleHealth = (module: AutomationModule): ModuleHealth => {
     const issues: string[] = [];
     let status: 'healthy' | 'warning' | 'error' | 'unknown' = 'healthy';
 
-    // 检查依赖
+    // Check dependencies
     if (module.dependencies.length > 0) {
       const missingDeps = module.dependencies.filter(dep => 
         !modules.some(m => m.id === dep && m.enabled)
       );
       if (missingDeps.length > 0) {
-        issues.push(`缺少依赖: ${missingDeps.join(', ')}`);
+        issues.push(`Missing dependency: ${missingDeps.join(', ')}`);
         status = 'error';
       }
     }
 
-    // 检查运行状态
+    // Check running status
     if (module.metadata.runCount > 0 && module.metadata.successRate < 80) {
-      issues.push(`成功率较低: ${module.metadata.successRate}%`);
+      issues.push(`Low success rate: ${module.metadata.successRate}%`);
       status = status === 'error' ? 'error' : 'warning';
     }
 
-    // 检查最近运行时间
+    // Check last run time
     if (module.metadata.lastRun) {
       const lastRun = new Date(module.metadata.lastRun);
       const now = new Date();
       const hoursSinceLastRun = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60);
       
       if (hoursSinceLastRun > 24 && module.metadata.runCount > 0) {
-        issues.push(`长时间未运行: ${Math.round(hoursSinceLastRun)}小时`);
+        issues.push(`Not run for: ${Math.round(hoursSinceLastRun)}h`);
         status = status === 'error' ? 'error' : 'warning';
       }
     }
@@ -215,7 +215,7 @@ export default function ModulesManager() {
     };
   };
 
-  // 获取类别图标
+  // Get category icon
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'testing': return <Zap className="h-4 w-4" />;
@@ -228,7 +228,7 @@ export default function ModulesManager() {
     }
   };
 
-  // 获取类别颜色
+  // Get category color
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'testing': return 'bg-purple-100 text-purple-800';
@@ -241,10 +241,10 @@ export default function ModulesManager() {
     }
   };
 
-  // 初始加载
+  // Initial load
   useEffect(() => {
     fetchModules();
-    const interval = setInterval(fetchModules, 30000); // 每30秒更新一次
+    const interval = setInterval(fetchModules, 30000); // Update every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -253,7 +253,7 @@ export default function ModulesManager() {
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">加载模块列表...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Loading modules...</p>
         </div>
       </div>
     );
@@ -261,45 +261,45 @@ export default function ModulesManager() {
 
   return (
     <div className="space-y-6">
-      {/* 头部操作栏 */}
+      {/* Header actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">模块管理</h2>
+          <h2 className="text-2xl font-bold">Module Management</h2>
           <p className="text-muted-foreground">
-            管理自动化模块，监控模块健康状态
+            Manage automation modules and monitor health
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={fetchModules}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            刷新
+            Refresh
           </Button>
           <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
             <DialogTrigger>
               <Button variant="outline" size="sm">
                 <Upload className="mr-2 h-4 w-4" />
-                导入
+                Import
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>导入模块</DialogTitle>
+                <DialogTitle>Import Module</DialogTitle>
                 <DialogDescription>
-                  粘贴模块配置JSON数据
+                  Paste module config JSON
                 </DialogDescription>
               </DialogHeader>
               <Textarea
                 value={importData}
                 onChange={(e) => setImportData(e.target.value)}
-                placeholder="粘贴模块配置JSON..."
+                placeholder="Paste module config JSON..."
                 className="min-h-[200px] font-mono text-sm"
               />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowImportDialog(false)}>
-                  取消
+                  Cancel
                 </Button>
                 <Button onClick={importModule}>
-                  导入
+                  Import
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -308,46 +308,46 @@ export default function ModulesManager() {
             <DialogTrigger>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                注册新模块
+                Register New Module
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>注册新模块</DialogTitle>
+                <DialogTitle>Register New Module</DialogTitle>
                 <DialogDescription>
-                  填写模块信息以注册新的自动化模块
+                  Fill in module info to register a new automation module
                 </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="module-id">模块ID</Label>
+                  <Label htmlFor="module-id">Module ID</Label>
                   <Input
                     id="module-id"
                     value={newModule.id}
                     onChange={(e) => setNewModule({...newModule, id: e.target.value})}
-                    placeholder="例如: test-automation"
+                    placeholder="e.g. test-automation"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="module-name">模块名称</Label>
+                  <Label htmlFor="module-name">Module Name</Label>
                   <Input
                     id="module-name"
                     value={newModule.name}
                     onChange={(e) => setNewModule({...newModule, name: e.target.value})}
-                    placeholder="例如: 测试自动化模块"
+                    placeholder="e.g. test-automation-module"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="module-version">版本</Label>
+                  <Label htmlFor="module-version">Version</Label>
                   <Input
                     id="module-version"
                     value={newModule.version}
                     onChange={(e) => setNewModule({...newModule, version: e.target.value})}
-                    placeholder="例如: 1.0.0"
+                    placeholder="e.g. 1.0.0"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="module-category">类别</Label>
+                  <Label htmlFor="module-category">Category</Label>
                   <Select
                     value={newModule.category}
                     onValueChange={(value: any) => setNewModule({...newModule, category: value})}
@@ -356,36 +356,36 @@ export default function ModulesManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="testing">测试</SelectItem>
-                      <SelectItem value="deployment">部署</SelectItem>
-                      <SelectItem value="monitoring">监控</SelectItem>
-                      <SelectItem value="security">安全</SelectItem>
-                      <SelectItem value="business">业务</SelectItem>
-                      <SelectItem value="integration">集成</SelectItem>
+                      <SelectItem value="testing">Testing</SelectItem>
+                      <SelectItem value="deployment">Deployment</SelectItem>
+                      <SelectItem value="monitoring">Monitoring</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="integration">Integration</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="module-description">描述</Label>
+                  <Label htmlFor="module-description">Description</Label>
                   <Textarea
                     id="module-description"
                     value={newModule.description}
                     onChange={(e) => setNewModule({...newModule, description: e.target.value})}
-                    placeholder="模块功能描述..."
+                    placeholder="Module description..."
                     rows={3}
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="module-author">作者</Label>
+                  <Label htmlFor="module-author">Author</Label>
                   <Input
                     id="module-author"
                     value={newModule.author}
                     onChange={(e) => setNewModule({...newModule, author: e.target.value})}
-                    placeholder="例如: 小A"
+                    placeholder="e.g. Alice"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="module-dependencies">依赖模块 (逗号分隔)</Label>
+                  <Label htmlFor="module-dependencies">Dependencies (comma separated)</Label>
                   <Input
                     id="module-dependencies"
                     value={newModule.dependencies.join(', ')}
@@ -393,16 +393,16 @@ export default function ModulesManager() {
                       ...newModule, 
                       dependencies: e.target.value.split(',').map(d => d.trim()).filter(d => d)
                     })}
-                    placeholder="例如: module1, module2"
+                    placeholder="e.g. module1, module2"
                   />
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowRegisterDialog(false)}>
-                  取消
+                  Cancel
                 </Button>
                 <Button onClick={registerModule}>
-                  注册模块
+                  Register Module
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -410,13 +410,13 @@ export default function ModulesManager() {
         </div>
       </div>
 
-      {/* 模块统计 */}
+      {/* Module stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold">{modules.length}</div>
-              <p className="text-sm text-muted-foreground">总模块数</p>
+              <p className="text-sm text-muted-foreground">Total Modules</p>
             </div>
           </CardContent>
         </Card>
@@ -426,7 +426,7 @@ export default function ModulesManager() {
               <div className="text-3xl font-bold text-green-600">
                 {modules.filter(m => m.enabled).length}
               </div>
-              <p className="text-sm text-muted-foreground">启用模块</p>
+              <p className="text-sm text-muted-foreground">Enabled</p>
             </div>
           </CardContent>
         </Card>
@@ -436,7 +436,7 @@ export default function ModulesManager() {
               <div className="text-3xl font-bold text-yellow-600">
                 {modules.filter(m => !m.enabled).length}
               </div>
-              <p className="text-sm text-muted-foreground">禁用模块</p>
+              <p className="text-sm text-muted-foreground">Disabled</p>
             </div>
           </CardContent>
         </Card>
@@ -448,13 +448,13 @@ export default function ModulesManager() {
                   ? Math.round(modules.reduce((sum, m) => sum + m.metadata.successRate, 0) / modules.length)
                   : 0}%
               </div>
-              <p className="text-sm text-muted-foreground">平均成功率</p>
+              <p className="text-sm text-muted-foreground">Avg Success Rate</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 模块列表 */}
+      {/* Module list */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((module) => {
           const health = getModuleHealth(module);
@@ -509,56 +509,56 @@ export default function ModulesManager() {
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">{module.description}</p>
                 
-                {/* 健康状态 */}
+                {/* Health status */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className={healthColor}>{healthIcon}</span>
                     <span className="text-sm font-medium capitalize">{health.status}</span>
                   </div>
                   <Badge variant={module.enabled ? 'default' : 'secondary'}>
-                    {module.enabled ? '已启用' : '已禁用'}
+                    {module.enabled ? 'Enabled' : 'Disabled'}
                   </Badge>
                 </div>
 
-                {/* 成功率进度条 */}
+                {/* Success rate progress bar */}
                 <div className="space-y-1 mb-3">
                   <div className="flex justify-between text-xs">
-                    <span>成功率</span>
+                    <span>Success Rate</span>
                     <span>{module.metadata.successRate}%</span>
                   </div>
                   <Progress value={module.metadata.successRate} className="h-2" />
                 </div>
 
-                {/* 统计信息 */}
+                {/* Stats */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">运行次数:</span>
+                    <span className="text-muted-foreground">Run Count:</span>
                     <span className="font-medium">{module.metadata.runCount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">最后运行:</span>
+                    <span className="text-muted-foreground">Last Run:</span>
                     <span className="font-medium">
                       {module.metadata.lastRun 
                         ? new Date(module.metadata.lastRun).toLocaleDateString()
-                        : '从未'}
+                        : 'Never'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">安装时间:</span>
+                    <span className="text-muted-foreground">Installed:</span>
                     <span className="font-medium">
                       {new Date(module.metadata.installedAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">作者:</span>
+                    <span className="text-muted-foreground">Author:</span>
                     <span className="font-medium">{module.author}</span>
                   </div>
                 </div>
 
-                {/* 依赖项 */}
+                {/* Dependencies */}
                 {module.dependencies.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-xs text-muted-foreground mb-1">依赖模块:</p>
+                    <p className="text-xs text-muted-foreground mb-1">Dependencies:</p>
                     <div className="flex flex-wrap gap-1">
                       {module.dependencies.map(dep => (
                         <Badge key={dep} variant="outline" className="text-xs">
@@ -569,10 +569,10 @@ export default function ModulesManager() {
                   </div>
                 )}
 
-                {/* 问题列表 */}
+                {/* Issues */}
                 {health.issues.length > 0 && (
                   <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-xs">
-                    <p className="font-medium text-red-700 mb-1">问题:</p>
+                    <p className="font-medium text-red-700 mb-1">Issues:</p>
                     <ul className="list-disc list-inside space-y-1">
                       {health.issues.map((issue, index) => (
                         <li key={index} className="text-red-600">{issue}</li>
@@ -584,11 +584,11 @@ export default function ModulesManager() {
               <div className="px-6 py-3 bg-muted/50 border-t flex justify-between">
                 <Button variant="ghost" size="sm" className="h-8 px-2">
                   <Eye className="mr-1 h-3 w-3" />
-                  查看详情
+                  View Details
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 px-2">
                   <Settings className="mr-1 h-3 w-3" />
-                  配置
+                  Settings
                 </Button>
               </div>
             </Card>
@@ -596,17 +596,17 @@ export default function ModulesManager() {
         })}
       </div>
 
-      {/* 空状态 */}
+      {/* Empty state */}
       {modules.length === 0 && (
         <Card className="text-center py-12">
           <Cpu className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold">暂无模块</h3>
+          <h3 className="text-lg font-semibold">No Modules</h3>
           <p className="text-muted-foreground mt-2 mb-4">
-            还没有注册任何自动化模块
+            No automation modules registered yet
           </p>
           <Button onClick={() => setShowRegisterDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            注册第一个模块
+            Register First Module
           </Button>
         </Card>
       )}

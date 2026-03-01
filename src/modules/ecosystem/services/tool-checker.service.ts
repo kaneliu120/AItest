@@ -1,5 +1,5 @@
 /**
- * 工具检查服务 - 负责工具状态检查和指标收集
+ * Tool checker service - responsible for tool status checks and metric collection
  */
 
 import { 
@@ -13,11 +13,11 @@ export class ToolCheckerService {
   constructor(private config: EcosystemConfig) {}
 
   /**
-   * 检查单个工具状态
+   * Check status of a single tool
    */
   async checkToolStatus(tool: ToolStatus): Promise<ToolCheckResult> {
     try {
-      // 模拟检查过程
+      // Simulate check process
       await this.simulateCheckDelay();
       
       const responseTime = this.calculateResponseTime(tool);
@@ -44,12 +44,12 @@ export class ToolCheckerService {
   }
 
   /**
-   * 批量检查工具状态
+   * Check multiple tools in batch
    */
   async checkMultipleTools(tools: ToolStatus[]): Promise<ToolCheckResult[]> {
     const results: ToolCheckResult[] = [];
     
-    // 并行检查，但限制并发数
+    // Run checks in parallel, but limit concurrency
     const batchSize = 5;
     for (let i = 0; i < tools.length; i += batchSize) {
       const batch = tools.slice(i, i + batchSize);
@@ -58,7 +58,7 @@ export class ToolCheckerService {
       );
       results.push(...batchResults);
       
-      // 批次间延迟，避免过载
+      // Delay between batches to avoid overload
       if (i + batchSize < tools.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -68,33 +68,33 @@ export class ToolCheckerService {
   }
 
   /**
-   * 计算响应时间
+   * Calculate response time
    */
   private calculateResponseTime(tool: ToolStatus): number {
     const baseTime = tool.responseTime || 50;
-    const variation = Math.random() * 40 - 20; // ±20ms变化
-    const networkJitter = Math.random() * 30; // 网络抖动
+    const variation = Math.random() * 40 - 20; // ±20ms variation
+    const networkJitter = Math.random() * 30; // network jitter
     
     return Math.max(1, baseTime + variation + networkJitter);
   }
 
   /**
-   * 确定工具状态
+   * Determine tool status
    */
   private determineToolStatus(tool: ToolStatus, responseTime: number): ToolStatus['status'] {
-    // 如果工具之前是离线状态，有50%几率恢复
+    // If the tool was previously offline, 50% chance of recovery
     if (tool.status === 'offline' && Math.random() > 0.5) {
       return 'healthy';
     }
 
-    // 基于响应时间判断状态
+    // Determine status based on response time
     if (responseTime > this.config.alertThresholds.responseTime * 2) {
       return 'error';
     } else if (responseTime > this.config.alertThresholds.responseTime) {
       return 'warning';
     }
 
-    // 随机错误模拟
+    // Random error simulation
     if (Math.random() > 0.95) {
       return 'error';
     } else if (Math.random() > 0.9) {
@@ -105,7 +105,7 @@ export class ToolCheckerService {
   }
 
   /**
-   * 创建工具指标
+   * Create tool metric
    */
   private createToolMetric(
     tool: ToolStatus, 
@@ -125,7 +125,7 @@ export class ToolCheckerService {
   }
 
   /**
-   * 计算内存使用率
+   * Calculate memory usage
    */
   private calculateMemoryUsage(tool: ToolStatus): number {
     const baseUsage = tool.category === 'database' ? 40 : 30;
@@ -134,7 +134,7 @@ export class ToolCheckerService {
   }
 
   /**
-   * 计算CPU使用率
+   * Calculate CPU usage
    */
   private calculateCpuUsage(tool: ToolStatus): number {
     const baseUsage = tool.category === 'analytics' ? 35 : 25;
@@ -143,7 +143,7 @@ export class ToolCheckerService {
   }
 
   /**
-   * 计算请求数量
+   * Calculate request count
    */
   private calculateRequestCount(tool: ToolStatus): number {
     const baseRequests = tool.category === 'api' ? 500 : 100;
@@ -152,7 +152,7 @@ export class ToolCheckerService {
   }
 
   /**
-   * 计算错误数量
+   * Calculate error count
    */
   private calculateErrorCount(status: ToolStatus['status']): number {
     if (status === 'error') {
@@ -164,37 +164,37 @@ export class ToolCheckerService {
   }
 
   /**
-   * 模拟检查延迟
+   * Simulate check delay
    */
   private async simulateCheckDelay(): Promise<void> {
-    const delay = 100 + Math.random() * 400; // 100-500ms延迟
+    const delay = 100 + Math.random() * 400; // 100-500ms delay
     await new Promise(resolve => setTimeout(resolve, delay));
   }
 
   /**
-   * 验证工具配置
+   * Validate tool configuration
    */
   validateToolConfig(tool: ToolStatus): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!tool.id || tool.id.trim() === '') {
-      errors.push('工具ID不能为空');
+      errors.push('Tool ID cannot be empty');
     }
 
     if (!tool.name || tool.name.trim() === '') {
-      errors.push('工具名称不能为空');
+      errors.push('Tool name cannot be empty');
     }
 
     if (!tool.category || tool.category.trim() === '') {
-      errors.push('工具分类不能为空');
+      errors.push('Tool category cannot be empty');
     }
 
     if (tool.responseTime !== undefined && tool.responseTime < 0) {
-      errors.push('响应时间不能为负数');
+      errors.push('Response time cannot be negative');
     }
 
     if (tool.uptime !== undefined && (tool.uptime < 0 || tool.uptime > 100)) {
-      errors.push('运行时间必须在0-100之间');
+      errors.push('Uptime must be between 0 and 100');
     }
 
     return {

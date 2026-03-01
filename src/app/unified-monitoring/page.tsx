@@ -88,40 +88,40 @@ export default function UnifiedMonitoringPage() {
   const [selectedSystem, setSelectedSystem] = useState<string>('all');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // 加载服务状态
+  // Load service status
   const loadServiceStatus = async () => {
     try {
       const response = await fetch('/api/v6/monitoring?action=status');
       const data = await response.json();
       if (data.success) setServiceStatus(data.data);
     } catch (error) {
-      console.error('加载服务状态失败:', error);
+      console.error('Failed to load service status:', error);
     }
   };
 
-  // 加载活跃告警
+  // Load active alerts
   const loadActiveAlerts = async () => {
     try {
       const response = await fetch('/api/v6/monitoring?action=alerts');
       const data = await response.json();
       if (data.success) setActiveAlerts(data.data.alerts || []);
     } catch (error) {
-      console.error('加载活跃告警失败:', error);
+      console.error('Failed to load active alerts:', error);
     }
   };
 
-  // 加载系统健康状态
+  // Load system health
   const loadSystemHealth = async () => {
     try {
       const response = await fetch('/api/v6/monitoring?action=health');
       const data = await response.json();
       if (data.success) setSystemHealth(data.data.health || []);
     } catch (error) {
-      console.error('加载系统健康状态失败:', error);
+      console.error('Failed to load system health:', error);
     }
   };
 
-  // 加载监控指标
+  // Load monitoring metrics
   const loadMetrics = async () => {
     try {
       const url = selectedSystem === 'all' 
@@ -132,11 +132,11 @@ export default function UnifiedMonitoringPage() {
       const data = await response.json();
       if (data.success) setMetrics(data.data.metrics || []);
     } catch (error) {
-      console.error('加载监控指标失败:', error);
+      console.error('Failed to load monitoring metrics:', error);
     }
   };
 
-  // 加载告警规则
+  // Load alert rules
   const loadAlertRules = async () => {
     try {
       const url = selectedSystem === 'all'
@@ -147,11 +147,11 @@ export default function UnifiedMonitoringPage() {
       const data = await response.json();
       if (data.success) setAlertRules(data.data.rules || []);
     } catch (error) {
-      console.error('加载告警规则失败:', error);
+      console.error('Failed to load alert rules:', error);
     }
   };
 
-  // 加载所有数据
+  // Load all data
   const loadAllData = async () => {
     setLoading(true);
     try {
@@ -163,7 +163,7 @@ export default function UnifiedMonitoringPage() {
         loadAlertRules()
       ]);
     } catch (error) {
-      console.error('加载数据失败:', error);
+      console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
@@ -172,14 +172,14 @@ export default function UnifiedMonitoringPage() {
   useEffect(() => {
     loadAllData();
     
-    // 自动刷新
+    // Auto refresh
     if (autoRefresh) {
-      const interval = setInterval(loadAllData, 30000); // 每30秒刷新
+      const interval = setInterval(loadAllData, 30000); // refresh every 30s
       return () => clearInterval(interval);
     }
   }, [selectedSystem, autoRefresh]);
 
-  // 确认告警
+  // Acknowledge alert
   const acknowledgeAlert = async (alertId: string) => {
     try {
       const response = await fetch('/api/v6/monitoring', {
@@ -197,11 +197,11 @@ export default function UnifiedMonitoringPage() {
         await loadActiveAlerts();
       }
     } catch (error) {
-      console.error('确认告警失败:', error);
+      console.error('Failed to acknowledge alert:', error);
     }
   };
 
-  // 解决告警
+  // Resolve alert
   const resolveAlert = async (alertId: string) => {
     try {
       const response = await fetch('/api/v6/monitoring', {
@@ -218,11 +218,11 @@ export default function UnifiedMonitoringPage() {
         await loadActiveAlerts();
       }
     } catch (error) {
-      console.error('解决告警失败:', error);
+      console.error('Failed to resolve alert:', error);
     }
   };
 
-  // 启动监控服务
+  // Start monitoring service
   const startMonitoring = async () => {
     setLoading(true);
     try {
@@ -237,13 +237,13 @@ export default function UnifiedMonitoringPage() {
         await loadServiceStatus();
       }
     } catch (error) {
-      console.error('启动监控服务失败:', error);
+      console.error('Failed to start monitoring service:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 停止监控服务
+  // Stop monitoring service
   const stopMonitoring = async () => {
     setLoading(true);
     try {
@@ -258,13 +258,13 @@ export default function UnifiedMonitoringPage() {
         await loadServiceStatus();
       }
     } catch (error) {
-      console.error('停止监控服务失败:', error);
+      console.error('Failed to stop monitoring service:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 测试告警
+  // Test alert
   const testAlert = async () => {
     try {
       const response = await fetch('/api/v6/monitoring', {
@@ -278,11 +278,11 @@ export default function UnifiedMonitoringPage() {
         await loadActiveAlerts();
       }
     } catch (error) {
-      console.error('测试告警失败:', error);
+      console.error('Failed to test alert:', error);
     }
   };
 
-  // 模拟指标
+  // Simulate metrics
   const simulateMetrics = async () => {
     try {
       const response = await fetch('/api/v6/monitoring', {
@@ -300,11 +300,11 @@ export default function UnifiedMonitoringPage() {
         await loadMetrics();
       }
     } catch (error) {
-      console.error('模拟指标失败:', error);
+      console.error('Failed to simulate metrics:', error);
     }
   };
 
-  // 获取状态颜色
+  // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return 'bg-green-100 text-green-800';
@@ -314,7 +314,7 @@ export default function UnifiedMonitoringPage() {
     }
   };
 
-  // 获取严重性颜色
+  // Get severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'bg-red-100 text-red-800';
@@ -324,7 +324,7 @@ export default function UnifiedMonitoringPage() {
     }
   };
 
-  // 获取系统图标
+  // Get system icon
   const getSystemIcon = (system: string) => {
     switch (system) {
       case 'knowledge-enhanced-development': return <Brain className="h-5 w-5" />;
@@ -336,34 +336,34 @@ export default function UnifiedMonitoringPage() {
     }
   };
 
-  // 获取系统显示名称
+  // Get system display name
   const getSystemDisplayName = (system: string) => {
     const names: Record<string, string> = {
-      'knowledge-enhanced-development': '知识增强开发',
-      'intelligent-task-dispatch': '智能任务分发',
-      'context-aware-cache': '上下文缓存',
-      'unified-gateway': '统一网关',
-      'automation-efficiency-optimization': '自动化效率优化'
+      'knowledge-enhanced-development': 'Knowledge-Enhanced Dev',
+      'intelligent-task-dispatch': 'Intelligent Task Dispatch',
+      'context-aware-cache': 'Context Cache',
+      'unified-gateway': 'Unified Gateway',
+      'automation-efficiency-optimization': 'Automation Efficiency'
     };
     return names[system] || system;
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* 标题和状态 */}
+      {/* Title and status */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center">
             <Activity className="h-8 w-8 mr-3 text-blue-600" />
-            统一监控和告警系统
+            Unified Monitoring &amp; Alerting
           </h1>
-          <p className="text-gray-600">实时监控所有子系统，智能告警和性能分析</p>
+          <p className="text-gray-600">Real-time monitoring of all subsystems with intelligent alerting and performance analysis</p>
         </div>
         <div className="flex items-center space-x-4">
           {serviceStatus && (
             <Badge className={getStatusColor(serviceStatus.overallStatus)}>
-              {serviceStatus.overallStatus === 'healthy' ? '健康' : 
-               serviceStatus.overallStatus === 'degraded' ? '降级' : '异常'}
+              {serviceStatus.overallStatus === 'healthy' ? 'Healthy' : 
+               serviceStatus.overallStatus === 'degraded' ? 'Degraded' : 'Unhealthy'}
             </Badge>
           )}
           <div className="flex space-x-2">
@@ -374,7 +374,7 @@ export default function UnifiedMonitoringPage() {
               disabled={loading}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              刷新
+              Refresh
             </Button>
             <Button 
               variant="outline" 
@@ -382,22 +382,22 @@ export default function UnifiedMonitoringPage() {
               onClick={() => setAutoRefresh(!autoRefresh)}
             >
               {autoRefresh ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-              {autoRefresh ? '停止自动刷新' : '开启自动刷新'}
+              {autoRefresh ? 'Stop Auto Refresh' : 'Start Auto Refresh'}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* 系统筛选器 */}
+      {/* System filter */}
       <div className="flex items-center space-x-4">
-        <div className="text-sm font-medium">系统筛选:</div>
+        <div className="text-sm font-medium">Filter by System:</div>
         <div className="flex flex-wrap gap-2">
           <Button
             variant={selectedSystem === 'all' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedSystem('all')}
           >
-            全部系统
+            All Systems
           </Button>
           {['knowledge-enhanced-development', 'intelligent-task-dispatch', 'context-aware-cache', 'unified-gateway', 'automation-efficiency-optimization'].map(system => (
             <Button
@@ -417,45 +417,45 @@ export default function UnifiedMonitoringPage() {
         <TabsList className="grid grid-cols-5 w-full">
           <TabsTrigger value="dashboard" className="flex items-center">
             <Activity className="h-4 w-4 mr-2" />
-            仪表板
+            Dashboard
           </TabsTrigger>
           <TabsTrigger value="alerts" className="flex items-center">
             <AlertTriangle className="h-4 w-4 mr-2" />
-            告警中心
+            Alert Center
           </TabsTrigger>
           <TabsTrigger value="health" className="flex items-center">
             <CheckCircle className="h-4 w-4 mr-2" />
-            系统健康
+            System Health
           </TabsTrigger>
           <TabsTrigger value="metrics" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
-            监控指标
+            Metrics
           </TabsTrigger>
           <TabsTrigger value="rules" className="flex items-center">
             <Settings className="h-4 w-4 mr-2" />
-            告警规则
+            Alert Rules
           </TabsTrigger>
         </TabsList>
 
-        {/* 仪表板标签页 */}
+        {/* Dashboard tab */}
         <TabsContent value="dashboard" className="space-y-6">
-          {/* 关键指标卡片 */}
+          {/* Key metrics cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* 整体状态 */}
+            {/* Overall status */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
                   <Activity className="h-4 w-4 mr-2" />
-                  整体状态
+                  Overall Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  {serviceStatus?.overallStatus === 'healthy' ? '健康' : 
-                   serviceStatus?.overallStatus === 'degraded' ? '降级' : '异常'}
+                  {serviceStatus?.overallStatus === 'healthy' ? 'Healthy' : 
+                   serviceStatus?.overallStatus === 'degraded' ? 'Degraded' : 'Unhealthy'}
                 </div>
                 <div className="text-sm text-gray-500">
-                  监控系统: {serviceStatus?.metrics?.totalChannels || 0}个
+                  Monitored Systems: {serviceStatus?.metrics?.totalChannels || 0}
                 </div>
                 <Progress 
                   value={serviceStatus?.overallStatus === 'healthy' ? 100 : 
@@ -465,12 +465,12 @@ export default function UnifiedMonitoringPage() {
               </CardContent>
             </Card>
 
-            {/* 活跃告警 */}
+            {/* Active alerts */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
                   <AlertTriangle className="h-4 w-4 mr-2" />
-                  活跃告警
+                  Active Alerts
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -478,24 +478,24 @@ export default function UnifiedMonitoringPage() {
                   {serviceStatus?.metrics?.activeAlerts || 0}
                 </div>
                 <div className="text-sm text-gray-500">
-                  总告警: {serviceStatus?.metrics?.totalAlerts || 0}
+                  Total Alerts: {serviceStatus?.metrics?.totalAlerts || 0}
                 </div>
                 <div className="mt-2 text-xs">
-                  严重: {activeAlerts.filter(a => a.severity === 'critical').length}
+                  Critical: {activeAlerts.filter(a => a.severity === 'critical').length}
                   <span className="mx-1">•</span>
-                  警告: {activeAlerts.filter(a => a.severity === 'warning').length}
+                  Warning: {activeAlerts.filter(a => a.severity === 'warning').length}
                   <span className="mx-1">•</span>
-                  信息: {activeAlerts.filter(a => a.severity === 'info').length}
+                  Info: {activeAlerts.filter(a => a.severity === 'info').length}
                 </div>
               </CardContent>
             </Card>
 
-            {/* 监控指标 */}
+            {/* Monitoring metrics */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  监控指标
+                  Monitoring Metrics
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -503,10 +503,10 @@ export default function UnifiedMonitoringPage() {
                   {serviceStatus?.metrics?.totalMetrics?.toLocaleString() || '0'}
                 </div>
                 <div className="text-sm text-gray-500">
-                  系统数量: {serviceStatus?.systemHealth?.length || 0}
+                  Systems: {serviceStatus?.systemHealth?.length || 0}
                 </div>
                 <div className="mt-2 text-xs">
-                  最近更新: {metrics[0] ? new Date(metrics[0].timestamp).toLocaleTimeString('zh-CN') : '无数据'}
+                  Last Updated: {metrics[0] ? new Date(metrics[0].timestamp).toLocaleTimeString('en-US') : 'No data'}
                 </div>
               </CardContent>
             </Card>
@@ -515,10 +515,10 @@ export default function UnifiedMonitoringPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="alerts"><div className="text-center py-12 text-gray-400">告警中心功能开发中...</div></TabsContent>
-        <TabsContent value="health"><div className="text-center py-12 text-gray-400">系统健康功能开发中...</div></TabsContent>
-        <TabsContent value="metrics"><div className="text-center py-12 text-gray-400">监控指标功能开发中...</div></TabsContent>
-        <TabsContent value="rules"><div className="text-center py-12 text-gray-400">告警规则功能开发中...</div></TabsContent>
+        <TabsContent value="alerts"><div className="text-center py-12 text-gray-400">Alert center coming soon...</div></TabsContent>
+        <TabsContent value="health"><div className="text-center py-12 text-gray-400">System health coming soon...</div></TabsContent>
+        <TabsContent value="metrics"><div className="text-center py-12 text-gray-400">Monitoring metrics coming soon...</div></TabsContent>
+        <TabsContent value="rules"><div className="text-center py-12 text-gray-400">Alert rules coming soon...</div></TabsContent>
       </Tabs>
     </div>
   );

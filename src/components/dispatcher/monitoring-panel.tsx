@@ -56,7 +56,7 @@ export default function MonitoringPanel() {
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // 从 API 拉取真实分发统计数据
+  // Fetch real dispatch stats from API
   const fetchMonitoringData = async () => {
     setLoading(true);
     try {
@@ -76,8 +76,8 @@ export default function MonitoringPanel() {
       });
       if (Array.isArray(d.alertList)) setAlerts(d.alertList);
     } catch (err) {
-      console.error('获取监控数据失败:', err);
-      // 失败时显示空数据而非假数据
+      console.error('Failed to fetch monitoring data:', err);
+      // Show empty data on failure instead of fake data
       setMonitoringData({
         performance: {
           totalTasks: 0, successfulTasks: 0, failedTasks: 0,
@@ -95,7 +95,7 @@ export default function MonitoringPanel() {
 
   useEffect(() => {
     fetchMonitoringData();
-    // 自动刷新（每60秒）
+    // Auto-refresh (every 60 seconds)
     const interval = setInterval(() => {
       if (autoRefresh) fetchMonitoringData();
     }, 60000);
@@ -115,7 +115,7 @@ export default function MonitoringPanel() {
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
           <Activity className="h-12 w-12 mx-auto text-gray-400 animate-pulse" />
-          <p className="mt-4 text-gray-600">加载监控数据...</p>
+          <p className="mt-4 text-gray-600">Loading monitoring data...</p>
         </div>
       </div>
     );
@@ -125,17 +125,17 @@ export default function MonitoringPanel() {
 
   return (
     <div className="space-y-6">
-      {/* 控制面板 */}
+      {/* Control panel */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <Activity className="h-5 w-5 mr-2 text-blue-600" />
-                <span className="font-medium">实时监控面板</span>
+                <span className="font-medium">Real-time Monitor</span>
               </div>
               <Badge variant="outline">
-                最后更新: {new Date(monitoringData.timestamp).toLocaleTimeString()}
+                Last updated: {new Date(monitoringData.timestamp).toLocaleTimeString()}
               </Badge>
             </div>
 
@@ -149,32 +149,32 @@ export default function MonitoringPanel() {
                   className="mr-2"
                 />
                 <label htmlFor="autoRefresh" className="text-sm">
-                  自动刷新
+                  Auto refresh
                 </label>
               </div>
               
               <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                刷新数据
+                Refresh
               </Button>
               
               <Button variant="outline" size="sm" onClick={handleClearAlerts}>
                 <Trash2 className="h-4 w-4 mr-2" />
-                清空警报
+                Clear Alerts
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 关键指标 */}
+      {/* Key metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">{performance.totalTasks}</div>
-                <div className="text-sm text-gray-600">总任务数</div>
+                <div className="text-sm text-gray-600">Total Tasks</div>
               </div>
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Activity className="h-6 w-6 text-blue-600" />
@@ -182,7 +182,7 @@ export default function MonitoringPanel() {
             </div>
             <div className="mt-4">
               <div className="flex justify-between text-sm">
-                <span>成功率</span>
+                <span>Success Rate</span>
                 <span className="font-medium">
                   {((performance.successfulTasks / performance.totalTasks) * 100).toFixed(1)}%
                 </span>
@@ -200,7 +200,7 @@ export default function MonitoringPanel() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">{performance.avgResponseTime}ms</div>
-                <div className="text-sm text-gray-600">平均响应时间</div>
+                <div className="text-sm text-gray-600">Avg Response Time</div>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
                 <BarChart3 className="h-6 w-6 text-green-600" />
@@ -208,10 +208,10 @@ export default function MonitoringPanel() {
             </div>
             <div className="mt-4">
               <div className="flex justify-between text-sm">
-                <span>性能等级</span>
+                <span>Performance</span>
                 <span className="font-medium">
-                  {performance.avgResponseTime < 100 ? '优秀' : 
-                   performance.avgResponseTime < 200 ? '良好' : '待优化'}
+                  {performance.avgResponseTime < 100 ? 'Excellent' : 
+                   performance.avgResponseTime < 200 ? 'Good' : 'Needs Optimization'}
                 </span>
               </div>
               <Progress 
@@ -227,7 +227,7 @@ export default function MonitoringPanel() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">{alertStats.total}</div>
-                <div className="text-sm text-gray-600">活跃警报</div>
+                <div className="text-sm text-gray-600">Active Alerts</div>
               </div>
               <div className="p-2 bg-red-100 rounded-lg">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -236,25 +236,25 @@ export default function MonitoringPanel() {
             <div className="mt-4 space-y-2">
               {alertStats.bySeverity.critical > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-red-600">严重</span>
+                  <span className="text-red-600">Critical</span>
                   <span className="font-medium">{alertStats.bySeverity.critical}</span>
                 </div>
               )}
               {alertStats.bySeverity.error > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-orange-600">错误</span>
+                  <span className="text-orange-600">Error</span>
                   <span className="font-medium">{alertStats.bySeverity.error}</span>
                 </div>
               )}
               {alertStats.bySeverity.warning > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-yellow-600">警告</span>
+                  <span className="text-yellow-600">Warning</span>
                   <span className="font-medium">{alertStats.bySeverity.warning}</span>
                 </div>
               )}
               {alertStats.bySeverity.info > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-blue-600">信息</span>
+                  <span className="text-blue-600">Info</span>
                   <span className="font-medium">{alertStats.bySeverity.info}</span>
                 </div>
               )}
@@ -266,7 +266,7 @@ export default function MonitoringPanel() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center">
               <BarChart3 className="h-4 w-4 mr-2" />
-              监控指标
+              Metrics
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -274,20 +274,20 @@ export default function MonitoringPanel() {
               {metrics.total}
             </div>
             <div className="text-sm text-gray-500">
-              系统数量: 4
+              Systems: 4
             </div>
             <div className="mt-2 text-xs">
-              最近更新: 刚刚
+              Last updated: Just now
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 警报列表 */}
+      {/* Alert list */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">实时警报</CardTitle>
-          <CardDescription>系统检测到的异常和警告</CardDescription>
+          <CardTitle className="text-sm font-medium">Live Alerts</CardTitle>
+          <CardDescription>System-detected anomalies and warnings</CardDescription>
         </CardHeader>
         <CardContent>
           {alerts.length > 0 ? (
@@ -308,21 +308,21 @@ export default function MonitoringPanel() {
                       <div>
                         <div className="font-medium">{alert.message}</div>
                         <div className="text-sm mt-1">
-                          <span className="text-gray-600">指标: {alert.metric}</span>
+                          <span className="text-gray-600">Metric: {alert.metric}</span>
                           <span className="mx-2">•</span>
-                          <span className="text-gray-600">值: {alert.value.toFixed(2)}</span>
+                          <span className="text-gray-600">Value: {alert.value.toFixed(2)}</span>
                           <span className="mx-2">•</span>
-                          <span className="text-gray-600">阈值: {alert.threshold}</span>
+                          <span className="text-gray-600">Threshold: {alert.threshold}</span>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          触发时间: {new Date(alert.timestamp).toLocaleString()}
+                          Triggered: {new Date(alert.timestamp).toLocaleString()}
                         </div>
                       </div>
                     </div>
                     <Badge variant={alert.severity === 'critical' ? 'destructive' : 'outline'}>
-                      {alert.severity === 'critical' ? '严重' : 
-                       alert.severity === 'error' ? '错误' : 
-                       alert.severity === 'warning' ? '警告' : '信息'}
+                      {alert.severity === 'critical' ? 'Critical' : 
+                       alert.severity === 'error' ? 'Error' : 
+                       alert.severity === 'warning' ? 'Warning' : 'Info'}
                     </Badge>
                   </div>
                 </div>
@@ -331,17 +331,17 @@ export default function MonitoringPanel() {
           ) : (
             <div className="text-center py-8">
               <CheckCircle className="h-12 w-12 mx-auto text-green-400" />
-              <p className="mt-4 text-gray-600">没有活跃警报，系统运行正常</p>
+              <p className="mt-4 text-gray-600">No active alerts, system running normally</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 系统分布 */}
+      {/* System distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">系统使用分布</CardTitle>
+            <CardTitle className="text-sm font-medium">System Usage Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             {Object.entries(performance.systemDistribution).length > 0 ? (
@@ -354,7 +354,7 @@ export default function MonitoringPanel() {
                       <div key={system} className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span>{system}</span>
-                          <span>{count}次 ({percentage.toFixed(1)}%)</span>
+                          <span>{count} ({percentage.toFixed(1)}%)</span>
                         </div>
                         <Progress value={percentage} className="h-2" />
                       </div>
@@ -363,7 +363,7 @@ export default function MonitoringPanel() {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-400">
-                暂无系统分布数据
+                No system distribution data
               </div>
             )}
           </CardContent>
@@ -371,7 +371,7 @@ export default function MonitoringPanel() {
         
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">任务类型分布</CardTitle>
+            <CardTitle className="text-sm font-medium">Task Type Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             {Object.entries(performance.taskTypeDistribution).length > 0 ? (
@@ -384,7 +384,7 @@ export default function MonitoringPanel() {
                       <div key={type} className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span>{type}</span>
-                          <span>{count}次 ({percentage.toFixed(1)}%)</span>
+                          <span>{count} ({percentage.toFixed(1)}%)</span>
                         </div>
                         <Progress value={percentage} className="h-2" />
                       </div>
@@ -393,38 +393,38 @@ export default function MonitoringPanel() {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-400">
-                暂无任务类型数据
+                No task type data
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* 指标统计 */}
+      {/* Metric stats */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">指标统计</CardTitle>
+          <CardTitle className="text-sm font-medium">Metric Stats</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold">{metrics.total}</div>
-              <div className="text-sm text-gray-600">总指标数</div>
+              <div className="text-sm text-gray-600">Total Metrics</div>
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold">{metrics.recent}</div>
-              <div className="text-sm text-gray-600">最近指标</div>
+              <div className="text-sm text-gray-600">Recent Metrics</div>
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold">--</div>
-              <div className="text-sm text-gray-600">最近指标</div>
+              <div className="text-sm text-gray-600">Recent Metrics</div>
             </div>
 
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold">--</div>
-              <div className="text-sm text-gray-600">最近指标</div>
+              <div className="text-sm text-gray-600">Recent Metrics</div>
             </div>
           </div>
         </CardContent>

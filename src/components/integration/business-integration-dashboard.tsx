@@ -51,7 +51,7 @@ export default function BusinessIntegrationDashboard() {
         setSystems(data.data.systems);
       }
     } catch (error) {
-      console.error('获取集成状态失败:', error);
+      console.error('Failed to fetch integration status:', error);
     } finally {
       setLoading(false);
     }
@@ -70,13 +70,13 @@ export default function BusinessIntegrationDashboard() {
       
       if (data.success) {
         setWorkflowResults(prev => [data.data, ...prev.slice(0, 4)]);
-        alert(`工作流 "${workflow}" 执行成功！`);
+        alert(`Workflow "${workflow}" executed successfully!`);
       } else {
-        alert(`工作流执行失败: ${data.error}`);
+        alert(`Workflow execution failed: ${data.error}`);
       }
     } catch (error) {
-      console.error('执行工作流失败:', error);
-      alert('工作流执行失败，请检查网络连接');
+      console.error('Failed to execute workflow:', error);
+      alert('Workflow execution failed, please check network connection');
     } finally {
       setExecuting(null);
     }
@@ -84,10 +84,10 @@ export default function BusinessIntegrationDashboard() {
 
   const getSystemIcon = (name: string) => {
     switch (name) {
-      case '财务系统': return <DollarSign className="h-5 w-5" />;
-      case '外包系统': return <Briefcase className="h-5 w-5" />;
-      case '任务系统': return <Workflow className="h-5 w-5" />;
-      case '知识管理系统': return <BookOpen className="h-5 w-5" />;
+      case 'Finance System': return <DollarSign className="h-5 w-5" />;
+      case 'Freelance System': return <Briefcase className="h-5 w-5" />;
+      case 'Task System': return <Workflow className="h-5 w-5" />;
+      case 'Knowledge Management System': return <BookOpen className="h-5 w-5" />;
       case 'My Skill Shop': return <Building2 className="h-5 w-5" />;
       default: return <Building2 className="h-5 w-5" />;
     }
@@ -95,14 +95,14 @@ export default function BusinessIntegrationDashboard() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case '运行中':
-      case '生产运行':
+      case 'Running':
+      case 'Production':
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">✅ {status}</Badge>;
-      case '待集成':
-      case '待启动':
+      case 'Pending Integration':
+      case 'Pending Start':
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">🔄 {status}</Badge>;
-      case 'API不可用':
-      case '目录不存在':
+      case 'API Unavailable':
+      case 'Directory Not Found':
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">❌ {status}</Badge>;
       default:
         return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">❓ {status}</Badge>;
@@ -115,7 +115,7 @@ export default function BusinessIntegrationDashboard() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">加载业务集成状态...</p>
+            <p className="mt-4 text-gray-600">Loading business integration status...</p>
           </div>
         </div>
       </div>
@@ -125,18 +125,18 @@ export default function BusinessIntegrationDashboard() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">业务集成中心</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Business Integration Hub</h1>
         <p className="text-gray-600 mt-2">
-          连接和管理所有业务系统，实现自动化工作流
+          Connect and manage all business systems with automated workflows
         </p>
       </div>
 
       <Tabs defaultValue="systems" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="systems">系统状态</TabsTrigger>
-          <TabsTrigger value="workflows">工作流</TabsTrigger>
-          <TabsTrigger value="results">执行结果</TabsTrigger>
-          <TabsTrigger value="analytics">分析</TabsTrigger>
+          <TabsTrigger value="systems">System Status</TabsTrigger>
+          <TabsTrigger value="workflows">Workflows</TabsTrigger>
+          <TabsTrigger value="results">Results</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="systems" className="space-y-6">
@@ -144,10 +144,10 @@ export default function BusinessIntegrationDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                业务系统状态
+                Business System Status
               </CardTitle>
               <CardDescription>
-                所有连接的业务系统及其当前状态
+                All connected business systems and their current status
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -166,21 +166,21 @@ export default function BusinessIntegrationDashboard() {
                     <CardContent>
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex justify-between">
-                          <span>路径:</span>
+                          <span>Path:</span>
                           <span className="font-mono text-xs truncate max-w-[200px]">
-                            {system.path || '未配置'}
+                            {system.path || 'Not configured'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>API:</span>
                           <span className="font-mono text-xs truncate max-w-[200px]">
-                            {system.api || '未配置'}
+                            {system.api || 'Not configured'}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span>API状态:</span>
-                          <span className={system.apiStatus === '健康' ? 'text-green-600' : 'text-red-600'}>
-                            {system.apiStatus || '未知'}
+                          <span>API Status:</span>
+                          <span className={system.apiStatus === 'Healthy' ? 'text-green-600' : 'text-red-600'}>
+                            {system.apiStatus || 'Unknown'}
                           </span>
                         </div>
                       </div>
@@ -193,41 +193,41 @@ export default function BusinessIntegrationDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>集成端点</CardTitle>
-              <CardDescription>可用的集成API端点</CardDescription>
+              <CardTitle>Integration Endpoints</CardTitle>
+              <CardDescription>Available integration API endpoints</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <h3 className="font-semibold">核心系统</h3>
+                  <h3 className="font-semibold">Core Systems</h3>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span>统一API网关:</span>
+                      <span>Unified API Gateway:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/v1/unified</code>
                     </div>
                     <div className="flex justify-between">
-                      <span>智能任务分发:</span>
+                      <span>Smart Task Dispatcher:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/v2/dispatcher</code>
                     </div>
                     <div className="flex justify-between">
-                      <span>知识增强开发:</span>
+                      <span>Knowledge-Enhanced Dev:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/v4/knowledge-dev</code>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-semibold">优化系统</h3>
+                  <h3 className="font-semibold">Optimization Systems</h3>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span>自动化效率优化:</span>
+                      <span>Automation Efficiency:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/v5/automation</code>
                     </div>
                     <div className="flex justify-between">
-                      <span>统一监控告警:</span>
+                      <span>Unified Monitoring:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/v6/monitoring</code>
                     </div>
                     <div className="flex justify-between">
-                      <span>业务集成:</span>
+                      <span>Business Integration:</span>
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">/api/integration</code>
                     </div>
                   </div>
@@ -242,48 +242,48 @@ export default function BusinessIntegrationDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Workflow className="h-5 w-5" />
-                自动化工作流
+                Automation Workflows
               </CardTitle>
               <CardDescription>
-                预定义的业务自动化工作流，一键执行
+                Predefined business automation workflows, one-click execution
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* 外包项目管理 */}
+                {/* Freelance project management */}
                 <Card className="border-2 border-blue-100">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Briefcase className="h-5 w-5 text-blue-600" />
-                      外包项目管理
+                      Freelance Project Management
                     </CardTitle>
                     <CardDescription>
-                      从外包平台获取项目 → 任务分配 → 知识库记录 → 财务跟踪
+                      Get project → Assign tasks → Archive knowledge → Track finance
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold">涉及系统:</h4>
+                      <h4 className="font-semibold">Systems Involved:</h4>
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">外包系统</Badge>
-                        <Badge variant="outline">任务系统</Badge>
-                        <Badge variant="outline">知识管理</Badge>
-                        <Badge variant="outline">财务系统</Badge>
+                        <Badge variant="outline">Freelance System</Badge>
+                        <Badge variant="outline">Task System</Badge>
+                        <Badge variant="outline">Knowledge Mgmt</Badge>
+                        <Badge variant="outline">Finance System</Badge>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold">工作流步骤:</h4>
+                      <h4 className="font-semibold">Workflow Steps:</h4>
                       <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                        <li>搜索外包平台项目</li>
-                        <li>创建任务和分配</li>
-                        <li>知识库归档记录</li>
-                        <li>财务跟踪和报告</li>
+                        <li>Search freelance platform</li>
+                        <li>Create and assign tasks</li>
+                        <li>Archive in knowledge base</li>
+                        <li>Finance tracking and reporting</li>
                       </ol>
                     </div>
                     <Button 
                       className="w-full"
                       onClick={() => executeWorkflow('outsource-project', {
-                        projectTitle: '网站开发项目',
+                        projectTitle: 'Website Development Project',
                         budget: 5000,
                         deadline: '2026-03-15'
                       })}
@@ -292,97 +292,97 @@ export default function BusinessIntegrationDashboard() {
                       {executing === 'outsource-project' ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          执行中...
+                          Executing...
                         </>
                       ) : (
                         <>
                           <PlayCircle className="h-4 w-4 mr-2" />
-                          执行工作流
+                          Run Workflow
                         </>
                       )}
                     </Button>
                   </CardContent>
                 </Card>
 
-                {/* 产品开发流程 */}
+                {/* Product development */}
                 <Card className="border-2 border-green-100">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-green-600" />
-                      产品开发流程
+                      Product Development
                     </CardTitle>
                     <CardDescription>
-                      需求分析 → 知识增强 → 任务分发 → 自动化测试
+                      Requirements → Knowledge → Dispatch → Test
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold">涉及系统:</h4>
+                      <h4 className="font-semibold">Systems Involved:</h4>
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">知识管理</Badge>
-                        <Badge variant="outline">任务分发</Badge>
-                        <Badge variant="outline">自动化优化</Badge>
+                        <Badge variant="outline">Knowledge Enhancement</Badge>
+                        <Badge variant="outline">Task Dispatch</Badge>
+                        <Badge variant="outline">Automation Optimization</Badge>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold">工作流步骤:</h4>
+                      <h4 className="font-semibold">Workflow Steps:</h4>
                       <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                        <li>需求分析和规划</li>
-                        <li>知识增强和最佳实践</li>
-                        <li>智能任务分发</li>
-                        <li>自动化测试和部署</li>
+                        <li>Requirements analysis and planning</li>
+                        <li>Knowledge enhancement and best practices</li>
+                        <li>Smart task dispatch</li>
+                        <li>Automated testing and deployment</li>
                       </ol>
                     </div>
                     <Button 
                       className="w-full"
                       onClick={() => executeWorkflow('product-development', {
-                        feature: '用户认证系统',
-                        requirements: '支持OAuth2、JWT、多因素认证'
+                        feature: 'User Auth System',
+                        requirements: 'OAuth2, JWT, MFA support'
                       })}
                       disabled={executing === 'product-development'}
                     >
                       {executing === 'product-development' ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          执行中...
+                          Executing...
                         </>
                       ) : (
                         <>
                           <PlayCircle className="h-4 w-4 mr-2" />
-                          执行工作流
+                          Run Workflow
                         </>
                       )}
                     </Button>
                   </CardContent>
                 </Card>
 
-                {/* 财务监控分析 */}
+                {/* Finance monitoring */}
                 <Card className="border-2 border-purple-100">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <DollarSign className="h-5 w-5 text-purple-600" />
-                      财务监控分析
+                      Finance Monitoring
                     </CardTitle>
                     <CardDescription>
-                      收入跟踪 → 成本分析 → 报告生成 → 知识归档
+                      Revenue tracking → Cost analysis → Report generation → Archive
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold">涉及系统:</h4>
+                      <h4 className="font-semibold">Systems Involved:</h4>
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">财务系统</Badge>
-                        <Badge variant="outline">知识管理</Badge>
-                        <Badge variant="outline">监控告警</Badge>
+                        <Badge variant="outline">Finance System</Badge>
+                        <Badge variant="outline">Knowledge Mgmt</Badge>
+                        <Badge variant="outline">Monitoring & Alerts</Badge>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold">工作流步骤:</h4>
+                      <h4 className="font-semibold">Workflow Steps:</h4>
                       <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                        <li>收集财务数据</li>
-                        <li>分析和计算指标</li>
-                        <li>生成报告和可视化</li>
-                        <li>知识库归档和告警</li>
+                        <li>Collect financial data</li>
+                        <li>Analyze and calculate metrics</li>
+                        <li>Generate reports and visualizations</li>
+                        <li>Archive in knowledge base and alert</li>
                       </ol>
                     </div>
                     <Button 
@@ -396,12 +396,12 @@ export default function BusinessIntegrationDashboard() {
                       {executing === 'finance-monitoring' ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          执行中...
+                          Executing...
                         </>
                       ) : (
                         <>
                           <PlayCircle className="h-4 w-4 mr-2" />
-                          执行工作流
+                          Run Workflow
                         </>
                       )}
                     </Button>
@@ -415,17 +415,17 @@ export default function BusinessIntegrationDashboard() {
         <TabsContent value="results" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>工作流执行结果</CardTitle>
+              <CardTitle>Workflow Results</CardTitle>
               <CardDescription>
-                最近执行的工作流结果和历史记录
+                Recent workflow execution results and history
               </CardDescription>
             </CardHeader>
             <CardContent>
               {workflowResults.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Workflow className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                  <p>暂无执行结果</p>
-                  <p className="text-sm mt-2">请先执行一个工作流</p>
+                  <p>No results yet</p>
+                  <p className="text-sm mt-2">Please run a workflow first</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -434,40 +434,40 @@ export default function BusinessIntegrationDashboard() {
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-lg">
-                            {result.workflow === 'outsource-project' && '外包项目管理'}
-                            {result.workflow === 'product-development' && '产品开发流程'}
-                            {result.workflow === 'finance-monitoring' && '财务监控分析'}
+                            {result.workflow === 'outsource-project' && 'Freelance Project Management'}
+                            {result.workflow === 'product-development' && 'Product Development'}
+                            {result.workflow === 'finance-monitoring' && 'Finance Monitoring'}
                           </CardTitle>
                           <Badge className="bg-blue-100 text-blue-800">
-                            {new Date(result.timestamp).toLocaleString('zh-CN')}
+                            {new Date(result.timestamp).toLocaleString('en-US')}
                           </Badge>
                         </div>
                         <CardDescription>
-                          步骤: {result.steps.join(' → ')}
+                          Steps: {result.steps.join(' → ')}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="font-medium">执行时间:</span>
-                            <span>{new Date(result.timestamp).toLocaleTimeString('zh-CN')}</span>
+                            <span className="font-medium">Execution time:</span>
+                            <span>{new Date(result.timestamp).toLocaleTimeString('en-US')}</span>
                           </div>
                           {result.analysis && (
                             <div className="flex justify-between">
-                              <span className="font-medium">分析结果:</span>
-                              <span className="text-green-600">✅ 完成</span>
+                              <span className="font-medium">Analysis result:</span>
+                              <span className="text-green-600">✅ Done</span>
                             </div>
                           )}
                           {result.dispatch && (
                             <div className="flex justify-between">
-                              <span className="font-medium">任务分发:</span>
-                              <span className="text-green-600">✅ 完成</span>
+                              <span className="font-medium">Task dispatch:</span>
+                              <span className="text-green-600">✅ Done</span>
                             </div>
                           )}
                           {result.optimization && (
                             <div className="flex justify-between">
-                              <span className="font-medium">效率优化:</span>
-                              <span className="text-green-600">✅ 完成</span>
+                              <span className="font-medium">Efficiency:</span>
+                              <span className="text-green-600">✅ Done</span>
                             </div>
                           )}
                         </div>
@@ -485,62 +485,62 @@ export default function BusinessIntegrationDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                集成分析
+                Integration Analytics
               </CardTitle>
               <CardDescription>
-                业务集成系统的性能和使用情况分析
+                Performance and usage analysis of the business integration system
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">健康系统</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-500">Healthy Systems</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {systems.filter(s => s.status === '运行中' || s.status === '生产运行').length}
+                      {systems.filter(s => s.status === 'Running' || s.status === 'Production').length}
                       <span className="text-sm text-gray-500 ml-1">/ {systems.length}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">运行中的业务系统</p>
+                    <p className="text-xs text-gray-500 mt-1">Running business systems</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">API可用性</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-500">API Availability</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {systems.filter(s => s.apiStatus === '健康' || s.apiStatus === '可访问').length}
+                      {systems.filter(s => s.apiStatus === 'Healthy' || s.apiStatus === 'Accessible').length}
                       <span className="text-sm text-gray-500 ml-1">/ {systems.length}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">可用的API端点</p>
+                    <p className="text-xs text-gray-500 mt-1">Available API endpoints</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">工作流执行</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-500">Workflow Executions</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{workflowResults.length}</div>
-                    <p className="text-xs text-gray-500 mt-1">已执行的工作流</p>
+                    <p className="text-xs text-gray-500 mt-1">Executed workflows</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">集成度</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-500">Integration Rate</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {Math.round((systems.filter(s => s.status === '运行中' || s.status === '生产运行').length / systems.length) * 100)}%
+                      {Math.round((systems.filter(s => s.status === 'Running' || s.status === 'Production').length / systems.length) * 100)}%
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">整体集成完成度</p>
+                    <p className="text-xs text-gray-500 mt-1">Overall integration completion</p>
                   </CardContent>
                 </Card>
               </div>
 
               <div className="space-y-4">
-                <h3 className="font-semibold">系统状态分布</h3>
+                <h3 className="font-semibold">System Status Distribution</h3>
                 <div className="space-y-2">
                   {systems.map((system, index) => (
                     <div key={index} className="flex items-center justify-between">
@@ -565,15 +565,15 @@ export default function BusinessIntegrationDashboard() {
         <div className="flex items-start gap-3">
           <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-semibold text-blue-800">业务集成就绪</h3>
+            <h3 className="font-semibold text-blue-800">Business Integration Ready</h3>
             <p className="text-blue-700 text-sm mt-1">
-              所有业务系统已连接，自动化工作流已配置。您现在可以:
+              All business systems connected, workflows configured. You can now:
             </p>
             <ul className="text-blue-700 text-sm mt-2 space-y-1 list-disc list-inside">
-              <li>执行预定义的工作流自动化业务流程</li>
-              <li>监控各业务系统的实时状态</li>
-              <li>通过统一API网关访问所有系统</li>
-              <li>使用知识增强功能优化业务决策</li>
+              <li>Execute predefined workflows to automate business processes</li>
+              <li>Monitor real-time status of all business systems</li>
+              <li>Access all systems via unified API gateway</li>
+              <li>Use knowledge enhancement to optimize business decisions</li>
             </ul>
           </div>
         </div>

@@ -1,5 +1,5 @@
 /**
- * 健康监控模块类型定义
+ * Health monitoring module type definitions
  */
 
 export interface HealthMetric {
@@ -67,9 +67,9 @@ export interface HealthCheck {
   timestamp: Date;
 }
 
-// 监控配置
+// Monitoring configuration
 export interface MonitoringConfig {
-  checkInterval: number; // 毫秒
+  checkInterval: number; // milliseconds
   alertThresholds: AlertThresholds;
   retentionDays: number;
   enabled: boolean;
@@ -83,11 +83,11 @@ export interface AlertThresholds {
   responseTime: number;
 }
 
-// 历史数据
+// Historical data
 export interface HealthHistory {
   timestamp: Date;
   metrics: SystemMetrics;
   alerts: HealthAlert[];
 }
 
-// interfaces are exported inline above
+// Interfaces are exported inline above

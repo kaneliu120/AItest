@@ -1,10 +1,10 @@
-// 服务器组件 - 无状态管理问题
+// Server component - no state management issues
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-// 获取API数据
+// Fetch API data
 async function getApiData() {
   try {
     const response = await fetch('http://localhost:3001/api/external-apis', {
@@ -12,13 +12,13 @@ async function getApiData() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取API数据失败:', error);
+    console.error('Failed to fetch API data:', error);
     return { success: false, data: { apis: [] } };
   }
 }
@@ -29,14 +29,14 @@ export default async function ServerTestPage() {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">服务器组件测试页面</h1>
+      <h1 className="text-2xl font-bold mb-4">Server Component Test Page</h1>
       <div className="space-y-4">
         <div>
-          <p>API数量: {apis.length}</p>
-          <p>加载状态: 完成 (服务器端渲染)</p>
+          <p>API count: {apis.length}</p>
+          <p>Status: Loaded (SSR)</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold mb-2">API列表 (前5个):</h2>
+          <h2 className="text-lg font-semibold mb-2">API list (first 5):</h2>
           {apis.length > 0 ? (
             <ul className="space-y-2">
               {apis.slice(0, 5).map((api: any) => (
@@ -46,21 +46,21 @@ export default async function ServerTestPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">没有API数据</p>
+            <p className="text-slate-500">No API data</p>
           )}
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>服务器组件优势</CardTitle>
-            <CardDescription>无状态管理问题，直接获取数据</CardDescription>
+            <CardTitle>Server Component Advantages</CardTitle>
+            <CardDescription>No state management issues, fetches data directly</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              <li>✅ 无React状态更新问题</li>
-              <li>✅ 无hydration错误</li>
-              <li>✅ 直接获取数据</li>
-              <li>✅ 无客户端JavaScript依赖</li>
-              <li>✅ 更好的SEO</li>
+              <li>✅ No React state update issues</li>
+              <li>✅ No hydration errors</li>
+              <li>✅ Fetches data directly</li>
+              <li>✅ No client-side JavaScript dependency</li>
+              <li>✅ Better SEO</li>
             </ul>
           </CardContent>
         </Card>

@@ -39,8 +39,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild, ...props }, ref) => {
-    // 移除asChild属性，因为它只用于Radix UI的Slot组件
-    // 我们这里不使用Slot，所以直接忽略asChild
+    // Remove asChild prop (only used for Radix UI Slot); ignored here
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }))}

@@ -1,5 +1,5 @@
 /**
- * 健康监控服务
+ * Health monitoring service
  */
 
 import { 
@@ -15,7 +15,7 @@ import {
 
 export class HealthService {
   private config: MonitoringConfig = {
-    checkInterval: 30000, // 30秒
+    checkInterval: 30000, // 30 seconds
     alertThresholds: {
       cpu: 80,
       memory: 85,
@@ -37,7 +37,7 @@ export class HealthService {
   }
 
   /**
-   * 获取系统健康状态
+   * Get system health status
    */
   async getSystemHealth(): Promise<SystemHealth> {
     const components = await this.checkComponents();
@@ -53,7 +53,7 @@ export class HealthService {
       lastUpdated: new Date()
     };
 
-    // 保存历史记录
+    // Save history record
     this.healthHistory.push(systemHealth);
     this.trimHistory();
 
@@ -62,28 +62,28 @@ export class HealthService {
   }
 
   /**
-   * 检查各个组件
+   * Check individual components
    */
   private async checkComponents(): Promise<HealthComponent[]> {
     const components: HealthComponent[] = [
       {
         name: 'Mission Control API',
         status: 'online',
-        uptime: this.formatUptime(24 * 60 * 60), // 24小时
+        uptime: this.formatUptime(24 * 60 * 60), // 24 hours
         responseTime: 45,
         errorRate: 0.5
       },
       {
         name: 'Database',
         status: 'online',
-        uptime: this.formatUptime(7 * 24 * 60 * 60), // 7天
+        uptime: this.formatUptime(7 * 24 * 60 * 60), // 7 days
         responseTime: 120,
         errorRate: 0.1
       },
       {
         name: 'Redis Cache',
         status: 'online',
-        uptime: this.formatUptime(3 * 24 * 60 * 60), // 3天
+        uptime: this.formatUptime(3 * 24 * 60 * 60), // 3 days
         responseTime: 5,
         errorRate: 0
       },
@@ -96,17 +96,17 @@ export class HealthService {
       }
     ];
 
-    // 模拟异步检查
+    // Simulate async check
     await new Promise(resolve => setTimeout(resolve, 100));
 
     return components;
   }
 
   /**
-   * 收集系统指标
+   * Collect system metrics
    */
   private async collectMetrics(): Promise<SystemMetrics> {
-    // 模拟收集系统指标
+    // Simulate collecting system metrics
     const metrics: SystemMetrics = {
       cpuUsage: Math.random() * 100,
       memoryUsage: 30 + Math.random() * 50,
@@ -123,17 +123,17 @@ export class HealthService {
   }
 
   /**
-   * 生成告警
+   * Generate alerts
    */
   private generateAlerts(components: HealthComponent[], metrics: SystemMetrics): HealthAlert[] {
     const alerts: HealthAlert[] = [];
 
-    // 检查组件状态
+    // Check component status
     components.forEach(component => {
       if (component.status === 'offline') {
         alerts.push({
           level: 'critical',
-          message: `${component.name} 离线`,
+          message: `${component.name} is offline`,
           component: component.name,
           timestamp: new Date(),
           acknowledged: false
@@ -141,7 +141,7 @@ export class HealthService {
       } else if (component.status === 'degraded') {
         alerts.push({
           level: 'warning',
-          message: `${component.name} 性能下降`,
+          message: `${component.name} performance degraded`,
           component: component.name,
           timestamp: new Date(),
           acknowledged: false
@@ -149,11 +149,11 @@ export class HealthService {
       }
     });
 
-    // 检查指标阈值
+    // Check metric thresholds
     if (metrics.cpuUsage > this.config.alertThresholds.cpu) {
       alerts.push({
         level: 'warning',
-        message: `CPU使用率过高: ${metrics.cpuUsage.toFixed(1)}%`,
+        message: `CPU usage too high: ${metrics.cpuUsage.toFixed(1)}%`,
         timestamp: new Date(),
         acknowledged: false
       });
@@ -162,7 +162,7 @@ export class HealthService {
     if (metrics.memoryUsage > this.config.alertThresholds.memory) {
       alerts.push({
         level: 'warning',
-        message: `内存使用率过高: ${metrics.memoryUsage.toFixed(1)}%`,
+        message: `Memory usage too high: ${metrics.memoryUsage.toFixed(1)}%`,
         timestamp: new Date(),
         acknowledged: false
       });
@@ -171,7 +171,7 @@ export class HealthService {
     if (metrics.errorRate > this.config.alertThresholds.errorRate) {
       alerts.push({
         level: 'error',
-        message: `错误率过高: ${metrics.errorRate.toFixed(1)}%`,
+        message: `Error rate too high: ${metrics.errorRate.toFixed(1)}%`,
         timestamp: new Date(),
         acknowledged: false
       });
@@ -181,18 +181,18 @@ export class HealthService {
   }
 
   /**
-   * 计算整体健康度
+   * Calculate overall health score
    */
   private calculateOverallHealth(components: HealthComponent[], metrics: SystemMetrics): number {
     let score = 100;
 
-    // 组件状态扣分
+    // Deduct for component status
     components.forEach(component => {
       if (component.status === 'offline') score -= 30;
       else if (component.status === 'degraded') score -= 15;
     });
 
-    // 指标扣分
+    // Deduct for metrics
     if (metrics.cpuUsage > 90) score -= 20;
     else if (metrics.cpuUsage > 80) score -= 10;
 
@@ -206,45 +206,45 @@ export class HealthService {
   }
 
   /**
-   * 执行健康检查
+   * Perform health check
    */
   async performHealthCheck(): Promise<HealthCheckResponse> {
     const startTime = Date.now();
     const checks: HealthCheck[] = [];
 
-    // API检查
+    // API check
     checks.push({
       name: 'API Endpoint',
       status: 'pass',
       duration: 45,
-      output: 'API响应正常',
+      output: 'API responding normally',
       timestamp: new Date()
     });
 
-    // 数据库检查
+    // Database check
     checks.push({
       name: 'Database Connection',
       status: 'pass',
       duration: 120,
-      output: '数据库连接正常',
+      output: 'Database connection normal',
       timestamp: new Date()
     });
 
-    // Redis检查
+    // Redis check
     checks.push({
       name: 'Redis Cache',
       status: 'pass',
       duration: 5,
-      output: '缓存服务正常',
+      output: 'Cache service normal',
       timestamp: new Date()
     });
 
-    // 外部服务检查
+    // External services check
     checks.push({
       name: 'External Services',
       status: 'warn',
       duration: 800,
-      output: '部分外部服务响应较慢',
+      output: 'Some external services responding slowly',
       timestamp: new Date()
     });
 
@@ -259,7 +259,7 @@ export class HealthService {
   }
 
   /**
-   * 获取健康历史
+   * Get health history
    */
   getHealthHistory(hours: number = 24): SystemHealth[] {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
@@ -267,21 +267,21 @@ export class HealthService {
   }
 
   /**
-   * 获取配置
+   * Get configuration
    */
   getConfig(): MonitoringConfig {
     return { ...this.config };
   }
 
   /**
-   * 更新配置
+   * Update configuration
    */
   updateConfig(config: Partial<MonitoringConfig>): void {
     this.config = { ...this.config, ...config };
   }
 
   /**
-   * 确认告警
+   * Acknowledge alert
    */
   acknowledgeAlert(alertIndex: number): void {
     if (this.healthHistory.length > 0) {
@@ -293,17 +293,17 @@ export class HealthService {
   }
 
   /**
-   * 清理历史记录
+   * Trim history records
    */
   private trimHistory(): void {
-    const maxRecords = this.config.retentionDays * 24 * 4; // 每15分钟一条记录
+    const maxRecords = this.config.retentionDays * 24 * 4; // one record every 15 minutes
     if (this.healthHistory.length > maxRecords) {
       this.healthHistory = this.healthHistory.slice(-maxRecords);
     }
   }
 
   /**
-   * 格式化运行时间
+   * Format uptime
    */
   private formatUptime(seconds: number): string {
     const days = Math.floor(seconds / (24 * 60 * 60));
@@ -316,5 +316,5 @@ export class HealthService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const healthService = new HealthService();

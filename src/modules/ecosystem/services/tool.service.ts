@@ -19,133 +19,133 @@ import {
   TOOL_STATUSES,
 } from '../types';
 
-// 工具服务类
+// Tool service class
 export class ToolService {
   private basePath = '/api/ecosystem/tools';
 
-  // 获取所有工具
+  // Get all tools
   async getTools(params?: ToolSearchParams): Promise<ToolsResponse> {
     return apiClient.get<ToolsResponse>(this.basePath, { params });
   }
 
-  // 获取单个工具
+  // Get a single tool
   async getTool(id: string): Promise<ToolResponse> {
     return apiClient.get<ToolResponse>(`${this.basePath}/${id}`);
   }
 
-  // 创建工具
+  // Create tool
   async createTool(tool: Omit<Tool, 'id' | 'metadata' | 'health' | 'usage' | 'configuration'>): Promise<ToolResponse> {
     return apiClient.post<ToolResponse>(this.basePath, tool);
   }
 
-  // 更新工具
+  // Update tool
   async updateTool(id: string, updates: Partial<Tool>): Promise<ToolResponse> {
     return apiClient.put<ToolResponse>(`${this.basePath}/${id}`, updates);
   }
 
-  // 删除工具
+  // Delete tool
   async deleteTool(id: string): Promise<void> {
     await apiClient.delete(`${this.basePath}/${id}`);
   }
 
-  // 配置工具
+  // Configure tool
   async configureTool(id: string, config: ConfigureToolRequest): Promise<ToolResponse> {
     return apiClient.post<ToolResponse>(`${this.basePath}/${id}/configure`, config);
   }
 
-  // 测试工具
+  // Test tool
   async testTool(id: string, testRequest: TestToolRequest): Promise<any> {
     return apiClient.post(`${this.basePath}/${id}/test`, testRequest);
   }
 
-  // 更新工具状态
+  // Update tool status
   async updateToolStatus(id: string, statusRequest: UpdateToolStatusRequest): Promise<ToolResponse> {
     return apiClient.patch<ToolResponse>(`${this.basePath}/${id}/status`, statusRequest);
   }
 
-  // 获取工具健康状态
+  // Get tool health status
   async getToolHealth(id: string): Promise<ToolHealthResponse> {
     return apiClient.get<ToolHealthResponse>(`${this.basePath}/${id}/health`);
   }
 
-  // 检查所有工具健康状态
+  // Check all tools health status
   async checkAllToolsHealth(): Promise<ToolHealthResponse[]> {
     return apiClient.post<ToolHealthResponse[]>(`${this.basePath}/health-check`);
   }
 
-  // 获取工具统计
+  // Get tool statistics
   async getToolStatistics(): Promise<ToolStatisticsResponse> {
     return apiClient.get<ToolStatisticsResponse>(`${this.basePath}/statistics`);
   }
 
-  // 搜索工具
+  // Search tools
   async searchTools(query: string, category?: string): Promise<ToolsResponse> {
     const params: any = { query };
     if (category) params.category = category;
     return this.getTools(params);
   }
 
-  // 按分类获取工具
+  // Get tools by category
   async getToolsByCategory(category: string): Promise<ToolsResponse> {
     return this.getTools({ category: category as any });
   }
 
-  // 获取配置的工具
+  // Get configured tools
   async getConfiguredTools(): Promise<ToolsResponse> {
     return this.getTools({ configured: true });
   }
 
-  // 获取未配置的工具
+  // Get unconfigured tools
   async getUnconfiguredTools(): Promise<ToolsResponse> {
     return this.getTools({ configured: false });
   }
 
-  // 获取活跃工具
+  // Get active tools
   async getActiveTools(): Promise<ToolsResponse> {
     return this.getTools({ status: 'active' });
   }
 
-  // 获取工具事件
+  // Get tool events
   async getToolEvents(filter?: ToolEventFilter): Promise<any> {
     return apiClient.get(`${this.basePath}/events`, { params: filter });
   }
 
-  // 导出工具配置
+  // Export tool configuration
   async exportTools(): Promise<ToolExport> {
     return apiClient.get<ToolExport>(`${this.basePath}/export`);
   }
 
-  // 导入工具配置
+  // Import tool configuration
   async importTools(exportData: ToolExport): Promise<void> {
     await apiClient.post(`${this.basePath}/import`, exportData);
   }
 
-  // 获取工具依赖
+  // Get tool dependencies
   async getToolDependencies(toolId: string): Promise<ToolDependency[]> {
     return apiClient.get<ToolDependency[]>(`${this.basePath}/${toolId}/dependencies`);
   }
 
-  // 获取工具版本
+  // Get tool versions
   async getToolVersions(toolId: string): Promise<ToolVersion[]> {
     return apiClient.get<ToolVersion[]>(`${this.basePath}/${toolId}/versions`);
   }
 
-  // 获取工具权限
+  // Get tool permissions
   async getToolPermissions(toolId: string): Promise<ToolPermission[]> {
     return apiClient.get<ToolPermission[]>(`${this.basePath}/${toolId}/permissions`);
   }
 
-  // 配置工具Webhook
+  // Configure tool Webhook
   async configureToolWebhook(toolId: string, webhook: ToolWebhook): Promise<ToolWebhook> {
     return apiClient.post<ToolWebhook>(`${this.basePath}/${toolId}/webhooks`, webhook);
   }
 
-  // 获取工具Webhooks
+  // Get tool Webhooks
   async getToolWebhooks(toolId: string): Promise<ToolWebhook[]> {
     return apiClient.get<ToolWebhook[]>(`${this.basePath}/${toolId}/webhooks`);
   }
 
-  // 模拟数据 - 用于开发和测试
+  // Mock data - for development and testing
   getMockTools(): Tool[] {
     return [
       {
@@ -362,7 +362,7 @@ export class ToolService {
     ];
   }
 
-  // 获取模拟统计
+  // Get mock statistics
   getMockStatistics() {
     return {
       totalTools: 5,
@@ -408,7 +408,7 @@ export class ToolService {
     };
   }
 
-  // 工具类方法
+  // Utility methods
   getToolCategories() {
     return TOOL_CATEGORIES;
   }
@@ -446,7 +446,7 @@ export class ToolService {
     return categoryMap[category] || category;
   }
 
-  // 计算工具健康状态颜色
+  // Calculate tool health status color
   getHealthColor(status: string) {
     const colorMap: Record<string, string> = {
       healthy: 'green',
@@ -456,7 +456,7 @@ export class ToolService {
     return colorMap[status] || 'gray';
   }
 
-  // 计算工具使用频率
+  // Calculate tool usage frequency
   getUsageFrequency(usageCount: number) {
     if (usageCount > 1000) return 'high';
     if (usageCount > 100) return 'medium';
@@ -464,8 +464,8 @@ export class ToolService {
   }
 }
 
-// 创建单例实例
+// Create singleton instance
 export const toolService = new ToolService();
 
-// 导出默认实例
+// Export default instance
 export default toolService;

@@ -1,5 +1,5 @@
 /**
- * 任务管理服务
+ * Task management service
  */
 
 import { 
@@ -32,25 +32,25 @@ export class TaskService {
   }
 
   /**
-   * 创建任务
+   * Create a task
    */
   async createTask(input: CreateTaskInput, creatorId: string): Promise<ApiResponse<Task>> {
     try {
-      // 验证输入
+      // Validate input
       const validation = this.validationService.validateCreateTask(input);
       if (!validation.isValid) {
         return {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: '输入验证失败',
+            message: 'Input validation failed',
             details: validation.errors
           },
           timestamp: new Date()
         };
       }
 
-      // 创建任务
+      // Create task
       const task: Task = {
         id: this.generateId(),
         title: input.title,
@@ -74,7 +74,7 @@ export class TaskService {
 
       this.tasks.push(task);
 
-      // 记录事件
+      // Record event
       this.recordEvent({
         type: 'task_created',
         task
@@ -86,12 +86,12 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '创建任务失败');
+      return this.handleError(error, 'Failed to create task');
     }
   }
 
   /**
-   * 获取任务
+   * Get a task
    */
   async getTask(taskId: string): Promise<ApiResponse<Task>> {
     try {
@@ -101,7 +101,7 @@ export class TaskService {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: '任务不存在'
+            message: 'Task not found'
           },
           timestamp: new Date()
         };
@@ -113,12 +113,12 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '获取任务失败');
+      return this.handleError(error, 'Failed to get task');
     }
   }
 
   /**
-   * 更新任务
+   * Update a task
    */
   async updateTask(taskId: string, input: UpdateTaskInput): Promise<ApiResponse<Task>> {
     try {
@@ -128,7 +128,7 @@ export class TaskService {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: '任务不存在'
+            message: 'Task not found'
           },
           timestamp: new Date()
         };
@@ -137,7 +137,7 @@ export class TaskService {
       const oldTask = { ...this.tasks[taskIndex] };
       const updatedTask = { ...oldTask };
 
-      // 更新字段
+      // Update fields
       if (input.title !== undefined) updatedTask.title = input.title;
       if (input.description !== undefined) updatedTask.description = input.description;
       if (input.status !== undefined) updatedTask.status = input.status;
@@ -159,14 +159,14 @@ export class TaskService {
 
       updatedTask.updatedAt = new Date();
 
-      // 如果任务完成，记录完成时间
+      // If task is completed, record completion time
       if (input.status === TaskStatus.DONE && oldTask.status !== TaskStatus.DONE) {
         updatedTask.completedAt = new Date();
       }
 
       this.tasks[taskIndex] = updatedTask;
 
-      // 记录事件
+      // Record events
       if (input.status !== undefined && input.status !== oldTask.status) {
         this.recordEvent({
           type: 'task_status_changed',
@@ -197,12 +197,12 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '更新任务失败');
+      return this.handleError(error, 'Failed to update task');
     }
   }
 
   /**
-   * 删除任务
+   * Delete a task
    */
   async deleteTask(taskId: string): Promise<ApiResponse<void>> {
     try {
@@ -212,7 +212,7 @@ export class TaskService {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: '任务不存在'
+            message: 'Task not found'
           },
           timestamp: new Date()
         };
@@ -220,7 +220,7 @@ export class TaskService {
 
       const [deletedTask] = this.tasks.splice(taskIndex, 1);
 
-      // 记录事件
+      // Record event
       this.recordEvent({
         type: 'task_deleted',
         task: deletedTask
@@ -231,18 +231,18 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '删除任务失败');
+      return this.handleError(error, 'Failed to delete task');
     }
   }
 
   /**
-   * 获取任务列表
+   * Get task list
    */
   async getTasks(filter: TaskFilter = {}): Promise<ApiResponse<PaginatedResponse<Task>>> {
     try {
       let filteredTasks = [...this.tasks];
 
-      // 应用过滤器
+      // Apply filters
       if (filter.status && filter.status.length > 0) {
         filteredTasks = filteredTasks.filter(task => filter.status!.includes(task.status));
       }
@@ -292,7 +292,7 @@ export class TaskService {
         );
       }
 
-      // 分页
+      // Pagination
       const page = filter.page || 1;
       const limit = filter.limit || 20;
       const startIndex = (page - 1) * limit;
@@ -318,12 +318,12 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '获取任务列表失败');
+      return this.handleError(error, 'Failed to get task list');
     }
   }
 
   /**
-   * 获取任务统计
+   * Get task statistics
    */
   async getTaskStats(): Promise<ApiResponse<TaskStats>> {
     try {
@@ -371,7 +371,7 @@ export class TaskService {
       const avgCompletionTime = completedTasks.length > 0
         ? completedTasks.reduce((sum, task) => {
             const completionTime = task.completedAt!.getTime() - task.createdAt.getTime();
-            return sum + (completionTime / (1000 * 60 * 60)); // 转换为小时
+            return sum + (completionTime / (1000 * 60 * 60)); // convert to hours
           }, 0) / completedTasks.length
         : 0;
 
@@ -391,12 +391,12 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '获取任务统计失败');
+      return this.handleError(error, 'Failed to get task statistics');
     }
   }
 
   /**
-   * 获取任务事件
+   * Get task events
    */
   async getTaskEvents(taskId?: string, limit: number = 50): Promise<ApiResponse<TaskEvent[]>> {
     try {
@@ -419,27 +419,27 @@ export class TaskService {
         timestamp: new Date()
       };
     } catch (error) {
-      return this.handleError(error, '获取任务事件失败');
+      return this.handleError(error, 'Failed to get task events');
     }
   }
 
   /**
-   * 初始化示例数据
+   * Initialize sample data
    */
   private initializeSampleData(): void {
-    // 创建示例用户
+    // Create sample user
     const sampleUser: User = {
       id: 'user-001',
-      name: '系统管理员',
+      name: 'System Admin',
       email: 'admin@example.com',
       role: UserRole.ADMIN,
       isActive: true
     };
 
-    // 创建示例项目
+    // Create sample project
     const sampleProject: Project = {
       id: 'project-001',
-      name: 'Mission Control 优化',
+      name: 'Mission Control Optimization',
       status: ProjectStatus.ACTIVE,
       owner: sampleUser,
       members: [sampleUser],
@@ -447,19 +447,19 @@ export class TaskService {
       progress: 65
     };
 
-    // 创建示例任务
+    // Create sample tasks
     this.tasks = [
       {
         id: 'task-001',
-        title: '迁移现有代码到模块化架构',
-        description: '将Mission Control现有功能迁移到模块化架构',
+        title: 'Migrate existing code to modular architecture',
+        description: 'Migrate existing Mission Control functionality to modular architecture',
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.HIGH,
         creator: sampleUser,
         assignee: sampleUser,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7天后
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2天前
-        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1天前
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
         tags: ['migration', 'architecture', 'refactoring'],
         estimatedHours: 40,
         actualHours: 25,
@@ -471,13 +471,13 @@ export class TaskService {
       },
       {
         id: 'task-002',
-        title: '创建任务管理模块',
-        description: '实现完整的任务管理功能',
+        title: 'Create task management module',
+        description: 'Implement full task management functionality',
         status: TaskStatus.TODO,
         priority: TaskPriority.HIGH,
         creator: sampleUser,
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5天后
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1天前
+        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
         updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
         tags: ['module', 'task-management', 'development'],
         estimatedHours: 30,
@@ -490,13 +490,13 @@ export class TaskService {
       },
       {
         id: 'task-003',
-        title: '完善CI/CD流水线',
-        description: '为每个模块建立独立的测试和部署流水线',
+        title: 'Improve CI/CD pipeline',
+        description: 'Establish independent testing and deployment pipelines for each module',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
         creator: sampleUser,
-        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10天后
-        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3天前
+        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
         updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         tags: ['ci-cd', 'automation', 'testing'],
         estimatedHours: 20,
@@ -509,13 +509,13 @@ export class TaskService {
       },
       {
         id: 'task-004',
-        title: '实施性能监控',
-        description: '实施生产环境性能监控和告警',
+        title: 'Implement performance monitoring',
+        description: 'Implement production environment performance monitoring and alerting',
         status: TaskStatus.REVIEW,
         priority: TaskPriority.CRITICAL,
         creator: sampleUser,
         assignee: sampleUser,
-        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3天后
+        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
         createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(),
         tags: ['monitoring', 'performance', 'production'],
@@ -531,19 +531,19 @@ export class TaskService {
   }
 
   /**
-   * 生成唯一ID
+   * Generate unique ID
    */
   private generateId(): string {
     return `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * 获取用户
+   * Get user
    */
   private async getUser(userId: string): Promise<any> {
     return {
       id: userId,
-      name: '用户_' + userId.slice(-4),
+      name: 'user_' + userId.slice(-4),
       email: `user_${userId.slice(-4)}@example.com`,
       role: 'developer' as const,
       isActive: true
@@ -551,14 +551,14 @@ export class TaskService {
   }
 
   /**
-   * 获取项目
+   * Get project
    */
   private async getProject(projectId: string): Promise<any> {
     return {
       id: projectId,
-      name: '项目_' + projectId.slice(-4),
+      name: 'project_' + projectId.slice(-4),
       status: 'active' as const,
-      owner: { id: 'user-001', name: '管理员', email: 'admin@example.com', role: 'admin' as const, isActive: true },
+      owner: { id: 'user-001', name: 'Admin', email: 'admin@example.com', role: 'admin' as const, isActive: true },
       members: [],
       tags: [],
       progress: 50
@@ -566,18 +566,18 @@ export class TaskService {
   }
 
   /**
-   * 记录事件
+   * Record event
    */
   private recordEvent(event: any): void {
     this.taskEvents.unshift(event);
-    // 保持最近500条事件
+    // Keep only the most recent 500 events
     if (this.taskEvents.length > 500) {
       this.taskEvents.pop();
     }
   }
 
   /**
-   * 错误处理
+   * Error handling
    */
   private handleError(error: unknown, message: string): any {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -594,5 +594,5 @@ export class TaskService {
   }
 }
 
-// 导出单例
+// Export singleton
 export const taskService = new TaskService();

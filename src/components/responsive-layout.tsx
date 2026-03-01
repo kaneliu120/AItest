@@ -14,18 +14,18 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
-  // 检测屏幕尺寸
+  // Detect screen size
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
       if (width < 768) {
         setScreenSize('mobile');
-        setIsSidebarOpen(false); // 移动端默认关闭侧边栏
+        setIsSidebarOpen(false); // Close sidebar by default on mobile
       } else if (width < 1024) {
         setScreenSize('tablet');
       } else {
         setScreenSize('desktop');
-        setIsSidebarOpen(true); // 桌面端默认打开侧边栏
+        setIsSidebarOpen(true); // Open sidebar by default on desktop
       }
     };
 
@@ -34,7 +34,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // 移动端点击外部关闭侧边栏
+  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -49,7 +49,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isSidebarOpen, screenSize]);
 
-  // 获取屏幕尺寸图标
+  // Get screen size icon
   const getScreenIcon = () => {
     switch (screenSize) {
       case 'mobile': return <Smartphone className="h-4 w-4" />;
@@ -60,7 +60,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* 移动端菜单按钮 */}
+      {/* Mobile menu button */}
       {screenSize === 'mobile' && (
         <div className="fixed bottom-6 right-4 z-50">
           <Button
@@ -74,7 +74,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
         </div>
       )}
 
-      {/* 屏幕尺寸指示器（仅开发环境） */}
+      {/* Screen size indicator (dev only) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium backdrop-blur-sm">
           {getScreenIcon()}
@@ -83,7 +83,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
       )}
 
       <div className="flex">
-        {/* 侧边栏 */}
+        {/* Sidebar */}
         <div className={`
           sidebar-container
           ${screenSize === 'mobile' 
@@ -99,13 +99,13 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
           />
         </div>
 
-        {/* 主内容区域 */}
+        {/* Main content area */}
         <div className={`
           flex-1 flex flex-col
           ${screenSize === 'mobile' && isSidebarOpen ? 'ml-0' : ''}
           ${screenSize === 'mobile' ? 'min-h-screen' : ''}
         `}>
-          {/* 移动端遮罩 */}
+          {/* Mobile overlay */}
           {isSidebarOpen && screenSize === 'mobile' && (
             <div 
               className="fixed inset-0 bg-black/50 z-30"
@@ -123,7 +123,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
             ${screenSize === 'mobile' ? 'p-4' : 'p-6'}
             ${screenSize === 'tablet' ? 'p-4' : ''}
           `}>
-            {/* 响应式容器 */}
+            {/* Responsive container */}
             <div className={`
               mx-auto
               ${screenSize === 'mobile' ? 'w-full max-w-full' : ''}
@@ -139,7 +139,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   );
 }
 
-// 响应式MCP组件
+// Responsive MCP component
 export function ResponsiveContainer({ 
   children, 
   className = '' 
@@ -231,7 +231,7 @@ export function ResponsiveText({
   );
 }
 
-// 移动端优化钩子
+// Mobile optimization hook
 export function useResponsive() {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);

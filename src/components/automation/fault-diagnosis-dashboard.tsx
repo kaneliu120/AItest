@@ -44,8 +44,8 @@ export default function FaultDiagnosisDashboard() {
   const [faults, setFaults] = useState<FaultItem[]>([
     {
       id: 'fault-001',
-      title: '数据库连接超时',
-      description: 'PostgreSQL连接池耗尽，导致API响应延迟',
+      title: 'Database connection timeout',
+      description: 'PostgreSQL connection pool exhausted, causing API response delays',
       severity: 'critical',
       status: 'investigating',
       createdAt: '2026-02-22T14:30:00Z',
@@ -54,8 +54,8 @@ export default function FaultDiagnosisDashboard() {
     },
     {
       id: 'fault-002',
-      title: '内存泄漏检测',
-      description: 'Node.js服务内存使用持续增长',
+      title: 'Memory leak detected',
+      description: 'Node.js service memory usage keeps growing',
       severity: 'high',
       status: 'open',
       createdAt: '2026-02-21T09:15:00Z',
@@ -64,8 +64,8 @@ export default function FaultDiagnosisDashboard() {
     },
     {
       id: 'fault-003',
-      title: '第三方API限流',
-      description: 'Stripe API调用频率超过限制',
+      title: 'Third-party API rate limiting',
+      description: 'Stripe API call frequency exceeded limit',
       severity: 'medium',
       status: 'resolved',
       createdAt: '2026-02-20T16:20:00Z',
@@ -98,7 +98,7 @@ export default function FaultDiagnosisDashboard() {
   };
 
   const refreshData = async () => {
-    // 模拟API调用
+    // Mock API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     setStatus(prev => ({
@@ -118,49 +118,49 @@ export default function FaultDiagnosisDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* 状态概览 */}
+      {/* Status overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">总故障数</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Faults</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{status.stats.totalFaults}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
               <AlertTriangle className="h-4 w-4" />
-              <span>{status.stats.criticalFaults} 个严重</span>
+              <span>{status.stats.criticalFaults} critical</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">已解决</CardTitle>
+            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{status.stats.resolvedFaults}</div>
             <div className="text-sm text-muted-foreground mt-1">
-              解决率: {Math.round((status.stats.resolvedFaults / status.stats.totalFaults) * 100)}%
+              Resolution rate: {Math.round((status.stats.resolvedFaults / status.stats.totalFaults) * 100)}%
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">待处理</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{status.stats.pendingFaults}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
               <Clock className="h-4 w-4" />
-              <span>需要关注</span>
+              <span>Needs attention</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">系统状态</CardTitle>
+            <CardTitle className="text-sm font-medium">System Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -168,20 +168,20 @@ export default function FaultDiagnosisDashboard() {
               <span className="text-lg font-bold capitalize">{status.status}</span>
             </div>
             <div className="text-sm text-muted-foreground mt-1">
-              最后检查: {new Date(status.lastCheck).toLocaleTimeString()}
+              Last check: {new Date(status.lastCheck).toLocaleTimeString()}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 操作栏 */}
+      {/* Action bar */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="flex flex-col md:flex-row gap-3 flex-1">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="搜索故障..."
+              placeholder="Search faults..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border rounded-lg"
@@ -194,11 +194,11 @@ export default function FaultDiagnosisDashboard() {
               onChange={(e) => setSeverityFilter(e.target.value)}
               className="px-3 py-2 border rounded-lg text-sm"
             >
-              <option value="all">所有严重级别</option>
-              <option value="critical">严重</option>
-              <option value="high">高</option>
-              <option value="medium">中</option>
-              <option value="low">低</option>
+              <option value="all">All Severities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
             </select>
             
             <select
@@ -206,26 +206,26 @@ export default function FaultDiagnosisDashboard() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border rounded-lg text-sm"
             >
-              <option value="all">所有状态</option>
-              <option value="open">未处理</option>
-              <option value="investigating">调查中</option>
-              <option value="resolved">已解决</option>
+              <option value="all">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="investigating">Investigating</option>
+              <option value="resolved">Resolved</option>
             </select>
           </div>
         </div>
         
         <Button onClick={refreshData} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
-          刷新数据
+          Refresh
         </Button>
       </div>
 
-      {/* 故障列表 */}
+      {/* Fault list */}
       <Card>
         <CardHeader>
-          <CardTitle>故障列表</CardTitle>
+          <CardTitle>Fault List</CardTitle>
           <CardDescription>
-            发现 {filteredFaults.length} 个故障，{status.stats.pendingFaults} 个待处理
+            {filteredFaults.length} faults found, {status.stats.pendingFaults} pending
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -241,15 +241,15 @@ export default function FaultDiagnosisDashboard() {
                           {fault.severity.toUpperCase()}
                         </Badge>
                         <Badge variant={fault.status === 'resolved' ? 'outline' : 'default'}>
-                          {fault.status === 'open' ? '未处理' : 
-                           fault.status === 'investigating' ? '调查中' : '已解决'}
+                          {fault.status === 'open' ? 'Open' : 
+                           fault.status === 'investigating' ? 'Investigating' : 'Resolved'}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">{fault.description}</p>
                     </div>
                     <div className="text-right text-sm text-gray-500">
-                      <div>创建: {new Date(fault.createdAt).toLocaleDateString()}</div>
-                      <div>更新: {new Date(fault.updatedAt).toLocaleDateString()}</div>
+                      <div>Created: {new Date(fault.createdAt).toLocaleDateString()}</div>
+                      <div>Updated: {new Date(fault.updatedAt).toLocaleDateString()}</div>
                     </div>
                   </div>
                   
@@ -263,11 +263,11 @@ export default function FaultDiagnosisDashboard() {
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">
-                        查看详情
+                        View Details
                       </Button>
                       {fault.status !== 'resolved' && (
                         <Button size="sm">
-                          开始处理
+                          Start Handling
                         </Button>
                       )}
                     </div>
@@ -278,26 +278,26 @@ export default function FaultDiagnosisDashboard() {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>未找到匹配的故障</p>
-              <p className="text-sm mt-2">尝试调整搜索条件或刷新数据</p>
+              <p>No matching faults</p>
+              <p className="text-sm mt-2">Try adjusting search criteria or refresh</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 底部状态栏 */}
+      {/* Footer status bar */}
       <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${getStatusColor(status.status)}`} />
-            <span>服务状态: {status.status}</span>
+            <span>Service status: {status.status}</span>
           </div>
-          <div>版本: 1.0.0</div>
-          <div>最后更新: {new Date().toLocaleTimeString()}</div>
+          <div>Version: 1.0.0</div>
+          <div>Last updated: {new Date().toLocaleTimeString()}</div>
         </div>
         <div className="flex items-center gap-2">
           <Bell className="h-4 w-4" />
-          <span>{status.stats.pendingFaults} 个待处理故障</span>
+          <span>{status.stats.pendingFaults} pending faults</span>
         </div>
       </div>
     </div>

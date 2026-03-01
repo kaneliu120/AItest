@@ -1,5 +1,5 @@
 /**
- * 工具生态系统服务
+ * Tool ecosystem service
  */
 
 import { 
@@ -16,7 +16,7 @@ import {
 
 export class EcosystemService {
   private config: EcosystemConfig = {
-    checkInterval: 60000, // 1分钟
+    checkInterval: 60000, // 1 minute
     alertThresholds: {
       responseTime: 1000,
       errorRate: 5,
@@ -41,17 +41,17 @@ export class EcosystemService {
   }
 
   /**
-   * 初始化数据
+   * Initialize data
    */
   private initializeData(): void {
-    // 初始化工具数据
+    // Initialize tool data
     this.tools = [
       {
         id: 'tool-001',
         name: 'API Gateway',
         status: 'healthy',
         category: ToolCategoryEnum.DEPLOYMENT,
-        description: '统一API网关服务',
+        description: 'Unified API gateway service',
         lastChecked: new Date(),
         responseTime: 45,
         uptime: 99.8,
@@ -64,7 +64,7 @@ export class EcosystemService {
         name: 'Redis Cache',
         status: 'healthy',
         category: ToolCategoryEnum.DATABASE,
-        description: '高性能缓存服务',
+        description: 'High-performance cache service',
         lastChecked: new Date(),
         responseTime: 5,
         uptime: 99.9,
@@ -76,7 +76,7 @@ export class EcosystemService {
         name: 'PostgreSQL',
         status: 'warning',
         category: ToolCategoryEnum.DATABASE,
-        description: '主数据库服务',
+        description: 'Primary database service',
         lastChecked: new Date(Date.now() - 300000),
         responseTime: 120,
         uptime: 99.5,
@@ -89,7 +89,7 @@ export class EcosystemService {
         name: 'Monitoring Dashboard',
         status: 'healthy',
         category: ToolCategoryEnum.MONITORING,
-        description: '系统监控仪表盘',
+        description: 'System monitoring dashboard',
         lastChecked: new Date(),
         responseTime: 80,
         uptime: 99.7,
@@ -101,7 +101,7 @@ export class EcosystemService {
         name: 'CI/CD Pipeline',
         status: 'error',
         category: ToolCategoryEnum.DEPLOYMENT,
-        description: '持续集成部署流水线',
+        description: 'Continuous integration and deployment pipeline',
         lastChecked: new Date(Date.now() - 600000),
         responseTime: 5000,
         uptime: 95.2,
@@ -114,7 +114,7 @@ export class EcosystemService {
         name: 'Authentication Service',
         status: 'healthy',
         category: ToolCategoryEnum.SECURITY,
-        description: '用户认证和授权服务',
+        description: 'User authentication and authorization service',
         lastChecked: new Date(),
         responseTime: 60,
         uptime: 99.9,
@@ -126,7 +126,7 @@ export class EcosystemService {
         name: 'Message Queue',
         status: 'offline',
         category: ToolCategoryEnum.COMMUNICATION,
-        description: '消息队列服务',
+        description: 'Message queue service',
         lastChecked: new Date(Date.now() - 900000),
         responseTime: 0,
         uptime: 98.5,
@@ -138,7 +138,7 @@ export class EcosystemService {
         name: 'Analytics Engine',
         status: 'healthy',
         category: ToolCategoryEnum.ANALYTICS,
-        description: '数据分析引擎',
+        description: 'Data analytics engine',
         lastChecked: new Date(),
         responseTime: 200,
         uptime: 99.6,
@@ -147,7 +147,7 @@ export class EcosystemService {
       }
     ];
 
-    // 初始化分类
+    // Initialize categories
     this.categories = Object.values(ToolCategoryEnum).map(category => ({
       id: category,
       name: this.formatCategoryName(category),
@@ -159,14 +159,14 @@ export class EcosystemService {
       ).length
     }));
 
-    // 初始化告警
+    // Initialize alerts
     this.alerts = [
       {
         id: 'alert-001',
         toolId: 'tool-005',
         toolName: 'CI/CD Pipeline',
         level: 'error',
-        message: '部署流水线失败，构建超时',
+        message: 'CI/CD pipeline failed, build timed out',
         timestamp: new Date(Date.now() - 300000),
         acknowledged: false,
         details: { buildId: 'build-12345', error: 'Docker build timeout' }
@@ -176,29 +176,29 @@ export class EcosystemService {
         toolId: 'tool-007',
         toolName: 'Message Queue',
         level: 'critical',
-        message: '消息队列服务离线',
+        message: 'Message queue service offline',
         timestamp: new Date(Date.now() - 600000),
         acknowledged: true,
-        details: { lastSeen: '10分钟前', recoveryAttempts: 2 }
+        details: { lastSeen: '10 minutes ago', recoveryAttempts: 2 }
       },
       {
         id: 'alert-003',
         toolId: 'tool-003',
         toolName: 'PostgreSQL',
         level: 'warning',
-        message: '数据库响应时间超过阈值',
+        message: 'Database response time exceeded threshold',
         timestamp: new Date(Date.now() - 1800000),
         acknowledged: false,
         details: { responseTime: 120, threshold: 100 }
       }
     ];
 
-    // 初始化指标
+    // Initialize metrics
     this.generateMockMetrics();
   }
 
   /**
-   * 获取生态系统摘要
+   * Get ecosystem summary
    */
   async getEcosystemSummary(): Promise<EcosystemSummary> {
     const stats = this.calculateStats();
@@ -218,21 +218,21 @@ export class EcosystemService {
   }
 
   /**
-   * 获取所有工具状态
+   * Get all tool statuses
    */
   async getAllTools(): Promise<ToolStatus[]> {
     return [...this.tools];
   }
 
   /**
-   * 获取工具详情
+   * Get tool details
    */
   async getToolDetails(toolId: string): Promise<ToolStatus | null> {
     return this.tools.find(tool => tool.id === toolId) || null;
   }
 
   /**
-   * 检查工具状态
+   * Check tool status
    */
   async checkToolStatus(toolId: string): Promise<ToolCheckResult> {
     const tool = this.tools.find(t => t.id === toolId);
@@ -240,7 +240,7 @@ export class EcosystemService {
       throw new Error(`Tool not found: ${toolId}`);
     }
 
-    // 模拟检查过程
+    // Simulate check process
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const responseTime = Math.random() * 200;
@@ -252,12 +252,12 @@ export class EcosystemService {
       status = 'error';
     }
 
-    // 更新工具状态
+    // Update tool status
     tool.status = status;
     tool.responseTime = responseTime;
     tool.lastChecked = new Date();
 
-    // 记录指标
+    // Record metrics
     const metric: ToolMetric = {
       timestamp: new Date(),
       toolId,
@@ -272,7 +272,7 @@ export class EcosystemService {
     this.metrics.push(metric);
     this.trimMetrics();
 
-    // 检查是否需要生成告警
+    // Check if alert needs to be generated
     if (status === 'error' || responseTime > this.config.alertThresholds.responseTime * 2) {
       this.generateAlert(tool, metric);
     }
@@ -287,7 +287,7 @@ export class EcosystemService {
   }
 
   /**
-   * 批量检查工具状态
+   * Check all tools in batch
    */
   async checkAllTools(): Promise<ToolCheckResult[]> {
     const results: ToolCheckResult[] = [];
@@ -305,7 +305,7 @@ export class EcosystemService {
   }
 
   /**
-   * 获取工具指标历史
+   * Get tool metrics history
    */
   async getToolMetrics(toolId: string, hours: number = 24): Promise<ToolMetric[]> {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
@@ -315,7 +315,7 @@ export class EcosystemService {
   }
 
   /**
-   * 获取告警
+   * Get alerts
    */
   async getAlerts(options: {
     level?: EcosystemAlert['level'][];
@@ -341,12 +341,12 @@ export class EcosystemService {
       filtered = filtered.slice(0, options.limit);
     }
 
-    // 按时间倒序排序
+    // Sort by time descending
     return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   /**
-   * 确认告警
+   * Acknowledge alert
    */
   async acknowledgeAlert(alertId: string): Promise<void> {
     const alert = this.alerts.find(a => a.id === alertId);
@@ -356,21 +356,21 @@ export class EcosystemService {
   }
 
   /**
-   * 获取配置
+   * Get configuration
    */
   getConfig(): EcosystemConfig {
     return { ...this.config };
   }
 
   /**
-   * 更新配置
+   * Update configuration
    */
   updateConfig(config: Partial<EcosystemConfig>): void {
     this.config = { ...this.config, ...config };
   }
 
   /**
-   * 计算统计信息
+   * Calculate statistics
    */
   private calculateStats(): MonitoringStats {
     const totalTools = this.tools.length;
@@ -399,7 +399,7 @@ export class EcosystemService {
   }
 
   /**
-   * 获取最近告警
+   * Get recent alerts
    */
   private getRecentAlerts(limit: number): EcosystemAlert[] {
     return this.alerts
@@ -408,7 +408,7 @@ export class EcosystemService {
   }
 
   /**
-   * 获取表现最佳的工具
+   * Get top performing tools
    */
   private getTopPerformers(limit: number): ToolStatus[] {
     return [...this.tools]
@@ -418,7 +418,7 @@ export class EcosystemService {
   }
 
   /**
-   * 获取需要关注的工具
+   * Get tools needing attention
    */
   private getToolsNeedingAttention(limit: number): ToolStatus[] {
     return [...this.tools]
@@ -431,34 +431,34 @@ export class EcosystemService {
   }
 
   /**
-   * 计算系统健康度
+   * Calculate overall system health score
    */
   private calculateSystemHealth(): number {
     const stats = this.calculateStats();
     let score = 100;
 
-    // 错误工具扣分
+    // Deduct for error tools
     score -= stats.errorTools * 15;
     
-    // 警告工具扣分
+    // Deduct for warning tools
     score -= stats.warningTools * 5;
 
-    // 响应时间扣分
+    // Deduct for response time
     if (stats.avgResponseTime > 1000) score -= 20;
     else if (stats.avgResponseTime > 500) score -= 10;
 
-    // 运行时间扣分
+    // Deduct for uptime
     if (stats.overallUptime < 95) score -= 30;
     else if (stats.overallUptime < 99) score -= 10;
 
-    // 告警扣分
+    // Deduct for alerts
     score -= stats.recentAlerts * 5;
 
     return Math.max(0, Math.min(100, Math.round(score)));
   }
 
   /**
-   * 生成告警
+   * Generate alert
    */
   private generateAlert(tool: ToolStatus, metric: ToolMetric): void {
     const alert: EcosystemAlert = {
@@ -466,7 +466,7 @@ export class EcosystemService {
       toolId: tool.id,
       toolName: tool.name,
       level: tool.status === 'error' ? 'error' : 'warning',
-      message: `${tool.name} ${tool.status === 'error' ? '发生错误' : '性能下降'}`,
+      message: `${tool.name} ${tool.status === 'error' ? 'encountered an error' : 'performance degraded'}`,
       timestamp: new Date(),
       acknowledged: false,
       details: {
@@ -481,13 +481,13 @@ export class EcosystemService {
   }
 
   /**
-   * 生成模拟指标数据
+   * Generate mock metrics data
    */
   private generateMockMetrics(): void {
     const now = Date.now();
     const hours = 24;
 
-    for (let i = 0; i < hours * 12; i++) { // 每5分钟一条数据
+    for (let i = 0; i < hours * 12; i++) { // one data point every 5 minutes
       const timestamp = new Date(now - (hours - i / 12) * 60 * 60 * 1000);
       
       this.tools.forEach(tool => {
@@ -510,69 +510,69 @@ export class EcosystemService {
   }
 
   /**
-   * 清理指标数据
+   * Trim metrics data
    */
   private trimMetrics(): void {
-    const maxRecords = this.config.retentionDays * 24 * 12; // 每5分钟一条记录
+    const maxRecords = this.config.retentionDays * 24 * 12; // one record every 5 minutes
     if (this.metrics.length > maxRecords) {
       this.metrics = this.metrics.slice(-maxRecords);
     }
   }
 
   /**
-   * 清理告警数据
+   * Trim alert records
    */
   private trimAlerts(): void {
-    const maxRecords = this.config.retentionDays * 24; // 每天最多24条告警
+    const maxRecords = this.config.retentionDays * 24; // max 24 alerts per day
     if (this.alerts.length > maxRecords) {
       this.alerts = this.alerts.slice(-maxRecords);
     }
   }
 
   /**
-   * 格式化分类名称
+   * Format category name
    */
   private formatCategoryName(category: string): string {
     const names: Record<string, string> = {
-      [ToolCategoryEnum.DEVELOPMENT]: '开发工具',
-      [ToolCategoryEnum.MONITORING]: '监控工具',
-      [ToolCategoryEnum.AUTOMATION]: '自动化工具',
-      [ToolCategoryEnum.DATABASE]: '数据库',
-      [ToolCategoryEnum.SECURITY]: '安全工具',
-      [ToolCategoryEnum.COMMUNICATION]: '通信工具',
-      [ToolCategoryEnum.ANALYTICS]: '分析工具',
-      [ToolCategoryEnum.DEPLOYMENT]: '部署工具',
-      [ToolCategoryEnum.TESTING]: '测试工具',
-      [ToolCategoryEnum.DOCUMENTATION]: '文档工具',
-      [ToolCategoryEnum.OTHER]: '其他工具'
+      [ToolCategoryEnum.DEVELOPMENT]: 'Development Tools',
+      [ToolCategoryEnum.MONITORING]: 'Monitoring Tools',
+      [ToolCategoryEnum.AUTOMATION]: 'Automation Tools',
+      [ToolCategoryEnum.DATABASE]: 'Database',
+      [ToolCategoryEnum.SECURITY]: 'Security Tools',
+      [ToolCategoryEnum.COMMUNICATION]: 'Communication Tools',
+      [ToolCategoryEnum.ANALYTICS]: 'Analytics Tools',
+      [ToolCategoryEnum.DEPLOYMENT]: 'Deployment Tools',
+      [ToolCategoryEnum.TESTING]: 'Testing Tools',
+      [ToolCategoryEnum.DOCUMENTATION]: 'Documentation Tools',
+      [ToolCategoryEnum.OTHER]: 'Other Tools'
     };
     
     return names[category] || category;
   }
 
   /**
-   * 获取分类描述
+   * Get category description
    */
   private getCategoryDescription(category: string): string {
     const descriptions: Record<string, string> = {
-      [ToolCategoryEnum.DEVELOPMENT]: '代码开发、调试和版本控制工具',
-      [ToolCategoryEnum.MONITORING]: '系统监控、日志和性能分析工具',
-      [ToolCategoryEnum.AUTOMATION]: '自动化脚本和工作流工具',
-      [ToolCategoryEnum.DATABASE]: '数据库管理和查询工具',
-      [ToolCategoryEnum.SECURITY]: '安全认证、加密和防护工具',
-      [ToolCategoryEnum.COMMUNICATION]: '消息队列、通知和通信工具',
-      [ToolCategoryEnum.ANALYTICS]: '数据分析和可视化工具',
-      [ToolCategoryEnum.DEPLOYMENT]: '部署、容器化和CI/CD工具',
-      [ToolCategoryEnum.TESTING]: '测试框架和质量保证工具',
-      [ToolCategoryEnum.DOCUMENTATION]: '文档生成和管理工具',
-      [ToolCategoryEnum.OTHER]: '其他类型的工具和服务'
+      [ToolCategoryEnum.DEVELOPMENT]: 'Code development, debugging, and version control tools',
+      [ToolCategoryEnum.MONITORING]: 'System monitoring, logging, and performance analysis tools',
+      [ToolCategoryEnum.AUTOMATION]: 'Automation scripts and workflow tools',
+      [ToolCategoryEnum.DATABASE]: 'Database management and query tools',
+      [ToolCategoryEnum.SECURITY]: 'Security authentication, encryption, and protection tools',
+      [ToolCategoryEnum.COMMUNICATION]: 'Message queue, notifications, and communication tools',
+      [ToolCategoryEnum.ANALYTICS]: 'Data analysis and visualization tools',
+      [ToolCategoryEnum.DEPLOYMENT]: 'Deployment, containerization, and CI/CD tools',
+      [ToolCategoryEnum.TESTING]: 'Testing frameworks and quality assurance tools',
+      [ToolCategoryEnum.DOCUMENTATION]: 'Documentation generation and management tools',
+      [ToolCategoryEnum.OTHER]: 'Other types of tools and services'
     };
     
-    return descriptions[category] || '工具和服务';
+    return descriptions[category] || 'Tools and services';
   }
 
   /**
-   * 获取分类图标
+   * Get category icon
    */
   private getCategoryIcon(category: string): string {
     const icons: Record<string, string> = {
@@ -593,5 +593,5 @@ export class EcosystemService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const ecosystemService = new EcosystemService();

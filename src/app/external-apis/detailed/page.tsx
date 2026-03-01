@@ -97,12 +97,12 @@ export default function DetailedExternalApisPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [providerFilter, setProviderFilter] = useState('all');
   
-  // 分页状态
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   
-  // 显示/隐藏敏感信息
+  // Show/hide sensitive info
   const [showSensitiveInfo, setShowSensitiveInfo] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function DetailedExternalApisPage() {
         setApis(data.data.apis || []);
       }
     } catch (error) {
-      console.error('获取API列表失败:', error);
+      console.error('Failed to fetch API list:', error);
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ export default function DetailedExternalApisPage() {
   const filterAndPaginateApis = () => {
     let filtered = [...apis];
     
-    // 搜索过滤
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(api => 
@@ -142,32 +142,32 @@ export default function DetailedExternalApisPage() {
       );
     }
     
-    // 类别过滤
+    // Category filter
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(api => api.category === categoryFilter);
     }
     
-    // 状态过滤
+    // Status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(api => api.status === statusFilter);
     }
     
-    // 提供商过滤
+    // Provider filter
     if (providerFilter !== 'all') {
       filtered = filtered.filter(api => api.provider === providerFilter);
     }
     
-    // 计算分页
+    // Calculate pagination
     const total = filtered.length;
     const pages = Math.ceil(total / pageSize);
     setTotalPages(pages);
     
-    // 确保当前页有效
+    // Ensure current page is valid
     if (currentPage > pages && pages > 0) {
       setCurrentPage(1);
     }
     
-    // 获取当前页数据
+    // Get current page data
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginated = filtered.slice(startIndex, endIndex);
@@ -183,10 +183,10 @@ export default function DetailedExternalApisPage() {
         body: JSON.stringify({ action: 'check', apiId }),
       });
       if (res.ok) {
-        fetchApis(); // 刷新数据
+        fetchApis(); // refresh data
       }
     } catch (error) {
-      console.error('检查API失败:', error);
+      console.error('Failed to check API:', error);
     }
   };
 
@@ -198,10 +198,10 @@ export default function DetailedExternalApisPage() {
         body: JSON.stringify({ action: 'check-all' }),
       });
       if (res.ok) {
-        fetchApis(); // 刷新数据
+        fetchApis(); // refresh data
       }
     } catch (error) {
-      console.error('检查所有API失败:', error);
+      console.error('Failed to check all APIs:', error);
     }
   };
 
@@ -227,11 +227,11 @@ export default function DetailedExternalApisPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return '活跃';
-      case 'needs_setup': return '需配置';
-      case 'error': return '错误';
-      case 'inactive': return '未激活';
-      default: return '未知';
+      case 'active': return 'Active';
+      case 'needs_setup': return 'Needs Setup';
+      case 'error': return 'Error';
+      case 'inactive': return 'Inactive';
+      default: return 'Unknown';
     }
   };
 
@@ -248,16 +248,16 @@ export default function DetailedExternalApisPage() {
     return <Server className="h-4 w-4" />;
   };
 
-  // 客户端时间格式化组件
+  // Client-side time formatting component
   const ClientFormattedTime = ({ timestamp }: { timestamp: string }) => {
     const [formattedTime, setFormattedTime] = useState('');
     
     useEffect(() => {
       const date = new Date(timestamp);
-      setFormattedTime(date.toLocaleString('zh-CN'));
+      setFormattedTime(date.toLocaleString('en-US'));
     }, [timestamp]);
     
-    return <span>{formattedTime || '加载中...'}</span>;
+    return <span>{formattedTime || 'Loading...'}</span>;
   };
 
   const formatRelativeTime = (timestamp: string) => {
@@ -266,10 +266,10 @@ export default function DetailedExternalApisPage() {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     
-    if (diffMins < 1) return '刚刚';
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}小时前`;
-    return `${Math.floor(diffMins / 1440)}天前`;
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    return `${Math.floor(diffMins / 1440)}d ago`;
   };
 
   const getCategories = () => {
@@ -295,7 +295,7 @@ export default function DetailedExternalApisPage() {
 
   const handlePageSizeChange = (size: string) => {
     setPageSize(parseInt(size));
-    setCurrentPage(1); // 重置到第一页
+    setCurrentPage(1); // Reset to first page
   };
 
   if (loading) {
@@ -303,7 +303,7 @@ export default function DetailedExternalApisPage() {
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-center py-16">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          <span className="ml-3">加载外部API数据...</span>
+          <span className="ml-3">Loading external API data...</span>
         </div>
       </div>
     );
@@ -311,38 +311,38 @@ export default function DetailedExternalApisPage() {
 
   return (
     <div className="container mx-auto py-8">
-      {/* 页面标题和操作 */}
+      {/* Page title and actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">外部API详细列表</h1>
+          <h1 className="text-3xl font-bold">External API Detailed List</h1>
           <p className="text-gray-500 mt-2">
-            所有集成的外部API和CLIMCP的详细信息和配置
+            Detailed information and configuration for all integrated external APIs and CLI MCPs
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={fetchApis}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            刷新
+            Refresh
           </Button>
           <Button onClick={handleCheckAll}>
             <TestTube className="h-4 w-4 mr-2" />
-            检查所有API
+            Check All APIs
           </Button>
           <Button variant="outline">
             <Plus className="h-4 w-4 mr-2" />
-            添加API
+            Add API
           </Button>
         </div>
       </div>
 
-      {/* 过滤和搜索栏 */}
+      {/* Filter and search bar */}
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium mb-1 block">搜索</label>
+              <label className="text-sm font-medium mb-1 block">Search</label>
               <Input
-                placeholder="搜索API名称、描述、标签..."
+                placeholder="Search API name, description, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
@@ -350,13 +350,13 @@ export default function DetailedExternalApisPage() {
             </div>
             
             <div>
-              <label className="text-sm font-medium mb-1 block">类别</label>
+              <label className="text-sm font-medium mb-1 block">Category</label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有类别</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {getCategories().map(category => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -367,13 +367,13 @@ export default function DetailedExternalApisPage() {
             </div>
             
             <div>
-              <label className="text-sm font-medium mb-1 block">状态</label>
+              <label className="text-sm font-medium mb-1 block">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有状态</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   {getStatuses().map(status => (
                     <SelectItem key={status} value={status}>
                       {getStatusText(status)}
@@ -384,13 +384,13 @@ export default function DetailedExternalApisPage() {
             </div>
             
             <div>
-              <label className="text-sm font-medium mb-1 block">提供商</label>
+              <label className="text-sm font-medium mb-1 block">Provider</label>
               <Select value={providerFilter} onValueChange={setProviderFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有提供商</SelectItem>
+                  <SelectItem value="all">All Providers</SelectItem>
                   {getProviders().map(provider => (
                     <SelectItem key={provider} value={provider}>
                       {provider}
@@ -403,26 +403,26 @@ export default function DetailedExternalApisPage() {
         </CardContent>
       </Card>
 
-      {/* API列表表格 */}
+      {/* API list table */}
       <Card>
         <CardHeader>
-          <CardTitle>API列表</CardTitle>
+          <CardTitle>API List</CardTitle>
           <CardDescription>
-            共 {apis.length} 个API，当前显示 {filteredApis.length} 个
+            Total {apis.length} APIs, showing {filteredApis.length}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>状态</TableHead>
-                <TableHead>名称</TableHead>
-                <TableHead>提供商</TableHead>
-                <TableHead>类别</TableHead>
-                <TableHead>认证类型</TableHead>
-                <TableHead>最后检查</TableHead>
-                <TableHead>调用统计</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Provider</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Auth Type</TableHead>
+                <TableHead>Last Checked</TableHead>
+                <TableHead>Call Stats</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -456,21 +456,21 @@ export default function DetailedExternalApisPage() {
                   <TableCell>
                     <div className="text-sm">{api.authType}</div>
                     <div className="text-xs text-gray-500">
-                      {api.status === 'needs_setup' ? '需要配置' : '已配置'}
+                      {api.status === 'needs_setup' ? 'Needs Setup' : 'Configured'}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">{formatRelativeTime(api.lastChecked)}</div>
                     <div className="text-xs text-gray-500">
-                      {api.lastResponseTime ? `${api.lastResponseTime}ms` : '未检查'}
+                      {api.lastResponseTime ? `${api.lastResponseTime}ms` : 'Not checked'}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      成功: {api.successfulCalls}/{api.totalCalls}
+                      Success: {api.successfulCalls}/{api.totalCalls}
                     </div>
                     <div className="text-xs text-gray-500">
-                      平均: {api.averageResponseTime}ms
+                      Avg: {api.averageResponseTime}ms
                     </div>
                   </TableCell>
                   <TableCell>
@@ -481,7 +481,7 @@ export default function DetailedExternalApisPage() {
                         onClick={() => handleCheckApi(api.id)}
                       >
                         <TestTube className="h-3 w-3 mr-1" />
-                        检查
+                        Check
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -490,32 +490,32 @@ export default function DetailedExternalApisPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>操作</DropdownMenuLabel>
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem>
                             <Edit className="h-4 w-4 mr-2" />
-                            编辑配置
+                            Edit Config
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Key className="h-4 w-4 mr-2" />
-                            {showSensitiveInfo[api.id] ? '隐藏密钥' : '显示密钥'}
+                            {showSensitiveInfo[api.id] ? 'Hide Keys' : 'Show Keys'}
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Settings className="h-4 w-4 mr-2" />
-                            重新认证
+                            Re-authenticate
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Wrench className="h-4 w-4 mr-2" />
-                            手动修复
+                            Manual Fix
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem>
                             <BarChart3 className="h-4 w-4 mr-2" />
-                            查看统计
+                            View Stats
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
                             <Trash2 className="h-4 w-4 mr-2" />
-                            删除API
+                            Delete API
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -526,12 +526,11 @@ export default function DetailedExternalApisPage() {
             </TableBody>
           </Table>
 
-          {/* 分页控件 */}
+          {/* Pagination controls */}
           {apis.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t">
               <div className="text-sm text-gray-500">
-                显示第 {(currentPage - 1) * pageSize + 1} 到{' '}
-                {Math.min(currentPage * pageSize, apis.length)} 条，共 {apis.length} 条
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, apis.length)} of {apis.length}
               </div>
               
               <div className="flex items-center gap-2">
@@ -540,10 +539,10 @@ export default function DetailedExternalApisPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="10">10条/页</SelectItem>
-                    <SelectItem value="20">20条/页</SelectItem>
-                    <SelectItem value="50">50条/页</SelectItem>
-                    <SelectItem value="100">100条/页</SelectItem>
+                    <SelectItem value="10">10 / page</SelectItem>
+                    <SelectItem value="20">20 / page</SelectItem>
+                    <SelectItem value="50">50 / page</SelectItem>
+                    <SelectItem value="100">100 / page</SelectItem>
                   </SelectContent>
                 </Select>
                 
@@ -615,29 +614,29 @@ export default function DetailedExternalApisPage() {
         </CardContent>
       </Card>
 
-      {/* 快速操作卡片 */}
+      {/* Quick action cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Key className="h-5 w-5 mr-2 text-blue-600" />
-              密钥管理
+              Key Management
             </CardTitle>
-            <CardDescription>API密钥和安全配置</CardDescription>
+            <CardDescription>API keys and security configuration</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <Button variant="outline" className="w-full justify-start">
                 <Eye className="h-4 w-4 mr-2" />
-                显示/隐藏所有密钥
+                Show/Hide All Keys
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Shield className="h-4 w-4 mr-2" />
-                安全审计
+                Security Audit
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
-                导出密钥备份
+                Export Key Backup
               </Button>
             </div>
           </CardContent>
@@ -647,23 +646,23 @@ export default function DetailedExternalApisPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Settings className="h-5 w-5 mr-2 text-green-600" />
-              批量操作
+              Batch Operations
             </CardTitle>
-            <CardDescription>批量管理和配置</CardDescription>
+            <CardDescription>Batch management and configuration</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <Button variant="outline" className="w-full justify-start" onClick={handleCheckAll}>
                 <TestTube className="h-4 w-4 mr-2" />
-                批量检查所有API
+                Batch Check All APIs
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <RefreshCw className="h-4 w-4 mr-2" />
-                批量刷新令牌
+                Batch Refresh Tokens
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Upload className="h-4 w-4 mr-2" />
-                批量导入配置
+                Batch Import Config
               </Button>
             </div>
           </CardContent>
@@ -673,23 +672,23 @@ export default function DetailedExternalApisPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <BarChart3 className="h-5 w-5 mr-2 text-purple-600" />
-              报告和分析
+              Reports & Analytics
             </CardTitle>
-            <CardDescription>性能报告和数据分析</CardDescription>
+            <CardDescription>Performance reports and data analysis</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <Button variant="outline" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
-                下载详细报告
+                Download Detailed Report
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Clock className="h-4 w-4 mr-2" />
-                查看历史数据
+                View Historical Data
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Server className="h-4 w-4 mr-2" />
-                性能分析
+                Performance Analysis
               </Button>
             </div>
           </CardContent>

@@ -24,19 +24,19 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [statistics, setStatistics] = useState<any>(null);
 
-  // 过滤器状态
+  // Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<ToolStatus | 'all'>('all');
   const [showConfiguredOnly, setShowConfiguredOnly] = useState(false);
 
-  // 加载工具数据
+  // Load tool data
   useEffect(() => {
     loadTools();
     loadStatistics();
   }, []);
 
-  // 应用过滤器
+  // Apply filters
   useEffect(() => {
     applyFilters();
   }, [tools, searchQuery, selectedCategory, selectedStatus, showConfiguredOnly]);
@@ -46,11 +46,11 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
       setLoading(true);
       setError(null);
       
-      // 在实际应用中，这里会调用API
+      // In production, this would call the API
       // const response = await toolService.getTools();
       // setTools(response.tools);
       
-      // 暂时使用模拟数据
+      // Using mock data for now
       const mockTools = toolService.getMockTools();
       setTools(mockTools);
       setFilteredTools(mockTools);
@@ -64,11 +64,11 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
 
   const loadStatistics = async () => {
     try {
-      // 在实际应用中，这里会调用API
+      // In production, this would call the API
       // const response = await toolService.getToolStatistics();
       // setStatistics(response.statistics);
       
-      // 暂时使用模拟数据
+      // Using mock data for now
       const mockStats = toolService.getMockStatistics();
       setStatistics(mockStats);
     } catch (err) {
@@ -79,7 +79,7 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
   const applyFilters = () => {
     let filtered = [...tools];
 
-    // 搜索过滤
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -90,17 +90,17 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
       );
     }
 
-    // 分类过滤
+    // Category filter
     if (selectedCategory !== 'all') {
       filtered = filtered.filter((tool) => tool.category === selectedCategory);
     }
 
-    // 状态过滤
+    // Status filter
     if (selectedStatus !== 'all') {
       filtered = filtered.filter((tool) => tool.status === selectedStatus);
     }
 
-    // 配置状态过滤
+    // Configuration status filter
     if (showConfiguredOnly) {
       filtered = filtered.filter((tool) => tool.configuration.isConfigured);
     }
@@ -129,17 +129,17 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
     if (tool && onToolSelect) {
       onToolSelect(tool);
     }
-    // 在实际应用中，这里会打开配置对话框
+    // In production, this would open the configuration dialog
     console.log('Configure tool:', toolId);
   };
 
   const handleToolTest = (toolId: string) => {
-    // 在实际应用中，这里会执行工具测试
+    // In production, this would run a tool test
     console.log('Test tool:', toolId);
   };
 
   const handleToolStatusChange = (toolId: string, status: string) => {
-    // 在实际应用中，这里会更新工具状态
+    // In production, this would update the tool status
     console.log('Change tool status:', toolId, 'to', status);
   };
 
@@ -149,16 +149,16 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
   };
 
   const handleExport = () => {
-    // 在实际应用中，这里会导出工具配置
+    // In production, this would export tool configuration
     console.log('Export tools');
   };
 
   const handleImport = () => {
-    // 在实际应用中，这里会导入工具配置
+    // In production, this would import tool configuration
     console.log('Import tools');
   };
 
-  // 重置过滤器
+  // Reset filters
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
@@ -207,7 +207,7 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 标题和操作 */}
+      {/* Title and actions */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tool Ecosystem</h1>
@@ -235,12 +235,12 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
         </div>
       </div>
 
-      {/* 统计信息 */}
+      {/* Statistics */}
       {showStats && statistics && (
         <ToolStats statistics={statistics} />
       )}
 
-      {/* 过滤器 */}
+      {/* Filters */}
       {showFilters && (
         <ToolFilters
           searchQuery={searchQuery}
@@ -255,7 +255,7 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
         />
       )}
 
-      {/* 工具数量信息 */}
+      {/* Tool count info */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-600">
@@ -285,7 +285,7 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
         </div>
       </div>
 
-      {/* 工具网格 */}
+      {/* Tool grid */}
       {filteredTools.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTools.map((tool) => (
@@ -332,7 +332,7 @@ const EcosystemDashboard: React.FC<EcosystemDashboardProps> = ({
         </div>
       )}
 
-      {/* 分页 */}
+      {/* Pagination */}
       {filteredTools.length > 0 && (
         <div className="flex items-center justify-between border-t border-gray-200 pt-6">
           <div className="flex-1 flex justify-between sm:hidden">

@@ -1,5 +1,5 @@
 /**
- * 任务管理核心类型定义
+ * Task management core type definitions
  */
 
 export interface Task {

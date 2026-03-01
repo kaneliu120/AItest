@@ -73,7 +73,7 @@ import {
   AlertOctagon as AlertOctagonIcon,
 } from 'lucide-react';
 
-// 类型定义
+// Type definitions
 interface SystemMetrics {
   timestamp: string;
   cpu: {
@@ -181,12 +181,12 @@ export default function SystemMonitoringPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(30); // 秒
+  const [refreshInterval, setRefreshInterval] = useState(30); // seconds
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedComponents, setExpandedComponents] = useState<string[]>([]);
   const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<string[]>([]);
 
-  // 加载监控数据
+  // Load monitoring data
   const loadMonitoringData = async () => {
     try {
       setLoading(true);
@@ -194,24 +194,24 @@ export default function SystemMonitoringPage() {
       
       const response = await fetch('/api/system-monitoring');
       if (!response.ok) {
-        throw new Error(`API响应错误: ${response.status}`);
+        throw new Error(`API response error: ${response.status}`);
       }
       
       const data = await response.json();
       if (!data.success) {
-        throw new Error(data.error || '获取监控数据失败');
+        throw new Error(data.error || 'Failed to fetch monitoring data');
       }
       
       setMonitoringData(data.data);
     } catch (err: any) {
-      console.error('加载监控数据失败:', err);
-      setError(err.message || '未知错误');
+      console.error('Failed to load monitoring data:', err);
+      setError(err.message || 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  // 初始化加载和自动刷新
+  // Initialize load and auto refresh
   useEffect(() => {
     loadMonitoringData();
     
@@ -221,7 +221,7 @@ export default function SystemMonitoringPage() {
     }
   }, [autoRefresh, refreshInterval]);
 
-  // 切换组件展开状态
+  // Toggle component expansion
   const toggleComponentExpansion = (componentId: string) => {
     setExpandedComponents(prev => 
       prev.includes(componentId) 
@@ -230,13 +230,13 @@ export default function SystemMonitoringPage() {
     );
   };
 
-  // 确认告警
+  // Acknowledge alert
   const acknowledgeAlert = (alertId: string) => {
     setAcknowledgedAlerts(prev => [...prev, alertId]);
-    // TODO: 发送到API确认告警
+    // TODO: send acknowledgment to API
   };
 
-  // 格式化字节大小
+  // Format bytes
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -245,15 +245,15 @@ export default function SystemMonitoringPage() {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
-  // 格式化时间
+  // Format time
   const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}秒`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}小时`;
-    return `${Math.floor(seconds / 86400)}天`;
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    return `${Math.floor(seconds / 86400)}d`;
   };
 
-  // 获取状态颜色
+  // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return 'text-emerald-600 bg-emerald-50 border-emerald-200';
@@ -263,7 +263,7 @@ export default function SystemMonitoringPage() {
     }
   };
 
-  // 获取状态图标
+  // Get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy': return <CheckCircle className="h-4 w-4" />;
@@ -273,7 +273,7 @@ export default function SystemMonitoringPage() {
     }
   };
 
-  // 获取严重性颜色
+  // Get severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'bg-rose-100 text-rose-800 border-rose-200';
@@ -287,7 +287,7 @@ export default function SystemMonitoringPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">加载系统监控数据...</p>
+          <p className="mt-4 text-muted-foreground">Loading system monitoring data...</p>
         </div>
       </div>
     );
@@ -301,7 +301,7 @@ export default function SystemMonitoringPage() {
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-rose-600" />
               <div>
-                <h3 className="font-semibold text-rose-900">加载监控数据失败</h3>
+                <h3 className="font-semibold text-rose-900">Failed to load monitoring data</h3>
                 <p className="text-sm text-rose-700 mt-1">{error}</p>
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function SystemMonitoringPage() {
               onClick={loadMonitoringData}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              重试
+              Retry
             </Button>
           </CardContent>
         </Card>
@@ -324,11 +324,11 @@ export default function SystemMonitoringPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* 页面标题和控制栏 */}
+        {/* Page title and controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">系统监控中心</h1>
-            <p className="text-muted-foreground">实时监控系统性能、组件健康和告警状态</p>
+            <h1 className="text-3xl font-bold">System Monitoring Center</h1>
+            <p className="text-muted-foreground">Real-time monitoring of system performance, component health, and alert status</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function SystemMonitoringPage() {
                   className="h-4 w-4 rounded border-slate-300"
                 />
                 <label htmlFor="auto-refresh" className="text-sm text-slate-600">
-                  自动刷新
+                  Auto Refresh
                 </label>
               </div>
               <select
@@ -349,10 +349,10 @@ export default function SystemMonitoringPage() {
                 onChange={(e) => setRefreshInterval(Number(e.target.value))}
                 className="text-sm border border-slate-300 rounded px-2 py-1"
               >
-                <option value={10}>10秒</option>
-                <option value={30}>30秒</option>
-                <option value={60}>60秒</option>
-                <option value={300}>5分钟</option>
+                <option value={10}>10s</option>
+                <option value={30}>30s</option>
+                <option value={60}>60s</option>
+                <option value={300}>5min</option>
               </select>
             </div>
             <Button
@@ -361,16 +361,16 @@ export default function SystemMonitoringPage() {
               onClick={loadMonitoringData}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              刷新
+              Refresh
             </Button>
             <Button size="sm">
               <Settings className="h-4 w-4 mr-2" />
-              设置
+              Settings
             </Button>
           </div>
         </div>
 
-        {/* 健康状态横幅 */}
+        {/* Health status banner */}
         <Card className={`border-2 ${
           data.overallHealth > 80 ? 'border-emerald-200' :
           data.overallHealth > 60 ? 'border-amber-200' :
@@ -389,59 +389,59 @@ export default function SystemMonitoringPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">
-                      {data.overallHealth > 80 ? '系统运行正常' :
-                       data.overallHealth > 60 ? '系统需要关注' :
-                       '系统需要紧急维护'}
+                      {data.overallHealth > 80 ? 'System Running Normally' :
+                       data.overallHealth > 60 ? 'System Needs Attention' :
+                       'System Needs Urgent Maintenance'}
                     </h3>
                     <Badge variant="outline" className={
                       data.overallHealth > 80 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
                       data.overallHealth > 60 ? 'bg-amber-100 text-amber-700 border-amber-200' :
                       'bg-rose-100 text-rose-700 border-rose-200'
                     }>
-                      {data.overallHealth}% 健康分
+                      {data.overallHealth}% Health Score
                     </Badge>
                   </div>
                   <p className="text-sm text-slate-600 mt-1">
-                    最后更新: {new Date(data.timestamp).toLocaleString()}
+                    Last updated: {new Date(data.timestamp).toLocaleString()}
                   </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-emerald-600">{data.summary.healthyComponents}</div>
-                  <div className="text-xs text-slate-500">健康组件</div>
+                  <div className="text-xs text-slate-500">Healthy</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-amber-600">{data.summary.degradedComponents}</div>
-                  <div className="text-xs text-slate-500">降级组件</div>
+                  <div className="text-xs text-slate-500">Degraded</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-rose-600">{data.summary.unhealthyComponents}</div>
-                  <div className="text-xs text-slate-500">故障组件</div>
+                  <div className="text-xs text-slate-500">Unhealthy</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-slate-900">{data.summary.activeAlerts}</div>
-                  <div className="text-xs text-slate-500">活跃告警</div>
+                  <div className="text-xs text-slate-500">Active Alerts</div>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* 主标签页 */}
+        {/* Main tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-            <TabsTrigger value="overview">概览</TabsTrigger>
-            <TabsTrigger value="components">组件</TabsTrigger>
-            <TabsTrigger value="metrics">指标</TabsTrigger>
-            <TabsTrigger value="alerts">告警</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="metrics">Metrics</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
           </TabsList>
 
-          {/* 概览标签页 */}
+          {/* Overview tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* 系统资源卡片 */}
+            {/* System resource cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* CPU 卡片 */}
+              {/* CPU card */}
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -461,21 +461,21 @@ export default function SystemMonitoringPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs text-slate-500">
-                      <span>使用率</span>
+                      <span>Usage</span>
                       <span>{data.metrics.cpu.usage}%</span>
                     </div>
                     <Progress value={data.metrics.cpu.usage} className="h-2" />
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       <div>
-                        <div className="text-slate-400">负载</div>
+                        <div className="text-slate-400">Load</div>
                         <div className="font-medium">{data.metrics.cpu.load1m.toFixed(2)}</div>
                       </div>
                       <div>
-                        <div className="text-slate-400">核心</div>
+                        <div className="text-slate-400">Cores</div>
                         <div className="font-medium">{data.metrics.cpu.cores}</div>
                       </div>
                       <div>
-                        <div className="text-slate-400">型号</div>
+                        <div className="text-slate-400">Model</div>
                         <div className="font-medium truncate" title={data.metrics.cpu.model}>
                           {data.metrics.cpu.model.split(' ')[0]}
                         </div>
@@ -485,12 +485,12 @@ export default function SystemMonitoringPage() {
                 </CardContent>
               </Card>
 
-              {/* 内存卡片 */}
+              {/* Memory card */}
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <MemoryStick className="h-4 w-4" />
-                      内存
+                      Memory
                     </CardTitle>
                     <Badge variant="

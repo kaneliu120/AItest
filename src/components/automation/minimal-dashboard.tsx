@@ -13,7 +13,7 @@ import {
   Clock, AlertCircle, Circle, ChevronRight,
 } from 'lucide-react';
 
-// ─── 类型 ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface ComponentStatus {
   taskScheduler: boolean;
   dataSync: boolean;
@@ -41,7 +41,7 @@ interface Execution {
   duration: string; timestamp: string;
 }
 
-// ─── MCP函数 ────────────────────────────────────────────────────────────────
+// ─── MCP functions ───────────────────────────────────────────────────────────
 function fmtUptime(s: number) {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
@@ -51,16 +51,16 @@ function fmtTime(iso: string) {
     const d = new Date(iso);
     const now = Date.now();
     const diff = now - d.getTime();
-    if (diff < 60000)  return '刚刚';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
-    return d.toLocaleDateString('zh-CN');
+    if (diff < 60000)  return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}min ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}hr ago`;
+    return d.toLocaleDateString('en-US');
   } catch { return iso; }
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  running: '运行中', idle: '空闲', error: '异常',
-  success: '成功', pending: '等待', 
+  const STATUS_LABEL: Record<string, string> = {
+  running: 'Running', idle: 'Idle', error: 'Error',
+  success: 'Success', pending: 'Pending', 
 };
 const STATUS_COLOR = {
   running: 'bg-green-100 text-green-700 border-green-200',
@@ -71,13 +71,13 @@ const STATUS_COLOR = {
 };
 
 const COMPONENT_LABELS: Record<keyof ComponentStatus, string> = {
-  taskScheduler:    '任务调度器',
-  dataSync:         '数据同步',
-  healthMonitor:    '健康监控',
-  ecosystemWatcher: '生态监控',
+  taskScheduler:    'Task Scheduler',
+  dataSync:         'Data Sync',
+  healthMonitor:    'Health Monitor',
+  ecosystemWatcher: 'Ecosystem Monitor',
 };
 
-// ─── 主组件 ──────────────────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function MinimalAutomationDashboard() {
   const [service,    setService]    = useState<ServiceStatus | null>(null);
   const [modules,    setModules]    = useState<Module[]>([]);
@@ -125,35 +125,35 @@ export default function MinimalAutomationDashboard() {
     }
   };
 
-  // ── KPI 数据 ──
+  // ── KPI data ──
   const kpis = [
     {
-      label: '总模块',
+      label: 'Total Modules',
       value: service?.stats.totalModules ?? 0,
-      sub: `${service?.stats.enabledModules ?? 0} 启用中`,
+      sub: `${service?.stats.enabledModules ?? 0} enabled`,
       icon: <Zap className="w-5 h-5 text-blue-500" />,
       color: 'bg-blue-50 border-blue-100',
     },
     {
-      label: '运行任务',
+      label: 'Running Tasks',
       value: service?.stats.totalTasks ?? 0,
-      sub: `${service?.stats.activeExecutions ?? 0} 活跃执行`,
+      sub: `${service?.stats.activeExecutions ?? 0} active`,
       icon: <CheckCircle className="w-5 h-5 text-green-500" />,
       color: 'bg-green-50 border-green-100',
     },
     {
-      label: '累计事件',
+      label: 'Total Events',
       value: service?.stats.totalEvents ?? 0,
-      sub: `系统运行 ${fmtUptime(service?.uptime ?? 0)}`,
+      sub: `Uptime ${fmtUptime(service?.uptime ?? 0)}`,
       icon: <Activity className="w-5 h-5 text-purple-500" />,
       color: 'bg-purple-50 border-purple-100',
     },
     {
-      label: '平均成功率',
+      label: 'Avg Success Rate',
       value: modules.length
         ? `${Math.round(modules.reduce((a, m) => a + m.successRate, 0) / modules.length)}%`
         : '—',
-      sub: `${modules.filter(m => m.status === 'running').length} 个模块运行中`,
+      sub: `${modules.filter(m => m.status === 'running').length} modules running`,
       icon: <Cpu className="w-5 h-5 text-orange-500" />,
       color: 'bg-orange-50 border-orange-100',
     },
@@ -163,51 +163,51 @@ export default function MinimalAutomationDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
-        <span className="text-slate-500">加载自动化数据…</span>
+        <span className="text-slate-500">Loading automation data…</span>
       </div>
     );
   }
 
   const chartData = modules.map(m => ({
-    name:  m.name.replace('器', ''),
-    成功率: m.successRate,
-    运行次数: Math.min(m.runCount, 100),
+    name:  m.name,
+    Success: m.successRate,
+    RunCount: Math.min(m.runCount, 100),
   }));
 
   const tabs = [
-    { id: 'overview',    label: '概览' },
-    { id: 'modules',     label: '模块管理' },
-    { id: 'executions',  label: '执行历史' },
+    { id: 'overview',    label: 'Overview' },
+    { id: 'modules',     label: 'Modules' },
+    { id: 'executions',  label: 'History' },
   ] as const;
 
   return (
     <div className="p-6 space-y-6">
 
-      {/* ── 页头 ── */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">自动化中心</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Automation Center</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            系统状态：
+            Status:
             <span className="inline-flex items-center gap-1 ml-1">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
-              <span className="text-green-600 font-medium">运行中</span>
+              <span className="text-green-600 font-medium">Running</span>
             </span>
-            <span className="ml-3 text-slate-400">v{service?.version ?? '2.0.0'} · 运行 {fmtUptime(service?.uptime ?? 0)}</span>
+            <span className="ml-3 text-slate-400">v{service?.version ?? '2.0.0'} · Uptime {fmtUptime(service?.uptime ?? 0)}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">
             <Clock className="w-3 h-3 inline mr-1" />
-            {lastRefresh.toLocaleTimeString('zh-CN')} 更新
+            {lastRefresh.toLocaleTimeString('en-US')} updated
           </span>
           <Button variant="outline" size="sm" onClick={fetchAll}>
-            <RefreshCw className="w-3.5 h-3.5 mr-1" /> 刷新
+            <RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh
           </Button>
         </div>
       </div>
 
-      {/* ── KPI 卡片 ── */}
+      {/* ── KPI cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map(k => (
           <Card key={k.label} className={`border ${k.color}`}>
@@ -225,7 +225,7 @@ export default function MinimalAutomationDashboard() {
         ))}
       </div>
 
-      {/* ── Tab 栏 ── */}
+      {/* ── Tab bar ── */}
       <div className="flex gap-1 border-b border-slate-200">
         {tabs.map(t => (
           <button
@@ -242,14 +242,14 @@ export default function MinimalAutomationDashboard() {
         ))}
       </div>
 
-      {/* ══ 概览 Tab ══ */}
+      {/* ══ Overview Tab ══ */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* 组件状态 */}
+          {/* Component status */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">系统组件状态</CardTitle>
+              <CardTitle className="text-base">System Components</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
@@ -268,12 +268,12 @@ export default function MinimalAutomationDashboard() {
               {service?.systemHealth.cpu !== null && (
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-xs text-slate-500">
-                    <span>CPU 使用率</span>
+                    <span>CPU Usage</span>
                     <span>{service?.systemHealth.cpu ?? 0}%</span>
                   </div>
                   <Progress value={service?.systemHealth.cpu ?? 0} className="h-1.5" />
                   <div className="flex justify-between text-xs text-slate-500">
-                    <span>内存使用率</span>
+                    <span>Memory Usage</span>
                     <span>{service?.systemHealth.memory ?? 0}%</span>
                   </div>
                   <Progress value={service?.systemHealth.memory ?? 0} className="h-1.5" />
@@ -282,10 +282,10 @@ export default function MinimalAutomationDashboard() {
             </CardContent>
           </Card>
 
-          {/* 模块成功率图表 */}
+          {/* Module success rate chart */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">模块成功率</CardTitle>
+              <CardTitle className="text-base">Module Success Rate</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -293,23 +293,23 @@ export default function MinimalAutomationDashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                  <Tooltip formatter={(v) => [`${v}%`, '成功率']} />
-                  <Bar dataKey="成功率" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v) => [`${v}%`, 'Success Rate']} />
+                  <Bar dataKey="Success" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* 近期执行摘要 */}
+          {/* Recent executions summary */}
           <Card className="lg:col-span-2">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">近期执行摘要</CardTitle>
+                <CardTitle className="text-base">Recent Executions</CardTitle>
                 <button
                   onClick={() => setActiveTab('executions')}
                   className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-0.5"
                 >
-                  查看全部 <ChevronRight className="w-3 h-3" />
+                  View All <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </CardHeader>
@@ -330,7 +330,7 @@ export default function MinimalAutomationDashboard() {
                   </div>
                 ))}
                 {executions.length === 0 && (
-                  <p className="text-sm text-slate-400 text-center py-4">暂无执行记录</p>
+                  <p className="text-sm text-slate-400 text-center py-4">No executions</p>
                 )}
               </div>
             </CardContent>
@@ -338,7 +338,7 @@ export default function MinimalAutomationDashboard() {
         </div>
       )}
 
-      {/* ══ 模块管理 Tab ══ */}
+      {/* ══ Modules Tab ══ */}
       {activeTab === 'modules' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {modules.map(m => (
@@ -368,7 +368,7 @@ export default function MinimalAutomationDashboard() {
                       ? <RefreshCw className="w-3 h-3 animate-spin mr-1" />
                       : <Play className="w-3 h-3 mr-1" />
                     }
-                    {triggering === m.id ? '运行中…' : '运行'}
+                    {triggering === m.id ? 'Running…' : 'Run'}
                   </Button>
                 </div>
 
@@ -376,7 +376,7 @@ export default function MinimalAutomationDashboard() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-xs text-slate-500">
-                    <span>成功率</span>
+                    <span>Success Rate</span>
                     <span className="font-medium text-slate-700">{m.successRate}%</span>
                   </div>
                   <Progress value={m.successRate} className="h-1.5" />
@@ -384,34 +384,34 @@ export default function MinimalAutomationDashboard() {
 
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
                   <div>
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">上次运行</span>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">Last Run</span>
                     <span>{fmtTime(m.lastRun)}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">下次运行</span>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">Next Run</span>
                     <span>{fmtTime(m.nextRun)}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">累计执行</span>
-                    <span>{m.runCount} 次</span>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">Total Runs</span>
+                    <span>{m.runCount}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
           {modules.length === 0 && (
-            <p className="text-sm text-slate-400 text-center py-10 col-span-2">暂无模块数据</p>
+            <p className="text-sm text-slate-400 text-center py-10 col-span-2">No module data</p>
           )}
         </div>
       )}
 
-      {/* ══ 执行历史 Tab ══ */}
+      {/* ══ Execution History Tab ══ */}
       {activeTab === 'executions' && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">执行历史</CardTitle>
-              <span className="text-xs text-slate-400">共 {executions.length} 条记录</span>
+              <CardTitle className="text-base">Execution History</CardTitle>
+              <span className="text-xs text-slate-400">{executions.length} records</span>
             </div>
           </CardHeader>
           <CardContent>
@@ -419,11 +419,11 @@ export default function MinimalAutomationDashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 text-xs text-slate-400 uppercase tracking-wide">
-                    <th className="text-left pb-2 pr-4 font-medium">模块</th>
-                    <th className="text-left pb-2 pr-4 font-medium">操作</th>
-                    <th className="text-left pb-2 pr-4 font-medium">状态</th>
-                    <th className="text-right pb-2 pr-4 font-medium">耗时</th>
-                    <th className="text-right pb-2 font-medium">时间</th>
+                    <th className="text-left pb-2 pr-4 font-medium">Module</th>
+                    <th className="text-left pb-2 pr-4 font-medium">Action</th>
+                    <th className="text-left pb-2 pr-4 font-medium">Status</th>
+                    <th className="text-right pb-2 pr-4 font-medium">Duration</th>
+                    <th className="text-right pb-2 font-medium">Time</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -447,7 +447,7 @@ export default function MinimalAutomationDashboard() {
                   ))}
                   {executions.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400">暂无执行记录</td>
+                      <td colSpan={5} className="py-8 text-center text-slate-400">No executions</td>
                     </tr>
                   )}
                 </tbody>

@@ -73,25 +73,25 @@ export default function ClientInteractivePart({
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   
-  // 过滤逻辑
+  // Filter logic
   const filteredApis = apis.filter(api => {
-    // 搜索过滤
+    // Search filter
     if (searchQuery && !api.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !api.description.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     
-    // 提供商过滤
+    // Provider filter
     if (filterProvider !== 'all' && api.provider !== filterProvider) {
       return false;
     }
     
-    // 类别过滤
+    // Category filter
     if (filterCategory !== 'all' && api.category !== filterCategory) {
       return false;
     }
     
-    // 状态过滤
+    // Status filter
     if (filterStatus !== 'all' && api.status !== filterStatus) {
       return false;
     }
@@ -99,13 +99,13 @@ export default function ClientInteractivePart({
     return true;
   });
 
-  // 获取提供商列表
+  // Get provider list
   const providers = Array.from(new Set(apis.map(api => api.provider)));
   
-  // 获取类别列表
+  // Get category list
   const categories = Array.from(new Set(apis.map(api => api.category)));
 
-  // 获取状态图标
+  // Get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active': return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -115,7 +115,7 @@ export default function ClientInteractivePart({
     }
   };
 
-  // 获取提供商图标
+  // Get provider icon
   const getProviderIcon = (provider: string) => {
     switch (provider.toLowerCase()) {
       case 'google': return <Cloud className="h-4 w-4" />;
@@ -133,36 +133,36 @@ export default function ClientInteractivePart({
 
   return (
     <>
-      {/* 统计卡片 */}
+      {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">API总数</CardTitle>
+              <CardTitle className="text-sm font-medium">Total APIs</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalApis}</div>
               <div className="text-xs text-muted-foreground">
-                活跃: {stats.activeApis} | 未激活: {stats.inactiveApis}
+                Active: {stats.activeApis} | Inactive: {stats.inactiveApis}
               </div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">平均响应时间</CardTitle>
+              <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.avgResponseTime}ms</div>
               <div className="text-xs text-muted-foreground">
-                总调用: {stats.totalCalls}
+                Total Calls: {stats.totalCalls}
               </div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">成功率</CardTitle>
+              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.successRate}%</div>
@@ -172,19 +172,19 @@ export default function ClientInteractivePart({
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">告警</CardTitle>
+              <CardTitle className="text-sm font-medium">Alerts</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{alerts.length}</div>
               <div className="text-xs text-muted-foreground">
-                未解决: {alerts.filter(a => !a.resolved).length}
+                Unresolved: {alerts.filter(a => !a.resolved).length}
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* 搜索和过滤 */}
+      {/* Search and filter */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -192,7 +192,7 @@ export default function ClientInteractivePart({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="搜索API名称或描述..."
+                  placeholder="Search API name or description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -206,7 +206,7 @@ export default function ClientInteractivePart({
                 onChange={(e) => setFilterProvider(e.target.value)}
                 className="w-[140px] rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="all">所有提供商</option>
+                <option value="all">All Providers</option>
                 {providers.map(provider => (
                   <option key={provider} value={provider}>{provider}</option>
                 ))}
@@ -217,7 +217,7 @@ export default function ClientInteractivePart({
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="w-[140px] rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="all">所有类别</option>
+                <option value="all">All Categories</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -228,23 +228,23 @@ export default function ClientInteractivePart({
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-[140px] rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="all">所有状态</option>
-                <option value="active">活跃</option>
-                <option value="inactive">未激活</option>
-                <option value="pending">待配置</option>
-                <option value="error">错误</option>
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending Setup</option>
+                <option value="error">Error</option>
               </select>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* API列表 */}
+      {/* API list */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">外部API列表</CardTitle>
+          <CardTitle className="text-sm font-medium">External API List</CardTitle>
           <CardDescription>
-            共 {filteredApis.length} 个API，显示第 1 - {Math.min(filteredApis.length, 10)} 个
+            Total {filteredApis.length} APIs, showing 1 - {Math.min(filteredApis.length, 10)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -252,12 +252,12 @@ export default function ClientInteractivePart({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-4 w-[200px] lg:w-[250px]">API名称</th>
-                  <th className="text-left p-4 hidden sm:table-cell">提供商</th>
-                  <th className="text-left p-4 hidden md:table-cell">类别</th>
-                  <th className="text-left p-4">状态</th>
-                  <th className="text-left p-4 hidden lg:table-cell">响应时间</th>
-                  <th className="text-left p-4 hidden lg:table-cell">调用统计</th>
+                  <th className="text-left p-4 w-[200px] lg:w-[250px]">API Name</th>
+                  <th className="text-left p-4 hidden sm:table-cell">Provider</th>
+                  <th className="text-left p-4 hidden md:table-cell">Category</th>
+                  <th className="text-left p-4">Status</th>
+                  <th className="text-left p-4 hidden lg:table-cell">Response Time</th>
+                  <th className="text-left p-4 hidden lg:table-cell">Call Stats</th>
                 </tr>
               </thead>
               <tbody>
@@ -299,56 +299,56 @@ export default function ClientInteractivePart({
             
             {filteredApis.length === 0 && (
               <div className="text-center py-8 text-slate-500">
-                没有找到匹配的API
+                No matching APIs found
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* 操作指南 */}
+      {/* Operation guide */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">操作指南</CardTitle>
+          <CardTitle className="text-sm font-medium">Operation Guide</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <h4 className="font-medium text-sm flex items-center gap-2">
                 <Brain className="h-4 w-4" />
-                添加新API
+                Add New API
               </h4>
               <ul className="text-sm text-slate-600 space-y-1">
-                <li>1. 点击"添加API"按钮</li>
-                <li>2. 填写API基本信息</li>
-                <li>3. 配置认证信息</li>
-                <li>4. 保存并测试连接</li>
+                <li>1. Click the "Add API" button</li>
+                <li>2. Fill in the basic API information</li>
+                <li>3. Configure authentication</li>
+                <li>4. Save and test the connection</li>
               </ul>
             </div>
             
             <div className="space-y-2">
               <h4 className="font-medium text-sm flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                故障排除
+                Troubleshooting
               </h4>
               <ul className="text-sm text-slate-600 space-y-1">
-                <li>• 检查API密钥是否过期</li>
-                <li>• 验证网络连接</li>
-                <li>• 检查API配额限制</li>
-                <li>• 查看错误日志详情</li>
+                <li>• Check if API keys are expired</li>
+                <li>• Verify network connectivity</li>
+                <li>• Check API quota limits</li>
+                <li>• Review error log details</li>
               </ul>
             </div>
             
             <div className="space-y-2">
               <h4 className="font-medium text-sm flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                安全建议
+                Security Best Practices
               </h4>
               <ul className="text-sm text-slate-600 space-y-1">
-                <li>• 定期轮换API密钥</li>
-                <li>• 使用最小必要权限</li>
-                <li>• 监控异常调用模式</li>
-                <li>• 启用API使用审计</li>
+                <li>• Rotate API keys regularly</li>
+                <li>• Use least-privilege access</li>
+                <li>• Monitor for abnormal call patterns</li>
+                <li>• Enable API usage auditing</li>
               </ul>
             </div>
           </div>
@@ -356,8 +356,8 @@ export default function ClientInteractivePart({
       </Card>
 
       <div className="text-center text-sm text-slate-500 pt-4">
-        <p>外部API监控数据每60秒自动刷新 • 最后更新: {new Date().toLocaleString()}</p>
-        <p className="mt-1">支持: Google APIs • OpenAI • Anthropic • GitHub • Azure • LinkedIn • Brave Search</p>
+        <p>External API data refreshes every 60s • Last updated: {new Date().toLocaleString()}</p>
+        <p className="mt-1">Supports: Google APIs • OpenAI • Anthropic • GitHub • Azure • LinkedIn • Brave Search</p>
       </div>
     </>
   );

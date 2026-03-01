@@ -44,25 +44,25 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   
-  // 过滤逻辑
+  // Filter logic
   const filteredApis = apis.filter(api => {
-    // 搜索过滤
+    // Search filter
     if (searchQuery && !api.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !api.description.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     
-    // 提供商过滤
+    // Provider filter
     if (filterProvider !== 'all' && api.provider !== filterProvider) {
       return false;
     }
     
-    // 类别过滤
+    // Category filter
     if (filterCategory !== 'all' && api.category !== filterCategory) {
       return false;
     }
     
-    // 状态过滤
+    // Status filter
     if (filterStatus !== 'all' && api.status !== filterStatus) {
       return false;
     }
@@ -70,9 +70,9 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
     return true;
   });
   
-  // 提供商选项
+  // Provider options
   const providerOptions = [
-    { value: 'all', label: '所有提供商' },
+    { value: 'all', label: 'All Providers' },
     { value: 'google', label: 'Google' },
     { value: 'openai', label: 'OpenAI' },
     { value: 'anthropic', label: 'Anthropic' },
@@ -83,28 +83,28 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
     { value: 'brave', label: 'Brave' }
   ];
   
-  // 类别选项
+  // Category options
   const categoryOptions = [
-    { value: 'all', label: '所有类别' },
-    { value: 'ai', label: '人工智能' },
-    { value: 'cloud', label: '云服务' },
-    { value: 'dev', label: '开发MCP' },
-    { value: 'analytics', label: '数据分析' },
-    { value: 'ads', label: '广告营销' },
-    { value: 'social', label: '社交媒体' },
-    { value: 'search', label: '搜索服务' }
+    { value: 'all', label: 'All Categories' },
+    { value: 'ai', label: 'Artificial Intelligence' },
+    { value: 'cloud', label: 'Cloud Services' },
+    { value: 'dev', label: 'Dev MCP' },
+    { value: 'analytics', label: 'Data Analytics' },
+    { value: 'ads', label: 'Ad Marketing' },
+    { value: 'social', label: 'Social Media' },
+    { value: 'search', label: 'Search Services' }
   ];
   
-  // 状态选项
+  // Status options
   const statusOptions = [
-    { value: 'all', label: '所有状态' },
-    { value: 'active', label: '活跃' },
-    { value: 'inactive', label: '未激活' },
-    { value: 'pending', label: '待配置' },
-    { value: 'error', label: '错误' }
+    { value: 'all', label: 'All Statuses' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+    { value: 'pending', label: 'Pending Setup' },
+    { value: 'error', label: 'Error' }
   ];
   
-  // 获取提供商图标
+  // Get provider icon
   const getProviderIcon = (provider: string) => {
     switch (provider) {
       case 'google': return <Cloud className="h-4 w-4" />;
@@ -119,25 +119,25 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
     }
   };
   
-  // 获取状态徽章
+  // Get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="h-3 w-3 mr-1" />活跃</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="h-3 w-3 mr-1" />Active</Badge>;
       case 'inactive':
-        return <Badge variant="outline">未激活</Badge>;
+        return <Badge variant="outline">Inactive</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><AlertTriangle className="h-3 w-3 mr-1" />待配置</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><AlertTriangle className="h-3 w-3 mr-1" />Pending Setup</Badge>;
       case 'error':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="h-3 w-3 mr-1" />错误</Badge>;
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="h-3 w-3 mr-1" />Error</Badge>;
       default:
-        return <Badge variant="outline">未知</Badge>;
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
   
   return (
     <>
-      {/* 搜索和过滤 */}
+      {/* Search and filter */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -145,7 +145,7 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="搜索API名称或描述..."
+                  placeholder="Search API name or description..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,12 +193,12 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
         </CardContent>
       </Card>
       
-      {/* API列表 */}
+      {/* API list */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">外部API列表</CardTitle>
+          <CardTitle className="text-sm font-medium">External API List</CardTitle>
           <p className="text-sm text-slate-500">
-            共 {filteredApis.length} 个API，显示第 1 - {Math.min(filteredApis.length, 10)} 个
+            Total {filteredApis.length} APIs, showing 1 - {Math.min(filteredApis.length, 10)}
           </p>
         </CardHeader>
         <CardContent>
@@ -206,13 +206,13 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 font-medium text-slate-500 w-[200px] lg:w-[250px]">API名称</th>
-                  <th className="text-left py-3 font-medium text-slate-500 hidden sm:table-cell">提供商</th>
-                  <th className="text-left py-3 font-medium text-slate-500 hidden md:table-cell">类别</th>
-                  <th className="text-left py-3 font-medium text-slate-500">状态</th>
-                  <th className="text-left py-3 font-medium text-slate-500 hidden lg:table-cell">响应时间</th>
-                  <th className="text-left py-3 font-medium text-slate-500 hidden lg:table-cell">调用统计</th>
-                  <th className="text-right py-3 font-medium text-slate-500 w-[140px]">操作</th>
+                  <th className="text-left py-3 font-medium text-slate-500 w-[200px] lg:w-[250px]">API Name</th>
+                  <th className="text-left py-3 font-medium text-slate-500 hidden sm:table-cell">Provider</th>
+                  <th className="text-left py-3 font-medium text-slate-500 hidden md:table-cell">Category</th>
+                  <th className="text-left py-3 font-medium text-slate-500">Status</th>
+                  <th className="text-left py-3 font-medium text-slate-500 hidden lg:table-cell">Response Time</th>
+                  <th className="text-left py-3 font-medium text-slate-500 hidden lg:table-cell">Call Stats</th>
+                  <th className="text-right py-3 font-medium text-slate-500 w-[140px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -243,7 +243,7 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
                     </td>
                     <td className="py-3 hidden lg:table-cell">
                       <div className="text-sm">
-                        {api.totalCalls} 次调用
+                        {api.totalCalls} calls
                         <div className="text-xs text-slate-500">
                           ✅ {api.successfulCalls} / ❌ {api.failedCalls}
                         </div>
@@ -260,7 +260,7 @@ export default function ClientInteractivePart({ initialApis }: ClientInteractive
                 {filteredApis.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-slate-500">
-                      没有找到匹配的API
+                      No matching APIs found
                     </td>
                   </tr>
                 )}

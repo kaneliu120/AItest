@@ -89,14 +89,14 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
     return (
       <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-200">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-        <p className="mt-4 text-slate-700 font-medium">正在加载可视化数据...</p>
+        <p className="mt-4 text-slate-700 font-medium">Loading visualization data...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* 标签页导航 */}
+      {/* Tab navigation */}
       <div className="flex border-b border-slate-200">
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm ${
@@ -107,7 +107,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
           onClick={() => setActiveTab('overview')}
         >
           <BarChart3 className="w-4 h-4 mr-2" />
-          项目概览
+          Overview
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm ${
@@ -118,7 +118,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
           onClick={() => setActiveTab('features')}
         >
           <Target className="w-4 h-4 mr-2" />
-          功能分析
+          Feature Analysis
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm ${
@@ -129,7 +129,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
           onClick={() => setActiveTab('risks')}
         >
           <AlertTriangle className="w-4 h-4 mr-2" />
-          风险评估
+          Risk Assessment
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm ${
@@ -140,69 +140,69 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
           onClick={() => setActiveTab('trends')}
         >
           <TrendingUp className="w-4 h-4 mr-2" />
-          趋势洞察
+          Trends \& Insights
         </button>
       </div>
 
-      {/* 项目概览标签页 */}
+      {/* Overview tab */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* 关键指标卡片 */}
+          {/* Key metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Target className="w-5 h-5 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">功能总数</span>
+                <span className="text-sm font-medium text-slate-700">Total Features</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {metrics.totalFeatures}
               </div>
-              <div className="text-xs text-slate-500">个核心功能</div>
+              <div className="text-xs text-slate-500">core features</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Clock className="w-5 h-5 text-orange-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">总工时</span>
+                <span className="text-sm font-medium text-slate-700">Total Hours</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.effortEstimation.totalHours}
               </div>
-              <div className="text-xs text-slate-500">小时</div>
+              <div className="text-xs text-slate-500">hours</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Users className="w-5 h-5 text-green-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">团队规模</span>
+                <span className="text-sm font-medium text-slate-700">Team Size</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.effortEstimation.teamSize}
               </div>
-              <div className="text-xs text-slate-500">人</div>
+              <div className="text-xs text-slate-500">people</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-purple-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">复杂度</span>
+                <span className="text-sm font-medium text-slate-700">Complexity</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.complexity.overall}/10
               </div>
-              <div className="text-xs text-slate-500">总体评分</div>
+              <div className="text-xs text-slate-500">overall score</div>
             </div>
           </div>
 
-          {/* 复杂度雷达图 */}
+          {/* Complexity radar chart */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">复杂度评估</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Complexity Assessment</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-slate-900">
                   {analysis.complexity.overall}
                 </div>
-                <div className="text-sm text-slate-600 mt-1">总体</div>
+                <div className="text-sm text-slate-600 mt-1">Overall</div>
                 <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full"
@@ -215,7 +215,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
                 <div className="text-3xl font-bold text-slate-900">
                   {analysis.complexity.technical.score}
                 </div>
-                <div className="text-sm text-slate-600 mt-1">技术</div>
+                <div className="text-sm text-slate-600 mt-1">Technical</div>
                 <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
                   <div
                     className="bg-green-600 h-2 rounded-full"
@@ -228,7 +228,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
                 <div className="text-3xl font-bold text-slate-900">
                   {analysis.complexity.business.score}
                 </div>
-                <div className="text-sm text-slate-600 mt-1">业务</div>
+                <div className="text-sm text-slate-600 mt-1">Business</div>
                 <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
                   <div
                     className="bg-purple-600 h-2 rounded-full"
@@ -241,7 +241,7 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
                 <div className="text-3xl font-bold text-slate-900">
                   {analysis.complexity.integration.score}
                 </div>
-                <div className="text-sm text-slate-600 mt-1">集成</div>
+                <div className="text-sm text-slate-600 mt-1">Integration</div>
                 <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
                   <div
                     className="bg-orange-600 h-2 rounded-full"
@@ -252,9 +252,9 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
             </div>
           </div>
 
-          {/* 技术栈适合度 */}
+          {/* Tech stack suitability */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">技术栈推荐适合度</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Tech Stack Suitability</h3>
             <div className="space-y-4">
               {analysis.techStack.frontend.map((tech: any, index: number) => (
                 <div key={`item-${index}`} className="space-y-2">
@@ -278,50 +278,50 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
         </div>
       )}
 
-      {/* 功能分析标签页 */}
+      {/* Feature Analysis tab */}
       {activeTab === 'features' && (
         <div className="space-y-6">
-          {/* 功能优先级分布 */}
+          {/* Feature Priority Distribution */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">功能优先级分布</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Feature Priority Distribution</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-red-50 rounded-xl">
                 <div className="text-2xl font-bold text-red-700">{metrics.highPriorityFeatures}</div>
-                <div className="text-sm text-red-600">高优先级</div>
+                <div className="text-sm text-red-600">High Priority</div>
               </div>
               <div className="text-center p-4 bg-yellow-50 rounded-xl">
                 <div className="text-2xl font-bold text-yellow-700">{metrics.mediumPriorityFeatures}</div>
-                <div className="text-sm text-yellow-600">中优先级</div>
+                <div className="text-sm text-yellow-600">Medium Priority</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-xl">
                 <div className="text-2xl font-bold text-green-700">{metrics.lowPriorityFeatures}</div>
-                <div className="text-sm text-green-600">低优先级</div>
+                <div className="text-sm text-green-600">Low Priority</div>
               </div>
             </div>
           </div>
 
-          {/* 功能复杂度分布 */}
+          {/* Feature Complexity Distribution */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">功能复杂度分布</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Feature Complexity Distribution</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-green-50 rounded-xl">
                 <div className="text-2xl font-bold text-green-700">{metrics.simpleFeatures}</div>
-                <div className="text-sm text-green-600">简单</div>
+                <div className="text-sm text-green-600">Simple</div>
               </div>
               <div className="text-center p-4 bg-yellow-50 rounded-xl">
                 <div className="text-2xl font-bold text-yellow-700">{metrics.mediumFeatures}</div>
-                <div className="text-sm text-yellow-600">中等</div>
+                <div className="text-sm text-yellow-600">Medium</div>
               </div>
               <div className="text-center p-4 bg-red-50 rounded-xl">
                 <div className="text-2xl font-bold text-red-700">{metrics.complexFeatures}</div>
-                <div className="text-sm text-red-600">复杂</div>
+                <div className="text-sm text-red-600">Complex</div>
               </div>
             </div>
           </div>
 
-          {/* 功能列表 */}
+          {/* Feature List */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">功能详细列表</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Feature Detail List</h3>
             <div className="space-y-3">
               {analysis.categories.functional.map((req: any, index: number) => (
                 <div key={`item-${index}`} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
@@ -330,17 +330,17 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
                       <div className="flex items-center">
                         <span className="font-mono text-sm text-slate-900 mr-2">{req.id}</span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(req.priority)} text-white`}>
-                          {req.priority === 'high' ? '高' : req.priority === 'medium' ? '中' : '低'}
+                          {req.priority === 'high' ? 'High' : req.priority === 'medium' ? 'Medium' : 'Low'}
                         </span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ml-2 ${getComplexityColor(req.complexity)} text-white`}>
-                          {req.complexity === 'complex' ? '复杂' : req.complexity === 'medium' ? '中等' : '简单'}
+                          {req.complexity === 'complex' ? 'Complex' : req.complexity === 'medium' ? 'Medium' : 'Simple'}
                         </span>
                       </div>
                       <p className="text-sm text-slate-700 mt-1">{req.description}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-medium text-slate-900">{req.estimatedEffort} 小时</div>
-                      <div className="text-xs text-slate-500">预估工时</div>
+                      <div className="text-sm font-medium text-slate-900">{req.estimatedEffort} hours</div>
+                      <div className="text-xs text-slate-500">Estimated Hours</div>
                     </div>
                   </div>
                 </div>
@@ -350,10 +350,10 @@ export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboar
         </div>
       )}
 
-      {/* 风险评估标签页 */}
+      {/* Risk Assessment tab */}
       {activeTab === 'risks' && (
         <div className="space-y-6">
-          {/* 风险分布 */}
+          {/* Risk Distribution */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
 
             </div>

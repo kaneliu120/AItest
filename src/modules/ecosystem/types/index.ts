@@ -1,5 +1,5 @@
 /**
- * 工具生态系统模块类型定义
+ * Tool ecosystem module type definitions
  */
 
 export interface ToolStatus {
@@ -89,7 +89,7 @@ export interface EcosystemSummary {
   systemHealth: number; // 0-100
 }
 
-// 工具分类枚举
+// Tool category enum
 export enum ToolCategoryEnum {
   DEVELOPMENT = 'development',
   MONITORING = 'monitoring',
@@ -104,7 +104,7 @@ export enum ToolCategoryEnum {
   OTHER = 'other'
 }
 
-// 导出所有类型
+// Export all types
 export type {
   ToolStatus,
   MonitoringStats,

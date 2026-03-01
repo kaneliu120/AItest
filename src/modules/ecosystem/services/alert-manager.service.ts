@@ -1,5 +1,5 @@
 /**
- * 告警管理服务 - 负责告警的生成、管理和通知
+ * Alert manager service - responsible for alert generation, management, and notifications
  */
 
 import { 
@@ -15,23 +15,23 @@ export class AlertManagerService {
   constructor(private config: EcosystemConfig) {}
 
   /**
-   * 生成工具告警
+   * Generate a tool alert
    */
   generateToolAlert(
     tool: ToolStatus, 
     metric: ToolMetric, 
     previousStatus?: ToolStatus['status']
   ): EcosystemAlert | null {
-    // 检查是否需要生成告警
+    // Check if alert should be generated
     const shouldAlert = this.shouldGenerateAlert(tool, metric, previousStatus);
     if (!shouldAlert) {
       return null;
     }
 
-    // 确定告警级别
+    // Determine alert level
     const level = this.determineAlertLevel(tool, metric);
     
-    // 生成告警消息
+    // Generate alert message
     const message = this.generateAlertMessage(tool, metric, level);
 
     const alert: EcosystemAlert = {
@@ -53,14 +53,14 @@ export class AlertManagerService {
     this.alerts.unshift(alert);
     this.trimAlerts();
     
-    // 发送通知
+    // Send notifications
     this.sendNotifications(alert);
 
     return alert;
   }
 
   /**
-   * 获取告警列表
+   * Get alert list
    */
   getAlerts(options: {
     level?: EcosystemAlert['level'][];
@@ -72,22 +72,22 @@ export class AlertManagerService {
   } = {}): EcosystemAlert[] {
     let filtered = [...this.alerts];
 
-    // 按级别过滤
+    // Filter by level
     if (options.level && options.level.length > 0) {
       filtered = filtered.filter(alert => options.level!.includes(alert.level));
     }
 
-    // 按确认状态过滤
+    // Filter by acknowledged state
     if (options.acknowledged !== undefined) {
       filtered = filtered.filter(alert => alert.acknowledged === options.acknowledged);
     }
 
-    // 按工具ID过滤
+    // Filter by tool ID
     if (options.toolId) {
       filtered = filtered.filter(alert => alert.toolId === options.toolId);
     }
 
-    // 按时间范围过滤
+    // Filter by time range
     if (options.startDate) {
       filtered = filtered.filter(alert => alert.timestamp >= options.startDate!);
     }
@@ -96,10 +96,10 @@ export class AlertManagerService {
       filtered = filtered.filter(alert => alert.timestamp <= options.endDate!);
     }
 
-    // 排序（按时间倒序）
+    // Sort (descending by time)
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    // 限制数量
+    // Limit results
     if (options.limit) {
       filtered = filtered.slice(0, options.limit);
     }
@@ -108,7 +108,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 确认告警
+   * Acknowledge an alert
    */
   acknowledgeAlert(alertId: string): boolean {
     const alert = this.alerts.find(a => a.id === alertId);
@@ -124,7 +124,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 批量确认告警
+   * Acknowledge multiple alerts in batch
    */
   acknowledgeAlerts(alertIds: string[]): { success: string[]; failed: string[] } {
     const success: string[] = [];
@@ -142,7 +142,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 获取告警统计
+   * Get alert statistics
    */
   getAlertStats(): {
     total: number;
@@ -179,7 +179,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 清理旧告警
+   * Clean up old alerts
    */
   cleanupOldAlerts(daysToKeep: number = 30): number {
     const cutoff = new Date(Date.now() - daysToKeep * 24 * 60 * 60 * 1000);
@@ -191,29 +191,29 @@ export class AlertManagerService {
   }
 
   /**
-   * 检查是否需要生成告警
+   * Check whether an alert should be generated
    */
   private shouldGenerateAlert(
     tool: ToolStatus, 
     metric: ToolMetric, 
     previousStatus?: ToolStatus['status']
   ): boolean {
-    // 如果状态从健康变为非健康，生成告警
+    // If status changed from healthy to unhealthy, generate alert
     if (previousStatus === 'healthy' && metric.status !== 'healthy') {
       return true;
     }
 
-    // 如果响应时间超过阈值，生成告警
+    // If response time exceeds threshold, generate alert
     if (metric.responseTime > this.config.alertThresholds.responseTime) {
       return true;
     }
 
-    // 如果错误数量超过阈值，生成告警
+    // If error count exceeds threshold, generate alert
     if (metric.errorCount && metric.errorCount > 10) {
       return true;
     }
 
-    // 如果工具离线，生成告警
+    // If tool is offline, generate alert
     if (metric.status === 'offline') {
       return true;
     }
@@ -222,7 +222,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 确定告警级别
+   * Determine alert level
    */
   private determineAlertLevel(tool: ToolStatus, metric: ToolMetric): EcosystemAlert['level'] {
     if (metric.status === 'offline') {
@@ -249,7 +249,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 生成告警消息
+   * Generate alert message
    */
   private generateAlertMessage(
     tool: ToolStatus, 
@@ -262,26 +262,26 @@ export class AlertManagerService {
 
     switch (level) {
       case 'critical':
-        return `${toolName} 服务离线，请立即检查`;
+        return `${toolName} service is offline, please check immediately`;
       
       case 'error':
         if (metric.status === 'error') {
-          return `${toolName} 发生错误，响应时间: ${responseTime}ms`;
+          return `${toolName} encountered an error, response time: ${responseTime}ms`;
         } else {
-          return `${toolName} 响应时间严重超时: ${responseTime}ms (阈值: ${threshold}ms)`;
+          return `${toolName} response time critically exceeded: ${responseTime}ms (threshold: ${threshold}ms)`;
         }
       
       case 'warning':
-        return `${toolName} 响应时间超过阈值: ${responseTime}ms (阈值: ${threshold}ms)`;
+        return `${toolName} response time exceeded threshold: ${responseTime}ms (threshold: ${threshold}ms)`;
       
       case 'info':
       default:
-        return `${toolName} 状态变化: ${metric.status}`;
+        return `${toolName} status changed: ${metric.status}`;
     }
   }
 
   /**
-   * 生成告警ID
+   * Generate alert ID
    */
   private generateAlertId(): string {
     const timestamp = Date.now();
@@ -290,7 +290,7 @@ export class AlertManagerService {
   }
 
   /**
-   * 发送通知
+   * Send notifications
    */
   private sendNotifications(alert: EcosystemAlert): void {
     const channels = this.config.notificationChannels || [];
@@ -298,7 +298,7 @@ export class AlertManagerService {
     channels.forEach(channel => {
       switch (channel) {
         case 'dashboard':
-          // 仪表盘通知已通过状态更新处理
+          // Dashboard notifications are handled via state updates
           break;
           
         case 'email':
@@ -317,34 +317,34 @@ export class AlertManagerService {
   }
 
   /**
-   * 发送邮件通知
+   * Send email notification
    */
   private sendEmailNotification(alert: EcosystemAlert): void {
-    // 模拟发送邮件
+    // Simulate sending email
     console.log(`[Email] ${alert.level.toUpperCase()}: ${alert.message}`);
   }
 
   /**
-   * 发送Slack通知
+   * Send Slack notification
    */
   private sendSlackNotification(alert: EcosystemAlert): void {
-    // 模拟发送Slack消息
+    // Simulate sending Slack message
     console.log(`[Slack] ${alert.level.toUpperCase()}: ${alert.message}`);
   }
 
   /**
-   * 发送Webhook通知
+   * Send Webhook notification
    */
   private sendWebhookNotification(alert: EcosystemAlert): void {
-    // 模拟发送Webhook
+    // Simulate sending Webhook
     console.log(`[Webhook] ${alert.level.toUpperCase()}: ${alert.message}`);
   }
 
   /**
-   * 清理告警数据
+   * Trim alert records
    */
   private trimAlerts(): void {
-    const maxRecords = this.config.retentionDays * 24; // 每天最多24条告警
+    const maxRecords = this.config.retentionDays * 24; // max 24 alerts per day
     if (this.alerts.length > maxRecords) {
       this.alerts = this.alerts.slice(-maxRecords);
     }

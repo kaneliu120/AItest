@@ -1,5 +1,5 @@
 /**
- * 任务管理工具类型
+ * Task management utility types
  */
 
 import { 
@@ -12,38 +12,38 @@ import {
   ProjectStatus
 } from './core';
 
-// 部分更新类型
+// Partial update types
 export type PartialTask = Partial<Task>;
 export type PartialUser = Partial<User>;
 export type PartialProject = Partial<Project>;
 
-// 必需字段类型
+// Required field types
 export type RequiredTask = Required<Pick<Task, 'id' | 'title' | 'status' | 'priority' | 'creator' | 'createdAt'>>;
 export type RequiredUser = Required<Pick<User, 'id' | 'name' | 'email' | 'role' | 'isActive'>>;
 export type RequiredProject = Required<Pick<Project, 'id' | 'name' | 'status' | 'owner' | 'progress'>>;
 
-// 只读类型
+// Readonly types
 export type ReadonlyTask = Readonly<Task>;
 export type ReadonlyUser = Readonly<User>;
 export type ReadonlyProject = Readonly<Project>;
 
-// 选择字段类型
+// Pick field types
 export type TaskPreview = Pick<Task, 'id' | 'title' | 'status' | 'priority' | 'assignee' | 'dueDate'>;
 export type UserPreview = Pick<User, 'id' | 'name' | 'email' | 'avatar' | 'role'>;
 export type ProjectPreview = Pick<Project, 'id' | 'name' | 'status' | 'progress' | 'endDate'>;
 
-// 排除字段类型
+// Omit field types
 export type TaskWithoutComments = Omit<Task, 'comments'>;
 export type TaskWithoutAttachments = Omit<Task, 'attachments'>;
 export type UserWithoutSensitive = Omit<User, 'email' | 'department'>;
 
-// 记录类型
+// Record types
 export type TaskStatusRecord = Record<TaskStatus, number>;
 export type TaskPriorityRecord = Record<TaskPriority, number>;
 export type UserRoleRecord = Record<UserRole, number>;
 export type ProjectStatusRecord = Record<ProjectStatus, number>;
 
-// 映射类型
+// Mapped types
 export type TaskStatusColors = {
   [K in TaskStatus]: string;
 };
@@ -60,7 +60,7 @@ export type ProjectStatusLabels = {
   [K in ProjectStatus]: string;
 };
 
-// 条件类型
+// Conditional types
 export type ActiveTask = Task & { status: Exclude<TaskStatus, TaskStatus.DONE | TaskStatus.CANCELLED> };
 export type CompletedTask = Task & { status: TaskStatus.DONE; completedAt: Date };
 export type OverdueTask = Task & { dueDate: Date; status: Exclude<TaskStatus, TaskStatus.DONE | TaskStatus.CANCELLED> };
@@ -72,7 +72,7 @@ export type TeamMemberUser = User & { role: Exclude<UserRole, UserRole.ADMIN | U
 export type ActiveProject = Project & { status: Exclude<ProjectStatus, ProjectStatus.COMPLETED | ProjectStatus.CANCELLED> };
 export type CompletedProject = Project & { status: ProjectStatus.COMPLETED };
 
-// 实用工具类型
+// Utility types
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 export type Maybe<T> = T | null | undefined;
@@ -89,7 +89,7 @@ export type DeepRequired<T> = {
   [P in keyof T]-?: T[P] extends object ? DeepRequired<T[P]> : T[P];
 };
 
-// 函数类型
+// Function types
 export type TaskFilterFunction = (task: Task) => boolean;
 export type TaskComparator = (a: Task, b: Task) => number;
 export type TaskTransformer = (task: Task) => any;
@@ -98,7 +98,7 @@ export type TaskValidator = (task: Task) => { valid: boolean; errors: string[] }
 export type UserFilterFunction = (user: User) => boolean;
 export type ProjectFilterFunction = (project: Project) => boolean;
 
-// 事件类型
+// Event types
 export type TaskEvent = 
   | { type: 'task_created'; task: Task }
   | { type: 'task_updated'; oldTask: Task; newTask: Task }
@@ -119,7 +119,7 @@ export type ProjectEvent =
   | { type: 'project_deleted'; project: Project }
   | { type: 'project_status_changed'; project: Project; oldStatus: ProjectStatus; newStatus: ProjectStatus };
 
-// 响应类型
+// Response types
 export type PaginatedResponse<T> = {
   data: T[];
   pagination: {
@@ -143,7 +143,7 @@ export type ApiResponse<T> = {
   timestamp: Date;
 };
 
-// 配置类型
+// Configuration types
 export type TaskModuleConfig = {
   features: {
     timeTracking: boolean;

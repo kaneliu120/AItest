@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 
-// 客户端组件，避免hydration错误
+// Client component - avoid hydration errors
 function LastUpdatedTime() {
   const [currentTime, setCurrentTime] = useState('');
   
@@ -16,10 +16,10 @@ function LastUpdatedTime() {
     setCurrentTime(new Date().toLocaleString());
   }, []);
   
-  return <span>{currentTime || '加载中...'}</span>;
+  return <span>{currentTime || 'Loading...'}</span>;
 }
 
-// 客户端时间格式化组件
+// Client-side time formatting component
 function AlertTime({ timestamp }: { timestamp: string }) {
   const [formattedTime, setFormattedTime] = useState('');
   
@@ -28,7 +28,7 @@ function AlertTime({ timestamp }: { timestamp: string }) {
     setFormattedTime(date.toLocaleTimeString());
   }, [timestamp]);
   
-  return <span>{formattedTime || '加载中...'}</span>;
+  return <span>{formattedTime || 'Loading...'}</span>;
 }
 
 import { 

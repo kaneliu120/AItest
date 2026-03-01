@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 import { ExternalApiMonitoring } from '@/components/external-api-monitoring';
 
-// 客户端组件，避免hydration错误
+// Client component to avoid hydration errors
 function LastCheckedTime() {
   const [currentTime, setCurrentTime] = useState('');
   
@@ -51,10 +51,10 @@ function LastCheckedTime() {
     setCurrentTime(new Date().toLocaleTimeString());
   }, []);
   
-  return <span>{currentTime || '加载中...'}</span>;
+  return <span>{currentTime || 'Loading...'}</span>;
 }
 
-// 客户端时间格式化组件
+// Client-side time formatting component
 function ClientTime({ timestamp, format = 'time' }: { timestamp?: string, format?: 'time' | 'date' | 'datetime' }) {
   const [formattedTime, setFormattedTime] = useState('');
   
@@ -81,7 +81,7 @@ function ClientTime({ timestamp, format = 'time' }: { timestamp?: string, format
     setFormattedTime(formatted);
   }, [timestamp, format]);
   
-  return <span>{formattedTime || '加载中...'}</span>;
+  return <span>{formattedTime || 'Loading...'}</span>;
 }
 
 interface MonitoringStats {
@@ -136,26 +136,26 @@ export default function EcosystemDashboard() {
   const [tools, setTools] = useState<ToolStatus[]>([]);
   
   const [toolsStatus, setToolsStatus] = useState<ToolStatus[]>([
-    { name: 'GitHub CLI', status: 'healthy', type: '开发MCP', version: '2.47.0', lastChecked: '2分钟前', description: 'GitHub命令行MCP' },
-    { name: 'Docker', status: 'healthy', type: '容器化', version: '24.0.7', lastChecked: '5分钟前', description: '容器运行时' },
-    { name: 'Node.js', status: 'healthy', type: '运行时', version: '20.11.0', lastChecked: '10分钟前', description: 'JavaScript运行时' },
-    { name: 'PostgreSQL', status: 'healthy', type: '数据库', version: '15.5', lastChecked: '15分钟前', description: '关系型数据库' },
-    { name: 'Redis', status: 'healthy', type: '缓存', version: '7.2.4', lastChecked: '20分钟前', description: '内存数据存储' },
-    { name: 'Nginx', status: 'healthy', type: 'Web服务器', version: '1.24.0', lastChecked: '25分钟前', description: '反向代理服务器' },
-    { name: 'Python', status: 'healthy', type: '运行时', version: '3.11.6', lastChecked: '30分钟前', description: 'Python解释器' },
-    { name: 'Terraform', status: 'healthy', type: '基础设施', version: '1.7.4', lastChecked: '35分钟前', description: '基础设施即代码' },
-    { name: 'Kubernetes', status: 'healthy', type: '编排', version: '1.28.4', lastChecked: '40分钟前', description: '容器编排平台' },
-    { name: 'Prometheus', status: 'healthy', type: '监控', version: '2.48.1', lastChecked: '45分钟前', description: '监控系统' },
-    { name: 'Grafana', status: 'healthy', type: '可视化', version: '10.2.3', lastChecked: '50分钟前', description: '数据可视化平台' },
-    { name: 'Elasticsearch', status: 'healthy', type: '搜索', version: '8.12.0', lastChecked: '55分钟前', description: '搜索和分析引擎' },
-    { name: 'Kibana', status: 'healthy', type: '可视化', version: '8.12.0', lastChecked: '1小时前', description: '数据可视化' },
-    { name: 'Logstash', status: 'healthy', type: '日志', version: '8.12.0', lastChecked: '1小时前', description: '日志处理' },
-    { name: 'Filebeat', status: 'healthy', type: '日志', version: '8.12.0', lastChecked: '1小时前', description: '日志收集器' },
-    { name: 'Ansible', status: 'healthy', type: '自动化', version: '2.16.2', lastChecked: '1小时前', description: '配置管理' },
-    { name: 'Jenkins', status: 'warning', type: 'CI/CD', version: '2.426.1', lastChecked: '1小时前', description: '持续集成服务器' },
-    { name: 'SonarQube', status: 'warning', type: '代码质量', version: '10.3.0', lastChecked: '1小时前', description: '代码质量分析' },
-    { name: 'Vault', status: 'error', type: '安全', version: '1.15.2', lastChecked: '1小时前', description: '密钥管理' },
-    { name: 'Consul', status: 'healthy', type: '服务发现', version: '1.16.1', lastChecked: '1小时前', description: '服务网格' },
+    { name: 'GitHub CLI', status: 'healthy', type: 'Dev MCP', version: '2.47.0', lastChecked: '2 min ago', description: 'GitHub CLI tool' },
+    { name: 'Docker', status: 'healthy', type: 'Containerization', version: '24.0.7', lastChecked: '5 min ago', description: 'Container runtime' },
+    { name: 'Node.js', status: 'healthy', type: 'Runtime', version: '20.11.0', lastChecked: '10 min ago', description: 'JavaScript runtime' },
+    { name: 'PostgreSQL', status: 'healthy', type: 'Database', version: '15.5', lastChecked: '15 min ago', description: 'Relational database' },
+    { name: 'Redis', status: 'healthy', type: 'Cache', version: '7.2.4', lastChecked: '20 min ago', description: 'In-memory data store' },
+    { name: 'Nginx', status: 'healthy', type: 'Web Server', version: '1.24.0', lastChecked: '25 min ago', description: 'Reverse proxy server' },
+    { name: 'Python', status: 'healthy', type: 'Runtime', version: '3.11.6', lastChecked: '30 min ago', description: 'Python interpreter' },
+    { name: 'Terraform', status: 'healthy', type: 'Infrastructure', version: '1.7.4', lastChecked: '35 min ago', description: 'Infrastructure as code' },
+    { name: 'Kubernetes', status: 'healthy', type: 'Orchestration', version: '1.28.4', lastChecked: '40 min ago', description: 'Container orchestration platform' },
+    { name: 'Prometheus', status: 'healthy', type: 'Monitoring', version: '2.48.1', lastChecked: '45 min ago', description: 'Monitoring system' },
+    { name: 'Grafana', status: 'healthy', type: 'Visualization', version: '10.2.3', lastChecked: '50 min ago', description: 'Data visualization platform' },
+    { name: 'Elasticsearch', status: 'healthy', type: 'Search', version: '8.12.0', lastChecked: '55 min ago', description: 'Search and analytics engine' },
+    { name: 'Kibana', status: 'healthy', type: 'Visualization', version: '8.12.0', lastChecked: '1 hour ago', description: 'Data visualization' },
+    { name: 'Logstash', status: 'healthy', type: 'Logging', version: '8.12.0', lastChecked: '1 hour ago', description: 'Log processing' },
+    { name: 'Filebeat', status: 'healthy', type: 'Logging', version: '8.12.0', lastChecked: '1 hour ago', description: 'Log collector' },
+    { name: 'Ansible', status: 'healthy', type: 'Automation', version: '2.16.2', lastChecked: '1 hour ago', description: 'Configuration management' },
+    { name: 'Jenkins', status: 'warning', type: 'CI/CD', version: '2.426.1', lastChecked: '1 hour ago', description: 'Continuous integration server' },
+    { name: 'SonarQube', status: 'warning', type: 'Code Quality', version: '10.3.0', lastChecked: '1 hour ago', description: 'Code quality analysis' },
+    { name: 'Vault', status: 'error', type: 'Security', version: '1.15.2', lastChecked: '1 hour ago', description: 'Secret management' },
+    { name: 'Consul', status: 'healthy', type: 'Service Discovery', version: '1.16.1', lastChecked: '1 hour ago', description: 'Service mesh' },
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -167,16 +167,16 @@ export default function EcosystemDashboard() {
   const fetchEcosystemData = async () => {
     setLoading(true);
     try {
-      // 调用真实API
+      // Call real API
       const response = await fetch('/api/ecosystem/status?format=json');
       if (!response.ok) {
-        throw new Error(`API请求失败: ${response.status}`);
+        throw new Error(`API request failed: ${response.status}`);
       }
       
       const data = await response.json();
       
       if (data.success) {
-        // 更新统计数据
+        // Update stats
         const newStats = {
           ...monitoringStats,
           totalTools: data.data.monitoring.totalTools,
@@ -188,7 +188,7 @@ export default function EcosystemDashboard() {
         };
         setMonitoringStats(newStats);
         
-        // 更新调度器统计
+        // Update scheduler stats
         const newSchedulerStats = {
           ...schedulerStats,
           pending: data.data.scheduler.pending,
@@ -202,18 +202,18 @@ export default function EcosystemDashboard() {
         };
         setSchedulerStats(newSchedulerStats);
         
-        // 更新MCP列表
+        // Update MCP list
         setTools(data.data.tools || []);
         
-        // 更新连接率
+        // Update connection rate
         setConnectionRate(data.data.summary.connectionRate || 68);
       } else {
-        throw new Error(data.error || 'API返回错误');
+        throw new Error(data.error || 'API returned error');
       }
       
     } catch (error) {
-      console.error('获取生态系统数据失败:', error);
-      // 失败时使用模拟数据
+      console.error('Failed to fetch ecosystem data:', error);
+      // Use mock data on failure
       const newStats = {
         ...monitoringStats,
         lastUpdate: new Date().toISOString(),
@@ -254,23 +254,23 @@ export default function EcosystemDashboard() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case '开发MCP': return <Code className="h-4 w-4" />;
-      case '容器化': return <DockerIcon />;
-      case '运行时': return <Cpu className="h-4 w-4" />;
-      case '数据库': return <Database className="h-4 w-4" />;
-      case '缓存': return <Server className="h-4 w-4" />;
-      case 'Web服务器': return <Network className="h-4 w-4" />;
-      case '基础设施': return <Cloud className="h-4 w-4" />;
-      case '编排': return <Workflow className="h-4 w-4" />;
-      case '监控': return <Activity className="h-4 w-4" />;
-      case '可视化': return <BarChart3 className="h-4 w-4" />;
-      case '搜索': return <Search className="h-4 w-4" />;
-      case '日志': return <FileText className="h-4 w-4" />;
-      case '自动化': return <Zap className="h-4 w-4" />;
+      case 'Dev MCP': return <Code className="h-4 w-4" />;
+      case 'Containerization': return <DockerIcon />;
+      case 'Runtime': return <Cpu className="h-4 w-4" />;
+      case 'Database': return <Database className="h-4 w-4" />;
+      case 'Cache': return <Server className="h-4 w-4" />;
+      case 'Web Server': return <Network className="h-4 w-4" />;
+      case 'Infrastructure': return <Cloud className="h-4 w-4" />;
+      case 'Orchestration': return <Workflow className="h-4 w-4" />;
+      case 'Monitoring': return <Activity className="h-4 w-4" />;
+      case 'Visualization': return <BarChart3 className="h-4 w-4" />;
+      case 'Search': return <Search className="h-4 w-4" />;
+      case 'Logging': return <FileText className="h-4 w-4" />;
+      case 'Automation': return <Zap className="h-4 w-4" />;
       case 'CI/CD': return <GitBranch className="h-4 w-4" />;
-      case '代码质量': return <CheckSquare className="h-4 w-4" />;
-      case '安全': return <Shield className="h-4 w-4" />;
-      case '服务发现': return <Network className="h-4 w-4" />;
+      case 'Code Quality': return <CheckSquare className="h-4 w-4" />;
+      case 'Security': return <Shield className="h-4 w-4" />;
+      case 'Service Discovery': return <Network className="h-4 w-4" />;
       default: return <Wrench className="h-4 w-4" />;
     }
   };
@@ -292,7 +292,7 @@ export default function EcosystemDashboard() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-500">加载生态系统数据...</p>
+            <p className="text-gray-500">Loading ecosystem data...</p>
           </div>
         </div>
       </div>
@@ -309,20 +309,20 @@ export default function EcosystemDashboard() {
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
                 <Activity className="h-6 w-6 text-blue-500" />
               </div>
-              MCP生态系统
+              MCP Ecosystem
             </h1>
             <p className="text-gray-600 mt-2">
-              统一管理所有MCP和服务，确保系统稳定运行
+              Unified management of all MCPs and services for stable operation
               {monitoringStats.lastUpdate && (
                 <span className="text-sm text-gray-500 ml-2">
-                  最后更新: <ClientTime timestamp={monitoringStats.lastUpdate} format="time" />
+                  Last updated: <ClientTime timestamp={monitoringStats.lastUpdate} format="time" />
                 </span>
               )}
             </p>
           </div>
           <Button onClick={fetchEcosystemData} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
-            刷新数据
+            Refresh Data
           </Button>
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function EcosystemDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">MCP总数</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Total MCPs</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -340,15 +340,15 @@ export default function EcosystemDashboard() {
             </div>
             <div className="flex gap-4 mt-2">
               <div className="text-sm">
-                <div className="font-medium">健康</div>
+                <div className="font-medium">Healthy</div>
                 <div className="text-2xl text-green-600">{monitoringStats.healthyTools}</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium">警告</div>
+                <div className="font-medium">Warning</div>
                 <div className="text-2xl text-yellow-600">{monitoringStats.warningTools}</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium">错误</div>
+                <div className="font-medium">Error</div>
                 <div className="text-2xl text-red-600">{monitoringStats.errorTools}</div>
               </div>
             </div>
@@ -357,7 +357,7 @@ export default function EcosystemDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">连接率</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Connection Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -368,14 +368,14 @@ export default function EcosystemDashboard() {
             </div>
             <Progress value={connectionRate} className="mt-2" />
             <p className="text-sm text-gray-500 mt-2">
-              {monitoringStats.healthyTools}个MCP正常连接
+              {monitoringStats.healthyTools} MCPs connected
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">调度器状态</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Scheduler Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -384,15 +384,15 @@ export default function EcosystemDashboard() {
             </div>
             <div className="flex gap-4 mt-2">
               <div className="text-sm">
-                <div className="font-medium">待处理</div>
+                <div className="font-medium">Pending</div>
                 <div className="text-2xl">{schedulerStats.pending}</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium">运行中</div>
+                <div className="font-medium">Running</div>
                 <div className="text-2xl">{schedulerStats.running}</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium">已完成</div>
+                <div className="font-medium">Completed</div>
                 <div className="text-2xl">{schedulerStats.completed}</div>
               </div>
             </div>
@@ -401,19 +401,19 @@ export default function EcosystemDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">系统健康</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">System Health</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold">
-                {monitoringStats.errorTools === 0 ? '正常' : '异常'}
+                {monitoringStats.errorTools === 0 ? 'Normal' : 'Abnormal'}
               </div>
               <Heart className="h-8 w-8 text-red-500" />
             </div>
             <div className="flex items-center gap-2 mt-2">
               <div className={`h-2 w-2 rounded-full ${monitoringStats.errorTools === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <span className="text-sm">
-                {monitoringStats.errorTools === 0 ? '所有系统运行正常' : `${monitoringStats.errorTools}个系统异常`}
+                {monitoringStats.errorTools === 0 ? 'All systems running normally' : `${monitoringStats.errorTools} system(s) abnormal`}
               </span>
             </div>
           </CardContent>
@@ -427,7 +427,7 @@ export default function EcosystemDashboard() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索MCP..."
+              placeholder="Search MCPs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
@@ -440,10 +440,10 @@ export default function EcosystemDashboard() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
             >
-              <option value="all">所有状态</option>
-              <option value="healthy">健康</option>
-              <option value="warning">警告</option>
-              <option value="error">错误</option>
+              <option value="all">All Status</option>
+              <option value="healthy">Healthy</option>
+              <option value="warning">Warning</option>
+              <option value="error">Error</option>
             </select>
             
             <select
@@ -451,7 +451,7 @@ export default function EcosystemDashboard() {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
             >
-              <option value="all">所有类型</option>
+              <option value="all">All Types</option>
               {toolTypes.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
@@ -462,11 +462,11 @@ export default function EcosystemDashboard() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Filter className="h-4 w-4 mr-2" />
-            高级筛选
+            Advanced Filter
           </Button>
           <Button size="sm">
             <Zap className="h-4 w-4 mr-2" />
-            快速操作
+            Quick Actions
           </Button>
         </div>
       </div>
@@ -475,30 +475,30 @@ export default function EcosystemDashboard() {
         <TabsList>
           <TabsTrigger value="tools">
             <Wrench className="h-4 w-4 mr-2" />
-            MCP列表
+            MCP List
           </TabsTrigger>
           <TabsTrigger value="categories">
             <div className="h-4 w-4 mr-2">
               <FolderTree />
             </div>
-            分类管理
+            Categories
           </TabsTrigger>
           <TabsTrigger value="monitoring">
             <Activity className="h-4 w-4 mr-2" />
-            实时监控
+            Live Monitoring
           </TabsTrigger>
           <TabsTrigger value="analytics">
             <BarChart3 className="h-4 w-4 mr-2" />
-            数据分析
+            Analytics
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tools" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>🛠️ MCP状态列表</CardTitle>
+              <CardTitle>🛠️ MCP Status List</CardTitle>
               <CardDescription>
-                发现 {filteredTools.length} 个MCP，{monitoringStats.healthyTools} 个健康，{monitoringStats.warningTools} 个警告，{monitoringStats.errorTools} 个错误
+                Found {filteredTools.length} MCPs, {monitoringStats.healthyTools} healthy, {monitoringStats.warningTools} warning, {monitoringStats.errorTools} error
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -527,7 +527,7 @@ export default function EcosystemDashboard() {
                           <Badge className={getStatusColor(tool.status)}>
                             <div className="flex items-center gap-1">
                               {getStatusIcon(tool.status)}
-                              {tool.status === 'healthy' ? '健康' : tool.status === 'warning' ? '警告' : '错误'}
+                              {tool.status === 'healthy' ? 'Healthy' : tool.status === 'warning' ? 'Warning' : 'Error'}
                             </div>
                           </Badge>
                           <Button variant="ghost" size="sm">
@@ -543,19 +543,19 @@ export default function EcosystemDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            查看详情
+                            View Details
                           </Button>
                           <Button variant="outline" size="sm">
-                            运行诊断
+                            Run Diagnostics
                           </Button>
                           {tool.status !== 'healthy' && (
                             <Button size="sm">
-                              修复问题
+                              Fix Issues
                             </Button>
                           )}
                         </div>
                         <div className="text-xs text-gray-500">
-                          最后检查: <LastCheckedTime />
+                          Last checked: <LastCheckedTime />
                         </div>
                       </div>
                     </div>
@@ -564,8 +564,8 @@ export default function EcosystemDashboard() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>未找到匹配的MCP</p>
-                  <p className="text-sm mt-2">尝试调整搜索条件或刷新数据</p>
+                  <p>No matching MCPs found</p>
+                  <p className="text-sm mt-2">Try adjusting search filters or refresh data</p>
                 </div>
               )}
             </CardContent>
@@ -575,8 +575,8 @@ export default function EcosystemDashboard() {
         <TabsContent value="categories" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>📁 MCP分类管理</CardTitle>
-              <CardDescription>按类型组织MCP，便于管理和维护</CardDescription>
+              <CardTitle>📁 MCP Category Management</CardTitle>
+              <CardDescription>Organize MCPs by type for easy management</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -594,28 +594,28 @@ export default function EcosystemDashboard() {
                         </div>
                         <div>
                           <h3 className="font-semibold">{type}</h3>
-                          <p className="text-sm text-gray-500">{typeTools.length} 个MCP</p>
+                          <p className="text-sm text-gray-500">{typeTools.length} MCPs</p>
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">健康</span>
+                          <span className="text-sm">Healthy</span>
                           <span className="font-medium text-green-600">{healthyCount}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">警告</span>
+                          <span className="text-sm">Warning</span>
                           <span className="font-medium text-yellow-600">{warningCount}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">错误</span>
+                          <span className="text-sm">Error</span>
                           <span className="font-medium text-red-600">{errorCount}</span>
                         </div>
                       </div>
                       
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <Button variant="outline" size="sm" className="w-full">
-                          查看全部
+                          View All
                         </Button>
                       </div>
                     </div>
@@ -627,20 +627,20 @@ export default function EcosystemDashboard() {
         </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-4">
-          {/* 外部API监控 */}
+          {/* External API monitoring */}
           <ExternalApiMonitoring />
           
-          {/* 原有监控面板 */}
+          {/* Legacy monitoring panel */}
           <Card>
             <CardHeader>
-              <CardTitle>📊 系统MCP监控面板</CardTitle>
-              <CardDescription>内部MCP和系统组件的实时监控</CardDescription>
+              <CardTitle>📊 System MCP Monitoring</CardTitle>
+              <CardDescription>Real-time monitoring of internal MCPs and system components</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-4 bg-gray-50 rounded-xl">
-                    <h3 className="font-semibold mb-3">连接状态趋势</h3>
+                    <h3 className="font-semibold mb-3">Connection Status Trend</h3>
                     <div className="h-32 flex items-end gap-1">
                       {[65, 72, 68, 75, 80, 85, 82, 88, 90, 92, 95, 98].map((value, index) => (
                         <div key={index} className="flex-1">
@@ -652,31 +652,31 @@ export default function EcosystemDashboard() {
                       ))}
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>7天前</span>
-                      <span>今天</span>
+                      <span>7 days ago</span>
+                      <span>Today</span>
                     </div>
                   </div>
                   
                   <div className="p-4 bg-gray-50 rounded-xl">
-                    <h3 className="font-semibold mb-3">错误率统计</h3>
+                    <h3 className="font-semibold mb-3">Error Rate Statistics</h3>
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span>严重错误</span>
+                          <span>Critical Errors</span>
                           <span className="font-medium">0.2%</span>
                         </div>
                         <Progress value={0.2} className="h-1" />
                       </div>
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span>警告</span>
+                          <span>Warning</span>
                           <span className="font-medium">1.5%</span>
                         </div>
                         <Progress value={1.5} className="h-1" />
                       </div>
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span>连接失败</span>
+                          <span>Connection Failures</span>
                           <span className="font-medium">0.8%</span>
                         </div>
                         <Progress value={0.8} className="h-1" />
@@ -686,12 +686,12 @@ export default function EcosystemDashboard() {
                 </div>
                 
                 <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-2">监控说明</h3>
+                  <h3 className="font-semibold text-blue-800 mb-2">Monitoring Notes</h3>
                   <ul className="text-sm text-blue-700 space-y-1">
-                    <li>• 监控数据每5分钟自动更新一次</li>
-                    <li>• 健康状态基于MCP响应时间和错误率计算</li>
-                    <li>• 警告状态表示MCP性能下降但仍在运行</li>
-                    <li>• 错误状态表示MCP无法正常响应</li>
+                    <li>• Monitoring data auto-updates every 5 minutes</li>
+                    <li>• Health status is calculated based on response time and error rate</li>
+                    <li>• Warning status means MCP performance is degraded but still running</li>
+                    <li>• Error status means MCP cannot respond normally</li>
                   </ul>
                 </div>
               </div>
@@ -702,31 +702,31 @@ export default function EcosystemDashboard() {
         <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>📈 数据分析报告</CardTitle>
-              <CardDescription>MCP使用情况和性能分析</CardDescription>
+              <CardTitle>📈 Data Analytics Report</CardTitle>
+              <CardDescription>MCP usage and performance analysis</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-white border border-gray-200 rounded-xl">
-                    <div className="text-sm text-gray-500 mb-1">最常用MCP</div>
+                    <div className="text-sm text-gray-500 mb-1">Most Used MCP</div>
                     <div className="text-lg font-semibold">GitHub CLI</div>
-                    <div className="text-sm text-gray-500">平均每天使用 42 次</div>
+                    <div className="text-sm text-gray-500">Average 42 uses per day</div>
                   </div>
                   <div className="p-4 bg-white border border-gray-200 rounded-xl">
-                    <div className="text-sm text-gray-500 mb-1">最稳定MCP</div>
+                    <div className="text-sm text-gray-500 mb-1">Most Stable MCP</div>
                     <div className="text-lg font-semibold">Docker</div>
-                    <div className="text-sm text-gray-500">99.8% 可用性</div>
+                    <div className="text-sm text-gray-500">99.8% availability</div>
                   </div>
                   <div className="p-4 bg-white border border-gray-200 rounded-xl">
-                    <div className="text-sm text-gray-500 mb-1">需要关注</div>
+                    <div className="text-sm text-gray-500 mb-1">Needs Attention</div>
                     <div className="text-lg font-semibold">Vault</div>
-                    <div className="text-sm text-gray-500">最近 3 次连接失败</div>
+                    <div className="text-sm text-gray-500">3 recent connection failures</div>
                   </div>
                 </div>
                 
                 <div className="p-4 bg-gray-50 rounded-xl">
-                  <h3 className="font-semibold mb-3">MCP使用频率</h3>
+                  <h3 className="font-semibold mb-3">MCP Usage Frequency</h3>
                   <div className="space-y-3">
                     {[
                       { name: 'GitHub CLI', usage: 95 },
@@ -757,32 +757,32 @@ export default function EcosystemDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Button className="justify-start" variant="outline" onClick={() => window.open('/health', '_blank')}>
           <Activity className="h-4 w-4 mr-2" />
-          健康监控
+          Health Monitoring
         </Button>
         <Button className="justify-start" variant="outline" onClick={() => window.open('/skill-evaluator', '_blank')}>
           <CheckSquare className="h-4 w-4 mr-2" />
-          技能评估
+          Skill Evaluation
         </Button>
         <Button className="justify-start" variant="outline" onClick={() => window.open('/automation', '_blank')}>
           <Zap className="h-4 w-4 mr-2" />
-          自动化设置
+          Automation Settings
         </Button>
         <Button className="justify-start" variant="outline" onClick={() => window.open('/settings', '_blank')}>
           <Settings className="h-4 w-4 mr-2" />
-          系统设置
+          System Settings
         </Button>
       </div>
 
       {/* Footer Info */}
       <div className="mt-8 text-center text-sm text-gray-500">
-        <p>Mission Control 生态系统版本 2.0.0 | 数据自动更新间隔: 5分钟</p>
-        <p className="mt-1">监控系统: http://localhost:3001/health | 调度器: http://localhost:3001/ecosystem/scheduler</p>
+        <p>Mission Control Ecosystem v2.0.0 | Data auto-update interval: 5 minutes</p>
+        <p className="mt-1">Monitoring: http://localhost:3001/health | Scheduler: http://localhost:3001/ecosystem/scheduler</p>
       </div>
     </div>
   );
 }
 
-// 辅助组件
+// Helper components
 function DockerIcon() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">

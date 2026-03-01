@@ -61,7 +61,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
   const [showApiKey, setShowApiKey] = useState(false);
   const [showClientSecret, setShowClientSecret] = useState(false);
   
-  // 表单状态
+  // Form state
   const [formData, setFormData] = useState({
     name: apiName || '',
     provider: provider || '',
@@ -81,25 +81,25 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
   });
 
   const authTypes = [
-    { value: 'api_key', label: 'API密钥' },
+    { value: 'api_key', label: 'API Key' },
     { value: 'oauth', label: 'OAuth 2.0' },
-    { value: 'token', label: '访问令牌' },
-    { value: 'service_account', label: '服务账号' },
-    { value: 'basic', label: '基本认证' },
-    { value: 'none', label: '无需认证' },
+    { value: 'token', label: 'Access Token' },
+    { value: 'service_account', label: 'Service Account' },
+    { value: 'basic', label: 'Basic Auth' },
+    { value: 'none', label: 'No Auth' },
   ];
 
   const categories = [
-    { value: 'ai', label: '人工智能' },
-    { value: 'cloud', label: '云服务' },
-    { value: 'development', label: '开发MCP' },
-    { value: 'analytics', label: '数据分析' },
-    { value: 'ads', label: '广告营销' },
-    { value: 'social', label: '社交媒体' },
-    { value: 'search', label: '搜索服务' },
-    { value: 'audio', label: '音频处理' },
-    { value: 'payment', label: '支付服务' },
-    { value: 'other', label: '其他' },
+    { value: 'ai', label: 'AI' },
+    { value: 'cloud', label: 'Cloud Services' },
+    { value: 'development', label: 'Development MCP' },
+    { value: 'analytics', label: 'Data Analytics' },
+    { value: 'ads', label: 'Advertising' },
+    { value: 'social', label: 'Social Media' },
+    { value: 'search', label: 'Search Services' },
+    { value: 'audio', label: 'Audio Processing' },
+    { value: 'payment', label: 'Payment Services' },
+    { value: 'other', label: 'Other' },
   ];
 
   const providers = [
@@ -112,8 +112,8 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
     { value: 'aws', label: 'AWS', icon: <Cloud className="h-4 w-4" /> },
     { value: 'linkedin', label: 'LinkedIn', icon: <MessageSquare className="h-4 w-4" /> },
     { value: 'brave', label: 'Brave', icon: <Globe className="h-4 w-4" /> },
-    { value: 'transcript', label: '转录服务', icon: <MessageSquare className="h-4 w-4" /> },
-    { value: 'custom', label: '自定义', icon: <Settings className="h-4 w-4" /> },
+    { value: 'transcript', label: 'Transcription', icon: <MessageSquare className="h-4 w-4" /> },
+    { value: 'custom', label: 'Custom', icon: <Settings className="h-4 w-4" /> },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,7 +142,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
             result.catch(err => console.error('onSuccess callback failed:', err));
           }
         }
-        // 重置表单
+        // Reset form
         if (!apiId) {
           setFormData({
             name: '',
@@ -164,7 +164,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
         }
       }
     } catch (error) {
-      console.error('保存API配置失败:', error);
+      console.error('Failed to save API config:', error);
     } finally {
       setLoading(false);
     }
@@ -182,13 +182,13 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
       });
 
       if (res.ok) {
-        alert('连接测试成功！');
+        alert('Connection test successful!');
       } else {
-        alert('连接测试失败，请检查配置。');
+        alert('Connection test failed, please check configuration.');
       }
     } catch (error) {
-      console.error('测试连接失败:', error);
-      alert('测试连接时发生错误。');
+      console.error('Connection test failed:', error);
+      alert('Error occurred during connection test.');
     } finally {
       setLoading(false);
     }
@@ -210,7 +210,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
       });
 
       if (res.ok) {
-        alert('重新认证成功！');
+        alert('Re-authentication successful!');
         if (onSuccess) {
           const result = onSuccess();
           if (result && typeof result.then === 'function') {
@@ -218,11 +218,11 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
           }
         }
       } else {
-        alert('重新认证失败，请检查配置。');
+        alert('Re-authentication failed, please check configuration.');
       }
     } catch (error) {
-      console.error('重新认证失败:', error);
-      alert('重新认证时发生错误。');
+      console.error('Re-authentication failed:', error);
+      alert('Error occurred during re-authentication.');
     } finally {
       setLoading(false);
     }
@@ -239,12 +239,12 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
         {apiId ? (
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
-            配置
+            Configure
           </Button>
         ) : (
           <Button>
             <Key className="h-4 w-4 mr-2" />
-            添加新API
+            Add New API
           </Button>
         )}
       </DialogTrigger>
@@ -252,45 +252,45 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getProviderIcon(formData.provider)}
-            {apiId ? '配置API' : '添加新API'}
+            {apiId ? 'Configure API' : 'Add New API'}
           </DialogTitle>
           <DialogDescription>
             {apiId 
-              ? `配置 ${apiName} 的认证信息和设置`
-              : '添加新的外部API服务集成'
+              ? `Configure authentication and settings for ${apiName}`
+              : 'Add new external API service integration'
             }
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 基本信息 */}
+          {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">基本信息</CardTitle>
-              <CardDescription>API的基本标识信息</CardDescription>
+              <CardTitle className="text-sm">Basic Information</CardTitle>
+              <CardDescription>Basic API identification info</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">API名称 *</Label>
+                  <Label htmlFor="name">API Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="例如: Google Analytics 4"
+                    placeholder="e.g. Google Analytics 4"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="provider">服务提供商 *</Label>
+                  <Label htmlFor="provider">Service Provider *</Label>
                   <Select
                     value={formData.provider}
                     onValueChange={(value) => setFormData({...formData, provider: value})}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="选择提供商" />
+                      <SelectValue placeholder="Select Provider" />
                     </SelectTrigger>
                     <SelectContent>
                       {providers.map(provider => (
@@ -306,14 +306,14 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">类别 *</Label>
+                  <Label htmlFor="category">Category *</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) => setFormData({...formData, category: value})}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="选择类别" />
+                      <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map(category => (
@@ -326,14 +326,14 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="authType">认证类型 *</Label>
+                  <Label htmlFor="authType">Auth Type *</Label>
                   <Select
                     value={formData.authType}
                     onValueChange={(value) => setFormData({...formData, authType: value})}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="选择认证类型" />
+                      <SelectValue placeholder="Select Auth Type" />
                     </SelectTrigger>
                     <SelectContent>
                       {authTypes.map(type => (
@@ -347,18 +347,18 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">描述</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="API的功能和用途描述"
+                  placeholder="Describe API functionality and purpose"
                   rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endpoint">API端点 (可选)</Label>
+                <Label htmlFor="endpoint">API Endpoint (optional)</Label>
                 <Input
                   id="endpoint"
                   value={formData.endpoint}
@@ -369,16 +369,16 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
             </CardContent>
           </Card>
 
-          {/* 认证信息 */}
+          {/* Authentication */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">认证信息</CardTitle>
-              <CardDescription>API访问凭证和密钥</CardDescription>
+              <CardTitle className="text-sm">Authentication</CardTitle>
+              <CardDescription>API access credentials and keys</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {formData.authType === 'api_key' && (
                 <div className="space-y-2">
-                  <Label htmlFor="apiKey">API密钥 *</Label>
+                  <Label htmlFor="apiKey">API Key *</Label>
                   <div className="relative">
                     <Input
                       id="apiKey"
@@ -405,25 +405,25 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="clientId">客户端ID *</Label>
+                      <Label htmlFor="clientId">Client ID *</Label>
                       <Input
                         id="clientId"
                         value={formData.clientId}
                         onChange={(e) => setFormData({...formData, clientId: e.target.value})}
-                        placeholder="客户端ID"
+                        placeholder="Client ID"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="clientSecret">客户端密钥 *</Label>
+                      <Label htmlFor="clientSecret">Client Secret *</Label>
                       <div className="relative">
                         <Input
                           id="clientSecret"
                           type={showClientSecret ? "text" : "password"}
                           value={formData.clientSecret}
                           onChange={(e) => setFormData({...formData, clientSecret: e.target.value})}
-                          placeholder="客户端密钥"
+                          placeholder="Client Secret"
                           required
                         />
                         <Button
@@ -440,13 +440,13 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="refreshToken">刷新令牌 (可选)</Label>
+                    <Label htmlFor="refreshToken">Refresh Token (optional)</Label>
                     <Input
                       id="refreshToken"
                       type="password"
                       value={formData.refreshToken}
                       onChange={(e) => setFormData({...formData, refreshToken: e.target.value})}
-                      placeholder="刷新令牌"
+                      placeholder="Refresh Token"
                     />
                   </div>
                 </>
@@ -454,61 +454,61 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
 
               {formData.authType === 'service_account' && (
                 <div className="space-y-2">
-                  <Label htmlFor="serviceAccount">服务账号JSON (可选)</Label>
+                  <Label htmlFor="serviceAccount">Service Account JSON (optional)</Label>
                   <Textarea
                     id="serviceAccount"
                     value={formData.serviceAccount}
                     onChange={(e) => setFormData({...formData, serviceAccount: e.target.value})}
-                    placeholder="粘贴服务账号JSON内容"
+                    placeholder="Paste service account JSON content"
                     rows={4}
                   />
                 </div>
               )}
 
-              {/* 项目信息 */}
+              {/* Project info */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="projectId">项目ID (可选)</Label>
+                  <Label htmlFor="projectId">Project ID (optional)</Label>
                   <Input
                     id="projectId"
                     value={formData.projectId}
                     onChange={(e) => setFormData({...formData, projectId: e.target.value})}
-                    placeholder="项目ID"
+                    placeholder="Project ID"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="accountId">账号ID (可选)</Label>
+                  <Label htmlFor="accountId">Account ID (optional)</Label>
                   <Input
                     id="accountId"
                     value={formData.accountId}
                     onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-                    placeholder="账号ID"
+                    placeholder="Account ID"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="region">区域 (可选)</Label>
+                  <Label htmlFor="region">Region (optional)</Label>
                   <Input
                     id="region"
                     value={formData.region}
                     onChange={(e) => setFormData({...formData, region: e.target.value})}
-                    placeholder="例如: us-east-1"
+                    placeholder="e.g. us-east-1"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 标签 */}
+          {/* Tags */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">标签</CardTitle>
-              <CardDescription>用于分类和搜索的标签</CardDescription>
+              <CardTitle className="text-sm">Tags</CardTitle>
+              <CardDescription>Tags for categorization and search</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label>常用标签</Label>
+                <Label>Common Tags</Label>
                 <div className="flex flex-wrap gap-2">
                   {['ai', 'cloud', 'api', 'development', 'analytics', 'production', 'test'].map(tag => (
                     <Badge
@@ -540,7 +540,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                   disabled={loading}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  测试连接
+                  Test Connection
                 </Button>
                 <Button
                   type="button"
@@ -549,7 +549,7 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
                   disabled={loading}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  重新认证
+                  Re-authenticate
                 </Button>
               </>
             )}
@@ -559,18 +559,18 @@ export function ApiConfigForm({ apiId, apiName, provider, category, onSuccess }:
               onClick={() => setOpen(false)}
               disabled={loading}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  保存中...
+                  Saving...
                 </>
               ) : (
                 <>
                   <Key className="h-4 w-4 mr-2" />
-                  {apiId ? '更新配置' : '添加API'}
+                  {apiId ? 'Update Config' : 'Add API'}
                 </>
               )}
             </Button>

@@ -158,7 +158,7 @@ export function WorkflowMetricsTab({
                           {trendPoints.slice(-8).map((p) => (
                             <div key={`${p.bucket}-sr`}>
                               <div className="flex justify-between text-xs mb-1">
-                                <span>{new Date(p.bucket).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(p.bucket).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                 <span>{p.successRate.toFixed(1)}%</span>
                               </div>
                               <Progress value={Math.min(100, Math.max(0, p.successRate))} className="h-2" />
@@ -172,7 +172,7 @@ export function WorkflowMetricsTab({
                           {trendPoints.slice(-8).map((p) => (
                             <div key={`${p.bucket}-avg`}>
                               <div className="flex justify-between text-xs mb-1">
-                                <span>{new Date(p.bucket).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(p.bucket).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                 <span>{Math.round(p.averageExecutionTime)}ms</span>
                               </div>
                               <Progress value={Math.min(100, p.averageExecutionTime / 300)} className="h-2" />
@@ -375,7 +375,7 @@ export function WorkflowMetricsTab({
                           <div key={h.id} className="border rounded p-2 text-xs">
                             <div className="flex justify-between">
                               <span className="font-medium">{h.kind}</span>
-                              <span className="text-gray-500">{new Date(h.createdAt).toLocaleString('zh-CN')}</span>
+                              <span className="text-gray-500">{new Date(h.createdAt).toLocaleString('en-US')}</span>
                             </div>
                             <div className="text-gray-600">{h.command}</div>
                           </div>

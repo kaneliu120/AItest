@@ -7,42 +7,42 @@ import { Target, Calendar, TrendingUp, CheckCircle } from "lucide-react";
 export default function MissionProgress() {
   const phases = [
     {
-      name: "阶段1: 生存 (0-3个月)",
-      description: "建立稳定现金流",
+      name: "Phase 1: Survival (0-3 months)",
+      description: "Establish stable cash flow",
       progress: 55,
-      target: "月收入30k PHP",
-      status: "进行中",
+      target: "Monthly income 30k PHP",
+      status: "In Progress",
       tasks: [
-        { name: "外包平台注册", completed: false },
-        { name: "第一个项目获得", completed: false },
-        { name: "本地变现渠道", completed: true },
-        { name: "开发环境搭建", completed: true },
+        { name: "Register on freelance platform", completed: false },
+        { name: "Get first project", completed: false },
+        { name: "Local monetization channels", completed: true },
+        { name: "Dev environment setup", completed: true },
       ]
     },
     {
-      name: "阶段2: 发展 (3-12个月)",
-      description: "打造AI智能体产品线",
+      name: "Phase 2: Growth (3-12 months)",
+      description: "Build AI agent product line",
       progress: 15,
-      target: "月收入100k PHP",
-      status: "规划中",
+      target: "Monthly income 100k PHP",
+      status: "Planning",
       tasks: [
-        { name: "My Skill Shop优化", completed: true },
-        { name: "AI智能体开发", completed: false },
-        { name: "团队建设", completed: false },
-        { name: "市场扩展", completed: false },
+        { name: "My Skill Shop optimization", completed: true },
+        { name: "AI agent development", completed: false },
+        { name: "Team building", completed: false },
+        { name: "Market expansion", completed: false },
       ]
     },
     {
-      name: "阶段3: 扩展 (12-36个月)",
-      description: "AI+iGaming专家服务商",
+      name: "Phase 3: Scale (12-36 months)",
+      description: "AI+iGaming expert service provider",
       progress: 5,
-      target: "月收入500k PHP",
-      status: "规划中",
+      target: "Monthly income 500k PHP",
+      status: "Planning",
       tasks: [
-        { name: "行业专家地位", completed: false },
-        { name: "企业级客户", completed: false },
-        { name: "产品矩阵", completed: false },
-        { name: "区域影响力", completed: false },
+        { name: "Industry expert status", completed: false },
+        { name: "Enterprise clients", completed: false },
+        { name: "Product matrix", completed: false },
+        { name: "Regional influence", completed: false },
       ]
     }
   ];
@@ -52,10 +52,10 @@ export default function MissionProgress() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Target className="h-5 w-5" />
-          三阶段使命进度
+          3-Phase Mission Progress
         </CardTitle>
         <CardDescription>
-          当前进度: 第一阶段 55% | 总体进度 25%
+          Current: Phase 1 55% | Overall 25%
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -82,7 +82,7 @@ export default function MissionProgress() {
                 </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
-                  <span>{phase.tasks.filter(t => t.completed).length}/{phase.tasks.length} 任务完成</span>
+                  <span>{phase.tasks.filter(t => t.completed).length}/{phase.tasks.length} tasks done</span>
                 </div>
               </div>
               

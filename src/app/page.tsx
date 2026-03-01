@@ -97,7 +97,7 @@ const badgeMap: Record<string, string> = {
 async function fetchDashboard(): Promise<DashboardData | null> {
   try {
     const res = await fetch("http://localhost:3001/api/dashboard", { 
-      next: { revalidate: 60 }, // 每60秒重新验证
+      next: { revalidate: 60 }, // revalidate every 60 seconds
       headers: {
         'Accept': 'application/json',
       }
@@ -116,7 +116,7 @@ async function fetchDashboard(): Promise<DashboardData | null> {
     
     const json = await res.json();
     
-    // 验证响应结构
+    // Validate response structure
     if (!json || typeof json !== 'object') {
       console.warn('Dashboard API returned invalid JSON');
       return null;

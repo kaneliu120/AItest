@@ -8,49 +8,49 @@ export default function RecentActivities() {
     {
       id: 1,
       type: "completed",
-      title: "Docker Desktop安装完成",
-      description: "开发环境完全就绪",
-      time: "今天 10:42",
+      title: "Docker Desktop installation complete",
+      description: "Development environment ready",
+      time: "Today 10:42",
       icon: <CheckCircle className="h-4 w-4 text-green-500" />,
     },
     {
       id: 2,
       type: "in-progress",
-      title: "自动化测试集成开发",
-      description: "Mission Control集成进行中",
-      time: "今天 14:29",
+      title: "Automated testing integration dev",
+      description: "Mission Control integration in progress",
+      time: "Today 14:29",
       icon: <Code className="h-4 w-4 text-blue-500" />,
     },
     {
       id: 3,
       type: "pending",
-      title: "Upwork账号注册",
-      description: "等待用户完成注册",
-      time: "今天 10:45",
+      title: "Upwork account registration",
+      description: "Waiting for user to complete registration",
+      time: "Today 10:45",
       icon: <Users className="h-4 w-4 text-amber-500" />,
     },
     {
       id: 4,
       type: "completed",
-      title: "Discord频道配置",
-      description: "7个频道项目映射完成",
-      time: "今天 10:55",
+      title: "Discord channel configuration",
+      description: "7 channel-project mappings complete",
+      time: "Today 10:55",
       icon: <CheckCircle className="h-4 w-4 text-green-500" />,
     },
     {
       id: 5,
       type: "completed",
-      title: "晚间主动性系统配置",
-      description: "今晚20:00首次执行",
-      time: "今天 10:12",
+      title: "Evening initiative system config",
+      description: "First run tonight at 20:00",
+      time: "Today 10:12",
       icon: <Zap className="h-4 w-4 text-purple-500" />,
     },
     {
       id: 6,
       type: "alert",
-      title: "Google Ads OAuth配置",
-      description: "需要完整OAuth凭证",
-      time: "今天 13:23",
+      title: "Google Ads OAuth configuration",
+      description: "Full OAuth credentials needed",
+      time: "Today 13:23",
       icon: <AlertCircle className="h-4 w-4 text-red-500" />,
     },
   ];
@@ -67,11 +67,11 @@ export default function RecentActivities() {
 
   const getStatusText = (type: string) => {
     switch (type) {
-      case "completed": return "已完成";
-      case "in-progress": return "进行中";
-      case "pending": return "等待中";
-      case "alert": return "需注意";
-      default: return "未知";
+      case "completed": return "Completed";
+      case "in-progress": return "In Progress";
+      case "pending": return "Pending";
+      case "alert": return "Attention";
+      default: return "Unknown";
     }
   };
 
@@ -80,10 +80,10 @@ export default function RecentActivities() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          最近活动
+          Recent Activities
         </CardTitle>
         <CardDescription>
-          今日系统活动和任务状态
+          Today's system activities and task status
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -110,16 +110,16 @@ export default function RecentActivities() {
           ))}
         </div>
 
-        {/* 今日统计 */}
+        {/* Today's stats */}
         <div className="mt-6 pt-4 border-t">
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold">6</div>
-              <div className="text-sm text-muted-foreground">今日活动</div>
+              <div className="text-sm text-muted-foreground">Today's Activities</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">4</div>
-              <div className="text-sm text-muted-foreground">已完成</div>
+              <div className="text-sm text-muted-foreground">Completed</div>
             </div>
           </div>
         </div>

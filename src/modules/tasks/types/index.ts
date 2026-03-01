@@ -1,10 +1,10 @@
 /**
- * 任务管理模块类型定义 - 统一出口
+ * Task management module type definitions - unified export
  */
 
-// 核心业务类型
+// Core business types
 export * from './core';
-// 验证类型
+// Validation types
 export * from './validation';
-// 工具类型
+// Utility types
 export * from './utils';

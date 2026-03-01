@@ -1,5 +1,5 @@
 /**
- * 任务管理验证类型
+ * Task management validation types
  */
 
 import { 
@@ -12,7 +12,7 @@ import {
   ProjectStatus 
 } from './core';
 
-// 创建任务的验证类型
+// Validation type for creating tasks
 export interface CreateTaskInput {
   title: string;
   description?: string;
@@ -27,14 +27,14 @@ export interface CreateTaskInput {
   customFields?: Record<string, any>;
 }
 
-// 更新任务的验证类型
+// Validation type for updating tasks
 export interface UpdateTaskInput {
   title?: string;
   description?: string;
   status?: TaskStatus;
   priority?: TaskPriority;
-  assigneeId?: string | null; // null表示取消分配
-  dueDate?: Date | string | null; // null表示清除截止日期
+  assigneeId?: string | null; // null means unassign
+  dueDate?: Date | string | null; // null means clear due date
   tags?: string[];
   estimatedHours?: number;
   actualHours?: number;
@@ -43,7 +43,7 @@ export interface UpdateTaskInput {
   customFields?: Record<string, any>;
 }
 
-// 创建用户的验证类型
+// Validation type for creating users
 export interface CreateUserInput {
   name: string;
   email: string;
@@ -52,7 +52,7 @@ export interface CreateUserInput {
   avatar?: string;
 }
 
-// 更新用户的验证类型
+// Validation type for updating users
 export interface UpdateUserInput {
   name?: string;
   email?: string;
@@ -62,7 +62,7 @@ export interface UpdateUserInput {
   isActive?: boolean;
 }
 
-// 创建项目的验证类型
+// Validation type for creating projects
 export interface CreateProjectInput {
   name: string;
   description?: string;
@@ -74,7 +74,7 @@ export interface CreateProjectInput {
   budget?: number;
 }
 
-// 更新项目的验证类型
+// Validation type for updating projects
 export interface UpdateProjectInput {
   name?: string;
   description?: string;
@@ -89,7 +89,7 @@ export interface UpdateProjectInput {
   progress?: number;
 }
 
-// 添加附件的验证类型
+// Validation type for adding attachments
 export interface AddAttachmentInput {
   taskId: string;
   name: string;
@@ -98,19 +98,19 @@ export interface AddAttachmentInput {
   size: number;
 }
 
-// 添加评论的验证类型
+// Validation type for adding comments
 export interface AddCommentInput {
   taskId: string;
   content: string;
   mentionIds?: string[];
 }
 
-// 更新评论的验证类型
+// Validation type for updating comments
 export interface UpdateCommentInput {
   content: string;
 }
 
-// 任务过滤验证类型
+// Task filter validation type
 export interface ValidateTaskFilter {
   status?: TaskStatus[];
   priority?: TaskPriority[];
@@ -129,7 +129,7 @@ export interface ValidateTaskFilter {
   sortOrder?: 'asc' | 'desc';
 }
 
-// 验证结果类型
+// Validation result type
 export interface ValidationResult<T = any> {
   isValid: boolean;
   data?: T;
@@ -144,7 +144,7 @@ export interface ValidationError {
   value?: any;
 }
 
-// 验证规则类型
+// Validation rule type
 export interface ValidationRule {
   field: string;
   required?: boolean;

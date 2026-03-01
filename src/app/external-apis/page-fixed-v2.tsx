@@ -1,4 +1,4 @@
-// 混合组件 - 服务器组件获取数据，客户端组件处理交互
+// Hybrid component - server component fetches data, client component handles interaction
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import ClientInteractivePart from './client-part-v2';
 
-// 获取API数据
+// Fetch API data
 async function getApiData() {
   try {
     const response = await fetch('http://localhost:3000/api/external-apis', {
@@ -16,18 +16,18 @@ async function getApiData() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取API数据失败:', error);
+    console.error('Failed to fetch API data:', error);
     return { success: false, data: { apis: [] } };
   }
 }
 
-// 获取统计信息
+// Fetch stats
 async function getStats() {
   try {
     const response = await fetch('http://localhost:3000/api/external-apis?action=stats', {
@@ -35,18 +35,18 @@ async function getStats() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    console.error('Failed to fetch stats:', error);
     return { success: false, data: null };
   }
 }
 
-// 获取告警信息
+// Fetch alerts
 async function getAlerts() {
   try {
     const response = await fetch('http://localhost:3000/api/external-apis?action=alerts&resolved=false&limit=5', {
@@ -54,19 +54,19 @@ async function getAlerts() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取告警信息失败:', error);
+    console.error('Failed to fetch alerts:', error);
     return { success: false, data: { alerts: [] } };
   }
 }
 
 export default async function ExternalApisPage() {
-  // 并行获取所有数据
+  // Fetch all data in parallel
   const [apiData, statsData, alertsData] = await Promise.all([
     getApiData(),
     getStats(),
@@ -81,21 +81,21 @@ export default async function ExternalApisPage() {
     <div className="container mx-auto p-4 md:p-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">外部API监控</h1>
+          <h1 className="text-3xl font-bold tracking-tight">External API Monitoring</h1>
           <p className="text-muted-foreground mt-2">
-            监控和管理所有外部API服务的连接状态和性能
+            Monitor and manage the connection status and performance of all external API services
           </p>
         </div>
         
         <div className="flex items-center gap-2">
           <div className="text-sm text-muted-foreground">
-            API数量: <span className="font-semibold text-foreground">{apis.length}</span> | 
-            加载状态: <span className="font-semibold text-foreground">完成 (服务器端渲染)</span>
+            API count: <span className="font-semibold text-foreground">{apis.length}</span> | 
+            Status: <span className="font-semibold text-foreground">Loaded (SSR)</span>
           </div>
         </div>
       </div>
 
-      {/* 传递数据到客户端组件 */}
+      {/* Pass data to client component */}
       <ClientInteractivePart 
         initialApis={apis}
         initialStats={stats}

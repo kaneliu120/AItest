@@ -57,7 +57,7 @@ export default function ExecutionsMonitor() {
   const [search, setSearch] = useState('');
   const [selectedExecution, setSelectedExecution] = useState<string | null>(null);
 
-  // 获取执行记录
+  // Fetch executions
   const fetchExecutions = async () => {
     try {
       const response = await fetch('/api/automation?action=executions');
@@ -73,7 +73,7 @@ export default function ExecutionsMonitor() {
     }
   };
 
-  // 手动触发任务
+  // Trigger task manually
   const triggerTask = async (taskId: string) => {
     try {
       const response = await fetch('/api/automation', {
@@ -86,9 +86,9 @@ export default function ExecutionsMonitor() {
       });
       const data = await response.json();
       if (data.success) {
-        // 显示成功消息
+        // Show success message
         console.log('Task triggered:', data);
-        // 刷新执行记录
+        // Refresh executions
         setTimeout(fetchExecutions, 2000);
       }
     } catch (error) {
@@ -96,7 +96,7 @@ export default function ExecutionsMonitor() {
     }
   };
 
-  // 取消执行
+  // Cancel execution
   const cancelExecution = async (executionId: string) => {
     try {
       const response = await fetch('/api/automation', {
@@ -116,7 +116,7 @@ export default function ExecutionsMonitor() {
     }
   };
 
-  // 获取执行状态颜色
+  // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800';
@@ -128,7 +128,7 @@ export default function ExecutionsMonitor() {
     }
   };
 
-  // 获取执行状态图标
+  // Get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4" />;
@@ -140,7 +140,7 @@ export default function ExecutionsMonitor() {
     }
   };
 
-  // 格式化持续时间
+  // Format duration
   const formatDuration = (ms?: number) => {
     if (!ms) return 'N/A';
     if (ms < 1000) return `${ms}ms`;
@@ -149,12 +149,12 @@ export default function ExecutionsMonitor() {
     return `${Math.floor(ms / 3600000)}h ${Math.floor((ms % 3600000) / 60000)}m`;
   };
 
-  // 过滤执行记录
+  // Filter executions
   const filteredExecutions = executions.filter(exec => {
-    // 状态过滤
+    // Status filter
     if (filter !== 'all' && exec.status !== filter) return false;
     
-    // 搜索过滤
+    // Search filter
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -167,10 +167,10 @@ export default function ExecutionsMonitor() {
     return true;
   });
 
-  // 初始加载
+  // Initial load
   useEffect(() => {
     fetchExecutions();
-    const interval = setInterval(fetchExecutions, 10000); // 每10秒更新一次
+    const interval = setInterval(fetchExecutions, 10000); // Update every 10 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -179,7 +179,7 @@ export default function ExecutionsMonitor() {
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">加载执行记录...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Loading executions...</p>
         </div>
       </div>
     );
@@ -187,30 +187,30 @@ export default function ExecutionsMonitor() {
 
   return (
     <div className="space-y-6">
-      {/* 头部操作栏 */}
+      {/* Header actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">执行监控</h2>
+          <h2 className="text-2xl font-bold">Execution Monitor</h2>
           <p className="text-muted-foreground">
-            监控任务执行状态，查看执行结果和错误信息
+            Monitor task execution status and view results
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={fetchExecutions}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            刷新
+            Refresh
           </Button>
         </div>
       </div>
 
-      {/* 统计卡片 */}
+      {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-3xl font-bold">{stats.totalExecutions}</div>
-                <p className="text-sm text-muted-foreground">总执行次数</p>
+                <p className="text-sm text-muted-foreground">Total Executions</p>
               </div>
             </CardContent>
           </Card>
@@ -218,7 +218,7 @@ export default function ExecutionsMonitor() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600">{stats.successRate}%</div>
-                <p className="text-sm text-muted-foreground">成功率</p>
+                <p className="text-sm text-muted-foreground">Success Rate</p>
               </div>
             </CardContent>
           </Card>
@@ -226,7 +226,7 @@ export default function ExecutionsMonitor() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-3xl font-bold">{formatDuration(stats.averageDuration)}</div>
-                <p className="text-sm text-muted-foreground">平均耗时</p>
+                <p className="text-sm text-muted-foreground">Avg Duration</p>
               </div>
             </CardContent>
           </Card>
@@ -234,7 +234,7 @@ export default function ExecutionsMonitor() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">{stats.activeExecutions}</div>
-                <p className="text-sm text-muted-foreground">活跃执行</p>
+                <p className="text-sm text-muted-foreground">Active Executions</p>
               </div>
             </CardContent>
           </Card>
@@ -242,24 +242,24 @@ export default function ExecutionsMonitor() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-red-600">{stats.failedExecutions}</div>
-                <p className="text-sm text-muted-foreground">失败次数</p>
+                <p className="text-sm text-muted-foreground">Failed</p>
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* 过滤和搜索 */}
+      {/* Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="search">搜索</Label>
+              <Label htmlFor="search">Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="搜索任务名称、模块名称或执行ID..."
+                  placeholder="Search task name, module or execution ID..."
                   className="pl-10"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -267,16 +267,16 @@ export default function ExecutionsMonitor() {
               </div>
             </div>
             <div className="w-full md:w-48">
-              <Label htmlFor="filter">状态过滤</Label>
+              <Label htmlFor="filter">Status Filter</Label>
               <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">全部状态</SelectItem>
-                  <SelectItem value="running">运行中</SelectItem>
-                  <SelectItem value="success">成功</SelectItem>
-                  <SelectItem value="failed">失败</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="running">Running</SelectItem>
+                  <SelectItem value="success">Success</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -284,7 +284,7 @@ export default function ExecutionsMonitor() {
         </CardContent>
       </Card>
 
-      {/* 执行记录列表 */}
+      {/* Execution list */}
       <div className="space-y-4">
         {filteredExecutions.map((exec) => (
           <Card key={exec.id} className="overflow-hidden">
@@ -298,10 +298,10 @@ export default function ExecutionsMonitor() {
                   <CardDescription className="flex items-center gap-2 mt-1">
                     <Badge variant="outline">{exec.moduleName}</Badge>
                     <Badge className={getStatusColor(exec.status)}>
-                      {exec.status === 'success' ? '成功' :
-                       exec.status === 'running' ? '运行中' :
-                       exec.status === 'failed' ? '失败' :
-                       exec.status === 'pending' ? '等待中' : '已取消'}
+                      {exec.status === 'success' ? 'Success' :
+                       exec.status === 'running' ? 'Running' :
+                       exec.status === 'failed' ? 'Failed' :
+                       exec.status === 'pending' ? 'Pending' : 'Cancelled'}
                     </Badge>
                     <span className="text-xs">ID: {exec.id.substring(0, 8)}...</span>
                   </CardDescription>
@@ -312,7 +312,7 @@ export default function ExecutionsMonitor() {
                       variant="ghost"
                       size="icon"
                       onClick={() => cancelExecution(exec.id)}
-                      title="取消执行"
+                      title="Cancel Execution"
                     >
                       <Pause className="h-4 w-4" />
                     </Button>
@@ -321,7 +321,7 @@ export default function ExecutionsMonitor() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSelectedExecution(selectedExecution === exec.id ? null : exec.id)}
-                    title="查看详情"
+                    title="View Details"
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -331,65 +331,65 @@ export default function ExecutionsMonitor() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">开始时间</p>
+                  <p className="text-sm text-muted-foreground">Start Time</p>
                   <p className="font-medium">
                     {new Date(exec.startTime).toLocaleString()}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">持续时间</p>
+                  <p className="text-sm text-muted-foreground">Duration</p>
                   <p className="font-medium">{formatDuration(exec.duration)}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">重试次数</p>
+                  <p className="text-sm text-muted-foreground">Retries</p>
                   <p className="font-medium">{exec.retryCount}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">触发方式</p>
+                  <p className="text-sm text-muted-foreground">Trigger</p>
                   <p className="font-medium">
-                    {exec.metadata.triggeredBy === 'schedule' ? '定时' :
-                     exec.metadata.triggeredBy === 'manual' ? '手动' : '事件'}
+                    {exec.metadata.triggeredBy === 'schedule' ? 'Scheduled' :
+                     exec.metadata.triggeredBy === 'manual' ? 'Manual' : 'Event'}
                   </p>
                 </div>
               </div>
 
-              {/* 详情展开 */}
+              {/* Expanded details */}
               {selectedExecution === exec.id && (
                 <div className="mt-4 space-y-4 border-t pt-4">
-                  {/* 参数信息 */}
+                  {/* Parameters */}
                   {exec.parameters && Object.keys(exec.parameters).length > 0 && (
                     <div>
-                      <p className="text-sm font-medium mb-2">执行参数:</p>
+                      <p className="text-sm font-medium mb-2">Parameters:</p>
                       <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
                         {JSON.stringify(exec.parameters, null, 2)}
                       </pre>
                     </div>
                   )}
 
-                  {/* 结果信息 */}
+                  {/* Result */}
                   {exec.result && (
                     <div>
-                      <p className="text-sm font-medium mb-2">执行结果:</p>
+                      <p className="text-sm font-medium mb-2">Result:</p>
                       <pre className="text-xs bg-green-50 p-3 rounded overflow-x-auto">
                         {JSON.stringify(exec.result, null, 2)}
                       </pre>
                     </div>
                   )}
 
-                  {/* 错误信息 */}
+                  {/* Error */}
                   {exec.error && (
                     <div>
-                      <p className="text-sm font-medium mb-2 text-red-600">错误信息:</p>
+                      <p className="text-sm font-medium mb-2 text-red-600">Error:</p>
                       <pre className="text-xs bg-red-50 p-3 rounded overflow-x-auto">
                         {exec.error}
                       </pre>
                     </div>
                   )}
 
-                  {/* 标签 */}
+                  {/* Tags */}
                   {exec.metadata.tags.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium mb-2">标签:</p>
+                      <p className="text-sm font-medium mb-2">Tags:</p>
                       <div className="flex flex-wrap gap-1">
                         {exec.metadata.tags.map(tag => (
                           <Badge key={tag} variant="secondary">{tag}</Badge>
@@ -402,7 +402,7 @@ export default function ExecutionsMonitor() {
             </CardContent>
             <div className="px-6 py-3 bg-muted/50 border-t flex justify-between">
               <div className="text-xs text-muted-foreground">
-                优先级: {exec.metadata.priority}
+                Priority: {exec.metadata.priority}
               </div>
               <Button
                 variant="ghost"
@@ -411,26 +411,26 @@ export default function ExecutionsMonitor() {
                 onClick={() => triggerTask(exec.taskId)}
               >
                 <Zap className="mr-1 h-3 w-3" />
-                重新执行
+                Re-run
               </Button>
             </div>
           </Card>
         ))}
       </div>
 
-      {/* 空状态 */}
+      {/* Empty state */}
       {filteredExecutions.length === 0 && (
         <Card className="text-center py-12">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold">暂无执行记录</h3>
+          <h3 className="text-lg font-semibold">No executions</h3>
           <p className="text-muted-foreground mt-2 mb-4">
             {search || filter !== 'all' 
-              ? '没有匹配的执行记录'
-              : '还没有任务执行记录'}
+              ? 'No matching executions'
+              : 'No execution records yet'}
           </p>
           {search && (
             <Button variant="outline" onClick={() => setSearch('')}>
-              清除搜索
+              Clear Search
             </Button>
           )}
         </Card>

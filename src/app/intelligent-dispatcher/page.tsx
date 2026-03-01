@@ -91,40 +91,40 @@ export default function IntelligentDispatcherPage() {
   const [activeTab, setActiveTab] = useState('dispatch');
   const [compareResult, setCompareResult] = useState<any>(null);
 
-  // 示例查询
+  // Example queries
   const exampleQueries = [
-    '开发一个用户登录系统',
-    '查找AI模型部署指南',
-    '执行数据库备份脚本',
-    '生成RESTful API文档',
-    '优化前端性能',
-    '配置CI/CD流水线'
+    'Develop a user login system',
+    'Find an AI model deployment guide',
+    'Run a database backup script',
+    'Generate RESTful API documentation',
+    'Optimize frontend performance',
+    'Configure a CI/CD pipeline'
   ];
 
-  // 加载数据
+  // Load data
   const loadData = async () => {
     try {
-      // 加载分发统计
+      // Load dispatch stats
       const statsRes = await fetch('/api/v2/dispatcher?action=stats');
       const statsData = await statsRes.json();
       if (statsData.success) setDispatchStats(statsData.data);
 
-      // 加载系统性能
+      // Load system performance
       const perfRes = await fetch('/api/v2/dispatcher?action=performance');
       const perfData = await perfRes.json();
       if (perfData.success) setSystemPerformance(perfData.data);
 
-      // 加载任务历史
+      // Load task history
       const historyRes = await fetch('/api/v2/dispatcher?action=history&limit=20');
       const historyData = await historyRes.json();
       if (historyData.success) setTaskHistory(historyData.data);
 
-      // 加载配置
+      // Load config
       const configRes = await fetch('/api/v2/dispatcher?action=config');
       const configData = await configRes.json();
       if (configData.success) setConfig(configData.data);
     } catch (error) {
-      console.error('加载数据失败:', error);
+      console.error('Failed to load data:', error);
     }
   };
 
@@ -132,7 +132,7 @@ export default function IntelligentDispatcherPage() {
     loadData();
   }, []);
 
-  // 处理分发
+  // Handle dispatch
   const handleDispatch = async () => {
     if (!query.trim()) return;
 
@@ -151,16 +151,16 @@ export default function IntelligentDispatcherPage() {
       const data = await response.json();
       setResponse(data);
       
-      // 重新加载数据
+      // Reload data
       setTimeout(loadData, 500);
     } catch (error) {
-      console.error('分发失败:', error);
+      console.error('Dispatch failed:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 比较性能
+  // Compare performance
   const handleCompare = async () => {
     if (!query.trim()) return;
 
@@ -178,13 +178,13 @@ export default function IntelligentDispatcherPage() {
       const data = await response.json();
       setCompareResult(data.data);
     } catch (error) {
-      console.error('比较失败:', error);
+      console.error('Comparison failed:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 更新配置
+  // Update config
   const handleUpdateConfig = async (updates: Partial<DispatchConfig>) => {
     if (!config) return;
 
@@ -201,16 +201,16 @@ export default function IntelligentDispatcherPage() {
       const data = await response.json();
       if (data.success) {
         setConfig(data.data);
-        alert('配置更新成功');
+        alert('Config updated successfully');
       }
     } catch (error) {
-      console.error('更新配置失败:', error);
+      console.error('Failed to update config:', error);
     }
   };
 
-  // 清空历史
+  // Clear history
   const handleClearHistory = async () => {
-    if (!confirm('确定要清空历史记录吗？')) return;
+    if (!confirm('Are you sure you want to clear history?')) return;
 
     try {
       const response = await fetch('/api/v2/dispatcher', {
@@ -221,20 +221,20 @@ export default function IntelligentDispatcherPage() {
       
       const data = await response.json();
       if (data.success) {
-        alert('历史记录已清空');
+        alert('History cleared');
         loadData();
       }
     } catch (error) {
-      console.error('清空历史失败:', error);
+      console.error('Failed to clear history:', error);
     }
   };
 
-  // 使用示例查询
+  // Use example query
   const useExampleQuery = (example: string) => {
     setQuery(example);
   };
 
-  // 获取系统颜色
+  // Get system color
   const getSystemColor = (system: string) => {
     switch (system) {
       case 'mission-control': return 'text-blue-600 bg-blue-100';
@@ -244,7 +244,7 @@ export default function IntelligentDispatcherPage() {
     }
   };
 
-  // 获取任务类型颜色
+  // Get task type color
   const getTaskTypeColor = (type: string) => {
     switch (type) {
       case 'code': return 'text-blue-600 bg-blue-100';
@@ -255,7 +255,7 @@ export default function IntelligentDispatcherPage() {
     }
   };
 
-  // 格式化时间
+  // Format time
   const formatTime = (ms: number) => {
     if (ms < 1000) return `${ms}ms`;
     return `${(ms / 1000).toFixed(2)}s`;
@@ -263,24 +263,24 @@ export default function IntelligentDispatcherPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* 标题和状态 */}
+      {/* Title and status */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center">
             <Brain className="h-8 w-8 mr-3 text-blue-600" />
-            智能任务分发系统
+            Intelligent Task Dispatch System
           </h1>
-          <p className="text-gray-600">基于性能学习的智能任务路由和优化</p>
+          <p className="text-gray-600">AI-powered task routing and optimization based on performance learning</p>
         </div>
         <div className="flex items-center space-x-4">
           {dispatchStats && (
             <Badge variant="default" className="text-sm">
-              🎯 成功率: {(dispatchStats.successRate * 100).toFixed(1)}%
+              🎯 Success Rate: {(dispatchStats.successRate * 100).toFixed(1)}%
             </Badge>
           )}
           <Button variant="outline" size="sm" onClick={loadData}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            刷新数据
+            Refresh Data
           </Button>
         </div>
       </div>
@@ -289,42 +289,42 @@ export default function IntelligentDispatcherPage() {
         <TabsList className="grid grid-cols-5 w-full">
           <TabsTrigger value="dispatch" className="flex items-center">
             <Play className="h-4 w-4 mr-2" />
-            任务分发
+            Dispatch
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
-            分析统计
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="monitoring" className="flex items-center">
             <Activity className="h-4 w-4 mr-2" />
-            实时监控
+            Live Monitor
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center">
             <TrendingUp className="h-4 w-4 mr-2" />
-            性能优化
+            Performance
           </TabsTrigger>
           <TabsTrigger value="config" className="flex items-center">
             <Settings className="h-4 w-4 mr-2" />
-            系统配置
+            Config
           </TabsTrigger>
         </TabsList>
 
-        {/* 任务分发标签页 */}
+        {/* Dispatch tab */}
         <TabsContent value="dispatch" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左侧：分发面板 */}
+            {/* Left: Dispatch panel */}
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>智能任务分发</CardTitle>
-                  <CardDescription>输入任务描述，系统将智能选择最优执行路径</CardDescription>
+                  <CardTitle>Intelligent Task Dispatch</CardTitle>
+                  <CardDescription>Enter your task description and the system will intelligently select the optimal execution path</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="query">任务描述</Label>
+                    <Label htmlFor="query">Task Description</Label>
                     <Textarea
                       id="query"
-                      placeholder="例如：开发一个用户登录系统，包含JWT认证和Redis会话管理"
+                      placeholder="e.g. Develop a user login system with JWT auth and Redis session management"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="min-h-[120px]"
@@ -332,38 +332,38 @@ export default function IntelligentDispatcherPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="priority">任务优先级</Label>
+                    <Label htmlFor="priority">Task Priority</Label>
                     <Select value={priority} onValueChange={setPriority}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="low">低优先级</SelectItem>
-                        <SelectItem value="medium">中等优先级</SelectItem>
-                        <SelectItem value="high">高优先级</SelectItem>
-                        <SelectItem value="critical">紧急优先级</SelectItem>
+                        <SelectItem value="low">Low Priority</SelectItem>
+                        <SelectItem value="medium">Medium Priority</SelectItem>
+                        <SelectItem value="high">High Priority</SelectItem>
+                        <SelectItem value="critical">Critical Priority</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="flex flex-wrap gap-3">
                     <Button onClick={handleDispatch} disabled={loading || !query.trim()}>
-                      {loading ? '智能分发中...' : '开始智能分发'}
+                      {loading ? 'Dispatching...' : 'Start Intelligent Dispatch'}
                       <Brain className="ml-2 h-4 w-4" />
                     </Button>
                     
                     <Button variant="outline" onClick={handleCompare} disabled={loading || !query.trim()}>
-                      性能比较
+                      Compare Performance
                       <BarChart3 className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* 示例查询 */}
+              {/* Example queries */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm font-medium">示例任务</CardTitle>
+                  <CardTitle className="text-sm font-medium">Example Tasks</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -382,35 +382,34 @@ export default function IntelligentDispatcherPage() {
                 </CardContent>
               </Card>
 
-              {/* 响应显示 */}
+              {/* Response display */}
               {response && (
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>分发结果</CardTitle>
+                      <CardTitle>Dispatch Result</CardTitle>
                       <div className="flex items-center space-x-2">
                         <Badge className={getTaskTypeColor(response.data.data.taskType)}>
                           {response.data.data.taskType}
                         </Badge>
                         {response.data.data.cached && (
-                          <Badge variant="secondary">缓存命中</Badge>
+                          <Badge variant="secondary">Cache Hit</Badge>
                         )}
                       </div>
                     </div>
                     <CardDescription>
-                      请求ID: {response.requestId} | 
-                      响应时间: {response.data.data.responseTime}ms
+                      Request ID: {response.requestId} | Response Time: {response.data.data.responseTime}ms
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-sm text-gray-500">选择的系统</Label>
+                          <Label className="text-sm text-gray-500">Selected System</Label>
                           <div className="font-medium">{response.data.data.source}</div>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-sm text-gray-500">任务类型</Label>
+                          <Label className="text-sm text-gray-500">Task Type</Label>
                           <div className="font-medium">{response.data.data.taskType}</div>
                         </div>
                       </div>
@@ -425,12 +424,12 @@ export default function IntelligentDispatcherPage() {
                 </Card>
               )}
 
-              {/* 性能比较结果 */}
+              {/* Performance comparison result */}
               {compareResult && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>性能比较结果</CardTitle>
-                    <CardDescription>智能分发 vs 基础分发</CardDescription>
+                    <CardTitle>Performance Comparison Result</CardTitle>
+                    <CardDescription>Intelligent Dispatch vs Basic Dispatch</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -438,24 +437,24 @@ export default function IntelligentDispatcherPage() {
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm font-medium flex items-center">
                             <Brain className="h-4 w-4 mr-2 text-blue-600" />
-                            智能分发
+                            Intelligent Dispatch
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2">
                             <div className="flex justify-between">
-                              <span className="text-sm">响应时间</span>
+                              <span className="text-sm">Response Time</span>
                               <span className="font-medium">{compareResult.intelligent.responseTime}ms</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm">选择的系统</span>
+                              <span className="text-sm">Selected System</span>
                               <Badge className={getSystemColor(compareResult.intelligent.system)}>
                                 {compareResult.intelligent.system}
                               </Badge>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm">缓存状态</span>
-                              <span>{compareResult.intelligent.cached ? '✅ 命中' : '❌ 未命中'}</span>
+                              <span className="text-sm">Cache Status</span>
+                              <span>{compareResult.intelligent.cached ? '✅ Hit' : '❌ Miss'}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -465,24 +464,24 @@ export default function IntelligentDispatcherPage() {
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm font-medium flex items-center">
                             <Network className="h-4 w-4 mr-2 text-gray-600" />
-                            基础分发
+                            Basic Dispatch
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2">
                             <div className="flex justify-between">
-                              <span className="text-sm">响应时间</span>
+                              <span className="text-sm">Response Time</span>
                               <span className="font-medium">{compareResult.basic.responseTime}ms</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm">选择的系统</span>
+                              <span className="text-sm">Selected System</span>
                               <Badge className={getSystemColor(compareResult.basic.system)}>
                                 {compareResult.basic.system}
                               </Badge>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm">缓存状态</span>
-                              <span>{compareResult.basic.cached ? '✅ 命中' : '❌ 未命中'}</span>
+                              <span className="text-sm">Cache Status</span>
+                              <span>{compareResult.basic.cached ? '✅ Hit' : '❌ Miss'}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -492,10 +491,10 @@ export default function IntelligentDispatcherPage() {
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <div className="flex items-center">
                         <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
-                        <span className="font-medium">性能提升: {compareResult.improvement.timeImprovement}</span>
+                        <span className="font-medium">Performance Gain: {compareResult.improvement.timeImprovement}</span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        智能分发系统选择: {compareResult.improvement.systemMatch}
+                        Intelligent dispatch chose: {compareResult.improvement.systemMatch}
                       </p>
                     </div>
                   </CardContent>
@@ -503,26 +502,26 @@ export default function IntelligentDispatcherPage() {
               )}
             </div>
 
-            {/* 右侧：统计面板 */}
+            {/* Right: Stats panel */}
             <div className="space-y-6">
-              {/* 总体统计 */}
+              {/* Overall stats */}
               {dispatchStats && (
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium flex items-center">
                       <Activity className="h-4 w-4 mr-2" />
-                      总体统计
+                      Overall Stats
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">总任务</span>
+                        <span className="text-sm text-gray-600">Total Tasks</span>
                         <span className="font-medium">{dispatchStats.totalTasks}</span>
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">成功率</span>
+                        <span className="text-sm text-gray-600">Success Rate</span>
                         <div className="flex items-center">
                           <span className="font-medium mr-2">{(dispatchStats.successRate * 100).toFixed(1)}%</span>
                           <Progress value={dispatchStats.successRate * 100} className="w-20" />
@@ -530,7 +529,7 @@ export default function IntelligentDispatcherPage() {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">缓存率</span>
+                        <span className="text-sm text-gray-600">Cache Rate</span>
                         <div className="flex items-center">
                           <span className="font-medium mr-2">{(dispatchStats.cacheRate * 100).toFixed(1)}%</span>
                           <Progress value={dispatchStats.cacheRate * 100} className="w-20" />
@@ -538,12 +537,12 @@ export default function IntelligentDispatcherPage() {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">平均响应时间</span>
+                        <span className="text-sm text-gray-600">Avg Response Time</span>
                         <span className="font-medium">{formatTime(dispatchStats.averageExecutionTime)}</span>
                       </div>
                       
                       <div className="pt-2 border-t">
-                        <div className="text-sm text-gray-600 mb-2">系统使用分布</div>
+                        <div className="text-sm text-gray-600 mb-2">System Usage Distribution</div>
                         {Object.entries(dispatchStats.systemStats).map(([system, stats]) => (
                           <div key={system} className="flex items-center justify-between mb-1">
                             <span className="text-xs">{system}</span>
@@ -558,12 +557,12 @@ export default function IntelligentDispatcherPage() {
                 </Card>
               )}
 
-              {/* 最近任务 */}
+              {/* Recent tasks */}
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
-                    最近任务
+                    Recent Tasks
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -579,31 +578,31 @@ export default function IntelligentDispatcherPage() {
                           </div>
                           <div className="flex justify-between text-xs text-gray-500 mt-1">
                             <span>{formatTime(task.executionTime)}</span>
-                            <span>{task.cached ? '💾 缓存' : '🔄 实时'}</span>
+                            <span>{task.cached ? '💾 Cached' : '🔄 Live'}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center text-gray-500 py-4">
-                      暂无任务记录
+                      No task history
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* 快速操作 */}
+              {/* Quick actions */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">快速操作</CardTitle>
+                  <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <Button variant="outline" size="sm" className="w-full" onClick={handleClearHistory}>
-                      清空历史记录
+                      Clear History
                     </Button>
                     <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveTab('config')}>
-                      系统配置
+                      System Config
                     </Button>
                   </div>
                 </CardContent>
@@ -612,33 +611,33 @@ export default function IntelligentDispatcherPage() {
           </div>
         </TabsContent>
 
-        {/* 实时监控标签页 */}
+        {/* Live monitor tab */}
         <TabsContent value="monitoring" className="space-y-6">
           <MonitoringPanel />
         </TabsContent>
 
-        {/* 分析统计标签页 */}
+        {/* Analytics tab */}
         <TabsContent value="analytics" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>系统性能分析</CardTitle>
-              <CardDescription>基于历史数据的智能路由决策分析</CardDescription>
+              <CardTitle>System Performance Analysis</CardTitle>
+              <CardDescription>Intelligent routing decision analysis based on historical data</CardDescription>
             </CardHeader>
             <CardContent>
               {systemPerformance.length > 0 ? (
                 <div className="space-y-6">
-                  {/* 系统性能表格 */}
+                  {/* System performance table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2">系统</th>
-                          <th className="text-left py-2">任务类型</th>
-                          <th className="text-left py-2">请求数</th>
-                          <th className="text-left py-2">成功率</th>
-                          <th className="text-left py-2">平均响应时间</th>
-                          <th className="text-left py-2">预估成本</th>
-                          <th className="text-left py-2">最后使用</th>
+                          <th className="text-left py-2">System</th>
+                          <th className="text-left py-2">Task Type</th>
+                          <th className="text-left py-2">Requests</th>
+                          <th className="text-left py-2">Success Rate</th>
+                          <th className="text-left py-2">Avg Response Time</th>
+                          <th className="text-left py-2">Est. Cost</th>
+                          <th className="text-left py-2">Last Used</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -677,10 +676,10 @@ export default function IntelligentDispatcherPage() {
                     </table>
                   </div>
 
-                  {/* 任务类型分布 */}
+                  {/* Task type distribution */}
                   {dispatchStats && (
                     <div>
-                      <h3 className="text-lg font-medium mb-4">任务类型分布</h3>
+                      <h3 className="text-lg font-medium mb-4">Task Type Distribution</h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {Object.entries(dispatchStats.taskTypeStats).map(([type, stats]) => (
                           <Card key={type}>
@@ -692,7 +691,7 @@ export default function IntelligentDispatcherPage() {
                                 <div className="text-2xl font-bold">{stats.total}</div>
                                 <div className="text-sm text-gray-500">{type}</div>
                                 <div className="text-xs text-gray-400">
-                                  成功率: {((stats.successful / stats.total) * 100).toFixed(1)}%
+                                  Success Rate: {((stats.successful / stats.total) * 100).toFixed(1)}%
                                 </div>
                               </div>
                             </CardContent>
@@ -704,30 +703,30 @@ export default function IntelligentDispatcherPage() {
                 </div>
               ) : (
                 <div className="text-center text-gray-500 py-8">
-                  暂无性能数据
+                  No performance data
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* 性能监控标签页 */}
+        {/* Performance monitoring tab */}
         <TabsContent value="performance" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>实时性能监控</CardTitle>
-              <CardDescription>系统性能趋势和优化建议</CardDescription>
+              <CardTitle>Real-time Performance Monitoring</CardTitle>
+              <CardDescription>System performance trends and optimization suggestions</CardDescription>
             </CardHeader>
             <CardContent>
               {dispatchStats ? (
                 <div className="space-y-6">
-                  {/* 关键指标 */}
+                  {/* Key metrics */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card>
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <div className="text-2xl font-bold">{dispatchStats.totalTasks}</div>
-                          <div className="text-sm text-gray-500">总任务数</div>
+                          <div className="text-sm text-gray-500">Total Tasks</div>
                         </div>
                       </CardContent>
                     </Card>
@@ -738,7 +737,7 @@ export default function IntelligentDispatcherPage() {
                           <div className="text-2xl font-bold text-green-600">
                             {(dispatchStats.successRate * 100).toFixed(1)}%
                           </div>
-                          <div className="text-sm text-gray-500">成功率</div>
+                          <div className="text-sm text-gray-500">Success Rate</div>
                         </div>
                       </CardContent>
                     </Card>
@@ -749,7 +748,7 @@ export default function IntelligentDispatcherPage() {
                           <div className="text-2xl font-bold text-blue-600">
                             {(dispatchStats.cacheRate * 100).toFixed(1)}%
                           </div>
-                          <div className="text-sm text-gray-500">缓存率</div>
+                          <div className="text-sm text-gray-500">Cache Rate</div>
                         </div>
                       </CardContent>
                     </Card>
@@ -758,16 +757,16 @@ export default function IntelligentDispatcherPage() {
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <div className="text-2xl font-bold">{formatTime(dispatchStats.averageExecutionTime)}</div>
-                          <div className="text-sm text-gray-500">平均响应时间</div>
+                          <div className="text-sm text-gray-500">Avg Response Time</div>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
 
-                  {/* 优化建议 */}
+                  {/* Optimization suggestions */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-sm font-medium">优化建议</CardTitle>
+                      <CardTitle className="text-sm font-medium">Optimization Suggestions</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -775,9 +774,9 @@ export default function IntelligentDispatcherPage() {
                           <div className="flex items-start p-3 bg-yellow-50 rounded-lg">
                             <div className="mr-3 mt-0.5">⚠️</div>
                             <div>
-                              <div className="font-medium">缓存率较低</div>
+                              <div className="font-medium">Low Cache Rate</div>
                               <div className="text-sm text-gray-600">
-                                当前缓存率仅{(dispatchStats.cacheRate * 100).toFixed(1)}%，建议增加缓存TTL或优化缓存策略
+                                Current cache rate is only {(dispatchStats.cacheRate * 100).toFixed(1)}%, consider increasing cache TTL or optimizing cache strategy
                               </div>
                             </div>
                           </div>
@@ -787,9 +786,9 @@ export default function IntelligentDispatcherPage() {
                           <div className="flex items-start p-3 bg-red-50 rounded-lg">
                             <div className="mr-3 mt-0.5">❌</div>
                             <div>
-                              <div className="font-medium">成功率需要提升</div>
+                              <div className="font-medium">Success Rate Needs Improvement</div>
                               <div className="text-sm text-gray-600">
-                                当前成功率{(dispatchStats.successRate * 100).toFixed(1)}%，建议检查系统连接和错误处理
+                                Current success rate {(dispatchStats.successRate * 100).toFixed(1)}%, check system connections and error handling
                               </div>
                             </div>
                           </div>
@@ -799,9 +798,9 @@ export default function IntelligentDispatcherPage() {
                           <div className="flex items-start p-3 bg-blue-50 rounded-lg">
                             <div className="mr-3 mt-0.5">⏱️</div>
                             <div>
-                              <div className="font-medium">响应时间较长</div>
+                              <div className="font-medium">High Response Time</div>
                               <div className="text-sm text-gray-600">
-                                平均响应时间{formatTime(dispatchStats.averageExecutionTime)}，建议优化慢查询或增加并行处理
+                                Average response time {formatTime(dispatchStats.averageExecutionTime)}, consider optimizing slow queries or adding parallel processing
                               </div>
                             </div>
                           </div>
@@ -811,9 +810,9 @@ export default function IntelligentDispatcherPage() {
                           <div className="flex items-start p-3 bg-green-50 rounded-lg">
                             <div className="mr-3 mt-0.5">✅</div>
                             <div>
-                              <div className="font-medium">系统运行良好</div>
+                              <div className="font-medium">System Running Well</div>
                               <div className="text-sm text-gray-600">
-                                当前系统性能优秀，继续保持当前配置
+                                Current system performance is excellent, maintain current configuration
                               </div>
                             </div>
                           </div>
@@ -824,32 +823,32 @@ export default function IntelligentDispatcherPage() {
                 </div>
               ) : (
                 <div className="text-center text-gray-500 py-8">
-                  加载性能数据中...
+                  Loading performance data...
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* 系统配置标签页 */}
+        {/* System config tab */}
         <TabsContent value="config" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>智能分发配置</CardTitle>
-              <CardDescription>调整系统权重和策略参数</CardDescription>
+              <CardTitle>Intelligent Dispatch Config</CardTitle>
+              <CardDescription>Adjust system weights and strategy parameters</CardDescription>
             </CardHeader>
             <CardContent>
               {config ? (
                 <div className="space-y-6">
-                  {/* 权重配置 */}
+                  {/* Weight config */}
                   <div>
-                    <h3 className="text-lg font-medium mb-4">决策权重配置</h3>
+                    <h3 className="text-lg font-medium mb-4">Decision Weight Configuration</h3>
                     <div className="space-y-4">
                       {[
-                        { key: 'performanceWeight', label: '性能权重', description: '响应时间的重要性' },
-                        { key: 'costWeight', label: '成本权重', description: '执行成本的重要性' },
-                        { key: 'reliabilityWeight', label: '可靠性权重', description: '成功率的重要性' },
-                        { key: 'cacheWeight', label: '缓存权重', description: '缓存命中率的重要性' }
+                        { key: 'performanceWeight', label: 'Performance Weight', description: 'Importance of response time' },
+                        { key: 'costWeight', label: 'Cost Weight', description: 'Importance of execution cost' },
+                        { key: 'reliabilityWeight', label: 'Reliability Weight', description: 'Importance of success rate' },
+                        { key: 'cacheWeight', label: 'Cache Weight', description: 'Importance of cache hit rate' }
                       ].map((item) => (
                         <div key={item.key} className="space-y-2">
                           <div className="flex justify-between">
@@ -872,12 +871,12 @@ export default function IntelligentDispatcherPage() {
                     </div>
                   </div>
 
-                  {/* 策略配置 */}
+                  {/* Strategy config */}
                   <div>
-                    <h3 className="text-lg font-medium mb-4">执行策略配置</h3>
+                    <h3 className="text-lg font-medium mb-4">Execution Strategy Configuration</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="defaultStrategy">默认策略</Label>
+                        <Label htmlFor="defaultStrategy">Default Strategy</Label>
                         <Select 
                           value={config.defaultStrategy} 
                           onValueChange={(value) => handleUpdateConfig({ defaultStrategy: value })}
@@ -886,16 +885,16 @@ export default function IntelligentDispatcherPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="optimistic">乐观执行</SelectItem>
-                            <SelectItem value="sequential">顺序执行</SelectItem>
-                            <SelectItem value="parallel">并行执行</SelectItem>
-                            <SelectItem value="fallback">回退执行</SelectItem>
+                            <SelectItem value="optimistic">Optimistic</SelectItem>
+                            <SelectItem value="sequential">Sequential</SelectItem>
+                            <SelectItem value="parallel">Parallel</SelectItem>
+                            <SelectItem value="fallback">Fallback</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="maxParallelTasks">最大并行任务数</Label>
+                        <Label htmlFor="maxParallelTasks">Max Parallel Tasks</Label>
                         <input
                           type="number"
                           id="maxParallelTasks"
@@ -917,7 +916,7 @@ export default function IntelligentDispatcherPage() {
                           onChange={(e) => handleUpdateConfig({ enablePredictiveRouting: e.target.checked })}
                           className="rounded"
                         />
-                        <Label htmlFor="enablePredictiveRouting">启用预测性路由</Label>
+                        <Label htmlFor="enablePredictiveRouting">Enable Predictive Routing</Label>
                       </div>
                       
                       <div className="flex items-center space-x-2">
@@ -928,35 +927,35 @@ export default function IntelligentDispatcherPage() {
                           onChange={(e) => handleUpdateConfig({ enableLoadBalancing: e.target.checked })}
                           className="rounded"
                         />
-                        <Label htmlFor="enableLoadBalancing">启用负载均衡</Label>
+                        <Label htmlFor="enableLoadBalancing">Enable Load Balancing</Label>
                       </div>
                     </div>
                   </div>
 
-                  {/* 配置摘要 */}
+                  {/* Config summary */}
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">当前配置摘要</CardTitle>
+                      <CardTitle className="text-sm font-medium">Current Config Summary</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-sm space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">总权重:</span>
+                          <span className="text-gray-600">Total Weight:</span>
                           <span className="font-medium">
                             {(config.performanceWeight + config.costWeight + config.reliabilityWeight + config.cacheWeight) * 100}%
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">默认策略:</span>
+                          <span className="text-gray-600">Default Strategy:</span>
                           <span className="font-medium">{config.defaultStrategy}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">预测路由:</span>
-                          <span className="font-medium">{config.enablePredictiveRouting ? '启用' : '禁用'}</span>
+                          <span className="text-gray-600">Predictive Routing:</span>
+                          <span className="font-medium">{config.enablePredictiveRouting ? 'Enabled' : 'Disabled'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">负载均衡:</span>
-                          <span className="font-medium">{config.enableLoadBalancing ? '启用' : '禁用'}</span>
+                          <span className="text-gray-600">Load Balancing:</span>
+                          <span className="font-medium">{config.enableLoadBalancing ? 'Enabled' : 'Disabled'}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -967,8 +966,8 @@ export default function IntelligentDispatcherPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="realtime"><div className="text-center py-12 text-gray-400">实时监控开发中...</div></TabsContent>
-        <TabsContent value="performance"><div className="text-center py-12 text-gray-400">性能分析开发中...</div></TabsContent>
+        <TabsContent value="realtime"><div className="text-center py-12 text-gray-400">Real-time monitoring coming soon...</div></TabsContent>
+        <TabsContent value="performance"><div className="text-center py-12 text-gray-400">Performance analysis coming soon...</div></TabsContent>
       </Tabs>
     </div>
   );

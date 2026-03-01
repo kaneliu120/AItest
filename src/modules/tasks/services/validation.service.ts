@@ -1,5 +1,5 @@
 /**
- * 任务管理验证服务
+ * Task management validation service
  */
 
 import { 
@@ -15,23 +15,23 @@ export class ValidationService {
     const errors: ValidationError[] = [];
 
     if (!input.title || input.title.trim().length === 0) {
-      errors.push({ field: 'title', message: '任务标题不能为空', code: 'REQUIRED' });
+      errors.push({ field: 'title', message: 'Task title cannot be empty', code: 'REQUIRED' });
     } else if (input.title.length > 200) {
-      errors.push({ field: 'title', message: '任务标题不能超过200个字符', code: 'MAX_LENGTH', value: input.title.length });
+      errors.push({ field: 'title', message: 'Task title cannot exceed 200 characters', code: 'MAX_LENGTH', value: input.title.length });
     }
 
     if (input.description && input.description.length > 5000) {
-      errors.push({ field: 'description', message: '描述不能超过5000个字符', code: 'MAX_LENGTH' });
+      errors.push({ field: 'description', message: 'Description cannot exceed 5000 characters', code: 'MAX_LENGTH' });
     }
 
     if (input.estimatedHours !== undefined && input.estimatedHours < 0) {
-      errors.push({ field: 'estimatedHours', message: '预估时间不能为负数', code: 'MIN_VALUE' });
+      errors.push({ field: 'estimatedHours', message: 'Estimated hours cannot be negative', code: 'MIN_VALUE' });
     }
 
     if (input.dueDate) {
       const due = new Date(input.dueDate);
       if (isNaN(due.getTime())) {
-        errors.push({ field: 'dueDate', message: '截止日期格式无效', code: 'INVALID_FORMAT' });
+        errors.push({ field: 'dueDate', message: 'Due date format is invalid', code: 'INVALID_FORMAT' });
       }
     }
 
@@ -48,18 +48,18 @@ export class ValidationService {
 
     if (input.title !== undefined) {
       if (input.title.trim().length === 0) {
-        errors.push({ field: 'title', message: '任务标题不能为空', code: 'REQUIRED' });
+        errors.push({ field: 'title', message: 'Task title cannot be empty', code: 'REQUIRED' });
       } else if (input.title.length > 200) {
-        errors.push({ field: 'title', message: '任务标题不能超过200个字符', code: 'MAX_LENGTH' });
+        errors.push({ field: 'title', message: 'Task title cannot exceed 200 characters', code: 'MAX_LENGTH' });
       }
     }
 
     if (input.estimatedHours !== undefined && input.estimatedHours < 0) {
-      errors.push({ field: 'estimatedHours', message: '预估时间不能为负数', code: 'MIN_VALUE' });
+      errors.push({ field: 'estimatedHours', message: 'Estimated hours cannot be negative', code: 'MIN_VALUE' });
     }
 
     if (input.actualHours !== undefined && input.actualHours < 0) {
-      errors.push({ field: 'actualHours', message: '实际时间不能为负数', code: 'MIN_VALUE' });
+      errors.push({ field: 'actualHours', message: 'Actual hours cannot be negative', code: 'MIN_VALUE' });
     }
 
     return {
@@ -74,11 +74,11 @@ export class ValidationService {
     const errors: ValidationError[] = [];
 
     if (filter.page !== undefined && filter.page < 1) {
-      errors.push({ field: 'page', message: '页码必须大于0', code: 'MIN_VALUE' });
+      errors.push({ field: 'page', message: 'Page number must be greater than 0', code: 'MIN_VALUE' });
     }
 
     if (filter.limit !== undefined && (filter.limit < 1 || filter.limit > 100)) {
-      errors.push({ field: 'limit', message: '每页数量必须在1-100之间', code: 'RANGE_ERROR' });
+      errors.push({ field: 'limit', message: 'Items per page must be between 1 and 100', code: 'RANGE_ERROR' });
     }
 
     return {

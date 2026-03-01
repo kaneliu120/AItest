@@ -18,8 +18,8 @@ export default function TaskForm({ onSubmit }: Props) {
       }}
       className="space-y-3"
     >
-      <input className="w-full border rounded px-3 py-2" placeholder="任务标题" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <button disabled={loading} className="w-full bg-blue-600 text-white rounded px-3 py-2">{loading ? '创建中...' : '创建任务'}</button>
+      <input className="w-full border rounded px-3 py-2" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <button disabled={loading} className="w-full bg-blue-600 text-white rounded px-3 py-2">{loading ? 'Creating...' : 'Create Task'}</button>
     </form>
   );
 }

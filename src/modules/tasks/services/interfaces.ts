@@ -1,5 +1,5 @@
 /**
- * 任务管理服务接口定义
+ * Task management service interface definitions
  */
 
 import { 
@@ -16,7 +16,7 @@ import {
 } from '../types';
 
 /**
- * 任务存储接口
+ * Task repository interface
  */
 export interface ITaskRepository {
   create(task: Task): Promise<Task>;
@@ -29,7 +29,7 @@ export interface ITaskRepository {
 }
 
 /**
- * 用户服务接口
+ * User service interface
  */
 export interface IUserService {
   getUser(id: string): Promise<User | null>;
@@ -38,7 +38,7 @@ export interface IUserService {
 }
 
 /**
- * 项目服务接口
+ * Project service interface
  */
 export interface IProjectService {
   getProject(id: string): Promise<Project | null>;
@@ -47,7 +47,7 @@ export interface IProjectService {
 }
 
 /**
- * 事件发布接口
+ * Event publisher interface
  */
 export interface IEventPublisher {
   publish(event: TaskEvent): Promise<void>;
@@ -55,7 +55,7 @@ export interface IEventPublisher {
 }
 
 /**
- * 验证服务接口
+ * Validation service interface
  */
 export interface IValidationService {
   validateCreateTask(input: CreateTaskInput): { isValid: boolean; errors: string[] };
@@ -64,7 +64,7 @@ export interface IValidationService {
 }
 
 /**
- * 任务服务接口
+ * Task service interface
  */
 export interface ITaskService {
   createTask(input: CreateTaskInput, creatorId: string): Promise<ApiResponse<Task>>;
@@ -77,7 +77,7 @@ export interface ITaskService {
 }
 
 /**
- * 任务查询接口
+ * Task query interface
  */
 export interface ITaskQueryService {
   getTasksByAssignee(assigneeId: string): Promise<Task[]>;
@@ -89,7 +89,7 @@ export interface ITaskQueryService {
 }
 
 /**
- * 任务操作接口
+ * Task operation interface
  */
 export interface ITaskOperationService {
   assignTask(taskId: string, assigneeId: string): Promise<ApiResponse<Task>>;
@@ -102,7 +102,7 @@ export interface ITaskOperationService {
 }
 
 /**
- * 任务统计接口
+ * Task statistics interface
  */
 export interface ITaskStatisticsService {
   getTaskStats(): Promise<TaskStats>;
@@ -129,7 +129,7 @@ export interface ITaskStatisticsService {
 }
 
 /**
- * 任务通知接口
+ * Task notification interface
  */
 export interface ITaskNotificationService {
   notifyTaskCreated(task: Task): Promise<void>;
@@ -140,4 +140,4 @@ export interface ITaskNotificationService {
   notifyCommentAdded(task: Task, comment: any): Promise<void>;
 }
 
-// 注：所有接口已通过 export interface 直接导出
+// Note: all interfaces are exported directly via export interface

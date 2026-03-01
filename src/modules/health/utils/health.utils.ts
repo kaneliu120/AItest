@@ -1,11 +1,11 @@
 /**
- * 健康监控工具函数
+ * Health monitoring utility functions
  */
 
 import { HealthMetric, SystemMetrics, HealthAlert } from '../types';
 
 /**
- * 格式化字节大小
+ * Format byte size
  */
 export function formatBytes(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return '0 Bytes';
@@ -20,14 +20,14 @@ export function formatBytes(bytes: number, decimals: number = 2): string {
 }
 
 /**
- * 格式化百分比
+ * Format percentage
  */
 export function formatPercent(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 
 /**
- * 格式化时间间隔
+ * Format time duration
  */
 export function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}ms`;
@@ -40,7 +40,7 @@ export function formatDuration(ms: number): string {
 }
 
 /**
- * 计算指标趋势
+ * Calculate metric trend
  */
 export function calculateTrend(
   current: number,
@@ -59,7 +59,7 @@ export function calculateTrend(
 }
 
 /**
- * 评估健康状态
+ * Evaluate health status
  */
 export function evaluateHealthStatus(
   value: number,
@@ -71,7 +71,7 @@ export function evaluateHealthStatus(
 }
 
 /**
- * 过滤和排序告警
+ * Filter and sort alerts
  */
 export function filterAndSortAlerts(
   alerts: HealthAlert[],
@@ -84,23 +84,23 @@ export function filterAndSortAlerts(
 ): HealthAlert[] {
   let filtered = [...alerts];
 
-  // 按级别过滤
+  // Filter by level
   if (options.level && options.level.length > 0) {
     filtered = filtered.filter(alert => options.level!.includes(alert.level));
   }
 
-  // 按确认状态过滤
+  // Filter by acknowledged state
   if (options.acknowledged !== undefined) {
     filtered = filtered.filter(alert => alert.acknowledged === options.acknowledged);
   }
 
-  // 按时间过滤
+  // Filter by time
   if (options.maxAgeHours) {
     const cutoff = new Date(Date.now() - options.maxAgeHours * 60 * 60 * 1000);
     filtered = filtered.filter(alert => alert.timestamp >= cutoff);
   }
 
-  // 排序
+  // Sort
   if (options.sortBy === 'timestamp') {
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   } else if (options.sortBy === 'level') {
@@ -112,7 +112,7 @@ export function filterAndSortAlerts(
 }
 
 /**
- * 生成健康报告摘要
+ * Generate health report summary
  */
 export function generateHealthSummary(
   metrics: SystemMetrics,
@@ -137,19 +137,19 @@ export function generateHealthSummary(
   const recommendations: string[] = [];
 
   if (metrics.cpuUsage > 80) {
-    recommendations.push('考虑优化CPU密集型任务或增加计算资源');
+    recommendations.push('Consider optimizing CPU-intensive tasks or adding more compute resources');
   }
 
   if (metrics.memoryUsage > 85) {
-    recommendations.push('检查内存泄漏或考虑增加内存');
+    recommendations.push('Check for memory leaks or consider adding more memory');
   }
 
   if (metrics.errorRate > 5) {
-    recommendations.push('调查错误原因并修复');
+    recommendations.push('Investigate error causes and fix them');
   }
 
   if (criticalAlerts.length > 0) {
-    recommendations.push('立即处理关键告警');
+    recommendations.push('Address critical alerts immediately');
   }
 
   return {
@@ -161,7 +161,7 @@ export function generateHealthSummary(
 }
 
 /**
- * 验证健康数据
+ * Validate health data
  */
 export function validateHealthData(data: any): boolean {
   if (!data || typeof data !== 'object') return false;
@@ -172,7 +172,7 @@ export function validateHealthData(data: any): boolean {
     if (!(field in data)) return false;
   }
 
-  // 验证类型
+  // Validate types
   if (typeof data.overallHealth !== 'number' || data.overallHealth < 0 || data.overallHealth > 100) {
     return false;
   }
@@ -185,7 +185,7 @@ export function validateHealthData(data: any): boolean {
 }
 
 /**
- * 模拟健康数据（用于测试）
+ * Generate mock health data (for testing)
  */
 export function generateMockHealthData(): any {
   return {
@@ -218,7 +218,7 @@ export function generateMockHealthData(): any {
     alerts: Math.random() > 0.7 ? [
       {
         level: Math.random() > 0.5 ? 'warning' : 'error',
-        message: 'CPU使用率超过阈值',
+        message: 'CPU usage exceeded threshold',
         timestamp: new Date(),
         acknowledged: false
       }
@@ -228,7 +228,7 @@ export function generateMockHealthData(): any {
 }
 
 /**
- * 导出所有工具函数
+ * Export all utility functions
  */
 export default {
   formatBytes,

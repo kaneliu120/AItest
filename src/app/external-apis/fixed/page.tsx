@@ -1,4 +1,4 @@
-// 混合组件 - 服务器组件获取数据，客户端组件处理交互
+// Mixed component - server component fetches data, client component handles interaction
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import ClientInteractivePart from './client-part';
 
-// 获取API数据
+// Fetch API data
 async function getApiData() {
   try {
     const response = await fetch('http://localhost:3001/api/external-apis', {
@@ -16,18 +16,18 @@ async function getApiData() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取API数据失败:', error);
+    console.error('Failed to fetch API data:', error);
     return { success: false, data: { apis: [] } };
   }
 }
 
-// 获取统计信息
+// Fetch stats
 async function getStats() {
   try {
     const response = await fetch('http://localhost:3001/api/external-apis?action=stats', {
@@ -35,18 +35,18 @@ async function getStats() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    console.error('Failed to fetch stats:', error);
     return { success: false, data: null };
   }
 }
 
-// 获取告警信息
+// Fetch alerts
 async function getAlerts() {
   try {
     const response = await fetch('http://localhost:3001/api/external-apis?action=alerts&resolved=false&limit=5', {
@@ -54,19 +54,19 @@ async function getAlerts() {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP错误: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取告警信息失败:', error);
+    console.error('Failed to fetch alerts:', error);
     return { success: false, data: { alerts: [] } };
   }
 }
 
 export default async function FixedExternalApisPage() {
-  // 并行获取所有数据
+  // Fetch all data in parallel
   const [apiData, statsData, alertsData] = await Promise.all([
     getApiData(),
     getStats(),
@@ -80,72 +80,72 @@ export default async function FixedExternalApisPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* 标题和控制栏 */}
+        {/* Title and controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              🌐 外部API监控中心
+              🌐 External API Monitoring Center
             </h1>
-            <p className="text-muted-foreground">监控和管理所有外部API服务的状态和配置</p>
-            <p className="text-xs text-slate-500 mt-1">API数量: {apis.length} | 加载状态: 完成 (服务器端渲染)</p>
+            <p className="text-muted-foreground">Monitor and manage the status and configuration of all external API services</p>
+            <p className="text-xs text-slate-500 mt-1">APIs: {apis.length} | Load status: Complete (server-side rendering)</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <Button variant="outline" size="default">
-              🔄 检查所有API
+              🔄 Check All APIs
             </Button>
             <Link href="/external-apis/detailed">
               <Button variant="outline" size="default">
-                📊 详细列表
+                📊 Detailed List
               </Button>
             </Link>
             <Button size="default">
-              🔑 添加新API
+              🔑 Add New API
             </Button>
             <Button variant="outline" size="default">
-              ⚙️ 设置
+              ⚙️ Settings
             </Button>
           </div>
         </div>
         
-        {/* 统计卡片 */}
+        {/* Stats cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">API总数</CardTitle>
+              <CardTitle className="text-sm font-medium">Total APIs</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{apis.length}</div>
-              <p className="text-xs text-slate-500">已配置的外部API服务</p>
+              <p className="text-xs text-slate-500">Configured external API services</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">活跃API</CardTitle>
+              <CardTitle className="text-sm font-medium">Active APIs</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {apis.filter((api: any) => api.status === 'active').length}
               </div>
-              <p className="text-xs text-slate-500">当前可用的API服务</p>
+              <p className="text-xs text-slate-500">Currently available API services</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">平均响应时间</CardTitle>
+              <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {stats?.averageResponseTime ? `${stats.averageResponseTime.toFixed(1)}ms` : 'N/A'}
               </div>
-              <p className="text-xs text-slate-500">所有API的平均响应时间</p>
+              <p className="text-xs text-slate-500">Average response time across all APIs</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">成功率</CardTitle>
+              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -156,47 +156,47 @@ export default async function FixedExternalApisPage() {
           </Card>
         </div>
         
-        {/* 客户端交互部分 */}
+        {/* Client interaction section */}
         <ClientInteractivePart initialApis={apis} />
         
-        {/* 操作指南 */}
+        {/* Operation guide */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">操作指南</CardTitle>
+            <CardTitle className="text-sm font-medium">Operation Guide</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
-                  🔑 添加新API
+                  🔑 Add New API
                 </h4>
                 <ul className="text-sm text-slate-600 space-y-1">
-                  <li>1. 点击"添加API"按钮</li>
-                  <li>2. 填写API基本信息</li>
-                  <li>3. 配置认证信息</li>
-                  <li>4. 保存并测试连接</li>
+                  <li>1. Click the "Add API" button</li>
+                  <li>2. Fill in the basic API information</li>
+                  <li>3. Configure authentication</li>
+                  <li>4. Save and test the connection</li>
                 </ul>
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
-                  🔧 故障排除
+                  🔧 Troubleshooting
                 </h4>
                 <ul className="text-sm text-slate-600 space-y-1">
-                  <li>• 检查API密钥是否过期</li>
-                  <li>• 验证网络连接</li>
-                  <li>• 检查API配额限制</li>
-                  <li>• 查看错误日志详情</li>
+                  <li>• Check if API keys are expired</li>
+                  <li>• Verify network connectivity</li>
+                  <li>• Check API quota limits</li>
+                  <li>• Review error log details</li>
                 </ul>
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
-                  🛡️ 安全建议
+                  🛡️ Security Best Practices
                 </h4>
                 <ul className="text-sm text-slate-600 space-y-1">
-                  <li>• 定期轮换API密钥</li>
-                  <li>• 使用最小必要权限</li>
-                  <li>• 监控异常调用模式</li>
-                  <li>• 启用API使用审计</li>
+                  <li>• Rotate API keys regularly</li>
+                  <li>• Use least-privilege access</li>
+                  <li>• Monitor for abnormal call patterns</li>
+                  <li>• Enable API usage auditing</li>
                 </ul>
               </div>
             </div>
@@ -204,8 +204,8 @@ export default async function FixedExternalApisPage() {
         </Card>
         
         <div className="text-center text-sm text-slate-500 pt-4">
-          <p>外部API监控数据每60秒自动刷新 • 最后更新: {new Date().toLocaleString()}</p>
-          <p className="mt-1">支持: Google APIs • OpenAI • Anthropic • GitHub • Azure • LinkedIn • Brave Search</p>
+          <p>External API data refreshes every 60s • Last updated: {new Date().toLocaleString()}</p>
+          <p className="mt-1">Supports: Google APIs • OpenAI • Anthropic • GitHub • Azure • LinkedIn • Brave Search</p>
         </div>
       </div>
     </div>

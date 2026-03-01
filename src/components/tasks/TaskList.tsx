@@ -28,8 +28,8 @@ export default function TaskList({ tasks, selectedIds = [], onToggleSelect, onUp
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => onUpdateStatus?.(t.id, 'in-progress')} className="text-xs px-2 py-1 border rounded">进行中</button>
-                <button onClick={() => onUpdateStatus?.(t.id, 'completed')} className="text-xs px-2 py-1 border rounded">完成</button>
+                <button onClick={() => onUpdateStatus?.(t.id, 'in-progress')} className="text-xs px-2 py-1 border rounded">In Progress</button>
+                <button onClick={() => onUpdateStatus?.(t.id, 'completed')} className="text-xs px-2 py-1 border rounded">Complete</button>
               </div>
             </div>
           </div>

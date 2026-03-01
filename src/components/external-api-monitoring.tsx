@@ -104,22 +104,22 @@ export function ExternalApiMonitoring() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 获取API列表
+      // Fetch API list
       const apisRes = await fetch('/api/external-apis');
       const apisData = await apisRes.json();
       setApis(apisData);
 
-      // 获取统计信息
+      // Fetch stats
       const statsRes = await fetch('/api/external-apis?action=stats');
       const statsData = await statsRes.json();
       setStats(statsData);
 
-      // 获取告警
+      // Fetch alerts
       const alertsRes = await fetch('/api/external-apis?action=alerts&resolved=false&limit=5');
       const alertsData = await alertsRes.json();
       setAlerts(alertsData);
     } catch (error) {
-      console.error('获取外部API数据失败:', error);
+      console.error('Failed to fetch external API data:', error);
     } finally {
       setLoading(false);
     }
@@ -133,10 +133,10 @@ export function ExternalApiMonitoring() {
         body: JSON.stringify({ action: 'check', apiId }),
       });
       if (res.ok) {
-        fetchData(); // 刷新数据
+        fetchData(); // Refresh data
       }
     } catch (error) {
-      console.error('检查API失败:', error);
+      console.error('Failed to check API:', error);
     }
   };
 
@@ -148,10 +148,10 @@ export function ExternalApiMonitoring() {
         body: JSON.stringify({ action: 'check-all' }),
       });
       if (res.ok) {
-        fetchData(); // 刷新数据
+        fetchData(); // Refresh data
       }
     } catch (error) {
-      console.error('检查所有API失败:', error);
+      console.error('Failed to check all APIs:', error);
     }
   };
 
@@ -163,10 +163,10 @@ export function ExternalApiMonitoring() {
         body: JSON.stringify({ action: 'resolve-alert', alertId }),
       });
       if (res.ok) {
-        fetchData(); // 刷新数据
+        fetchData(); // Refresh data
       }
     } catch (error) {
-      console.error('解决告警失败:', error);
+      console.error('Failed to resolve alert:', error);
     }
   };
 
@@ -205,10 +205,10 @@ export function ExternalApiMonitoring() {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     
-    if (diffMins < 1) return '刚刚';
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}小时前`;
-    return `${Math.floor(diffMins / 1440)}天前`;
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}min ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    return `${Math.floor(diffMins / 1440)}d ago`;
   };
 
   if (loading) {
@@ -217,7 +217,7 @@ export function ExternalApiMonitoring() {
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            <span className="ml-3">加载外部API数据...</span>
+            <span className="ml-3">Loading external API data...</span>
           </div>
         </CardContent>
       </Card>
@@ -226,13 +226,13 @@ export function ExternalApiMonitoring() {
 
   return (
     <div className="space-y-6">
-      {/* 统计卡片 */}
+      {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">总API数量</p>
+                <p className="text-sm font-medium text-gray-500">Total APIs</p>
                 <p className="text-2xl font-bold">{stats?.total || 0}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -246,10 +246,10 @@ export function ExternalApiMonitoring() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">健康状态</p>
+                <p className="text-sm font-medium text-gray-500">Health Status</p>
                 <p className="text-2xl font-bold">{stats?.healthy || 0}</p>
                 <p className="text-xs text-gray-500">
-                  {stats ? Math.round((stats.healthy / stats.total) * 100) : 0}% 健康率
+                  {stats ? Math.round((stats.healthy / stats.total) * 100) : 0}% healthy
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -263,9 +263,9 @@ export function ExternalApiMonitoring() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">平均响应时间</p>
+                <p className="text-sm font-medium text-gray-500">Avg Response Time</p>
                 <p className="text-2xl font-bold">{stats?.average_response_time?.toFixed(0) || 0}ms</p>
-                <p className="text-xs text-gray-500">所有API平均</p>
+                <p className="text-xs text-gray-500">All APIs average</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
                 <Clock className="h-6 w-6 text-purple-600" />
@@ -278,9 +278,9 @@ export function ExternalApiMonitoring() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">成功率</p>
+                <p className="text-sm font-medium text-gray-500">Success Rate</p>
                 <p className="text-2xl font-bold">{stats?.success_rate?.toFixed(1) || 0}%</p>
-                <p className="text-xs text-gray-500">总调用 {stats?.total_calls || 0} 次</p>
+                <p className="text-xs text-gray-500">Total calls: {stats?.total_calls || 0}</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-full">
                 <BarChart3 className="h-6 w-6 text-orange-600" />
@@ -290,52 +290,52 @@ export function ExternalApiMonitoring() {
         </Card>
       </div>
 
-      {/* 操作栏 */}
+      {/* Action bar */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h3 className="text-lg font-semibold">外部API监控</h3>
+              <h3 className="text-lg font-semibold">External API Monitoring</h3>
               <p className="text-sm text-gray-500">
-                监控所有集成的外部API和CLIMCP的状态
+                Monitor the status of all integrated external APIs and MCPs
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={fetchData}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                刷新
+                Refresh
               </Button>
               <Button size="sm" onClick={handleCheckAll}>
                 <TestTube className="h-4 w-4 mr-2" />
-                检查所有API
+                Check All APIs
               </Button>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
-                配置
+                Settings
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* API列表 */}
+      {/* API list */}
       <Card>
         <CardHeader>
-          <CardTitle>API列表</CardTitle>
-          <CardDescription>所有集成的外部API和CLIMCP</CardDescription>
+          <CardTitle>API List</CardTitle>
+          <CardDescription>All integrated external APIs and MCPs</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>状态</TableHead>
-                <TableHead>名称</TableHead>
-                <TableHead>提供商</TableHead>
-                <TableHead>类别</TableHead>
-                <TableHead>最后检查</TableHead>
-                <TableHead>响应时间</TableHead>
-                <TableHead>成功率</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Provider</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Last Checked</TableHead>
+                <TableHead>Response Time</TableHead>
+                <TableHead>Success Rate</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -361,7 +361,7 @@ export function ExternalApiMonitoring() {
                   <TableCell>
                     <div className="text-sm">{formatTime(api.last_checked)}</div>
                     <div className="text-xs text-gray-500">
-                      {new Date(api.last_checked).toLocaleString('zh-CN')}
+                      {new Date(api.last_checked).toLocaleString('en-US')}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -369,7 +369,7 @@ export function ExternalApiMonitoring() {
                       {api.last_response_time ? `${api.last_response_time}ms` : 'N/A'}
                     </div>
                     <div className="text-xs text-gray-500">
-                      平均: {api.average_response_time}ms
+                      Avg: {api.average_response_time}ms
                     </div>
                   </TableCell>
                   <TableCell>
@@ -387,7 +387,7 @@ export function ExternalApiMonitoring() {
                       </span>
                     </div>
                     <div className="text-xs text-gray-500">
-                      {api.successful_calls}/{api.total_calls} 成功
+                      {api.successful_calls}/{api.total_calls} successful
                     </div>
                   </TableCell>
                   <TableCell>
@@ -398,7 +398,7 @@ export function ExternalApiMonitoring() {
                         onClick={() => handleCheckApi(api.id)}
                       >
                         <TestTube className="h-3 w-3 mr-1" />
-                        检查
+                        Check
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -407,23 +407,23 @@ export function ExternalApiMonitoring() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>操作</DropdownMenuLabel>
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem>
                             <Edit className="h-4 w-4 mr-2" />
-                            编辑配置
+                            Edit Config
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Key className="h-4 w-4 mr-2" />
-                            更新密钥
+                            Update Key
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Wrench className="h-4 w-4 mr-2" />
-                            手动修复
+                            Manual Fix
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
                             <Trash2 className="h-4 w-4 mr-2" />
-                            删除API
+                            Delete API
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -436,15 +436,15 @@ export function ExternalApiMonitoring() {
         </CardContent>
       </Card>
 
-      {/* 告警面板 */}
+      {/* Alerts panel */}
       {alerts.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
-              活跃告警
+              Active Alerts
             </CardTitle>
-            <CardDescription>需要关注的问题</CardDescription>
+            <CardDescription>Issues requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -466,8 +466,8 @@ export function ExternalApiMonitoring() {
                           variant={alert.severity === 'critical' ? 'destructive' : 'outline'}
                           className="mr-2"
                         >
-                          {alert.severity === 'critical' ? '严重' : 
-                           alert.severity === 'warning' ? '警告' : '信息'}
+                          {alert.severity === 'critical' ? 'Critical' : 
+                           alert.severity === 'warning' ? 'Warning' : 'Info'}
                         </Badge>
                         <span className="font-medium">{alert.api_name}</span>
                       </div>
@@ -482,10 +482,10 @@ export function ExternalApiMonitoring() {
                         size="sm"
                         onClick={() => handleResolveAlert(alert.id)}
                       >
-                        标记为已解决
+                        Mark Resolved
                       </Button>
                       <Button size="sm">
-                        查看详情
+                        View Details
                       </Button>
                     </div>
                   </div>
@@ -496,35 +496,35 @@ export function ExternalApiMonitoring() {
         </Card>
       )}
 
-      {/* 快速操作 */}
+      {/* Quick actions */}
       <Card>
         <CardHeader>
-          <CardTitle>快速操作</CardTitle>
-          <CardDescription>常用API管理操作</CardDescription>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common API management actions</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" className="h-auto py-4">
               <div className="flex flex-col items-center">
                 <Key className="h-8 w-8 mb-2 text-blue-600" />
-                <span className="font-medium">添加新API</span>
-                <span className="text-xs text-gray-500 mt-1">集成新的外部服务</span>
+                <span className="font-medium">Add New API</span>
+                <span className="text-xs text-gray-500 mt-1">Integrate new external service</span>
               </div>
             </Button>
             
             <Button variant="outline" className="h-auto py-4">
               <div className="flex flex-col items-center">
                 <Shield className="h-8 w-8 mb-2 text-green-600" />
-                <span className="font-medium">安全审计</span>
-                <span className="text-xs text-gray-500 mt-1">检查API密钥安全性</span>
+                <span className="font-medium">Security Audit</span>
+                <span className="text-xs text-gray-500 mt-1">Check API key security</span>
               </div>
             </Button>
             
             <Button variant="outline" className="h-auto py-4">
               <div className="flex flex-col items-center">
                 <Download className="h-8 w-8 mb-2 text-purple-600" />
-                <span className="font-medium">导出报告</span>
-                <span className="text-xs text-gray-500 mt-1">生成API状态报告</span>
+                <span className="font-medium">Export Report</span>
+                <span className="text-xs text-gray-500 mt-1">Generate API status report</span>
               </div>
             </Button>
           </div>

@@ -7,74 +7,74 @@ import { Brain, MessageSquare, Code, FileText, Zap, Sparkles, Bot, Cpu, Terminal
 export default function AIPage() {
   const aiTools = [
     {
-      name: '代码助手',
-      description: 'AI辅助代码编写和调试',
+      name: 'Code Assistant',
+      description: 'AI-assisted code writing and debugging',
       icon: Code,
       status: 'active',
-      usage: '高频使用',
+      usage: 'High frequency',
     },
     {
-      name: '文档生成',
-      description: '自动生成技术文档和说明',
+      name: 'Document Generation',
+      description: 'Auto-generate technical documentation',
       icon: FileText,
       status: 'active',
-      usage: '中频使用',
+      usage: 'Medium frequency',
     },
     {
-      name: '对话助手',
-      description: '智能对话和问题解答',
+      name: 'Chat Assistant',
+      description: 'Smart conversation and Q&A',
       icon: MessageSquare,
       status: 'active',
-      usage: '高频使用',
+      usage: 'High frequency',
     },
     {
-      name: '自动化脚本',
-      description: '生成自动化工作流脚本',
+      name: 'Automation Scripts',
+      description: 'Generate automation workflow scripts',
       icon: Zap,
       status: 'active',
-      usage: '中频使用',
+      usage: 'Medium frequency',
     },
     {
-      name: '数据分析',
-      description: 'AI辅助数据分析和可视化',
+      name: 'Data Analytics',
+      description: 'AI-assisted data analysis and visualization',
       icon: Cpu,
       status: 'beta',
-      usage: '低频使用',
+      usage: 'Low frequency',
     },
     {
-      name: '创意生成',
-      description: '内容创作和创意构思',
+      name: 'Creative Generation',
+      description: 'Content creation and creative ideation',
       icon: Sparkles,
       status: 'active',
-      usage: '中频使用',
+      usage: 'Medium frequency',
     },
   ];
 
   const aiModels = [
     {
       name: 'DeepSeek',
-      description: '代码和推理专家',
-      provider: '深度求索',
+      description: 'Code and reasoning expert',
+      provider: 'DeepSeek',
       context: '128K',
       status: 'active',
     },
     {
       name: 'Claude 3',
-      description: '对话和创意专家',
+      description: 'Conversation and creativity expert',
       provider: 'Anthropic',
       context: '200K',
       status: 'active',
     },
     {
       name: 'GPT-4',
-      description: '通用AI助手',
+      description: 'General AI assistant',
       provider: 'OpenAI',
       context: '128K',
       status: 'available',
     },
     {
       name: 'Gemini Pro',
-      description: '多模态AI',
+      description: 'Multimodal AI',
       provider: 'Google',
       context: '1M',
       status: 'available',
@@ -84,19 +84,19 @@ export default function AIPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* 页面标题 */}
+        {/* Page title */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary">
             <Brain className="h-5 w-5" />
-            <span className="font-medium">AI助手中心</span>
+            <span className="font-medium">AI Assistant Hub</span>
           </div>
-          <h1 className="text-4xl font-bold">智能AI助手 🤖</h1>
+          <h1 className="text-4xl font-bold">Smart AI Assistant 🤖</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            集成多种AI模型和MCP，提升工作效率和创造力
+            Integrate multiple AI models and MCPs to boost productivity and creativity
           </p>
         </div>
 
-        {/* AIMCP卡片 */}
+        {/* AI tool cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {aiTools.map((tool, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">
@@ -114,21 +114,21 @@ export default function AIPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">状态</span>
+                    <span className="text-sm font-medium">Status</span>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                       tool.status === 'active' ? 'bg-green-50 text-green-600 border-green-200' :
                       'bg-yellow-50 text-yellow-600 border-yellow-200'
                     }`}>
-                      {tool.status === 'active' ? '活跃' : '测试中'}
+                      {tool.status === 'active' ? 'Active' : 'Beta'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">使用频率</span>
+                    <span className="text-sm font-medium">Usage</span>
                     <span className="text-sm">{tool.usage}</span>
                   </div>
                   <Button className="w-full" size="sm">
                     <Wand2 className="h-4 w-4 mr-2" />
-                    开始使用
+                    Start Using
                   </Button>
                 </div>
               </CardContent>
@@ -136,11 +136,11 @@ export default function AIPage() {
           ))}
         </div>
 
-        {/* AI模型 */}
+        {/* AI models */}
         <Card>
           <CardHeader>
-            <CardTitle>AI模型集成</CardTitle>
-            <CardDescription>集成的AI模型和配置</CardDescription>
+            <CardTitle>AI Model Integration</CardTitle>
+            <CardDescription>Integrated AI models and configuration</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -158,16 +158,16 @@ export default function AIPage() {
                   <p className="text-sm mb-3">{model.description}</p>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span>上下文长度</span>
+                      <span>Context Length</span>
                       <span className="font-medium">{model.context}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span>状态</span>
+                      <span>Status</span>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         model.status === 'active' ? 'bg-green-50 text-green-600 border-green-200' :
                         'bg-blue-50 text-blue-600 border-blue-200'
                       }`}>
-                        {model.status === 'active' ? '已激活' : '可用'}
+                        {model.status === 'active' ? 'Active' : 'Available'}
                       </span>
                     </div>
                   </div>
@@ -177,17 +177,17 @@ export default function AIPage() {
           </CardContent>
         </Card>
 
-        {/* 快速操作 */}
+        {/* Quick actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <Terminal className="h-12 w-12 mx-auto text-primary" />
                 <div>
-                  <h3 className="font-bold text-lg">代码助手</h3>
-                  <p className="text-sm text-muted-foreground">AI辅助编程和调试</p>
+                  <h3 className="font-bold text-lg">Code Assistant</h3>
+                  <p className="text-sm text-muted-foreground">AI-assisted programming and debugging</p>
                 </div>
-                <Button className="w-full">打开代码编辑器</Button>
+                <Button className="w-full">Open Code Editor</Button>
               </div>
             </CardContent>
           </Card>
@@ -197,10 +197,10 @@ export default function AIPage() {
               <div className="text-center space-y-4">
                 <MessageSquare className="h-12 w-12 mx-auto text-primary" />
                 <div>
-                  <h3 className="font-bold text-lg">智能对话</h3>
-                  <p className="text-sm text-muted-foreground">与AI助手对话交流</p>
+                  <h3 className="font-bold text-lg">Smart Chat</h3>
+                  <p className="text-sm text-muted-foreground">Chat and interact with AI assistant</p>
                 </div>
-                <Button className="w-full">开始对话</Button>
+                <Button className="w-full">Start Chat</Button>
               </div>
             </CardContent>
           </Card>
@@ -210,49 +210,49 @@ export default function AIPage() {
               <div className="text-center space-y-4">
                 <Zap className="h-12 w-12 mx-auto text-primary" />
                 <div>
-                  <h3 className="font-bold text-lg">自动化</h3>
-                  <p className="text-sm text-muted-foreground">AI生成自动化脚本</p>
+                  <h3 className="font-bold text-lg">Automation</h3>
+                  <p className="text-sm text-muted-foreground">AI-generated automation scripts</p>
                 </div>
-                <Button className="w-full">创建自动化</Button>
+                <Button className="w-full">Create Automation</Button>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* 使用说明 */}
+        {/* Usage guide */}
         <Card>
           <CardHeader>
-            <CardTitle>使用指南</CardTitle>
-            <CardDescription>如何有效使用AI助手</CardDescription>
+            <CardTitle>Usage Guide</CardTitle>
+            <CardDescription>How to effectively use the AI assistant</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium">代码助手</h4>
+                  <h4 className="font-medium">Code Assistant</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• 描述功能需求生成代码</li>
-                    <li>• 解释复杂代码逻辑</li>
-                    <li>• 调试和修复错误</li>
-                    <li>• 代码优化建议</li>
+                    <li>• Describe requirements to generate code</li>
+                    <li>• Explain complex code logic</li>
+                    <li>• Debug and fix errors</li>
+                    <li>• Code optimization suggestions</li>
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-medium">文档生成</h4>
+                  <h4 className="font-medium">Document Generation</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• 自动生成API文档</li>
-                    <li>• 创建使用说明</li>
-                    <li>• 生成项目报告</li>
-                    <li>• 整理会议记录</li>
+                    <li>• Auto-generate API documentation</li>
+                    <li>• Create usage instructions</li>
+                    <li>• Generate project reports</li>
+                    <li>• Organize meeting notes</li>
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-medium">创意助手</h4>
+                  <h4 className="font-medium">Creative Assistant</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• 头脑风暴和创意构思</li>
-                    <li>• 内容创作和编辑</li>
-                    <li>• 方案设计和评估</li>
-                    <li>• 问题分析和解决</li>
+                    <li>• Brainstorming and creative ideation</li>
+                    <li>• Content creation and editing</li>
+                    <li>• Solution design and evaluation</li>
+                    <li>• Problem analysis and solving</li>
                   </ul>
                 </div>
               </div>

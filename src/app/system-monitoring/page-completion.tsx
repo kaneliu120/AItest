@@ -1,26 +1,26 @@
 'use client';
 
-// 这是系统监控页面的完成部分，需要合并到主文件中
+// This is the completion section of the system monitoring page, to be merged into the main file
 
-// 在文件末尾添加以下内容
+// Add the following content at the end of the file
 
-                  {/* 告警标签页 */}
+                  {/* Alerts tab */}
                   <TabsContent value="alerts" className="space-y-4">
                     <Card>
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>
-                            <CardTitle className="text-sm font-medium">系统告警</CardTitle>
+                            <CardTitle className="text-sm font-medium">System Alerts</CardTitle>
                             <CardDescription>
-                              实时监控系统告警和通知
+                              Real-time system alert and notification monitoring
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-200">
-                              {data.summary.criticalAlerts} 严重
+                              {data.summary.criticalAlerts} Critical
                             </Badge>
                             <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                              {data.summary.warningAlerts} 警告
+                              {data.summary.warningAlerts} Warning
                             </Badge>
                           </div>
                         </div>
@@ -29,8 +29,8 @@
                         {data.alerts.length === 0 ? (
                           <div className="text-center py-8">
                             <CheckCircle className="h-12 w-12 text-emerald-400 mx-auto" />
-                            <h3 className="mt-4 font-medium">无活跃告警</h3>
-                            <p className="text-sm text-slate-500 mt-1">所有系统组件运行正常</p>
+                            <h3 className="mt-4 font-medium">No Active Alerts</h3>
+                            <p className="text-sm text-slate-500 mt-1">All system components are running normally</p>
                           </div>
                         ) : (
                           <div className="space-y-3">
@@ -55,7 +55,7 @@
                                     <div>
                                       <div className="font-medium">{alert.message}</div>
                                       <div className="text-sm text-slate-600 mt-1">
-                                        组件: {alert.componentId} | 指标: {alert.metric}
+                                        Component: {alert.componentId} | Metric: {alert.metric}
                                       </div>
                                       <div className="text-xs text-slate-500 mt-2">
                                         {new Date(alert.timestamp).toLocaleString()}
@@ -70,7 +70,7 @@
                                         onClick={() => acknowledgeAlert(alert.id)}
                                       >
                                         <Check className="h-3 w-3 mr-1" />
-                                        确认
+                                        Acknowledge
                                       </Button>
                                     )}
                                     <Button variant="ghost" size="sm">
@@ -81,11 +81,11 @@
                                 <div className="mt-3 pt-3 border-t border-slate-200">
                                   <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                      <div className="text-slate-500">当前值</div>
+                                      <div className="text-slate-500">Current Value</div>
                                       <div className="font-medium">{alert.currentValue}</div>
                                     </div>
                                     <div>
-                                      <div className="text-slate-500">阈值</div>
+                                      <div className="text-slate-500">Threshold</div>
                                       <div className="font-medium">{alert.threshold}</div>
                                     </div>
                                   </div>
@@ -98,16 +98,16 @@
                       <CardFooter className="border-t pt-4">
                         <div className="flex items-center justify-between w-full">
                           <div className="text-sm text-slate-500">
-                            共 {data.alerts.length} 个告警 ({data.summary.criticalAlerts} 严重, {data.summary.warningAlerts} 警告)
+                            Total {data.alerts.length} alerts ({data.summary.criticalAlerts} critical, {data.summary.warningAlerts} warning)
                           </div>
                           <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm">
                               <Filter className="h-3 w-3 mr-1" />
-                              筛选
+                              Filter
                             </Button>
                             <Button variant="outline" size="sm">
                               <Download className="h-3 w-3 mr-1" />
-                              导出
+                              Export
                             </Button>
                           </div>
                         </div>
@@ -120,10 +120,10 @@
           );
         }
 
-        // 需要导入 os 模块
+        // Need to import os module
         import os from 'os';
 
-        // 在文件顶部添加以下导入
+        // Add the following import at the top of the file
         // import os from 'os';
 
-        // 注意：需要将这段代码合并到主文件的相应位置
+        // Note: This code needs to be merged into the corresponding location in the main file

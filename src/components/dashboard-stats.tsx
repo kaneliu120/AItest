@@ -7,7 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardData } from "@/app/api/dashboard/route";
 
-// ── 骨架屏 ─────────────────────────────────────────────────────────────────
+// Skeleton screen
 function StatSkeleton() {
   return (
     <Card>
@@ -23,8 +23,8 @@ function StatSkeleton() {
   );
 }
 
-// ── 空状态标签 ──────────────────────────────────────────────────────────────
-function NoData({ label = "暂无数据" }: { label?: string }) {
+// Empty state label
+function NoData({ label = "No data" }: { label?: string }) {
   return (
     <span className="text-xs text-slate-400 italic">{label}</span>
   );
@@ -52,7 +52,7 @@ export default function DashboardStats() {
     );
   }
 
-  // ── 从 API 数据构建卡片配置 ──────────────────────────────────────────────
+  // Build card config from API data
   const { finance, freelance, tasks, health } = data ?? {
     finance: { currentMonthIncome: 0, monthlyGrowthRate: 0, available: false },
     freelance: { activeProjects: 0, pendingProposals: 0, available: false },
@@ -65,7 +65,7 @@ export default function DashboardStats() {
 
   const stats = [
     {
-      title: "本月收入",
+      title: "Monthly Revenue",
       value: finance.available ? fmtPHP(finance.currentMonthIncome) : null,
       change: finance.available
         ? `${finance.monthlyGrowthRate >= 0 ? "+" : ""}${finance.monthlyGrowthRate}%`
@@ -73,26 +73,26 @@ export default function DashboardStats() {
       icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-500/10",
-      description: "距离目标 ₱30,000",
+      description: "Target: ₱30,000",
       changeColor: finance.monthlyGrowthRate >= 0 ? "text-green-600" : "text-red-500",
     },
     {
-      title: "外包项目",
+      title: "Freelance Projects",
       value: freelance.available ? String(freelance.activeProjects) : null,
-      change: freelance.available ? `+${freelance.activeProjects} 进行中` : null,
+      change: freelance.available ? `+${freelance.activeProjects} active` : null,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-500/10",
       description: freelance.available
-        ? `${freelance.pendingProposals} 个提案待回复`
-        : "暂无数据",
+        ? `${freelance.pendingProposals} proposals pending`
+        : "No data",
       changeColor: "text-blue-600",
     },
     {
-      title: "系统健康",
+      title: "System Health",
       value: health.available ? `${health.overallHealth}%` : null,
       change: health.available
-        ? `${health.healthyTools}/${health.totalTools} 正常`
+        ? `${health.healthyTools}/${health.totalTools} healthy`
         : null,
       icon: TrendingUp,
       color: health.available && health.overallHealth >= 90
@@ -102,34 +102,34 @@ export default function DashboardStats() {
         ? "bg-emerald-500/10"
         : "bg-amber-500/10",
       description: health.available
-        ? health.warningTools > 0 ? `${health.warningTools} 个警告` : "全部健康"
-        : "暂无数据",
+        ? health.warningTools > 0 ? `${health.warningTools} warnings` : "All healthy"
+        : "No data",
       changeColor: "text-emerald-600",
     },
     {
-      title: "任务完成",
+      title: "Tasks Done",
       value: tasks.available ? `${tasks.completedTasks}/${tasks.totalTasks}` : null,
       change: tasks.available ? `${tasks.completionRate}%` : null,
       icon: Target,
       color: "text-amber-600",
       bgColor: "bg-amber-500/10",
-      description: "本周任务进度",
+      description: "This week's progress",
       changeColor: "text-amber-600",
     },
     {
-      title: "自动化节省",
-      value: null,           // 暂无真实数据源
+      title: "Automation Savings",
+      value: null,           // No real data source yet
       change: null,
       icon: Clock,
       color: "text-cyan-600",
       bgColor: "bg-cyan-500/10",
-      description: "通过自动化节省",
+      description: "Saved via automation",
       changeColor: "text-cyan-600",
     },
     {
-      title: "AI MCP使用",
+      title: "AI MCP Usage",
       value: health.available ? String(health.totalTools) : null,
-      change: health.available ? "活跃中" : null,
+      change: health.available ? "Active" : null,
       icon: Zap,
       color: "text-pink-600",
       bgColor: "bg-pink-500/10",

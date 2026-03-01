@@ -6,7 +6,7 @@ import { ResponsiveLayout } from "@/components/responsive-layout";
 import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from "@/contexts/language-context";
 
-// 使用系统字体栈替代 next/font/google（解决 Turbopack 工作区根目录检测问题）
+// Use system font stack instead of next/font/google (resolves Turbopack workspace root detection issue)
 const inter = { className: 'font-sans' };
 
 export const metadata: Metadata = {

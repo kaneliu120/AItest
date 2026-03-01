@@ -7,28 +7,28 @@ export default function TestSimplePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔧 TestSimple useEffect执行');
+    console.log('🔧 TestSimple useEffect triggered');
     
     const loadData = async () => {
       try {
-        console.log('📡 测试加载API数据...');
+        console.log('📡 Loading API data...');
         
         const response = await fetch('/api/external-apis');
-        console.log('📡 响应状态:', response.status, response.ok);
+        console.log('📡 Response status:', response.status, response.ok);
         const data = await response.json();
-        console.log('📊 测试API数据:', data.success ? '成功' : '失败', '长度:', data.data?.apis?.length || 0);
+        console.log('📊 API data:', data.success ? 'success' : 'failed', 'length:', data.data?.apis?.length || 0);
         
         if (data.success) {
           const apiList = data.data.apis || [];
-          console.log('📋 测试设置API列表:', apiList.length);
+          console.log('📋 Setting API list:', apiList.length);
           setApis(apiList);
-          console.log('✅ 测试setApis调用完成');
+          console.log('✅ setApis call complete');
         }
         
       } catch (error) {
-        console.error('❌ 测试加载失败:', error);
+        console.error('❌ Load failed:', error);
       } finally {
-        console.log('🔚 测试加载完成，设置loading=false');
+        console.log('🔚 Loading complete, setting loading=false');
         setLoading(false);
       }
     };
@@ -38,14 +38,14 @@ export default function TestSimplePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">简单测试页面</h1>
+      <h1 className="text-2xl font-bold mb-4">Simple Test Page</h1>
       <div className="space-y-4">
         <div>
-          <p>加载状态: {loading ? '加载中' : '完成'}</p>
-          <p>API数量: {apis.length}</p>
+          <p>Status: {loading ? 'Loading' : 'Loaded'}</p>
+          <p>API count: {apis.length}</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold mb-2">API列表 (前5个):</h2>
+          <h2 className="text-lg font-semibold mb-2">API list (first 5):</h2>
           {apis.length > 0 ? (
             <ul className="space-y-2">
               {apis.slice(0, 5).map((api, index) => (
@@ -55,7 +55,7 @@ export default function TestSimplePage() {
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">没有API数据</p>
+            <p className="text-slate-500">No API data</p>
           )}
         </div>
       </div>

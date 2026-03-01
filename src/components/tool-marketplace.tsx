@@ -7,56 +7,56 @@ import { Badge } from "@/components/ui/badge";
 
 const tools = [
   {
-    name: "财务跟踪器",
-    description: "自动跟踪收入和支出",
+    name: "Finance Tracker",
+    description: "Auto-track income and expenses",
     icon: DollarSign,
-    category: "财务",
-    status: "已安装",
+    category: "Finance",
+    status: "Installed",
     rating: 4.8,
     color: "bg-green-500/20 text-green-600",
   },
   {
-    name: "外包自动化",
-    description: "自动搜索和申请项目",
+    name: "Freelance Automation",
+    description: "Auto-search and apply for projects",
     icon: Users,
-    category: "外包",
-    status: "开发中",
+    category: "Freelance",
+    status: "In Development",
     rating: 4.5,
     color: "bg-blue-500/20 text-blue-600",
   },
   {
-    name: "AI代码生成",
-    description: "基于Antigravity的代码助手",
+    name: "AI Code Generation",
+    description: "Antigravity-based code assistant",
     icon: Brain,
-    category: "开发",
-    status: "已安装",
+    category: "Development",
+    status: "Installed",
     rating: 4.9,
     color: "bg-purple-500/20 text-purple-600",
   },
   {
-    name: "任务管理器",
-    description: "智能任务分配和跟踪",
+    name: "Task Manager",
+    description: "Smart task assignment and tracking",
     icon: FileText,
-    category: "生产力",
-    status: "已安装",
+    category: "Productivity",
+    status: "Installed",
     rating: 4.7,
     color: "bg-amber-500/20 text-amber-600",
   },
   {
-    name: "数据分析仪表板",
-    description: "业务数据可视化",
+    name: "Data Analytics Dashboard",
+    description: "Business data visualization",
     icon: BarChart3,
-    category: "分析",
-    status: "可用",
+    category: "Analytics",
+    status: "Available",
     rating: 4.6,
     color: "bg-cyan-500/20 text-cyan-600",
   },
   {
-    name: "自动化工作流",
-    description: "可视化工作流设计",
+    name: "Automation Workflows",
+    description: "Visual workflow design",
     icon: Zap,
-    category: "自动化",
-    status: "开发中",
+    category: "Automation",
+    status: "In Development",
     rating: 4.4,
     color: "bg-pink-500/20 text-pink-600",
   },
@@ -67,14 +67,14 @@ export default function ToolMarketplace() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>MCP市场</CardTitle>
+          <CardTitle>MCP Marketplace</CardTitle>
           <p className="text-sm text-muted-foreground">
-            按需开发和使用MCP
+            Develop and use MCPs on demand
           </p>
         </div>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
-          请求MCP
+          Request MCP
         </Button>
       </CardHeader>
       <CardContent>
@@ -101,9 +101,9 @@ export default function ToolMarketplace() {
                 </Badge>
                 <Badge
                   variant={
-                    tool.status === "已安装"
+                    tool.status === "Installed"
                       ? "default"
-                      : tool.status === "开发中"
+                      : tool.status === "In Development"
                       ? "secondary"
                       : "outline"
                   }
@@ -117,10 +117,10 @@ export default function ToolMarketplace() {
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              共 {tools.length} 个MCP，{tools.filter(t => t.status === "已安装").length} 个已安装
+              {tools.length} MCPs, {tools.filter(t => t.status === "Installed").length} installed
             </span>
             <Button variant="ghost" size="sm">
-              查看全部
+              View All
             </Button>
           </div>
         </div>

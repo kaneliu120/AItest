@@ -1,5 +1,5 @@
 /**
- * 健康监控仪表盘组件
+ * Health monitoring dashboard component
  */
 
 import React, { useState, useEffect } from 'react';
@@ -27,7 +27,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // 加载健康数据
+  // Load health data
   const loadHealthData = async () => {
     try {
       setLoading(true);
@@ -36,19 +36,19 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取健康数据失败');
+      setError(err instanceof Error ? err.message : 'Failed to fetch health data');
       console.error('Health data load error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 初始加载
+  // Initial load
   useEffect(() => {
     loadHealthData();
   }, []);
 
-  // 自动刷新
+  // Auto-refresh
   useEffect(() => {
     if (!autoRefresh) return;
 
@@ -59,21 +59,21 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
     return () => clearInterval(intervalId);
   }, [autoRefresh, refreshInterval]);
 
-  // 手动刷新
+  // Manual refresh
   const handleRefresh = () => {
     loadHealthData();
   };
 
-  // 确认告警
+  // Acknowledge alert
   const handleAcknowledgeAlert = (index: number) => {
     if (health) {
       healthService.acknowledgeAlert(index);
-      // 重新加载数据以更新UI
+      // Reload data to update UI
       loadHealthData();
     }
   };
 
-  // 渲染健康分数
+  // Render health score
   const renderHealthScore = (score: number) => {
     let color = 'text-green-600';
     let bgColor = 'bg-green-100';
@@ -94,26 +94,26 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
     );
   };
 
-  // 渲染组件状态
+  // Render component status
   const renderComponentStatus = (component: HealthComponent) => {
     let statusColor = 'bg-green-500';
-    let statusText = '在线';
+    let statusText = 'Online';
     
     if (component.status === 'offline') {
       statusColor = 'bg-red-500';
-      statusText = '离线';
+      statusText = 'Offline';
     } else if (component.status === 'degraded') {
       statusColor = 'bg-yellow-500';
-      statusText = '降级';
+      statusText = 'Degraded';
     }
 
     return (
       <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-200">
         <div>
           <h4 className="font-medium text-gray-900">{component.name}</h4>
-          <p className="text-sm text-gray-500">运行时间: {component.uptime}</p>
+          <p className="text-sm text-gray-500">Uptime: {component.uptime}</p>
           {component.responseTime && (
-            <p className="text-sm text-gray-500">响应时间: {component.responseTime}ms</p>
+            <p className="text-sm text-gray-500">Response time: {component.responseTime}ms</p>
           )}
         </div>
         <div className="flex items-center">
@@ -124,7 +124,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
     );
   };
 
-  // 渲染指标卡片
+  // Render metric card
   const renderMetricCard = (label: string, value: number, unit: string, threshold: number) => {
     const isCritical = value > threshold;
     const colorClass = isCritical ? 'text-red-600' : 'text-gray-900';
@@ -140,7 +140,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
           </div>
           {isCritical && (
             <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
-              警告
+              Warning
             </span>
           )}
         </div>
@@ -156,7 +156,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
     );
   };
 
-  // 渲染告警
+  // Render alert
   const renderAlert = (alert: HealthAlert, index: number) => {
     let alertColor = 'bg-blue-100 text-blue-800 border-blue-200';
     let alertIcon = 'ℹ️';
@@ -180,7 +180,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
             <div>
               <p className="font-medium">{alert.message}</p>
               <p className="text-sm opacity-75">
-                {alert.component && `组件: ${alert.component} • `}
+                {alert.component && `Component: ${alert.component} • `}
                 {new Date(alert.timestamp).toLocaleTimeString()}
               </p>
             </div>
@@ -190,7 +190,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
               onClick={() => handleAcknowledgeAlert(index)}
               className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
             >
-              确认
+              Acknowledge
             </button>
           )}
         </div>
@@ -203,7 +203,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">加载健康数据...</p>
+          <p className="mt-2 text-gray-600">Loading health data...</p>
         </div>
       </div>
     );
@@ -215,7 +215,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
         <div className="flex items-center">
           <span className="text-red-600 mr-2">❌</span>
           <div>
-            <h3 className="font-medium text-red-800">加载失败</h3>
+            <h3 className="font-medium text-red-800">Load failed</h3>
             <p className="text-red-600">{error}</p>
           </div>
         </div>
@@ -223,7 +223,7 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
           onClick={handleRefresh}
           className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
-          重试
+          Retry
         </button>
       </div>
     );
@@ -232,20 +232,20 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
   if (!health) {
     return (
       <div className="p-6 text-center text-gray-500">
-        暂无健康数据
+        No health data available
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* 标题和刷新按钮 */}
+      {/* Title and refresh button */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">系统健康监控</h2>
+          <h2 className="text-2xl font-bold text-gray-900">System Health Monitor</h2>
           <p className="text-gray-500">
-            最后更新: {lastUpdated.toLocaleTimeString()}
-            {autoRefresh && ` • 自动刷新: ${refreshInterval / 1000}秒`}
+            Last updated: {lastUpdated.toLocaleTimeString()}
+            {autoRefresh && ` • Auto-refresh: every ${refreshInterval / 1000}s`}
           </p>
         </div>
         <div className="flex items-center space-x-4">
@@ -255,24 +255,24 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
           >
             <span className="mr-2">🔄</span>
-            刷新
+            Refresh
           </button>
         </div>
       </div>
 
-      {/* 告警区域 */}
+      {/* Alert area */}
       {health.alerts.length > 0 && (
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <h3 className="font-medium text-gray-900 mb-3">系统告警 ({health.alerts.length})</h3>
+          <h3 className="font-medium text-gray-900 mb-3">System Alerts ({health.alerts.length})</h3>
           <div className="space-y-2">
             {health.alerts.map((alert, index) => renderAlert(alert, index))}
           </div>
         </div>
       )}
 
-      {/* 组件状态 */}
+      {/* Component status */}
       <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-        <h3 className="font-medium text-gray-900 mb-3">组件状态</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Component Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {health.components.map((component) => (
             <div key={component.name}>
@@ -282,32 +282,32 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
         </div>
       </div>
 
-      {/* 系统指标 */}
+      {/* System metrics */}
       {showDetails && (
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <h3 className="font-medium text-gray-900 mb-3">系统指标</h3>
+          <h3 className="font-medium text-gray-900 mb-3">System Metrics</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {renderMetricCard('CPU使用率', health.metrics.cpuUsage, '%', 80)}
-            {renderMetricCard('内存使用率', health.metrics.memoryUsage, '%', 85)}
-            {renderMetricCard('磁盘使用率', health.metrics.diskUsage, '%', 90)}
-            {renderMetricCard('错误率', health.metrics.errorRate, '%', 5)}
+            {renderMetricCard('CPU Usage', health.metrics.cpuUsage, '%', 80)}
+            {renderMetricCard('Memory Usage', health.metrics.memoryUsage, '%', 85)}
+            {renderMetricCard('Disk Usage', health.metrics.diskUsage, '%', 90)}
+            {renderMetricCard('Error Rate', health.metrics.errorRate, '%', 5)}
           </div>
         </div>
       )}
 
-      {/* 其他信息 */}
+      {/* Additional info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <h4 className="font-medium text-gray-900 mb-2">网络流量</h4>
+          <h4 className="font-medium text-gray-900 mb-2">Network Traffic</h4>
           <div className="space-y-2">
             <div>
-              <p className="text-sm text-gray-500">流入</p>
+              <p className="text-sm text-gray-500">Inbound</p>
               <p className="text-lg font-semibold">
                 {(health.metrics.networkIn / 1024).toFixed(1)} KB/s
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">流出</p>
+              <p className="text-sm text-gray-500">Outbound</p>
               <p className="text-lg font-semibold">
                 {(health.metrics.networkOut / 1024).toFixed(1)} KB/s
               </p>
@@ -316,16 +316,16 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
         </div>
 
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <h4 className="font-medium text-gray-900 mb-2">请求统计</h4>
+          <h4 className="font-medium text-gray-900 mb-2">Request Statistics</h4>
           <div className="space-y-2">
             <div>
-              <p className="text-sm text-gray-500">总请求数</p>
+              <p className="text-sm text-gray-500">Total Requests</p>
               <p className="text-lg font-semibold">
                 {health.metrics.requestCount.toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">错误数</p>
+              <p className="text-sm text-gray-500">Errors</p>
               <p className="text-lg font-semibold text-red-600">
                 {health.metrics.errorCount}
               </p>
@@ -334,12 +334,12 @@ const HealthDashboard: React.FC<HealthDashboardProps> = ({
         </div>
 
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <h4 className="font-medium text-gray-900 mb-2">监控配置</h4>
+          <h4 className="font-medium text-gray-900 mb-2">Monitoring Config</h4>
           <div className="space-y-1 text-sm">
-            <p>检查间隔: {healthService.getConfig().checkInterval / 1000}秒</p>
-            <p>CPU告警阈值: {healthService.getConfig().alertThresholds.cpu}%</p>
-            <p>内存告警阈值: {healthService.getConfig().alertThresholds.memory}%</p>
-            <p>数据保留: {healthService.getConfig().retentionDays}天</p>
+            <p>Check interval: {healthService.getConfig().checkInterval / 1000}s</p>
+            <p>CPU alert threshold: {healthService.getConfig().alertThresholds.cpu}%</p>
+            <p>Memory alert threshold: {healthService.getConfig().alertThresholds.memory}%</p>
+            <p>Data retention: {healthService.getConfig().retentionDays} days</p>
           </div>
         </div>
       </div>

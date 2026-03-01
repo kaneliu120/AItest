@@ -92,14 +92,14 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
     return (
       <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-200">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-slate-700 font-medium">正在准备可视化数据...</p>
+        <p className="mt-4 text-slate-700 font-medium">Preparing visualization data...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* 标签页导航 */}
+      {/* Tab navigation */}
       <div className="flex border-b border-slate-200 overflow-x-auto">
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm transition-colors ${
@@ -110,7 +110,7 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
           onClick={() => setActiveTab('overview')}
         >
           <BarChart3 className="w-4 h-4 mr-2" />
-          概览
+          Overview
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm transition-colors ${
@@ -121,7 +121,7 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
           onClick={() => setActiveTab('features')}
         >
           <Target className="w-4 h-4 mr-2" />
-          功能分析
+          Feature Analysis
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm transition-colors ${
@@ -132,7 +132,7 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
           onClick={() => setActiveTab('risks')}
         >
           <AlertTriangle className="w-4 h-4 mr-2" />
-          风险评估
+          Risk Assessment
         </button>
         <button
           className={`flex items-center px-4 py-3 font-medium text-sm transition-colors ${
@@ -143,63 +143,63 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
           onClick={() => setActiveTab('trends')}
         >
           <TrendingUp className="w-4 h-4 mr-2" />
-          趋势分析
+          Trend Analysis
         </button>
       </div>
 
-      {/* 概览标签页 */}
+      {/* Overview tab */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* 关键指标卡片 */}
+          {/* Key metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Target className="w-5 h-5 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">功能需求</span>
+                <span className="text-sm font-medium text-slate-700">Requirements</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.categories.functional.length}
               </div>
-              <div className="text-xs text-slate-500 mt-1">个核心功能</div>
+              <div className="text-xs text-slate-500 mt-1">core features</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Clock className="w-5 h-5 text-orange-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">总工时</span>
+                <span className="text-sm font-medium text-slate-700">Total Hours</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.effortEstimation.totalHours}
               </div>
-              <div className="text-xs text-slate-500 mt-1">小时</div>
+              <div className="text-xs text-slate-500 mt-1">hours</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Users className="w-5 h-5 text-green-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">团队规模</span>
+                <span className="text-sm font-medium text-slate-700">Team Size</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.effortEstimation.teamSize}
               </div>
-              <div className="text-xs text-slate-500 mt-1">人</div>
+              <div className="text-xs text-slate-500 mt-1">people</div>
             </div>
             
             <div className="bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-purple-600 mr-2" />
-                <span className="text-sm font-medium text-slate-700">复杂度</span>
+                <span className="text-sm font-medium text-slate-700">Complexity</span>
               </div>
               <div className="text-2xl font-bold text-slate-900 mt-2">
                 {analysis.complexity.overall}/10
               </div>
-              <div className="text-xs text-slate-500 mt-1">总体评分</div>
+              <div className="text-xs text-slate-500 mt-1">overall score</div>
             </div>
           </div>
 
-          {/* 复杂度雷达图模拟 */}
+          {/* Complexity radar chart */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">复杂度评估</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Complexity Assessment</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(chartData.complexityScores).map(([key, value]: [string, any]) => (
                 <div key={key} className="text-center">
@@ -207,9 +207,9 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
                     {value}
                   </div>
                   <div className="text-sm text-slate-600 mt-1 capitalize">
-                    {key === 'overview' ? '总体' : 
-                     key === 'technical' ? '技术' :
-                     key === 'business' ? '业务' : '集成'}
+                    {key === 'overview' ? 'Overall' : 
+                     key === 'technical' ? 'Technical' :
+                     key === 'business' ? 'Business' : 'Integration'}
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
                     <div
@@ -222,9 +222,9 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
             </div>
           </div>
 
-          {/* 技术栈适合度 */}
+          {/* Tech stack suitability */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">技术栈推荐适合度</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Tech Stack Suitability</h3>
             <div className="space-y-4">
               {chartData.techStackSuitability.map((tech: any, index: number) => (
                 <div key={index} className="space-y-2">
@@ -248,21 +248,21 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
         </div>
       )}
 
-      {/* 功能分析标签页 */}
+      {/* Feature Analysis tab */}
       {activeTab === 'features' && (
         <div className="space-y-6">
-          {/* 功能优先级矩阵 */}
+          {/* Feature Priority Matrix */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">功能优先级矩阵</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Feature Priority Matrix</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">功能ID</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">描述</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">优先级</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">复杂度</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">预估工时</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Feature ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Description</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Priority</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Complexity</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Est. Hours</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,16 +276,16 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
                       </td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(req.priority)}`}>
-                          {req.priority === 'high' ? '高' : req.priority === 'medium' ? '中' : '低'}
+                          {req.priority === 'high' ? 'High' : req.priority === 'medium' ? 'Medium' : 'Low'}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <span className="text-sm text-slate-700">
-                          {req.complexity === 'complex' ? '复杂' : req.complexity === 'medium' ? '中等' : '简单'}
+                          {req.complexity === 'complex' ? 'Complex' : req.complexity === 'medium' ? 'Medium' : 'Simple'}
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className="text-sm font-medium text-slate-900">{req.estimatedEffort} 小时</span>
+                        <span className="text-sm font-medium text-slate-900">{req.estimatedEffort}h</span>
                       </td>
                     </tr>
                   ))}
@@ -294,19 +294,19 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
             </div>
           </div>
 
-          {/* 工时分配饼图模拟 */}
+          {/* Effort Breakdown pie chart */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">工时分配</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Effort Breakdown</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {Object.entries(chartData.effortBreakdown).map(([key, value]: [string, any]) => (
                 <div key={key} className="text-center">
                   <div className="text-2xl font-bold text-slate-900">{value}</div>
                   <div className="text-sm text-slate-600 mt-1 capitalize">
-                    {key === 'analysis' ? '分析' :
-                     key === 'design' ? '设计' :
-                     key === 'development' ? '开发' :
-                     key === 'testing' ? '测试' :
-                     key === 'deployment' ? '部署' : '文档'}
+                    {key === 'analysis' ? 'Analysis' :
+                     key === 'design' ? 'Design' :
+                     key === 'development' ? 'Development' :
+                     key === 'testing' ? 'Testing' :
+                     key === 'deployment' ? 'Deployment' : 'Docs'}
                   </div>
                   <div className="text-xs text-slate-500">
                     {Math.round(value / analysis.effortEstimation.totalHours * 100)}%
@@ -316,17 +316,17 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
             </div>
           </div>
 
-          {/* AI增强分析（如果可用） */}
+          {/* AI Enhanced Analysis (if available) */}
           {aiEnhancedAnalysis && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
               <div className="flex items-center mb-4">
                 <Zap className="w-5 h-5 text-blue-600 mr-2" />
-                <h3 className="font-medium text-blue-900">AI增强分析</h3>
+                <h3 className="font-medium text-blue-900">AI Enhanced Analysis</h3>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-blue-800 mb-2">业务目标</h4>
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">Business Goals</h4>
                   <ul className="space-y-1">
                     {aiEnhancedAnalysis.semanticUnderstanding.businessGoals.slice(0, 3).map((goal: string, index: number) => (
                       <li key={index} className="text-sm text-blue-700 flex items-start">
@@ -338,7 +338,7 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
                 </div>
                 
                 <div>
-                  <h4 className="text-sm font-medium text-blue-800 mb-2">关键价值主张</h4>
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">Key Value Propositions</h4>
                   <div className="flex flex-wrap gap-2">
                     {aiEnhancedAnalysis.semanticUnderstanding.keyValuePropositions.slice(0, 3).map((prop: string, index: number) => (
                       <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -353,12 +353,12 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
         </div>
       )}
 
-      {/* 风险评估标签页 */}
+      {/* Risk Assessment tab */}
       {activeTab === 'risks' && (
         <div className="space-y-6">
-          {/* 风险矩阵 */}
+          {/* Risk Matrix */}
           <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h3 className="font-medium text-slate-900 mb-4">风险矩阵</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Risk Matrix</h3>
             
             {analysis.risks.length > 0 ? (
               <div className="space-y-4">
@@ -372,10 +372,10 @@ export function VisualizationDashboard({ analysis, aiEnhancedAnalysis }: Visuali
                         <span className="font-medium text-slate-900">{risk.id}: {risk.description}</span>
                         <div className="flex items-center mt-1 space-x-3">
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
-                            概率: {risk.probability === 'high' ? '高' : risk.probability === 'medium' ? '中' : '低'}
+                            Probability: {risk.probability === 'high' ? 'High' : risk.probability === 'medium' ? 'Medium' : 'Low'}
                           </span>
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
-                            影响: --
+                            Impact: --
                           </span>
                         </div>
                       </div>
