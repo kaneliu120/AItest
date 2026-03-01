@@ -1,6 +1,9 @@
 # 使用Node.js官方镜像
 FROM node:18-alpine AS builder
 
+# Install build tools for native modules (imagemin-mozjpeg, imagemin-optipng)
+RUN apk add --no-cache python3 make g++ libc6-compat
+
 # 设置工作目录
 WORKDIR /app
 
@@ -12,7 +15,7 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
 # 安装依赖（需要 devDeps 来运行 next build）
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # 复制源代码
 COPY . .
