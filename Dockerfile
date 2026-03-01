@@ -1,5 +1,5 @@
 # 使用Node.js官方镜像
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Install build tools for native modules (imagemin-mozjpeg, imagemin-optipng)
 RUN apk add --no-cache python3 make g++ libc6-compat
@@ -24,7 +24,7 @@ COPY . .
 RUN npm run build
 
 # 生产阶段
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 # 设置工作目录
 WORKDIR /app
