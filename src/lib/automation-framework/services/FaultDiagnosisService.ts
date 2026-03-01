@@ -1,5 +1,6 @@
 // 简化的故障排查服务
 import { FaultDiagnosisEngine, FaultDetectionRule } from '../core/FaultDiagnosisEngine';
+import { logger } from '@/lib/logger';
 
 export interface FaultDiagnosisServiceConfig {
   enabled: boolean;
@@ -111,17 +112,17 @@ export class FaultDiagnosisService {
         
         // 处理故障
         for (const result of results) {
-          await this.handleFault(result);
+          await this.handleFault(result as Record<string, unknown>);
         }
       }
     } catch (error) {
       this.status.lastError = error instanceof Error ? error.message : String(error);
-      console.error('故障检查失败:', error);
+      logger.error('故障检查失败', error, { module: 'FaultDiagnosisService' });
     }
   }
 
   // 获取系统指标
-  private async getSystemMetrics(): Promise<any> {
+  private async getSystemMetrics(): Promise<Record<string, number>> {
     // 简化的系统指标
     return {
       cpuUsage: Math.random() * 100,
@@ -136,7 +137,7 @@ export class FaultDiagnosisService {
   }
 
   // 处理故障
-  private async handleFault(fault: any): Promise<void> {
+  private async handleFault(fault: Record<string, unknown>): Promise<void> {
     console.log(`检测到故障: ${fault.description} (严重性: ${fault.severity})`);
     
     if (this.config.autoRepair && fault.automaticRepairAvailable) {
@@ -145,17 +146,20 @@ export class FaultDiagnosisService {
         await this.performAutoRepair(fault);
         this.status.stats.autoRepaired++;
       } catch (error) {
-        console.error(`自动修复失败:`, error);
+        logger.error('自动修复失败', error, { module: 'FaultDiagnosisService' });
       }
     }
   }
 
   // 执行自动修复
-  private async performAutoRepair(fault: any): Promise<void> {
-    if (fault.repairSteps) {
-      for (const step of fault.repairSteps) {
-        console.log(`执行修复步骤: ${step.description}`);
-        await step.action();
+  private async performAutoRepair(fault: Record<string, unknown>): Promise<void> {
+    const steps = fault.repairSteps;
+    if (Array.isArray(steps)) {
+      for (const step of steps as Array<{ description?: string; action?: () => Promise<unknown> }>) {
+        console.log(`执行修复步骤: ${step.description || '未知步骤'}`);
+        if (typeof step.action === 'function') {
+          await step.action();
+        }
       }
     }
   }

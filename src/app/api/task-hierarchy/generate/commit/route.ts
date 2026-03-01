@@ -1,0 +1,45 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createMissionTask } from '@/lib/mission-task-store';
+
+// 将 generate 草稿写入数据库（默认按顺序挂载）
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const draft = Array.isArray(body?.draft) ? body.draft : [];
+    if (!draft.length) return NextResponse.json({ success: false, error: 'draft 不能为空' }, { status: 400 });
+
+    let lastL1: string | null = null;
+    let lastL2: string | null = null;
+    const created: any[] = [];
+
+    for (const item of draft) {
+      const level = Number(item.level);
+      const title = String(item.title || '').trim();
+      if (!title || ![1,2,3].includes(level)) continue;
+
+      const parentId = level === 1 ? null : (level === 2 ? lastL1 : lastL2);
+      const row = await createMissionTask({
+        level: level as 1 | 2 | 3,
+        parentId,
+        title,
+        description: String(item.description || ''),
+        status: 'pending',
+        progress: 0,
+        targetPrice: item.targetPrice != null ? Number(item.targetPrice) : null,
+        currency: 'PHP',
+        owner: null,
+        category: String(item.category || ''),
+        source: 'doc',
+        metadata: { from: 'generate-commit' },
+      });
+
+      if (level === 1) { lastL1 = row.id; lastL2 = null; }
+      if (level === 2) { lastL2 = row.id; }
+      created.push(row);
+    }
+
+    return NextResponse.json({ success: true, data: { createdCount: created.length, created } });
+  } catch (e) {
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+  }
+}

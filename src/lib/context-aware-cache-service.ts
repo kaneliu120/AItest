@@ -1,11 +1,12 @@
 // 上下文智能缓存系统
 
 import { UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
+import { logger } from './logger';
 
 // 缓存项元数据
 export interface CacheItemMetadata {
   query: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   taskType: string;
   system: string;
   priority: string;
@@ -54,6 +55,7 @@ export interface CacheStrategy {
   similarityThreshold: number; // 相似度阈值
   enablePartialMatch: boolean; // 是否启用部分匹配
   enableContextAware: boolean; // 是否启用上下文感知
+  maxAlternatives?: number; // 最大备选数量
 }
 
 class ContextAwareCacheService {
@@ -148,7 +150,7 @@ class ContextAwareCacheService {
         exactItem.metadata.lastAccessed = Date.now();
         
         this.stats.hits++;
-        this.updateStats(startTime);
+        this.updateStats(Date.now() - startTime);
         
         return {
           cached: true,
@@ -165,7 +167,7 @@ class ContextAwareCacheService {
         if (contextMatch.cached) {
           this.stats.semanticHits++;
           this.stats.hits++;
-          this.updateStats(startTime);
+          this.updateStats(Date.now() - startTime);
           
           return {
             cached: true,
@@ -184,7 +186,7 @@ class ContextAwareCacheService {
         if (partialMatch.cached) {
           this.stats.partialHits++;
           this.stats.hits++;
-          this.updateStats(startTime);
+          this.updateStats(Date.now() - startTime);
           
           return {
             cached: true,
@@ -198,7 +200,7 @@ class ContextAwareCacheService {
 
       // 4. 未命中
       this.stats.misses++;
-      this.updateStats(startTime);
+      this.updateStats(Date.now() - startTime);
       
       return {
         cached: false,
@@ -206,7 +208,7 @@ class ContextAwareCacheService {
       };
 
     } catch (error) {
-      console.error('上下文缓存获取失败:', error);
+      logger.error('上下文缓存获取失败', error, { module: 'context-aware-cache-service' });
       return {
         cached: false,
         matchType: 'none'
@@ -264,7 +266,7 @@ class ContextAwareCacheService {
       await this.recordCacheFeatures(key, contextFeatures);
 
     } catch (error) {
-      console.error('上下文缓存设置失败:', error);
+      logger.error('上下文缓存设置失败', error, { module: 'context-aware-cache-service' });
     }
   }
 

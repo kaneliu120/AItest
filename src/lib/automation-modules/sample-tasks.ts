@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * 示例自动化测试任务
  */
@@ -80,7 +81,7 @@ export const sampleTasks = [
 /**
  * 注册示例任务
  */
-export async function registerSampleTasks(taskScheduler: any) {
+export async function registerSampleTasks(taskScheduler: { createTask?: (task: unknown) => unknown }) {
   console.log('注册示例自动化测试任务...');
   
   for (const task of sampleTasks) {
@@ -89,7 +90,7 @@ export async function registerSampleTasks(taskScheduler: any) {
       console.log(`  • ${task.name} (${task.id})`);
       await new Promise(resolve => setTimeout(resolve, 50));
     } catch (error) {
-      console.error(`  ❌ ${task.name} 注册失败:`, error);
+      logger.error('示例任务注册失败', error, { taskId: task.id, taskName: task.name });
     }
   }
   

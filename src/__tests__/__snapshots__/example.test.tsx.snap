@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Header Component Snapshot matches snapshot with title and subtitle 1`] = `
+<div>
+  <header>
+    <h1>
+      Mission Control
+    </h1>
+    <p>
+      Central Dashboard for Automation
+    </p>
+  </header>
+</div>
+`;
+
+exports[`Header Component Snapshot matches snapshot with title only 1`] = `
+<div>
+  <header>
+    <h1>
+      Mission Control
+    </h1>
+  </header>
+</div>
+`;

@@ -3,60 +3,72 @@
 import { useState } from "react";
 import {
   LayoutDashboard, Wrench, Workflow, BarChart3, Settings,
-  Rocket, DollarSign, Calendar, FileText, Users, Brain, Zap,
+  Rocket, DollarSign, Calendar, BookOpen, Users, Zap,
   ChevronLeft, ChevronRight, Bug, TestTube, Server, CheckSquare,
-  Heart, X, Sparkles,
+  X, Sparkles, Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLang } from "@/contexts/language-context";
+import type { TranslationKey } from "@/lib/i18n";
 
 interface SidebarProps {
   onClose?: () => void;
   compact?: boolean;
 }
 
-const navGroups = [
+type NavItem = {
+  titleKey: TranslationKey;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+};
+
+type NavGroup = {
+  labelKey: TranslationKey;
+  items: NavItem[];
+};
+
+const navGroups: NavGroup[] = [
   {
-    label: "概览",
+    labelKey: "navOverview",
     items: [
-      { title: "仪表板",    href: "/",            icon: LayoutDashboard, badge: "3" },
-      { title: "健康监控",  href: "/health",       icon: Heart,           badge: "95" },
+      { titleKey: "navDashboard",       href: "/",                    icon: LayoutDashboard, badge: "3" },
+      { titleKey: "navSystemMonitoring", href: "/system-monitoring",  icon: Server,          badge: "new" },
+      { titleKey: "navExternalAPIs",    href: "/external-apis",       icon: Globe,           badge: "new" },
     ],
   },
   {
-    label: "工具",
+    labelKey: "navMCP",
     items: [
-      { title: "工具生态系统", href: "/ecosystem",         icon: Server,      badge: "new" },
-      { title: "技能评估",     href: "/skill-evaluator",   icon: CheckSquare, badge: "76" },
-      { title: "工具市场",     href: "/tools",             icon: Wrench,      badge: "12" },
-      { title: "工作流",       href: "/workflows",         icon: Workflow,    badge: "5" },
+      { titleKey: "navMCPManagement",   href: "/tools",               icon: Wrench,      badge: "new" },
+      { titleKey: "navSkillManagement", href: "/skill-evaluator",     icon: CheckSquare, badge: "MGR" },
+      { titleKey: "navWorkflows",       href: "/workflows",           icon: Workflow,    badge: "5" },
     ],
   },
   {
-    label: "业务",
+    labelKey: "navBusiness",
     items: [
-      { title: "数据分析",   href: "/analytics",    icon: BarChart3 },
-      { title: "财务中心",   href: "/finance",      icon: DollarSign, badge: "new" },
-      { title: "任务管理",   href: "/tasks",        icon: Calendar },
-      { title: "外包平台",   href: "/freelance",    icon: Users,      badge: "8" },
+      { titleKey: "navAnalytics",  href: "/analytics",    icon: BarChart3 },
+      { titleKey: "navFinance",    href: "/finance",      icon: DollarSign, badge: "new" },
+      { titleKey: "navTasks",      href: "/tasks",        icon: Calendar,   badge: "new" },
+      { titleKey: "navFreelance",  href: "/freelance",    icon: Users,      badge: "8" },
     ],
   },
   {
-    label: "AI & 自动化",
+    labelKey: "navAIAutomation",
     items: [
-      { title: "AI 助手",    href: "/ai",                      icon: Brain },
-      { title: "需求分析",   href: "/requirements-analysis",   icon: Sparkles, badge: "new" },
-      { title: "自动化",     href: "/automation",              icon: Zap },
-      { title: "任务中心",   href: "/missions",                icon: Rocket,  badge: "3" },
+      { titleKey: "navRequirements", href: "/requirements-analysis", icon: Sparkles, badge: "new" },
+      { titleKey: "navAutomation",   href: "/automation",            icon: Zap },
     ],
   },
   {
-    label: "开发",
+    labelKey: "navDevelopment",
     items: [
-      { title: "测试中心",   href: "/testing",       icon: TestTube, badge: "new" },
-      { title: "故障排查",   href: "/troubleshooting", icon: Bug,    badge: "new" },
-      { title: "文档中心",   href: "/docs",          icon: FileText },
+      { titleKey: "navTesting",        href: "/testing",              icon: TestTube, badge: "new" },
+      { titleKey: "navTroubleshooting", href: "/troubleshooting",    icon: Bug,      badge: "new" },
+      { titleKey: "navKnowledge",      href: "http://localhost:3000/", icon: BookOpen, badge: "new" },
     ],
   },
 ];
@@ -64,6 +76,7 @@ const navGroups = [
 export function Sidebar({ onClose, compact = false }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(compact);
   const pathname = usePathname();
+  const { t } = useLang();
 
   return (
     <aside
@@ -81,7 +94,7 @@ export function Sidebar({ onClose, compact = false }: SidebarProps) {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-slate-900 truncate">Mission Control</p>
-              <p className="text-[10px] text-slate-400 truncate">智能指挥中心 v2.0</p>
+              <p className="text-[10px] text-slate-400 truncate">{t("sidebarSubtitle")}</p>
             </div>
           </div>
         )}
@@ -113,20 +126,21 @@ export function Sidebar({ onClose, compact = false }: SidebarProps) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto custom-scrollbar py-3 px-2 space-y-4">
         {navGroups.map((group) => (
-          <div key={group.label}>
+          <div key={group.labelKey}>
             {!collapsed && (
               <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                {group.label}
+                {t(group.labelKey)}
               </p>
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const active = pathname === item.href;
+                const title = t(item.titleKey);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    title={collapsed ? item.title : undefined}
+                    title={collapsed ? title : undefined}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 group relative",
                       active
@@ -148,7 +162,7 @@ export function Sidebar({ onClose, compact = false }: SidebarProps) {
 
                     {!collapsed && (
                       <>
-                        <span className="flex-1 truncate">{item.title}</span>
+                        <span className="flex-1 truncate">{title}</span>
                         {item.badge && (
                           <span
                             className={cn(
@@ -178,7 +192,7 @@ export function Sidebar({ onClose, compact = false }: SidebarProps) {
         {collapsed ? (
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
-              <span className="text-xs font-bold text-white">凯</span>
+              <span className="text-xs font-bold text-white">K</span>
             </div>
             <Link href="/settings">
               <Settings className="w-4 h-4 text-slate-400 hover:text-slate-600 transition-colors" />
@@ -188,13 +202,13 @@ export function Sidebar({ onClose, compact = false }: SidebarProps) {
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">凯</span>
+                <span className="text-xs font-bold text-white">K</span>
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">凯哥</p>
-              <p className="text-xs text-slate-400 truncate">三阶段使命进行中</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">Kane</p>
+              <p className="text-xs text-slate-400 truncate">{t("missionInProgress")}</p>
             </div>
             <Link href="/settings" className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
               <Settings className="w-4 h-4 text-slate-400" />

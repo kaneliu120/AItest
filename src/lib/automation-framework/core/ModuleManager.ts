@@ -1,6 +1,7 @@
 // 自动化模块管理器 - 核心组件
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/lib/logger';
 
 export interface AutomationModule {
   id: string;
@@ -11,7 +12,7 @@ export interface AutomationModule {
   enabled: boolean;
   category: 'testing' | 'deployment' | 'monitoring' | 'security' | 'business' | 'integration';
   dependencies: string[];
-  configSchema?: Record<string, any>;
+  configSchema?: Record<string, unknown>;
   metadata: {
     installedAt: string;
     updatedAt: string;
@@ -23,7 +24,7 @@ export interface AutomationModule {
 
 export interface ModuleConfig {
   moduleId: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   schedule?: {
     cron: string;
     enabled: boolean;
@@ -88,7 +89,7 @@ export class ModuleManager {
         const module = JSON.parse(content);
         modules.push(module);
       } catch (error) {
-        console.error(`Error reading module ${file}:`, error);
+        logger.error('Error reading module file', error, { module: 'ModuleManager', file });
       }
     }
     
@@ -107,7 +108,7 @@ export class ModuleManager {
       const content = fs.readFileSync(configFile, 'utf-8');
       return JSON.parse(content);
     } catch (error) {
-      console.error(`Error reading config for ${moduleId}:`, error);
+      logger.error('Error reading module config', error, { module: 'ModuleManager', moduleId });
       return null;
     }
   }
@@ -135,7 +136,7 @@ export class ModuleManager {
       fs.writeFileSync(moduleFile, JSON.stringify(module, null, 2));
       return true;
     } catch (error) {
-      console.error(`Error toggling module ${moduleId}:`, error);
+      logger.error('Error toggling module', error, { module: 'ModuleManager', moduleId });
       return false;
     }
   }
@@ -165,7 +166,7 @@ export class ModuleManager {
       fs.writeFileSync(moduleFile, JSON.stringify(module, null, 2));
       return true;
     } catch (error) {
-      console.error(`Error updating stats for ${moduleId}:`, error);
+      logger.error('Error updating module stats', error, { module: 'ModuleManager', moduleId });
       return false;
     }
   }

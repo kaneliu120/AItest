@@ -6,6 +6,16 @@ function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+const VALID_SYSTEMS = ['mission-control','okms','openclaw','auto'] as const;
+const VALID_PRIORITIES = ['low','medium','high','critical'] as const;
+
+function asSystem(v: unknown): UnifiedRequest['system'] {
+  return typeof v === 'string' && (VALID_SYSTEMS as readonly string[]).includes(v) ? (v as UnifiedRequest['system']) : undefined;
+}
+function asPriority(v: unknown): UnifiedRequest['priority'] {
+  return typeof v === 'string' && (VALID_PRIORITIES as readonly string[]).includes(v) ? (v as UnifiedRequest['priority']) : 'medium';
+}
+
 // GET: 处理查询请求
 export async function GET(request: NextRequest) {
   try {
@@ -24,8 +34,8 @@ export async function GET(request: NextRequest) {
           }, { status: 400 });
         }
 
-        const system = searchParams.get('system') as any;
-        const priority = searchParams.get('priority') as any || 'medium';
+        const system = asSystem(searchParams.get('system'));
+        const priority = asPriority(searchParams.get('priority'));
 
         const unifiedRequest: UnifiedRequest = {
           id: generateRequestId(),
@@ -103,7 +113,14 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'process':
         // 处理统一请求
-        const { query, system, priority, context, userId, sessionId, metadata } = body;
+        const b = body as Record<string, unknown>;
+        const query = typeof b.query === 'string' ? b.query : '';
+        const system = b.system;
+        const priority = b.priority;
+        const context = b.context;
+        const userId = b.userId;
+        const sessionId = b.sessionId;
+        const metadata = b.metadata;
         
         if (!query) {
           return NextResponse.json({
@@ -116,13 +133,13 @@ export async function POST(request: NextRequest) {
         const unifiedRequest: UnifiedRequest = {
           id: generateRequestId(),
           query,
-          system,
-          priority: priority || 'medium',
-          context: context || {},
-          userId,
-          sessionId,
+          system: asSystem(system),
+          priority: asPriority(priority),
+          context: (context && typeof context === 'object' ? context as Record<string, unknown> : {}),
+          userId: typeof userId === 'string' ? userId : undefined,
+          sessionId: typeof sessionId === 'string' ? sessionId : undefined,
           metadata: {
-            ...metadata,
+            ...(metadata && typeof metadata === 'object' ? metadata as Record<string, unknown> : {}),
             source: 'api',
             method: 'POST'
           }

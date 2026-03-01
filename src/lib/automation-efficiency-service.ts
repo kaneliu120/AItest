@@ -5,6 +5,7 @@ import { knowledgeEnhancedDevService, KnowledgeEnhancementLevel } from './knowle
 import { intelligentTaskDispatcher } from './intelligent-task-dispatcher';
 import { contextAwareCacheService } from './context-aware-cache-service';
 import { unifiedGatewayService, UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
+import { logger } from './logger';
 
 // 自动化效率指标
 export interface AutomationEfficiencyMetrics {
@@ -73,8 +74,8 @@ export interface AutomationTask {
   estimatedTime: number; // 分钟
   automationLevel: 'manual' | 'assisted' | 'full';
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  data?: any; // 自定义数据
-  result?: any;
+  data?: Record<string, unknown>; // 自定义数据
+  result?: unknown;
   metrics?: {
     actualTokenUsage: number;
     actualTime: number;
@@ -359,9 +360,9 @@ class AutomationEfficiencyService {
     this.tasks.set(taskId, automationTask);
     
     try {
-      console.log(`🤖 处理自动化任务: ${taskId} (${task.type})`);
+      logger.info('处理自动化任务', { module: 'automation-efficiency-service', taskId, type: task.type });
       
-      let result: any;
+      let result: unknown;
       let tokenUsage = task.estimatedTokenUsage;
       let qualityScore = 0.8; // 默认质量分
       
@@ -418,15 +419,15 @@ class AutomationEfficiencyService {
       // 更新系统指标
       this.updateSystemMetrics(automationTask);
       
-      console.log(`✅ 任务完成: ${taskId}`);
-      console.log(`  节省时间: ${timeSaved.toFixed(2)}小时`);
-      console.log(`  节省Token: ${tokenSavings.toFixed(0)}`);
-      console.log(`  质量评分: ${(qualityScore * 100).toFixed(1)}%`);
+      logger.info('任务完成', { module: 'automation-efficiency-service', taskId });
+      logger.info('任务统计-节省时间', { taskId, timeSavedHours: Number(timeSaved.toFixed(2)) });
+      logger.info('任务统计-节省Token', { taskId, tokenSavings: Number(tokenSavings.toFixed(0)) });
+      logger.info('任务统计-质量评分', { taskId, qualityScorePct: Number((qualityScore*100).toFixed(1)) });
       
       return automationTask;
       
     } catch (error) {
-      console.error(`❌ 任务失败: ${taskId}`, error);
+      logger.error('任务失败', error, { module: 'automation-efficiency-service', taskId });
       
       automationTask.status = 'failed';
       this.tasks.set(taskId, automationTask);
@@ -440,11 +441,11 @@ class AutomationEfficiencyService {
   }
 
   // 处理代码生成任务
-  private async processCodeGenerationTask(task: any): Promise<any> {
+  private async processCodeGenerationTask(task: Pick<AutomationTask,'priority'|'data'>): Promise<unknown> {
     // 使用知识增强开发系统
     const request: UnifiedRequest = {
       id: `code-gen-${Date.now()}`,
-      query: task.description || '生成代码',
+      query: String((task.data as any)?.description || '生成代码'),
       priority: task.priority,
       context: { 
         taskType: 'code-generation',
@@ -465,28 +466,31 @@ class AutomationEfficiencyService {
   }
 
   // 处理API设计任务
-  private async processApiDesignTask(task: any): Promise<any> {
+  private async processApiDesignTask(task: Pick<AutomationTask,'priority'|'data'>): Promise<unknown> {
     // 使用智能分发系统
     const dispatchResult = await intelligentTaskDispatcher.dispatchTask({
-      query: task.description || '设计API',
-      context: { taskType: 'api-design' }
-    });
+      id: `auto-${Date.now()}`,
+      query: String((task.data as any)?.description || '设计API'),
+      context: { taskType: 'api-design' },
+      priority: 'medium',
+    } as any);
     
     return {
       success: true,
-      apiDesign: dispatchResult.response,
-      system: dispatchResult.system,
+      apiDesign: dispatchResult.data,
+      system: dispatchResult.source,
       cached: dispatchResult.cached
     };
   }
 
   // 处理优化任务
-  private async processOptimizationTask(task: any): Promise<any> {
+  private async processOptimizationTask(task: Pick<AutomationTask,'priority'|'data'>): Promise<unknown> {
     // 使用上下文缓存优化
     const cacheResult = await contextAwareCacheService.getWithContext({
-      query: task.description || '优化任务',
-      context: { optimization: true }
-    });
+      id: `opt-${Date.now()}`,
+      query: String((task.data as any)?.description || '优化任务'),
+      context: { optimization: true },
+    } as any);
     
     return {
       success: true,
@@ -628,7 +632,7 @@ class AutomationEfficiencyService {
       }
     }
     
-    console.log(`✅ 批量处理完成: ${results.filter(r => r.status === 'completed').length}/${tasks.length} 成功`);
+    logger.info('批量处理完成', { module: 'automation-efficiency-service', success: results.filter(r => r.status === 'completed').length, total: tasks.length });
     
     return results;
   }

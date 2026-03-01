@@ -1,364 +1,438 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, AlertCircle, Calendar, Plus, Filter, CheckSquare, ListTodo } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ChevronDown,
+  ChevronRight,
+  CheckCircle2,
+  Circle,
+  ClipboardList,
+  Edit3,
+  FolderPlus,
+  Search,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
+
+type NodeTask = {
+  id: string;
+  parentId?: string | null;
+  level: number;
+  title: string;
+  status: string;
+  progress: number;
+  targetPrice?: number | null;
+  currency?: string;
+  children?: NodeTask[];
+};
+
+const GOAL_TITLES = [
+  'AI Agent Philippines market individual and enterprise deployment business',
+  'MySkillStore trading platform development and operations',
+  'Seeking business and institutional investment',
+  'Job Seeking',
+  'AI system and feature evolution',
+  'Freelance platform task orders',
+];
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [summary, setSummary] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [tree, setTree] = useState<NodeTask[]>([]);
+  const [q, setQ] = useState('');
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [form, setForm] = useState({ goalId: '', taskId: '', subtaskId: '' });
+  const [docText, setDocText] = useState('');
+  const [draft, setDraft] = useState<any[]>([]);
+
+  const load = async () => {
+    const j = await fetch('/api/task-hierarchy', { cache: 'no-store' }).then((r) => r.json());
+    setTree(j?.data || []);
+  };
 
   useEffect(() => {
-    fetchData();
+    load();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      // 获取任务列表
-      const tasksRes = await fetch('/api/tasks?action=tasks');
-      const tasksData = await tasksRes.json();
-      setTasks(tasksData.data.tasks || []);
+  const flat = useMemo(() => {
+    const out: NodeTask[] = [];
+    const walk = (nodes: NodeTask[]) =>
+      nodes.forEach((n) => {
+        out.push(n);
+        if (n.children?.length) walk(n.children);
+      });
+    walk(tree);
+    return out;
+  }, [tree]);
 
-      // 获取任务摘要
-      const summaryRes = await fetch('/api/tasks?action=summary');
-      const summaryData = await summaryRes.json();
-      setSummary(summaryData.data);
-    } catch (error) {
-      console.error('获取任务数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredFlat = useMemo(() => {
+    if (!q.trim()) return flat;
+    const keyword = q.toLowerCase();
+    return flat.filter((n) => n.title.toLowerCase().includes(keyword));
+  }, [flat, q]);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
+  const fixedLevel1 = GOAL_TITLES.map((title) => tree.find((t) => t.title === title && t.level === 1))
+    .filter(Boolean)
+    .map((t: any) => ({ id: t.id, title: t.title }));
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'text-green-600 bg-green-50 border-green-200';
-      case 'in-progress': return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'pending': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'overdue': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
+  const dynamicLevel1 = tree
+    .filter((t) => t.level === 1 && !GOAL_TITLES.includes(t.title))
+    .map((t) => ({ id: t.id, title: t.title }));
 
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high': return '高优先级';
-      case 'medium': return '中优先级';
-      case 'low': return '低优先级';
-      default: return '普通';
-    }
-  };
+  const level1Options = [...fixedLevel1, ...dynamicLevel1];
+  const level2Options = (tree.find((t) => t.id === form.goalId)?.children || []).map((t) => ({ id: t.id, title: t.title }));
+  const level3Options = ((tree.find((t) => t.id === form.goalId)?.children || []).find((t) => t.id === form.taskId)?.children || []).map((t) => ({ id: t.id, title: t.title }));
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return '已完成';
-      case 'in-progress': return '进行中';
-      case 'pending': return '待处理';
-      case 'overdue': return '已过期';
-      default: return '未知';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
+  const addLevel1 = async () => {
+    const title = (prompt('Enter new top-level goal name') || '').trim();
+    if (!title) return;
+    await fetch('/api/task-hierarchy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parentId: null, level: 1, title, currency: 'PHP', status: 'pending', progress: 0 }),
     });
+    setForm({ goalId: '', taskId: '', subtaskId: '' });
+    load();
   };
 
-  if (loading) {
+  const addLevel2 = async () => {
+    if (!form.goalId) {
+      alert('Please select a top-level goal first');
+      return;
+    }
+    const title = (prompt('Enter new level 2 task name') || '').trim();
+    if (!title) return;
+    await fetch('/api/task-hierarchy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parentId: form.goalId, level: 2, title, currency: 'PHP', status: 'pending', progress: 0 }),
+    });
+    setForm({ ...form, taskId: '', subtaskId: '' });
+    load();
+  };
+
+  const addLevel3 = async () => {
+    if (!form.taskId) {
+      alert('Please select a level 2 task first');
+      return;
+    }
+    const title = (prompt('Enter new level 3 subtask name') || '').trim();
+    if (!title) return;
+    await fetch('/api/task-hierarchy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parentId: form.taskId, level: 3, title, currency: 'PHP', status: 'pending', progress: 0 }),
+    });
+    setExpanded((prev) => ({ ...prev, [form.goalId]: true, [form.taskId]: true }));
+    load();
+  };
+
+  const updateTask = async (id: string, updates: any) => {
+    await fetch(`/api/task-hierarchy/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    load();
+  };
+
+  const removeTask = async (id: string) => {
+    await fetch(`/api/task-hierarchy/${id}`, { method: 'DELETE' });
+    load();
+  };
+
+  const generateDraft = async () => {
+    const j = await fetch('/api/task-hierarchy/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: docText }),
+    }).then((r) => r.json());
+    setDraft(j?.data?.draft || []);
+  };
+
+  const commitDraft = async () => {
+    if (!draft.length) return;
+    await fetch('/api/task-hierarchy/generate/commit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ draft }),
+    });
+    setDraft([]);
+    setDocText('');
+    load();
+  };
+
+  const statusChip = (status: string) => {
+    const mapping: Record<string, string> = {
+      completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'in-progress': 'bg-blue-50 text-blue-700 border-blue-200',
+      pending: 'bg-slate-100 text-slate-600 border-slate-200',
+    };
+    return mapping[status] || 'bg-slate-100 text-slate-600 border-slate-200';
+  };
+
+  const renderNode = (n: NodeTask) => {
+    if (q) {
+      const keyword = q.toLowerCase();
+      const selfHit = n.title.toLowerCase().includes(keyword);
+      const childHit = (n.children || []).some((c) => c.title.toLowerCase().includes(keyword));
+      if (!selfHit && !childHit) return null;
+    }
+
+    const isOpen = expanded[n.id] ?? (n.level === 1 ? false : true);
+
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">加载任务数据...</p>
+      <div key={n.id}>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-start gap-2">
+                {(n.children?.length || 0) > 0 ? (
+                  <button
+                    className="mt-1 rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                    onClick={() => setExpanded((prev) => ({ ...prev, [n.id]: !isOpen }))}
+                  >
+                    {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                ) : (
+                  <span className="mt-1 p-1 text-slate-300">
+                    <Circle className="h-4 w-4" />
+                  </span>
+                )}
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      className="truncate text-left text-base font-semibold text-slate-900 transition-colors hover:text-blue-600"
+                      onClick={() => (n.children?.length ? setExpanded((prev) => ({ ...prev, [n.id]: !isOpen })) : undefined)}
+                    >
+                      {n.title}
+                    </button>
+                    <span className={`rounded-md border px-2 py-0.5 text-xs ${statusChip(n.status)}`}>{n.status}</span>
+                    <a href={`/tasks/${n.id}`} className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline">
+                      Details
+                    </a>
+                  </div>
+                  <div className="mt-1 text-sm text-slate-500">
+                    Progress {n.progress}% · Target Price {n.targetPrice ?? '—'} {n.currency || 'PHP'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                onClick={() => updateTask(n.id, { status: 'in-progress' })}
+              >
+                In Progress
+              </button>
+              <button
+                className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-all hover:bg-blue-700 active:scale-95"
+                onClick={() => updateTask(n.id, { status: 'completed', progress: 100 })}
+              >
+                Complete
+              </button>
+              <button
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                onClick={() => {
+                  const title = prompt('New title', n.title) || n.title;
+                  const description = prompt('Description', '') || '';
+                  const targetPrice = prompt('Target Price', String(n.targetPrice ?? ''));
+                  const owner = prompt('Owner', '') || '';
+                  updateTask(n.id, { title, description, targetPrice: targetPrice ? Number(targetPrice) : null, owner });
+                }}
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+                Edit
+              </button>
+              <button
+                className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+                onClick={() => removeTask(n.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
+
+        {isOpen && n.children?.length ? <div className="ml-6 mt-3 space-y-3 border-l border-slate-200 pl-4">{n.children.map(renderNode)}</div> : null}
       </div>
     );
-  }
+  };
 
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length;
-  const inProgressTasks = tasks.filter(t => t.status === 'in-progress').length;
-  const completedTasks = tasks.filter(t => t.status === 'completed').length;
-  const overdueTasks = tasks.filter(t => t.status === 'overdue').length;
-  const highPriorityTasks = tasks.filter(t => t.priority === 'high').length;
+  const completedCount = flat.filter((t) => t.status === 'completed').length;
+  const inProgressCount = flat.filter((t) => t.status === 'in-progress').length;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* 页面标题 */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="min-h-screen bg-slate-50">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div>
-            <h1 className="text-3xl font-bold">任务管理</h1>
-            <p className="text-muted-foreground">管理和跟踪您的日常任务</p>
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium Tasks Workspace
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Task Management</h1>
+              <p className="mt-1 text-slate-600">Unified management of goals, task hierarchy, document breakdown, and execution status.</p>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatCard label="Total Tasks" value={String(flat.length)} />
+              <StatCard label="Search Results" value={String(filteredFlat.length)} />
+              <StatCard label="In Progress" value={String(inProgressCount)} />
+              <StatCard label="Completed" value={String(completedCount)} />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              筛选
-            </Button>
-            <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              日历视图
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              添加任务
-            </Button>
+        </section>
+
+        <section className="space-y-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center gap-2">
+              <FolderPlus className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-slate-900">Add Task Node</h2>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <select
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                value={form.goalId}
+                onChange={(e) => setForm({ ...form, goalId: e.target.value, taskId: '', subtaskId: '' })}
+              >
+                <option value="">Select top-level goal</option>
+                {level1Options.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                value={form.taskId}
+                onChange={(e) => setForm({ ...form, taskId: e.target.value, subtaskId: '' })}
+              >
+                <option value="">Level 2 Task (Optional)</option>
+                {level2Options.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                value={form.subtaskId}
+                onChange={(e) => setForm({ ...form, subtaskId: e.target.value })}
+              >
+                <option value="">Level 3 Subtask (Optional)</option>
+                {level3Options.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div>
+                <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 active:scale-95" onClick={addLevel1}>
+                  Add Level 1
+                </button>
+              </div>
+              <div>
+                <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" onClick={addLevel2}>
+                  Add Level 2
+                </button>
+              </div>
+              <div>
+                <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" onClick={addLevel3}>
+                  Add Level 3
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">总任务数</p>
-                  <p className="text-2xl font-bold">{tasks.length}</p>
+          <div className="space-y-6">
+            <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex items-center gap-2">
+                  <Wand2 className="h-5 w-5 text-blue-600" />
+                  <h2 className="text-lg font-semibold text-slate-900">Generate Tasks from Document</h2>
                 </div>
-                <ListTodo className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">待处理</p>
-                  <p className="text-2xl font-bold">{pendingTasks}</p>
+                <textarea
+                  className="min-h-28 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  placeholder="Paste task document content"
+                  value={docText}
+                  onChange={(e) => setDocText(e.target.value)}
+                />
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" onClick={generateDraft}>
+                    Generate Draft
+                  </button>
+                  <button
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    onClick={async () => {
+                      const j = await fetch('/api/task-hierarchy/template').then((r) => r.json());
+                      setDocText(j?.data?.template || '');
+                    }}
+                  >
+                    Insert Template
+                  </button>
+                  <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 active:scale-95" onClick={commitDraft}>
+                    Confirm & Save
+                  </button>
+                  <span className="ml-auto rounded-md bg-slate-100 px-2.5 py-1 text-xs text-slate-600">Drafts: {draft.length}</span>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">进行中</p>
-                  <p className="text-2xl font-bold">{inProgressTasks}</p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">已完成</p>
-                  <p className="text-2xl font-bold">{completedTasks}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">高优先级</p>
-                  <p className="text-2xl font-bold">{highPriorityTasks}</p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 任务进度 */}
-        {summary && (
-          <Card>
-            <CardHeader>
-              <CardTitle>任务进度</CardTitle>
-              <CardDescription>整体任务完成情况</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>总体完成率</span>
-                    <span>{summary.completionRate}%</span>
+            <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5 text-blue-600" />
+                    <h2 className="text-lg font-semibold text-slate-900">Task List</h2>
                   </div>
-                  <Progress value={summary.completionRate} className="h-3" />
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{summary.completedTasks}</div>
-                    <div className="text-sm text-muted-foreground">已完成</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{summary.inProgressTasks}</div>
-                    <div className="text-sm text-muted-foreground">进行中</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{summary.pendingTasks}</div>
-                    <div className="text-sm text-muted-foreground">待处理</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{summary.overdueTasks}</div>
-                    <div className="text-sm text-muted-foreground">已过期</div>
+
+                  <div className="relative w-full sm:max-w-xs">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      className="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      placeholder="Search task title"
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                    />
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* 任务列表 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 高优先级任务 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>高优先级任务</CardTitle>
-              <CardDescription>需要优先处理的任务</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {tasks
-                  .filter(t => t.priority === 'high')
-                  .slice(0, 5)
-                  .map((task) => (
-                    <div key={task.id} className="p-3 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                            {getPriorityText(task.priority)}
-                          </span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(task.status)}`}>
-                            {getStatusText(task.status)}
-                          </span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{formatDate(task.dueDate)}</span>
-                      </div>
-                      <p className="font-medium mb-1">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">{task.description}</p>
-                      {task.progress !== undefined && (
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>进度</span>
-                            <span>{task.progress}%</span>
-                          </div>
-                          <Progress value={task.progress} className="h-1" />
-                        </div>
-                      )}
+                <div className="space-y-3">
+                  {tree.length ? (
+                    tree.map(renderNode)
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                      <CheckCircle2 className="mx-auto h-8 w-8 text-slate-400" />
+                      <p className="mt-3 text-sm text-slate-500">No task data. Create a top-level goal first.</p>
                     </div>
-                  ))}
-              </div>
-              {highPriorityTasks === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">暂无高优先级任务</p>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* 最近任务 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>最近任务</CardTitle>
-              <CardDescription>最近创建和更新的任务</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {tasks.slice(0, 5).map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${
-                        task.status === 'completed' ? 'bg-green-100 text-green-600' :
-                        task.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
-                        'bg-yellow-100 text-yellow-600'
-                      }`}>
-                        {task.status === 'completed' ? (
-                          <CheckSquare className="h-4 w-4" />
-                        ) : task.status === 'in-progress' ? (
-                          <AlertCircle className="h-4 w-4" />
-                        ) : (
-                          <Clock className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {task.category} • 截止: {formatDate(task.dueDate)}
-                        </p>
-                      </div>
-                    </div>
-                    <Button size="sm" variant="ghost">
-                      {task.status === 'completed' ? '查看' : '处理'}
-                    </Button>
-                  </div>
-                ))}
               </div>
-              {tasks.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">暂无任务记录</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
 
-        {/* 任务分类统计 */}
-        {summary?.categories && summary.categories.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>任务分类统计</CardTitle>
-              <CardDescription>按类别统计的任务分布</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {summary.categories.map((category: any, index: number) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{category.name}</span>
-                        <span className="text-sm text-muted-foreground">({category.count}个任务)</span>
-                      </div>
-                      <span className="text-sm font-medium">{category.completionRate}%</span>
-                    </div>
-                    <Progress value={category.completionRate} className="h-2" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 快速操作 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button variant="outline" className="h-auto py-4">
-            <Plus className="h-4 w-4 mr-2" />
-            添加新任务
-          </Button>
-          <Button variant="outline" className="h-auto py-4">
-            <Calendar className="h-4 w-4 mr-2" />
-            查看日历
-          </Button>
-          <Button className="h-auto py-4">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            批量完成
-          </Button>
-        </div>
-      </div>
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="mt-1 text-lg font-semibold text-slate-900">{value}</div>
     </div>
   );
 }

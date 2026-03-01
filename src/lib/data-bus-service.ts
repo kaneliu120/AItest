@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * 数据总线服务
  * 标准化模块间数据传递
@@ -49,6 +50,7 @@ class DataBusService {
   private eventQueue: DataEvent[] = [];
   private metrics: DataBusMetrics;
   private config: DataBusConfig;
+  private processorIntervalId?: ReturnType<typeof setInterval>;
 
   constructor(config: Partial<DataBusConfig> = {}) {
     this.config = {
@@ -90,7 +92,7 @@ class DataBusService {
     // 检查事件是否过期
     if (this.isEventExpired(fullEvent)) {
       if (this.config.enableLogging) {
-        console.warn(`事件已过期，跳过发布: ${fullEvent.type}`);
+        logger.warn(`事件已过期，跳过发布: ${fullEvent.type}`);
       }
       return;
     }
@@ -106,7 +108,7 @@ class DataBusService {
     this.metrics.queueSize = this.eventQueue.length;
 
     if (this.config.enableLogging) {
-      console.log(`📤 发布事件: ${fullEvent.type} (来源: ${fullEvent.source})`);
+      logger.info(`📤 发布事件: ${fullEvent.type} (来源: ${fullEvent.source})`);
     }
   }
 
@@ -124,7 +126,7 @@ class DataBusService {
     this.metrics.activeSubscriptions++;
 
     if (this.config.enableLogging) {
-      console.log(`📥 订阅事件: ${eventType} (处理器: ${handlerId})`);
+      logger.info(`📥 订阅事件: ${eventType} (处理器: ${handlerId})`);
     }
 
     return {
@@ -139,7 +141,7 @@ class DataBusService {
           }
 
           if (this.config.enableLogging) {
-            console.log(`📭 取消订阅: ${eventType} (处理器: ${handlerId})`);
+            logger.info(`📭 取消订阅: ${eventType} (处理器: ${handlerId})`);
           }
         }
       },
@@ -209,7 +211,7 @@ class DataBusService {
       const correlationId = requestEvent.metadata?.correlationId;
       
       if (!correlationId) {
-        console.warn(`请求事件缺少correlationId: ${eventType}`);
+        logger.warn(`请求事件缺少correlationId: ${eventType}`);
         return;
       }
 
@@ -288,9 +290,16 @@ class DataBusService {
    * 私有方法：启动事件处理器
    */
   private startEventProcessor(): void {
-    setInterval(() => {
+    this.processorIntervalId = setInterval(() => {
       this.processEventQueue();
     }, 100); // 每100毫秒处理一次
+  }
+
+  stopEventProcessor(): void {
+    if (this.processorIntervalId !== undefined) {
+      clearInterval(this.processorIntervalId);
+      this.processorIntervalId = undefined;
+    }
   }
 
   /**
@@ -307,7 +316,7 @@ class DataBusService {
     // 检查事件是否过期
     if (this.isEventExpired(event)) {
       if (this.config.enableLogging) {
-        console.warn(`跳过过期事件: ${event.type}`);
+        logger.warn(`跳过过期事件: ${event.type}`);
       }
       return;
     }
@@ -317,7 +326,7 @@ class DataBusService {
 
     if (!handlers || handlers.size === 0) {
       if (this.config.enableLogging) {
-        console.warn(`没有处理器订阅事件: ${event.type}`);
+        logger.warn(`没有处理器订阅事件: ${event.type}`);
       }
       return;
     }
@@ -328,7 +337,7 @@ class DataBusService {
         await handler(event);
         return { success: true, index };
       } catch (error) {
-        console.error(`事件处理器错误 (${event.type}):`, error);
+        logger.error(`事件处理器错误 (${event.type}):`, error);
         return { success: false, index, error };
       }
     });
@@ -350,7 +359,7 @@ class DataBusService {
     }
 
     if (this.config.enableLogging) {
-      console.log(`📨 处理事件: ${event.type} (${handlers.size}个处理器, ${processingTime}ms)`);
+      logger.info(`📨 处理事件: ${event.type} (${handlers.size}个处理器, ${processingTime}ms)`);
     }
   }
 
@@ -447,15 +456,15 @@ export function logEvent(event: DataEvent, level: 'info' | 'warn' | 'error' = 'i
     error: '❌',
   };
   
-  console.log(`${logLevels[level]} 事件日志: ${event.type}`);
-  console.log(`   来源: ${event.source}`);
-  console.log(`   时间: ${event.timestamp}`);
+  logger.info(`${logLevels[level]} 事件日志: ${event.type}`);
+  logger.info(`   来源: ${event.source}`);
+  logger.info(`   时间: ${event.timestamp}`);
   
   if (event.metadata?.correlationId) {
-    console.log(`   关联ID: ${event.metadata.correlationId}`);
+    logger.info(`   关联ID: ${event.metadata.correlationId}`);
   }
   
   if (level === 'error' && event.data?.error) {
-    console.log(`   错误: ${event.data.error}`);
+    logger.info(`   错误: ${event.data.error}`);
   }
 }

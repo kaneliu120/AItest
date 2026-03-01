@@ -7,7 +7,7 @@ export interface DataMessage {
   source: string;
   destination?: string; // 如果为空，广播给所有模块
   timestamp: string;
-  payload: any;
+  payload: unknown;
   metadata?: {
     priority?: 'low' | 'normal' | 'high' | 'critical';
     ttl?: number; // 生存时间（毫秒）
@@ -205,11 +205,11 @@ export class DataBus {
   }
   
   // 请求-响应模式
-  async request<T = any>(
+  async request<T = unknown>(
     source: string,
     destination: string,
     type: string,
-    payload: any,
+    payload: unknown,
     timeout: number = 30000
   ): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -221,7 +221,7 @@ export class DataBus {
         if (response.metadata?.correlationId === correlationId) {
           clearTimeout(timeoutId);
           this.offMessage(source, responseHandler);
-          resolve(response.payload);
+          resolve(response.payload as T);
         }
       };
       
@@ -253,7 +253,7 @@ export class DataBus {
     source: string,
     destination: string,
     correlationId: string,
-    payload: any
+    payload: unknown
   ): string {
     return this.sendMessage({
       type: 'response',

@@ -1,0 +1,34 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // 当应用部署在子路径时使用
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  
+  reactStrictMode: true,
+  swcMinify: true,
+  
+  // 图片优化
+  images: {
+    unoptimized: true, // 禁用内置优化，使用简单方式
+  },
+  
+  // 类型检查
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
+  // ESLint检查
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // 生产环境优化
+  productionBrowserSourceMaps: false,
+  
+  // 环境变量
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'Mission Control',
+  },
+};
+
+module.exports = nextConfig;

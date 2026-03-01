@@ -1,11 +1,12 @@
+import { logger } from '@/lib/logger';
 // 简化的故障诊断引擎 - 避免类型错误
 export interface FaultDetectionRule {
   id: string;
   name: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  condition: (context: any) => boolean | Promise<boolean>;
-  action: (context: any) => Promise<any>;
+  condition: (context: Record<string, unknown>) => boolean | Promise<boolean>;
+  action: (context: Record<string, unknown>) => Promise<unknown>;
   tags: string[];
   enabled: boolean;
 }
@@ -13,7 +14,7 @@ export interface FaultDetectionRule {
 export interface RepairStep {
   id: string;
   description: string;
-  action: () => Promise<any>;
+  action: () => Promise<unknown>;
   requiresConfirmation: boolean;
   estimatedTime: number;
 }
@@ -34,7 +35,7 @@ export class FaultDiagnosisEngine {
         name: '高CPU使用率检测',
         description: '检测CPU使用率超过80%的情况',
         severity: 'medium',
-        condition: async (context) => context?.systemMetrics?.cpuUsage > 80,
+        condition: async (context) => (((context.systemMetrics as Record<string, unknown> | undefined)?.cpuUsage as number | undefined) ?? 0) > 80,
         action: async (context) => ({
           faultId: `cpu-high-${Date.now()}`,
           ruleId: 'high-cpu-usage',
@@ -54,7 +55,7 @@ export class FaultDiagnosisEngine {
             }
           ],
           confidence: 0.8,
-          data: { cpuUsage: context?.systemMetrics?.cpuUsage }
+          data: { cpuUsage: ((context.systemMetrics as Record<string, unknown> | undefined)?.cpuUsage as number | undefined) ?? 0 }
         }),
         tags: ['performance', 'cpu'],
         enabled: true
@@ -75,8 +76,8 @@ export class FaultDiagnosisEngine {
   }
 
   // 运行诊断
-  async diagnose(context: any): Promise<any[]> {
-    const results = [];
+  async diagnose(context: Record<string, unknown>): Promise<unknown[]> {
+    const results: unknown[] = [];
     
     for (const rule of this.rules.values()) {
       if (rule.enabled) {
@@ -87,7 +88,7 @@ export class FaultDiagnosisEngine {
             results.push(result);
           }
         } catch (error) {
-          console.error(`规则 ${rule.name} 执行失败:`, error);
+          logger.error('规则执行失败', error, { module: 'FaultDiagnosisEngine', rule: rule.name });
         }
       }
     }

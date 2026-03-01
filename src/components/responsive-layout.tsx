@@ -139,7 +139,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   );
 }
 
-// 响应式工具组件
+// 响应式MCP组件
 export function ResponsiveContainer({ 
   children, 
   className = '' 

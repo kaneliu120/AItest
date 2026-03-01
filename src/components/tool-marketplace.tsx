@@ -67,14 +67,14 @@ export default function ToolMarketplace() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>工具市场</CardTitle>
+          <CardTitle>MCP市场</CardTitle>
           <p className="text-sm text-muted-foreground">
-            按需开发和使用工具
+            按需开发和使用MCP
           </p>
         </div>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
-          请求工具
+          请求MCP
         </Button>
       </CardHeader>
       <CardContent>
@@ -117,7 +117,7 @@ export default function ToolMarketplace() {
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              共 {tools.length} 个工具，{tools.filter(t => t.status === "已安装").length} 个已安装
+              共 {tools.length} 个MCP，{tools.filter(t => t.status === "已安装").length} 个已安装
             </span>
             <Button variant="ghost" size="sm">
               查看全部

@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Terminal, Globe, Cpu, Shield, BarChart3, Play, Settings, Download, AlertCircle, CheckCircle, XCircle, RefreshCw, Wrench, Search, FileText } from "lucide-react";
+import { Terminal, Globe, Cpu, Shield, BarChart3, Play, Settings, Download, AlertCircle, CheckCircle, XCircle, RefreshCw, Wrench, Search, FileText, Zap } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-// 测试工具接口
+// 测试MCP接口
 interface TestTool {
   id: string;
   name: string;
@@ -41,11 +41,17 @@ interface TestSummary {
   averageDuration: string;
 }
 
+interface AutoModule {
+  id: string; name: string; status: 'running' | 'idle' | 'error';
+  description: string; lastRun: string; runCount: number; successRate: number;
+}
+
 export default function AutomatedTestingIntegration() {
   const [activeTab, setActiveTab] = useState("automation");
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [testTools, setTestTools] = useState<TestTool[]>([]);
+  const [autoModules, setAutoModules] = useState<AutoModule[]>([]);
   const [summary, setSummary] = useState<TestSummary>({
     totalTests: 0,
     passedTests: 0,
@@ -53,7 +59,7 @@ export default function AutomatedTestingIntegration() {
     averageDuration: "0.00"
   });
   const [diagnosticIssue, setDiagnosticIssue] = useState("");
-  const [webTestUrl, setWebTestUrl] = useState("https://localhost:3000");
+  const [webTestUrl, setWebTestUrl] = useState("http://localhost:3001/api/health");
   const [isLoading, setIsLoading] = useState(true);
 
   // 初始化数据
@@ -75,7 +81,7 @@ export default function AutomatedTestingIntegration() {
         setTestResults(resultsData.data.results);
       }
       
-      // 获取工具状态
+      // 获取MCP状态
       const statusRes = await fetch('/api/test?action=status');
       const statusData = await statusRes.json();
       
@@ -135,13 +141,20 @@ export default function AutomatedTestingIntegration() {
         setTestTools(tools);
       }
       
-      // 获取统计摘要
+      // 获取统计摘要（含自动化联动数据）
       const summaryRes = await fetch('/api/test?action=summary');
       const summaryData = await summaryRes.json();
       
       if (summaryData.success) {
         setSummary(summaryData.data);
       }
+
+      // ── 自动化模块数据（核心联动） ──
+      try {
+        const autoModRes  = await fetch('/api/automation?action=modules');
+        const autoModData = await autoModRes.json();
+        if (autoModData.success) setAutoModules(autoModData.data.modules ?? []);
+      } catch { /* 降级，不影响主流程 */ }
       
     } catch (error) {
       console.error('Failed to fetch test data:', error);
@@ -407,16 +420,22 @@ export default function AutomatedTestingIntegration() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">工具状态</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-orange-500" />自动化模块
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{testTools.filter(t => t.health === "healthy").length}/{testTools.length}</div>
-            <p className="text-xs text-muted-foreground">健康工具</p>
+            <div className="text-2xl font-bold text-orange-600">
+              {autoModules.filter(m => m.status === 'running').length}/{autoModules.length || 4}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              运行中 · 平均成功率 {autoModules.length > 0 ? Math.round(autoModules.reduce((a,m) => a + m.successRate, 0) / autoModules.length) : 0}%
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* 工具卡片 */}
+      {/* MCP卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {testTools.map((tool) => {
           const Icon = tool.icon;
@@ -511,49 +530,113 @@ export default function AutomatedTestingIntegration() {
         </TabsList>
         
         <TabsContent value="automation" className="space-y-4">
+          {/* ── 自动化模块状态（来自 /api/automation） ── */}
+          {autoModules.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  自动化模块状态
+                </CardTitle>
+                <CardDescription>来源：自动化中心实时数据 · 共 {autoModules.length} 个模块</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {autoModules.map(m => (
+                    <div key={m.id} className="p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${
+                            m.status === 'running' ? 'bg-green-500 animate-pulse'
+                            : m.status === 'error'  ? 'bg-red-500'
+                            : 'bg-gray-400'
+                          }`} />
+                          <span className="font-medium text-sm text-slate-800">{m.name}</span>
+                        </div>
+                        <Badge className={`text-[10px] ${
+                          m.status === 'running' ? 'bg-green-100 text-green-700'
+                          : m.status === 'error'  ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {m.status === 'running' ? '运行中' : m.status === 'error' ? '异常' : '空闲'}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-500 mb-2">{m.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 mr-3">
+                          <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                            <span>成功率</span><span>{m.successRate}%</span>
+                          </div>
+                          <Progress value={m.successRate} className="h-1" />
+                        </div>
+                        <span className="text-[10px] text-slate-300">共 {m.runCount} 次</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-xs text-blue-500">
+                  <Zap className="w-3 h-3" />
+                  <a href="/automation" className="hover:underline">前往自动化中心查看详情</a>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── 执行历史（含自动化流转记录） ── */}
           <Card>
             <CardHeader>
-              <CardTitle>测试结果记录</CardTitle>
-              <CardDescription>最近的自动化测试执行记录</CardDescription>
+              <CardTitle>测试执行记录</CardTitle>
+              <CardDescription>测试中心 + 自动化模块执行历史（合并展示）</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">工具</th>
+                      <th className="text-left py-3 px-4 font-medium">名称</th>
                       <th className="text-left py-3 px-4 font-medium">时间</th>
                       <th className="text-left py-3 px-4 font-medium">耗时</th>
                       <th className="text-left py-3 px-4 font-medium">状态</th>
-                      <th className="text-left py-3 px-4 font-medium">详情</th>
+                      <th className="text-left py-3 px-4 font-medium hidden md:table-cell">输出</th>
                     </tr>
                   </thead>
                   <tbody>
                     {testResults.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-8 text-center text-muted-foreground">
-                          暂无测试记录
+                          暂无记录 · 请先运行健康检查或自动化测试
                         </td>
                       </tr>
                     ) : (
-                      testResults.map((result) => (
+                      testResults.slice(0, 15).map((result) => (
                         <tr key={result.id} className="border-b hover:bg-muted/50">
-                          <td className="py-3 px-4">
+                          <td className="py-2.5 px-4">
                             <div className="flex items-center gap-2">
-                              {result.tool === "AI Assist" ? (
-                                <Terminal className="w-4 h-4 text-orange-600" />
-                              ) : result.tool === "CortexaAI" ? (
-                                <Globe className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Cpu className="w-4 h-4 text-blue-600" />
-                              )}
-                              <span>{result.tool}</span>
+                              {(result as any).toolId === 'automation'
+                                ? <Zap className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                                : (result as any).category === 'performance'
+                                  ? <BarChart3 className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                                  : (result as any).category === 'security'
+                                    ? <Shield className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                                    : <Globe className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                              }
+                              <span className="truncate max-w-[160px]">{(result as any).name || (result as any).tool || '—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-4">{new Date(result.time).toLocaleString()}</td>
-                          <td className="py-3 px-4">{result.duration}</td>
-                          <td className="py-3 px-4">{getTestStatusBadge(result.status)}</td>
-                          <td className="py-3 px-4">{result.details}</td>
+                          <td className="py-2.5 px-4 text-xs text-muted-foreground whitespace-nowrap">
+                            {(() => {
+                              const ts = (result as any).timestamp || (result as any).time;
+                              if (!ts) return '—';
+                              try { return new Date(ts).toLocaleTimeString('zh-CN'); } catch { return ts; }
+                            })()}
+                          </td>
+                          <td className="py-2.5 px-4 text-xs text-muted-foreground">
+                            {(result as any).duration > 0 ? `${(result as any).duration}ms` : (result as any).duration || '—'}
+                          </td>
+                          <td className="py-2.5 px-4">{getTestStatusBadge((result as any).status)}</td>
+                          <td className="py-2.5 px-4 text-xs text-muted-foreground hidden md:table-cell truncate max-w-[180px]">
+                            {(result as any).output || (result as any).details || '—'}
+                          </td>
                         </tr>
                       ))
                     )}
@@ -567,7 +650,7 @@ export default function AutomatedTestingIntegration() {
         <TabsContent value="troubleshooting">
           <Card>
             <CardHeader>
-              <CardTitle>故障排查工具</CardTitle>
+              <CardTitle>故障排查MCP</CardTitle>
               <CardDescription>使用AI Assist进行系统诊断和问题解决</CardDescription>
             </CardHeader>
             <CardContent>
@@ -625,14 +708,14 @@ export default function AutomatedTestingIntegration() {
         <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle>安全测试工具</CardTitle>
+              <CardTitle>安全测试MCP</CardTitle>
               <CardDescription>安全扫描和漏洞检测</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
                 <Shield className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>安全测试功能正在开发中...</p>
-                <p className="text-sm mt-2">计划集成OWASP ZAP、Nessus等安全测试工具</p>
+                <p className="text-sm mt-2">计划集成OWASP ZAP、Nessus等安全测试MCP</p>
               </div>
             </CardContent>
           </Card>
@@ -641,7 +724,7 @@ export default function AutomatedTestingIntegration() {
         <TabsContent value="performance">
           <Card>
             <CardHeader>
-              <CardTitle>性能测试工具</CardTitle>
+              <CardTitle>性能测试MCP</CardTitle>
               <CardDescription>负载测试和性能监控</CardDescription>
             </CardHeader>
             <CardContent>
@@ -776,7 +859,7 @@ export default function AutomatedTestingIntegration() {
                 </div>
                 
                 <div className="p-4 border rounded-lg">
-                  <h3 className="font-medium mb-2">工具健康状态</h3>
+                  <h3 className="font-medium mb-2">MCP健康状态</h3>
                   <div className="space-y-3">
                     {testTools.map(tool => (
                       <div key={tool.id} className="flex items-center justify-between">

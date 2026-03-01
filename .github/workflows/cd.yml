@@ -1,4 +1,4 @@
-name: CD - 构建验证
+name: CD - 构建 & 部署
 
 on:
   push:
@@ -6,8 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ─── 步骤1: 构建验证（GitHub runners）──────────────────────────────────────
   build:
     runs-on: ubuntu-latest
+    outputs:
+      build_success: ${{ steps.build.outcome }}
 
     steps:
     - uses: actions/checkout@v4
@@ -22,9 +25,26 @@ jobs:
       run: npm ci
 
     - name: 构建应用
+      id: build
       run: npm run build
       env:
         NODE_ENV: production
 
     - name: 构建成功通知
       run: echo "✅ Mission Control 构建成功 - $(date)"
+
+  # ─── 步骤2: 部署到本地服务器（需要 self-hosted runner）────────────────────
+  # 启用方式: Mac 上运行 GitHub Actions self-hosted runner
+  #   gh act runners add --name mac-local --labels mac,local
+  # 或手动触发: bash scripts/deploy-local.sh
+  #
+  # deploy:
+  #   runs-on: [self-hosted, mac, local]
+  #   needs: build
+  #   if: success()
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: 本地部署
+  #     run: bash scripts/deploy-local.sh
+  #   - name: 验证部署
+  #     run: curl -sf http://localhost:3002/api/health && echo "✅ 部署验证通过"

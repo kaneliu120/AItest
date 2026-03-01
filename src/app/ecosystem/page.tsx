@@ -41,6 +41,48 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
+import { ExternalApiMonitoring } from '@/components/external-api-monitoring';
+
+// 客户端组件，避免hydration错误
+function LastCheckedTime() {
+  const [currentTime, setCurrentTime] = useState('');
+  
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString());
+  }, []);
+  
+  return <span>{currentTime || '加载中...'}</span>;
+}
+
+// 客户端时间格式化组件
+function ClientTime({ timestamp, format = 'time' }: { timestamp?: string, format?: 'time' | 'date' | 'datetime' }) {
+  const [formattedTime, setFormattedTime] = useState('');
+  
+  useEffect(() => {
+    if (!timestamp) return;
+    
+    const date = new Date(timestamp);
+    let formatted = '';
+    
+    switch (format) {
+      case 'time':
+        formatted = date.toLocaleTimeString();
+        break;
+      case 'date':
+        formatted = date.toLocaleDateString();
+        break;
+      case 'datetime':
+        formatted = date.toLocaleString();
+        break;
+      default:
+        formatted = date.toLocaleTimeString();
+    }
+    
+    setFormattedTime(formatted);
+  }, [timestamp, format]);
+  
+  return <span>{formattedTime || '加载中...'}</span>;
+}
 
 interface MonitoringStats {
   totalTools: number;
@@ -94,7 +136,7 @@ export default function EcosystemDashboard() {
   const [tools, setTools] = useState<ToolStatus[]>([]);
   
   const [toolsStatus, setToolsStatus] = useState<ToolStatus[]>([
-    { name: 'GitHub CLI', status: 'healthy', type: '开发工具', version: '2.47.0', lastChecked: '2分钟前', description: 'GitHub命令行工具' },
+    { name: 'GitHub CLI', status: 'healthy', type: '开发MCP', version: '2.47.0', lastChecked: '2分钟前', description: 'GitHub命令行MCP' },
     { name: 'Docker', status: 'healthy', type: '容器化', version: '24.0.7', lastChecked: '5分钟前', description: '容器运行时' },
     { name: 'Node.js', status: 'healthy', type: '运行时', version: '20.11.0', lastChecked: '10分钟前', description: 'JavaScript运行时' },
     { name: 'PostgreSQL', status: 'healthy', type: '数据库', version: '15.5', lastChecked: '15分钟前', description: '关系型数据库' },
@@ -160,7 +202,7 @@ export default function EcosystemDashboard() {
         };
         setSchedulerStats(newSchedulerStats);
         
-        // 更新工具列表
+        // 更新MCP列表
         setTools(data.data.tools || []);
         
         // 更新连接率
@@ -212,7 +254,7 @@ export default function EcosystemDashboard() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case '开发工具': return <Code className="h-4 w-4" />;
+      case '开发MCP': return <Code className="h-4 w-4" />;
       case '容器化': return <DockerIcon />;
       case '运行时': return <Cpu className="h-4 w-4" />;
       case '数据库': return <Database className="h-4 w-4" />;
@@ -267,13 +309,13 @@ export default function EcosystemDashboard() {
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
                 <Activity className="h-6 w-6 text-blue-500" />
               </div>
-              工具生态系统
+              MCP生态系统
             </h1>
             <p className="text-gray-600 mt-2">
-              统一管理所有工具和服务，确保系统稳定运行
+              统一管理所有MCP和服务，确保系统稳定运行
               {monitoringStats.lastUpdate && (
                 <span className="text-sm text-gray-500 ml-2">
-                  最后更新: {new Date(monitoringStats.lastUpdate).toLocaleTimeString()}
+                  最后更新: <ClientTime timestamp={monitoringStats.lastUpdate} format="time" />
                 </span>
               )}
             </p>
@@ -289,7 +331,7 @@ export default function EcosystemDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">工具总数</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">MCP总数</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -326,7 +368,7 @@ export default function EcosystemDashboard() {
             </div>
             <Progress value={connectionRate} className="mt-2" />
             <p className="text-sm text-gray-500 mt-2">
-              {monitoringStats.healthyTools}个工具正常连接
+              {monitoringStats.healthyTools}个MCP正常连接
             </p>
           </CardContent>
         </Card>
@@ -385,7 +427,7 @@ export default function EcosystemDashboard() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索工具..."
+              placeholder="搜索MCP..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
@@ -433,7 +475,7 @@ export default function EcosystemDashboard() {
         <TabsList>
           <TabsTrigger value="tools">
             <Wrench className="h-4 w-4 mr-2" />
-            工具列表
+            MCP列表
           </TabsTrigger>
           <TabsTrigger value="categories">
             <div className="h-4 w-4 mr-2">
@@ -454,9 +496,9 @@ export default function EcosystemDashboard() {
         <TabsContent value="tools" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>🛠️ 工具状态列表</CardTitle>
+              <CardTitle>🛠️ MCP状态列表</CardTitle>
               <CardDescription>
-                发现 {filteredTools.length} 个工具，{monitoringStats.healthyTools} 个健康，{monitoringStats.warningTools} 个警告，{monitoringStats.errorTools} 个错误
+                发现 {filteredTools.length} 个MCP，{monitoringStats.healthyTools} 个健康，{monitoringStats.warningTools} 个警告，{monitoringStats.errorTools} 个错误
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -513,7 +555,7 @@ export default function EcosystemDashboard() {
                           )}
                         </div>
                         <div className="text-xs text-gray-500">
-                          最后检查: {new Date().toLocaleTimeString()}
+                          最后检查: <LastCheckedTime />
                         </div>
                       </div>
                     </div>
@@ -522,7 +564,7 @@ export default function EcosystemDashboard() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>未找到匹配的工具</p>
+                  <p>未找到匹配的MCP</p>
                   <p className="text-sm mt-2">尝试调整搜索条件或刷新数据</p>
                 </div>
               )}
@@ -533,8 +575,8 @@ export default function EcosystemDashboard() {
         <TabsContent value="categories" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>📁 工具分类管理</CardTitle>
-              <CardDescription>按类型组织工具，便于管理和维护</CardDescription>
+              <CardTitle>📁 MCP分类管理</CardTitle>
+              <CardDescription>按类型组织MCP，便于管理和维护</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -552,7 +594,7 @@ export default function EcosystemDashboard() {
                         </div>
                         <div>
                           <h3 className="font-semibold">{type}</h3>
-                          <p className="text-sm text-gray-500">{typeTools.length} 个工具</p>
+                          <p className="text-sm text-gray-500">{typeTools.length} 个MCP</p>
                         </div>
                       </div>
                       
@@ -585,10 +627,14 @@ export default function EcosystemDashboard() {
         </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-4">
+          {/* 外部API监控 */}
+          <ExternalApiMonitoring />
+          
+          {/* 原有监控面板 */}
           <Card>
             <CardHeader>
-              <CardTitle>📊 实时监控面板</CardTitle>
-              <CardDescription>系统性能和工具状态的实时监控</CardDescription>
+              <CardTitle>📊 系统MCP监控面板</CardTitle>
+              <CardDescription>内部MCP和系统组件的实时监控</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -643,9 +689,9 @@ export default function EcosystemDashboard() {
                   <h3 className="font-semibold text-blue-800 mb-2">监控说明</h3>
                   <ul className="text-sm text-blue-700 space-y-1">
                     <li>• 监控数据每5分钟自动更新一次</li>
-                    <li>• 健康状态基于工具响应时间和错误率计算</li>
-                    <li>• 警告状态表示工具性能下降但仍在运行</li>
-                    <li>• 错误状态表示工具无法正常响应</li>
+                    <li>• 健康状态基于MCP响应时间和错误率计算</li>
+                    <li>• 警告状态表示MCP性能下降但仍在运行</li>
+                    <li>• 错误状态表示MCP无法正常响应</li>
                   </ul>
                 </div>
               </div>
@@ -657,18 +703,18 @@ export default function EcosystemDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>📈 数据分析报告</CardTitle>
-              <CardDescription>工具使用情况和性能分析</CardDescription>
+              <CardDescription>MCP使用情况和性能分析</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-white border border-gray-200 rounded-xl">
-                    <div className="text-sm text-gray-500 mb-1">最常用工具</div>
+                    <div className="text-sm text-gray-500 mb-1">最常用MCP</div>
                     <div className="text-lg font-semibold">GitHub CLI</div>
                     <div className="text-sm text-gray-500">平均每天使用 42 次</div>
                   </div>
                   <div className="p-4 bg-white border border-gray-200 rounded-xl">
-                    <div className="text-sm text-gray-500 mb-1">最稳定工具</div>
+                    <div className="text-sm text-gray-500 mb-1">最稳定MCP</div>
                     <div className="text-lg font-semibold">Docker</div>
                     <div className="text-sm text-gray-500">99.8% 可用性</div>
                   </div>
@@ -680,7 +726,7 @@ export default function EcosystemDashboard() {
                 </div>
                 
                 <div className="p-4 bg-gray-50 rounded-xl">
-                  <h3 className="font-semibold mb-3">工具使用频率</h3>
+                  <h3 className="font-semibold mb-3">MCP使用频率</h3>
                   <div className="space-y-3">
                     {[
                       { name: 'GitHub CLI', usage: 95 },

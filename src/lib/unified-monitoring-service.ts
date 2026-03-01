@@ -72,6 +72,7 @@ export class UnifiedMonitoringService {
   private rules: Map<string, AlertRule> = new Map();
   private channels: Map<string, NotificationChannel> = new Map();
   private systemHealth: Map<string, SystemHealth> = new Map();
+  private cleanupIntervalId?: ReturnType<typeof setInterval>;
   
   private readonly defaultRules: AlertRule[] = [
     // 知识增强开发系统告警规则
@@ -838,12 +839,10 @@ export class UnifiedMonitoringService {
     return recommendations;
   }
   
-  // 启动监控服务
   async start(): Promise<void> {
     console.log('🚀 启动统一监控和告警服务...');
     
-    // 启动定期清理任务
-    setInterval(() => {
+    this.cleanupIntervalId = setInterval(() => {
       this.cleanupOldMetrics();
       this.cleanupOldAlerts();
     }, 60 * 60 * 1000); // 每小时清理一次
@@ -851,10 +850,12 @@ export class UnifiedMonitoringService {
     console.log('✅ 统一监控和告警服务已启动');
   }
   
-  // 停止监控服务
   async stop(): Promise<void> {
     console.log('🛑 停止统一监控和告警服务...');
-    // 清理资源
+    if (this.cleanupIntervalId !== undefined) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = undefined;
+    }
     console.log('✅ 统一监控和告警服务已停止');
   }
 }

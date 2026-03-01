@@ -320,3 +320,32 @@ export function extractFilterParams(
   
   return filters;
 }
+// ─── NextResponse 快捷输出 ────────────────────────────────────────────────────
+import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
+
+/** 生成带 requestId 的成功 JSON 响应 */
+export function ok<T>(data: T, status = 200): NextResponse {
+  return NextResponse.json(
+    { success: true, data, requestId: randomUUID(), timestamp: new Date().toISOString() },
+    { status }
+  );
+}
+
+/** 生成带 requestId 的失败 JSON 响应 */
+export function fail(
+  error: string,
+  status = 500,
+  code?: string
+): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      error,
+      code: code ?? (status === 400 ? 'BAD_REQUEST' : status === 404 ? 'NOT_FOUND' : status === 401 ? 'UNAUTHORIZED' : 'SERVER_ERROR'),
+      requestId: randomUUID(),
+      timestamp: new Date().toISOString(),
+    },
+    { status }
+  );
+}

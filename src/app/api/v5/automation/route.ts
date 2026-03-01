@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { automationEfficiencyService, AutomationTask } from '@/lib/automation-efficiency-service';
+import { logger } from '@/lib/logger';
+import { makeRequestId, logApiStart, logApiEnd, logApiError } from '@/lib/observability';
 
 // 生成任务ID
 function generateTaskId(): string {
@@ -8,6 +10,8 @@ function generateTaskId(): string {
 
 // GET: 获取服务状态和报告
 export async function GET(request: NextRequest) {
+  const requestId = makeRequestId('api');
+  logApiStart(request.nextUrl.pathname, requestId, { method: 'GET' });
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action') || 'status';
@@ -19,7 +23,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: status,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          requestId,
         });
         
       case 'report':
@@ -28,7 +33,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: report,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'metrics':
@@ -41,7 +46,7 @@ export async function GET(request: NextRequest) {
             optimizationStatus: statusData.optimizationStatus,
             performance: statusData.performance
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'recommendations':
@@ -53,28 +58,33 @@ export async function GET(request: NextRequest) {
             recommendations: statusWithRecs.recommendations || [],
             optimizationStatus: statusWithRecs.optimizationStatus
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       default:
         return NextResponse.json({
           success: false,
           error: `未知操作: ${action}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          requestId,
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('自动化效率API错误:', error);
+    logApiError('api/v5/automation', requestId, error);
+    logger.error('自动化效率API错误', error, { module: 'api/v5/automation', requestId });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId,
     }, { status: 500 });
   }
 }
 
 // POST: 处理自动化任务
 export async function POST(request: NextRequest) {
+  const requestId = makeRequestId('api');
+  logApiStart(request.nextUrl.pathname, requestId, { method: 'POST' });
   try {
     const body = await request.json();
     const { action } = body;
@@ -83,7 +93,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: '缺少 action 参数',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        requestId,
       }, { status: 400 });
     }
     
@@ -104,22 +115,23 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: false,
             error: '缺少 type 参数',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            requestId,
           }, { status: 400 });
         }
         
         const task: Omit<AutomationTask, 'id' | 'status'> = {
-          type: type as any,
-          priority: priority as any,
-          complexity: complexity as any,
+          type: type as AutomationTask['type'],
+          priority: priority as AutomationTask['priority'],
+          complexity: complexity as AutomationTask['complexity'],
           estimatedTokenUsage: parseInt(estimatedTokenUsage) || 1000,
           estimatedTime: parseInt(estimatedTime) || 30,
-          automationLevel: automationLevel as any
+          automationLevel: automationLevel as AutomationTask['automationLevel']
         };
         
         // 如果有描述，添加到上下文
         if (description) {
-          (task as any).description = description;
+          task.data = { ...(task.data || {}), description };
         }
         
         const processedTask = await automationEfficiencyService.processAutomationTask(task);
@@ -131,7 +143,7 @@ export async function POST(request: NextRequest) {
             metrics: processedTask.metrics,
             optimizationStatus: automationEfficiencyService.getServiceStatus().optimizationStatus
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'process-batch':
@@ -142,19 +154,20 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: false,
             error: '缺少有效的 tasks 数组',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            requestId,
           }, { status: 400 });
         }
         
         // 限制批量大小
-        const limitedTasks = tasks.slice(0, 10).map((t: any, index: number) => ({
-          type: t.type || 'code-generation',
-          priority: t.priority || 'medium',
-          complexity: t.complexity || 'medium',
-          estimatedTokenUsage: t.estimatedTokenUsage || 1000,
-          estimatedTime: t.estimatedTime || 30,
-          automationLevel: t.automationLevel || 'assisted',
-          description: t.description || `批量任务 ${index + 1}`
+        const limitedTasks: Array<Omit<AutomationTask, 'id' | 'status'>> = tasks.slice(0, 10).map((t: Record<string, unknown>, index: number) => ({
+          type: (t.type as AutomationTask['type']) || 'code-generation',
+          priority: (t.priority as AutomationTask['priority']) || 'medium',
+          complexity: (t.complexity as AutomationTask['complexity']) || 'medium',
+          estimatedTokenUsage: Number(t.estimatedTokenUsage ?? 1000),
+          estimatedTime: Number(t.estimatedTime ?? 30),
+          automationLevel: (t.automationLevel as AutomationTask['automationLevel']) || 'assisted',
+          data: { description: String(t.description ?? `批量任务 ${index + 1}`) }
         }));
         
         const batchResults = await automationEfficiencyService.processBatchTasks(limitedTasks);
@@ -189,7 +202,7 @@ export async function POST(request: NextRequest) {
               metrics: r.metrics
             }))
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'initialize':
@@ -202,7 +215,7 @@ export async function POST(request: NextRequest) {
             message: '自动化效率优化服务初始化完成',
             status: automationEfficiencyService.getServiceStatus()
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'reset':
@@ -215,7 +228,7 @@ export async function POST(request: NextRequest) {
             message: '自动化效率优化服务已重置',
             status: automationEfficiencyService.getServiceStatus()
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'test-optimization':
@@ -250,7 +263,7 @@ export async function POST(request: NextRequest) {
           }
         ];
         
-        const testResults = await automationEfficiencyService.processBatchTasks(testTasks as any);
+        const testResults = await automationEfficiencyService.processBatchTasks(testTasks as Array<Omit<AutomationTask, 'id' | 'status'>>);
         
         const testCompleted = testResults.filter(r => r.status === 'completed').length;
         const testTokenSavings = testResults
@@ -281,7 +294,7 @@ export async function POST(request: NextRequest) {
             },
             recommendations: serviceStatus.recommendations || []
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'simulate-workload':
@@ -289,13 +302,13 @@ export async function POST(request: NextRequest) {
         const { taskCount = 5 } = body;
         
         const simulatedTasks = Array.from({ length: Math.min(taskCount, 20) }, (_, i) => ({
-          type: ['code-generation', 'api-design', 'testing', 'optimization'][i % 4] as any,
-          priority: ['low', 'medium', 'high'][i % 3] as any,
-          complexity: ['low', 'medium', 'high'][i % 3] as any,
+          type: ['code-generation', 'api-design', 'testing', 'optimization'][i % 4] as AutomationTask['type'],
+          priority: ['low', 'medium', 'high'][i % 3] as AutomationTask['priority'],
+          complexity: ['low', 'medium', 'high'][i % 3] as AutomationTask['complexity'],
           description: `模拟任务 ${i + 1}: ${['创建组件', '设计API', '编写测试', '性能优化'][i % 4]}`,
-          estimatedTokenUsage: 1000 + Math.random() * 1000,
-          estimatedTime: 30 + Math.random() * 60,
-          automationLevel: ['manual', 'assisted', 'full'][i % 3] as any
+          estimatedTokenUsage: 1000 + (i * 200),  // deterministic estimate
+          estimatedTime: 30 + (i * 10),  // deterministic estimate
+          automationLevel: ['manual', 'assisted', 'full'][i % 3] as AutomationTask['automationLevel']
         }));
         
         const simulationResults = await automationEfficiencyService.processBatchTasks(simulatedTasks);
@@ -330,22 +343,25 @@ export async function POST(request: NextRequest) {
               timeSavings: r.metrics?.timeSavings?.toFixed(2) || '0.00'
             }))
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       default:
         return NextResponse.json({
           success: false,
           error: `未知操作: ${action}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          requestId,
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('自动化效率API错误:', error);
+    logApiError('api/v5/automation', requestId, error);
+    logger.error('自动化效率API错误', error, { module: 'api/v5/automation', requestId });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId,
     }, { status: 500 });
   }
 }

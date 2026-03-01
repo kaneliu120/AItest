@@ -92,11 +92,11 @@ export default function AIPage() {
           </div>
           <h1 className="text-4xl font-bold">智能AI助手 🤖</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            集成多种AI模型和工具，提升工作效率和创造力
+            集成多种AI模型和MCP，提升工作效率和创造力
           </p>
         </div>
 
-        {/* AI工具卡片 */}
+        {/* AIMCP卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {aiTools.map((tool, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">

@@ -1,471 +1,633 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Bug, 
-  Search, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  Zap, 
-  RefreshCw,
-  Terminal,
-  Server,
-  Database,
-  Network,
-  Cpu,
-  HardDrive,
-  BarChart3,
-  Download,
-  Play,
-  Shield
-} from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  Bug, Search, AlertTriangle, CheckCircle, Clock, RefreshCw,
+  Terminal, Server, Cpu, Shield, Download, Play,
+  ChevronRight, Circle, Activity, Zap, ExternalLink,
+} from 'lucide-react';
 
+// ─── Type ────────────────────────────────────────────────────────────────────
+interface Issue {
+  id: string; component: string;
+  severity: 'high' | 'medium' | 'low';
+  description: string; detectedAt: string;
+  status: 'active' | 'investigating' | 'resolved';
+  solution: string; category: string;
+  testResultId?: string; fixAction?: string;
+}
+interface IssueSummary {
+  total: number; active: number; investigating: number; resolved: number;
+  high: number; medium: number; low: number;
+}
+interface SystemSnapshot {
+  system:     { cpu: number|null; memory: number|null; uptime: number; nodeRss: number; nodeHeap: number };
+  testing:    { total: number; passed: number; failed: number; successRate: number; lastRun: string|null };
+  automation: { status: string; modules: number; tasks: number };
+}
+interface DiagTool {
+  id: string; name: string; description: string; icon: string;
+  duration: string; action: string; category: string;
+}
+
+// ─── Config ────────────────────────────────────────────────────────────────────
+const SEV_CFG = {
+  high:   { badge: 'bg-red-100 text-red-700 border-red-200',      dot: 'fill-red-500 text-red-500',      label: 'Critical', bar: 'bg-red-500' },
+  medium: { badge: 'bg-yellow-100 text-yellow-700 border-yellow-200', dot: 'fill-yellow-500 text-yellow-500', label: 'Medium', bar: 'bg-yellow-500' },
+  low:    { badge: 'bg-green-100 text-green-700 border-green-200', dot: 'fill-green-500 text-green-500',   label: 'Low', bar: 'bg-green-500' },
+};
+const STA_CFG = {
+  active:        { color: 'text-red-600',    icon: <AlertTriangle className="w-4 h-4" />, label: 'Active' },
+  investigating: { color: 'text-yellow-600', icon: <Clock         className="w-4 h-4" />, label: 'Investigating' },
+  resolved:      { color: 'text-green-600',  icon: <CheckCircle   className="w-4 h-4" />, label: 'Resolved' },
+};
+const TOOL_ICONS: Record<string, React.ReactNode> = {
+  server:   <Server   className="w-5 h-5" />,
+  cpu:      <Cpu      className="w-5 h-5" />,
+  shield:   <Shield   className="w-5 h-5" />,
+  terminal: <Terminal className="w-5 h-5" />,
+};
+function fmtTime(iso: string | null) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso), now = Date.now(), diff = now - d.getTime();
+    if (diff < 60000)    return 'just now';
+    if (diff < 3600000)  return `${Math.floor(diff / 60000)}  minutes ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}  hours ago`;
+    return d.toLocaleDateString('zh-CN');
+  } catch { return iso; }
+}
+function fmtUptime(s: number) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────────────
 export default function TroubleshootingPage() {
-  const [activeTab, setActiveTab] = useState("diagnosis");
-  const [scanning, setScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
+  const [tab,        setTab]        = useState<'issues' | 'tools' | 'snapshot'>('issues');
+  const [issues,     setIssues]     = useState<Issue[]>([]);
+  const [summary,    setSummary]    = useState<IssueSummary | null>(null);
+  const [snapshot,   setSnapshot]   = useState<SystemSnapshot | null>(null);
+  const [tools,      setTools]      = useState<DiagTool[]>([]);
+  const [scanning,   setScanning]   = useState(false);
+  const [scanPct,    setScanPct]    = useState(0);
+  const [scanMsg,    setScanMsg]    = useState('');
+  const [runningTool, setRunningTool] = useState<string | null>(null);
+  const [fixingId,   setFixingId]   = useState<string | null>(null);
+  const [msg,        setMsg]        = useState<{ type: 'ok'|'err'; text: string } | null>(null);
+  const [loading,    setLoading]    = useState(true);
+  const [filter,     setFilter]     = useState<'all' | 'active' | 'resolved'>('all');
 
-  const startSystemScan = () => {
-    setScanning(true);
-    setScanProgress(0);
-    
-    const interval = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setScanning(false);
-          return 100;
-        }
-        return prev + 10;
+  const toast = (type: 'ok'|'err', text: string) => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 4500);
+  };
+
+  // ── Data Loading ──
+  const fetchData = useCallback(async () => {
+    try {
+      const [issuesRes, snapRes, toolsRes] = await Promise.all([
+        fetch('/api/troubleshooting?action=issues').then(r => r.json()),
+        fetch('/api/troubleshooting?action=system-snapshot').then(r => r.json()),
+        fetch('/api/troubleshooting?action=tools').then(r => r.json()),
+      ]);
+      if (issuesRes.success) { setIssues(issuesRes.data.issues); setSummary(issuesRes.data.summary); }
+      if (snapRes.success)   setSnapshot(snapRes.data);
+      if (toolsRes.success)  setTools(toolsRes.data.tools);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ── Full System Scan ──
+  const fullScan = async () => {
+    setScanning(true); setScanPct(0); setScanMsg('Starting scan…');
+    // Simulated progress（Real scan approx. 10-20s）
+    const steps = [
+      [10, 'Detection API Healthy…'],
+      [30, 'Run Performance Test…'],
+      [55, 'Run Security Scan…'],
+      [75, 'System Diagnostics running…'],
+      [90, 'Summary analysis results…'],
+    ];
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < steps.length) {
+        setScanPct(steps[i][0] as number);
+        setScanMsg(steps[i][1] as string);
+        i++;
+      }
+    }, 2500);
+
+    try {
+      const res = await fetch('/api/troubleshooting', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'full-scan' }),
       });
-    }, 300);
-  };
-
-  const systemIssues = [
-    {
-      id: 'issue-001',
-      component: '数据库连接',
-      severity: 'high',
-      description: '数据库连接超时，响应时间超过5秒',
-      detectedAt: '2026-02-21 21:30:00',
-      status: 'active',
-      solution: '检查数据库配置，增加连接池大小',
-    },
-    {
-      id: 'issue-002',
-      component: 'API网关',
-      severity: 'medium',
-      description: 'API响应时间波动较大',
-      detectedAt: '2026-02-21 20:15:00',
-      status: 'investigating',
-      solution: '优化API缓存策略，增加负载均衡',
-    },
-    {
-      id: 'issue-003',
-      component: '文件存储',
-      severity: 'low',
-      description: '存储空间使用率达到85%',
-      detectedAt: '2026-02-21 18:45:00',
-      status: 'resolved',
-      solution: '清理临时文件，增加存储配额',
-    },
-    {
-      id: 'issue-004',
-      component: '网络连接',
-      severity: 'medium',
-      description: '外部API调用失败率增加',
-      detectedAt: '2026-02-21 17:20:00',
-      status: 'active',
-      solution: '检查网络配置，添加重试机制',
-    },
-  ];
-
-  const diagnosticTools = [
-    {
-      name: '系统健康检查',
-      description: '全面检查系统组件健康状态',
-      icon: Server,
-      duration: '2分钟',
-      status: 'available',
-    },
-    {
-      name: '性能分析器',
-      description: '分析系统性能瓶颈',
-      icon: Cpu,
-      duration: '5分钟',
-      status: 'available',
-    },
-    {
-      name: '网络诊断',
-      description: '检查网络连接和延迟',
-      icon: Network,
-      duration: '1分钟',
-      status: 'available',
-    },
-    {
-      name: '数据库优化',
-      description: '分析数据库性能和查询优化',
-      icon: Database,
-      duration: '3分钟',
-      status: 'available',
-    },
-    {
-      name: '日志分析',
-      description: '分析系统日志查找问题',
-      icon: Terminal,
-      duration: '4分钟',
-      status: 'available',
-    },
-    {
-      name: '安全扫描',
-      description: '检查系统安全漏洞',
-      icon: Server, // 暂时使用Server图标代替Shield
-      duration: '10分钟',
-      status: 'unavailable',
-    },
-  ];
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      const data = await res.json();
+      clearInterval(timer);
+      setScanPct(100); setScanMsg('Scan complete ✅');
+      setTimeout(async () => {
+        await fetchData();
+        setScanning(false);
+        toast('ok', data.data?.message ?? 'System scan complete, issue list updated');
+      }, 800);
+    } catch {
+      clearInterval(timer);
+      setScanning(false);
+      toast('err', 'Scan failed，Please try again later');
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'text-red-600';
-      case 'investigating': return 'text-yellow-600';
-      case 'resolved': return 'text-green-600';
-      default: return 'text-gray-600';
-    }
+  // ── Run Individual Diagnostics ──
+  const runTool = async (tool: DiagTool) => {
+    setRunningTool(tool.id);
+    try {
+      const res = await fetch('/api/troubleshooting', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-tool', toolAction: tool.action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchData();
+        toast('ok', `${tool.name} Execution complete，Issue list updated`);
+      } else { toast('err', data.message ?? 'Execution failed'); }
+    } catch { toast('err', 'Request failed'); }
+    finally { setRunningTool(null); }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return <AlertTriangle className="h-4 w-4" />;
-      case 'investigating': return <Clock className="h-4 w-4" />;
-      case 'resolved': return <CheckCircle className="h-4 w-4" />;
-      default: return <Bug className="h-4 w-4" />;
-    }
+  // ── Mark Resolved ──
+  const markResolved = async (issue: Issue) => {
+    setFixingId(issue.id);
+    try {
+      const res = await fetch('/api/troubleshooting', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resolve', issueId: issue.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchData();
+        toast('ok', `「${issue.component}」Marked as resolved`);
+      } else { toast('err', data.message ?? 'Operation failed'); }
+    } catch { toast('err', 'Request failed'); }
+    finally { setFixingId(null); }
   };
+
+  // ── Apply Fix ──
+  const applyFix = async (issue: Issue) => {
+    setFixingId(issue.id + '_fix');
+    try {
+      const res = await fetch('/api/troubleshooting', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'apply-fix', issueId: issue.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchData();
+        toast('ok', data.message ?? 'Fix applied');
+      } else { toast('err', data.message ?? 'Fix failed'); }
+    } catch { toast('err', 'Request failed'); }
+    finally { setFixingId(null); }
+  };
+
+  // ── Export Report ──
+  const exportReport = async () => {
+    try {
+      const res = await fetch('/api/troubleshooting', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-report' }),
+      });
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `troubleshooting-report-${Date.now()}.json`; a.click();
+      URL.revokeObjectURL(url);
+      toast('ok', 'Diagnostic report exported');
+    } catch { toast('err', 'Export failed'); }
+  };
+
+  // ── Filter Issues ──
+  const filtered = issues.filter(i => {
+    if (filter === 'active')   return i.status === 'active' || i.status === 'investigating';
+    if (filter === 'resolved') return i.status === 'resolved';
+    return true;
+  });
+
+  const tabs = [
+    { id: 'issues',   label: 'Issue List',   icon: <Bug       className="w-3.5 h-3.5" /> },
+    { id: 'tools',    label: 'DiagnosticsMCP',   icon: <Terminal  className="w-3.5 h-3.5" /> },
+    { id: 'snapshot', label: 'System Snapshot',   icon: <Activity  className="w-3.5 h-3.5" /> },
+  ] as const;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
+        <span className="text-slate-500">Loading fault data…</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* 页面标题 */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">故障排查中心 🐛</h1>
-            <p className="text-muted-foreground">诊断和解决系统问题</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              导出报告
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={startSystemScan}
-              disabled={scanning}
-            >
-              {scanning ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  扫描中...
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4 mr-2" />
-                  系统扫描
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+    <div className="p-6 space-y-6">
 
-        {/* 扫描进度 */}
-        {scanning && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Search className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium">系统扫描进行中</p>
-                      <p className="text-sm text-muted-foreground">正在检查系统组件...</p>
-                    </div>
-                  </div>
-                  <span className="font-bold">{scanProgress}%</span>
+      {/* ── Message Prompt ── */}
+      {msg && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 transition-all ${
+          msg.type === 'ok'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50   text-red-700   border border-red-200'
+        }`}>
+          {msg.type === 'ok' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+          {msg.text}
+        </div>
+      )}
+
+      {/* ── Page Header ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Troubleshooting Center</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Data Source：Testing center real-time results ·
+            <span className="ml-1 text-blue-500">
+              {summary?.total ?? 0}  issues
+              {(summary?.active ?? 0) > 0
+                ? <span className="text-red-500 ml-1">（{summary?.active}  Active）</span>
+                : <span className="text-green-500 ml-1">(System healthy)</span>
+              }
+            </span>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportReport}>
+            <Download className="w-3.5 h-3.5 mr-1" /> Export Report
+          </Button>
+          <Button size="sm" onClick={fullScan} disabled={scanning}
+            className="bg-blue-600 hover:bg-blue-700 text-white">
+            {scanning
+              ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Scanning…</>
+              : <><Search    className="w-3.5 h-3.5 mr-1" />Full System Scan</>
+            }
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Scan progress bar ── */}
+      {scanning && (
+        <Card className="border border-blue-200 bg-blue-50/50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">{scanMsg}</span>
+              </div>
+              <span className="text-sm font-bold text-blue-600">{scanPct}%</span>
+            </div>
+            <Progress value={scanPct} className="h-2" />
+            <p className="text-xs text-blue-500 mt-2">Calling testing center API: Health Check → Performance Test → Security Scan → System Diagnostics</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── KPI Card ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Active Issues',   value: summary?.active ?? 0,       icon: <AlertTriangle className="w-5 h-5 text-red-500" />,    color: 'bg-red-50 border-red-100',    click: () => { setTab('issues'); setFilter('active'); } },
+          { label: 'Investigating',     value: summary?.investigating ?? 0, icon: <Clock         className="w-5 h-5 text-yellow-500" />, color: 'bg-yellow-50 border-yellow-100' },
+          { label: 'Resolved',     value: summary?.resolved ?? 0,      icon: <CheckCircle   className="w-5 h-5 text-green-500" />,  color: 'bg-green-50 border-green-100', click: () => { setTab('issues'); setFilter('resolved'); } },
+          { label: 'Critical Issues',   value: summary?.high ?? 0,          icon: <Bug           className="w-5 h-5 text-orange-500" />, color: 'bg-orange-50 border-orange-100' },
+        ].map(k => (
+          <Card key={k.label}
+            className={`border ${k.color} ${k.click ? 'cursor-pointer hover:shadow-sm transition-shadow' : ''}`}
+            onClick={k.click}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-slate-500">{k.label}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{k.value}</p>
                 </div>
-                <Progress value={scanProgress} className="h-2" />
-                <div className="grid grid-cols-4 gap-2 text-xs text-muted-foreground">
-                  <span>数据库</span>
-                  <span>API服务</span>
-                  <span>网络连接</span>
-                  <span>文件系统</span>
-                </div>
+                <div className="p-2 rounded-lg bg-white shadow-sm">{k.icon}</div>
               </div>
             </CardContent>
           </Card>
-        )}
+        ))}
+      </div>
 
-        {/* 标签页 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="diagnosis">问题诊断</TabsTrigger>
-            <TabsTrigger value="tools">诊断工具</TabsTrigger>
-            <TabsTrigger value="history">历史记录</TabsTrigger>
-          </TabsList>
+      {/* ── Tab Bar ── */}
+      <div className="flex gap-1 border-b border-slate-200">
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              tab === t.id ? 'text-blue-600 border-blue-600' : 'text-slate-500 border-transparent hover:text-slate-700'
+            }`}>
+            {t.icon}{t.label}
+          </button>
+        ))}
+      </div>
 
-          {/* 问题诊断 */}
-          <TabsContent value="diagnosis" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>当前问题</CardTitle>
-                <CardDescription>检测到的系统问题和异常</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {systemIssues.map((issue) => (
-                    <div key={issue.id} className="p-4 border rounded-lg">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getSeverityColor(issue.severity)}`}>
-                            {getStatusIcon(issue.status)}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-bold">{issue.component}</h3>
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(issue.severity)}`}>
-                                {issue.severity === 'high' ? '高优先级' : 
-                                 issue.severity === 'medium' ? '中优先级' : '低优先级'}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">检测时间: {issue.detectedAt}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`flex items-center gap-1 ${getStatusColor(issue.status)}`}>
-                            {getStatusIcon(issue.status)}
-                            {issue.status === 'active' ? '活跃' : 
-                             issue.status === 'investigating' ? '调查中' : '已解决'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-1">问题描述</p>
-                          <p className="text-sm">{issue.description}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium mb-1">解决方案</p>
-                          <p className="text-sm">{issue.solution}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2 mt-4">
-                        <Button size="sm" variant="outline">标记为已解决</Button>
-                        <Button size="sm">应用修复</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      {/* ══ Issue List Tab ══ */}
+      {tab === 'issues' && (
+        <div className="space-y-4">
+          {/* Filter */}
+          <div className="flex items-center gap-2">
+            {(['all','active','resolved'] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+                  filter === f ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                }`}>
+                {f === 'all' ? `All (${summary?.total ?? 0})` : f === 'active' ? `Active (${summary?.active ?? 0})` : `Resolved (${summary?.resolved ?? 0})`}
+              </button>
+            ))}
+            <span className="ml-auto text-xs text-slate-400 flex items-center gap-1">
+              <RefreshCw className="w-3 h-3" /> Data from Testing Center live results
+              <button onClick={fetchData} className="ml-1 text-blue-400 hover:text-blue-600">Refresh</button>
+            </span>
+          </div>
+
+          {/* Healthy state when no issues */}
+          {filtered.length === 0 && (
+            <Card className={`border ${(summary?.active ?? 0) === 0 ? 'border-green-200 bg-green-50/40' : 'border-dashed border-slate-300'}`}>
+              <CardContent className="p-10 text-center">
+                {(summary?.total ?? 0) === 0 ? (
+                  <>
+                    <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-500" />
+                    <p className="text-green-700 font-medium">System running healthy</p>
+                    <p className="text-sm text-slate-500 mt-1">Testing center detected no failures</p>
+                    <Button variant="outline" size="sm" className="mt-4" onClick={fullScan} disabled={scanning}>
+                      <Play className="w-3.5 h-3.5 mr-1" /> Run Full System Scan to detect potential issues
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Bug className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm text-slate-400">No data for this filter</p>
+                  </>
+                )}
               </CardContent>
             </Card>
+          )}
 
-            {/* 系统指标 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>系统指标</CardTitle>
-                <CardDescription>关键系统性能指标</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { name: 'CPU使用率', value: 65, threshold: 80, icon: Cpu },
-                    { name: '内存使用率', value: 72, threshold: 85, icon: Server },
-                    { name: '磁盘使用率', value: 45, threshold: 90, icon: HardDrive },
-                    { name: '网络延迟', value: 28, threshold: 100, icon: Network },
-                  ].map((metric, index) => (
-                    <div key={index} className="text-center p-4 border rounded-lg">
-                      <metric.icon className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <p className="text-sm font-medium mb-1">{metric.name}</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className={`text-2xl font-bold ${
-                          metric.value > metric.threshold ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {metric.value}%
-                        </span>
-                        <span className="text-xs text-muted-foreground">阈值: {metric.threshold}%</span>
-                      </div>
-                      <Progress 
-                        value={metric.value} 
-                        className={`h-2 mt-2 ${
-                          metric.value > metric.threshold ? 'bg-red-100' : 'bg-green-100'
-                        }`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* 诊断工具 */}
-          <TabsContent value="tools" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>诊断工具</CardTitle>
-                <CardDescription>可用的系统诊断和故障排除工具</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {diagnosticTools.map((tool, index) => (
-                    <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <tool.icon className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold">{tool.name}</h3>
-                          <p className="text-sm text-muted-foreground">{tool.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{tool.duration}</span>
-                        <Button 
-                          size="sm" 
-                          variant={tool.status === 'available' ? 'default' : 'outline'}
-                          disabled={tool.status !== 'available'}
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          {tool.status === 'available' ? '运行' : '不可用'}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 快速诊断 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>快速诊断</CardTitle>
-                <CardDescription>一键运行常见问题检查</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { name: '服务连通性检查', description: '检查所有服务的连接状态' },
-                    { name: '数据库健康检查', description: '检查数据库连接和性能' },
-                    { name: 'API端点测试', description: '测试所有API端点的可用性' },
-                    { name: '文件系统检查', description: '检查文件权限和存储空间' },
-                  ].map((check, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{check.name}</p>
-                        <p className="text-sm text-muted-foreground">{check.description}</p>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        <Zap className="h-3 w-3 mr-1" />
-                        运行检查
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* 历史记录 */}
-          <TabsContent value="history" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>问题历史记录</CardTitle>
-                <CardDescription>过去30天的问题和解决方案</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { date: '2026-02-20', issue: '数据库连接超时', solution: '增加连接池大小', status: 'resolved' },
-                    { date: '2026-02-18', issue: 'API响应缓慢', solution: '优化查询缓存', status: 'resolved' },
-                    { date: '2026-02-15', issue: '内存泄漏', solution: '修复内存管理代码', status: 'resolved' },
-                    { date: '2026-02-12', issue: '网络抖动', solution: '优化网络配置', status: 'resolved' },
-                    { date: '2026-02-10', issue: '文件权限错误', solution: '修复文件权限设置', status: 'resolved' },
-                  ].map((record, index) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{record.date}</span>
-                        <span className="px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-600 border border-green-200">
-                          已解决
+          {/* Issue Card */}
+          {filtered.map(issue => (
+            <Card key={issue.id} className={`border ${
+              issue.status === 'resolved' ? 'border-green-100 bg-green-50/30 opacity-70'
+              : issue.severity === 'high' ? 'border-red-200' : 'border-slate-200'
+            }`}>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start gap-3">
+                    <Circle className={`w-2.5 h-2.5 mt-1.5 shrink-0 ${SEV_CFG[issue.severity]?.dot}`} />
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-slate-800">{issue.component}</h3>
+                        <Badge variant="outline" className={`text-[10px] ${SEV_CFG[issue.severity]?.badge}`}>
+                          {SEV_CFG[issue.severity]?.label}
+                        </Badge>
+                        <span className={`flex items-center gap-1 text-xs ${STA_CFG[issue.status]?.color}`}>
+                          {STA_CFG[issue.status]?.icon}
+                          {STA_CFG[issue.status]?.label}
                         </span>
                       </div>
-                      <div className="space-y-2">
-                        <div>
-                          <p className="text-sm font-medium">问题</p>
-                          <p className="text-sm">{record.issue}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">解决方案</p>
-                          <p className="text-sm">{record.solution}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 统计信息 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>故障统计</CardTitle>
-                <CardDescription>问题类型和解决时间分析</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-medium mb-3">问题类型分布</h4>
-                    <div className="space-y-2">
-                      {[
-                        { type: '数据库问题', count: 8, percentage: 32 },
-                        { type: 'API问题', count: 6, percentage: 24 },
-                        { type: '网络问题', count: 5, percentage: 20 },
-                        { type: '性能问题', count: 4, percentage: 16 },
-                        { type: '其他问题', count: 2, percentage: 8 },
-                      ].map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between">
-                          <span className="text-sm">{item.type}</span>
-                          <div className="flex items-center gap-3">
-                            <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-blue-500 rounded-full"
-                                style={{ width: `${item.percentage}%` }}
-                              />
-                            </div>
-                            <span className="text-sm font-medium w-8 text-right">{item.count}</span>
-                          </div>
-                        </div>
-                      ))}
+                      <p className="text-xs text-slate-400 mt-0.5">Detected at {fmtTime(issue.detectedAt)} · Category: {issue.category}</p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    {issue.status !== 'resolved' && (
+                      <>
+                        <Button variant="outline" size="sm" className="h-7 text-xs"
+                          disabled={fixingId === issue.id}
+                          onClick={() => markResolved(issue)}>
+                          {fixingId === issue.id
+                            ? <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                            : <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                          }
+                          Mark Resolved
+                        </Button>
+                        <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                          disabled={fixingId === issue.id + '_fix'}
+                          onClick={() => applyFix(issue)}>
+                          {fixingId === issue.id + '_fix'
+                            ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Fixing…</>
+                            : <><Zap className="w-3 h-3 mr-1" />Apply Fix</>
+                          }
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
+
+                {/* Issue Description */}
+                <div className="bg-slate-50 rounded-lg px-3 py-2 mb-3">
+                  <p className="text-xs text-slate-600 font-mono">{issue.description}</p>
+                </div>
+
+                {/* Solution */}
+                <div className="flex items-start gap-2">
+                  <ChevronRight className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-xs text-slate-400 mr-1">Suggested Fixes：</span>
+                    <span className="text-xs text-slate-600">{issue.solution}</span>
+                  </div>
+                </div>
+
+                {/* Navigate to Testing Center */}
+                {issue.testResultId && (
+                  <div className="mt-2 flex items-center gap-1 text-xs text-blue-400">
+                    <ExternalLink className="w-3 h-3" />
+                    <a href="/testing" className="hover:text-blue-600 underline">View detailed results in Testing Center</a>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* ══ DiagnosticsMCP Tab ══ */}
+      {tab === 'tools' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-slate-800">DiagnosticsMCP</h2>
+              <p className="text-xs text-slate-500">All MCP calls Testing Center API to run real detection</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {tools.map(tool => (
+              <Card key={tool.id} className="border border-slate-200 hover:border-blue-200 transition-colors">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${
+                        tool.category === 'health' ? 'bg-green-100 text-green-600'
+                        : tool.category === 'performance' ? 'bg-purple-100 text-purple-600'
+                        : tool.category === 'security' ? 'bg-red-100 text-red-600'
+                        : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {TOOL_ICONS[tool.icon] ?? <Terminal className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-800">{tool.name}</h3>
+                        <p className="text-xs text-slate-400">Estimated duration {tool.duration}</p>
+                      </div>
+                    </div>
+                    <Button size="sm" className="h-7 text-xs"
+                      variant={runningTool === tool.id ? 'outline' : 'default'}
+                      disabled={!!runningTool}
+                      onClick={() => runTool(tool)}>
+                      {runningTool === tool.id
+                        ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Executing…</>
+                        : <><Play className="w-3 h-3 mr-1" />Execute</>
+                      }
+                    </Button>
+                  </div>
+                  <p className="text-sm text-slate-600">{tool.description}</p>
+                  <div className="mt-3 flex items-center gap-1 text-xs text-blue-400">
+                    <ExternalLink className="w-3 h-3" />
+                    <a href="/testing" className="hover:text-blue-600 underline">View results in Testing Center</a>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* One-Click Full Scan */}
+          <Card className="border border-blue-200 bg-blue-50/40">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-slate-800">Full Diagnostics</h3>
+                  <p className="text-sm text-slate-500 mt-0.5">Run all diagnostics simultaneously for comprehensive system status detection</p>
+                </div>
+                <Button onClick={fullScan} disabled={scanning}
+                  className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {scanning
+                    ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Scanning…</>
+                    : <><Play       className="w-4 h-4 mr-2" />One-Click Full Scan</>
+                  }
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ══ System Snapshot Tab ══ */}
+      {tab === 'snapshot' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-slate-800">System Snapshot</h2>
+              <p className="text-xs text-slate-500">Aggregate real-time status of subsystems</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchData}>
+              <RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh
+            </Button>
+          </div>
+
+          {snapshot && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {/* System Resources */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Cpu className="w-4 h-4 text-purple-500" /> System Resources
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {snapshot.system.cpu !== null && (
+                    <>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                          <span>CPU Usage</span><span>{snapshot.system.cpu}%</span>
+                        </div>
+                        <Progress value={snapshot.system.cpu} className="h-1.5" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                          <span>Memory Usage</span><span>{snapshot.system.memory}%</span>
+                        </div>
+                        <Progress value={snapshot.system.memory ?? 0} className="h-1.5" />
+                      </div>
+                    </>
+                  )}
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 pt-1">
+                    <div><span className="block text-[10px] text-slate-300 uppercase tracking-wide mb-0.5">Node RSS</span>{snapshot.system.nodeRss} MB</div>
+                    <div><span className="block text-[10px] text-slate-300 uppercase tracking-wide mb-0.5">Heap Used</span>{snapshot.system.nodeHeap} MB</div>
+                    <div className="col-span-2"><span className="block text-[10px] text-slate-300 uppercase tracking-wide mb-0.5">Uptime</span>{fmtUptime(snapshot.system.uptime)}</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testing Center Status */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-blue-500" /> Testing Center
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>Success Rate</span><span>{snapshot.testing.successRate}%</span>
+                    </div>
+                    <Progress value={snapshot.testing.successRate} className="h-1.5" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                    <div className="bg-slate-50 rounded p-2">
+                      <div className="text-lg font-bold text-slate-800">{snapshot.testing.total}</div>
+                      <div className="text-slate-400">Total</div>
+                    </div>
+                    <div className="bg-green-50 rounded p-2">
+                      <div className="text-lg font-bold text-green-700">{snapshot.testing.passed}</div>
+                      <div className="text-green-600">Passed</div>
+                    </div>
+                    <div className="bg-red-50 rounded p-2">
+                      <div className="text-lg font-bold text-red-700">{snapshot.testing.failed}</div>
+                      <div className="text-red-600">Failed</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400">Recent Run：{fmtTime(snapshot.testing.lastRun)}</p>
+                  <a href="/testing" className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700">
+                    <ExternalLink className="w-3 h-3" /> Go to Testing Center
+                  </a>
+                </CardContent>
+              </Card>
+
+              {/* Automation Status */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-orange-500" /> Automation System
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${snapshot.automation.status === 'running' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                    <span className="text-sm font-medium text-slate-700">
+                      {snapshot.automation.status === 'running' ? 'Running' : snapshot.automation.status}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                    <div><span className="block text-[10px] text-slate-300 uppercase tracking-wide mb-0.5">Module Count</span>{snapshot.automation.modules}</div>
+                    <div><span className="block text-[10px] text-slate-300 uppercase tracking-wide mb-0.5">Task Count</span>{snapshot.automation.tasks}</div>
+                  </div>
+                  <a href="/automation" className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700">
+                    <ExternalLink className="w-3 h-3" /> Go to Automation Center
+                  </a>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

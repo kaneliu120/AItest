@@ -191,88 +191,49 @@ export class FinanceDbService {
   // ===== 财务分析 =====
 
   async getFinancialSummary(): Promise<FinancialSummary> {
-    const transactions = await this.getTransactions({ page: 1, pageSize: 1000 });
-    
-    const totalIncome = transactions.transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+    // 获取全量数据（移除 pageSize 限制，避免超过1000条时汇总错误）
+    const { transactions: txList } = await this.getTransactions({ page: 1, pageSize: 100000 });
 
-    const totalExpenses = transactions.transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+    // 单次遍历同时计算所有聚合指标，替代原来的多次 filter/forEach
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    const monthlyData: Record<string, { income: number; expenses: number; profit: number }> = {};
+    const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
+
+    for (const t of txList) {
+      const isIncome = t.type === 'income';
+      if (isIncome) totalIncome += t.amount; else totalExpenses += t.amount;
+
+      // 月度趋势
+      const month = t.date.substring(0, 7);
+      const md = monthlyData[month] ?? { income: 0, expenses: 0, profit: 0 };
+      if (isIncome) md.income += t.amount; else md.expenses += t.amount;
+      md.profit = md.income - md.expenses;
+      monthlyData[month] = md;
+
+      // 分类分析
+      const ca = categoryAnalysis[t.category] ?? { income: 0, expense: 0 };
+      if (isIncome) ca.income += t.amount; else ca.expense += t.amount;
+      categoryAnalysis[t.category] = ca;
+    }
 
     const netProfit = totalIncome - totalExpenses;
     const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
 
-    // 月度趋势
-    const monthlyData: Record<string, { income: number; expenses: number; profit: number }> = {};
-    
-    transactions.transactions.forEach(t => {
-      const month = t.date.substring(0, 7); // YYYY-MM
-      if (!monthlyData[month]) {
-        monthlyData[month] = { income: 0, expenses: 0, profit: 0 };
-      }
-      
-      if (t.type === 'income') {
-        monthlyData[month].income += t.amount;
-      } else {
-        monthlyData[month].expenses += t.amount;
-      }
-      monthlyData[month].profit = monthlyData[month].income - monthlyData[month].expenses;
-    });
-
     const monthlyTrend = Object.entries(monthlyData)
-      .map(([month, data]) => ({
-        month,
-        income: data.income,
-        expenses: data.expenses,
-        profit: data.profit,
-      }))
+      .map(([month, data]) => ({ month, income: data.income, expenses: data.expenses, profit: data.profit }))
       .sort((a, b) => b.month.localeCompare(a.month));
 
-    // 分类分析
-    const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
-    
-    transactions.transactions.forEach(t => {
-      if (!categoryAnalysis[t.category]) {
-        categoryAnalysis[t.category] = { income: 0, expense: 0 };
-      }
-      
-      if (t.type === 'income') {
-        categoryAnalysis[t.category].income += t.amount;
-      } else {
-        categoryAnalysis[t.category].expense += t.amount;
-      }
-    });
-
-    const totalAll = totalIncome + totalExpenses;
     const topCategories = Object.entries(categoryAnalysis)
       .flatMap(([category, data]) => [
-        {
-          category,
-          amount: data.income,
-          type: 'income' as const,
-          percentage: totalIncome > 0 ? (data.income / totalIncome) * 100 : 0,
-        },
-        {
-          category,
-          amount: data.expense,
-          type: 'expense' as const,
-          percentage: totalExpenses > 0 ? (data.expense / totalExpenses) * 100 : 0,
-        },
+        { category, amount: data.income, type: 'income' as const, percentage: totalIncome > 0 ? (data.income / totalIncome) * 100 : 0 },
+        { category, amount: data.expense, type: 'expense' as const, percentage: totalExpenses > 0 ? (data.expense / totalExpenses) * 100 : 0 },
       ])
       .filter(item => item.amount > 0)
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 10);
 
-    return {
-      totalIncome,
-      totalExpenses,
-      netProfit,
-      profitMargin,
-      monthlyTrend,
-      topCategories,
-    };
+    return { totalIncome, totalExpenses, netProfit, profitMargin, monthlyTrend, topCategories };
   }
 
   async getCategories(): Promise<{ income: string[]; expense: string[] }> {

@@ -3,8 +3,15 @@ import { unifiedGatewayService } from '@/lib/unified-gateway-service';
 import { intelligentTaskDispatcher } from '@/lib/intelligent-task-dispatcher';
 import { knowledgeEnhancedDevService } from '@/lib/knowledge-enhanced-dev-service';
 import { automationEfficiencyService } from '@/lib/automation-efficiency-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
+  // Deprecated: use /api/workflows (POST action=trigger) or /api/v5/automation for automation tasks.
+  // This endpoint is kept for backwards compatibility with business-integration-dashboard.
+  const deprecationHeaders = {
+    'Deprecation': 'true',
+    'Link': '</api/workflows>; rel="successor-version"',
+  };
   try {
     const body = await request.json();
     const { workflow, parameters } = body;
@@ -100,31 +107,65 @@ export async function POST(request: NextRequest) {
       }
         
       case 'finance-monitoring': {
-        // 财务监控工作流
+        // 财务监控工作流 — 读取真实 CSV 文件
         const { period } = parameters || {};
-        
-        // 模拟财务数据
+        const fs = await import('fs');
+        const path = await import('path');
+        const os = await import('os');
+        const homeDir = os.homedir();
+        const financeBase = path.join(homeDir, 'Finance');
+
+        let revenue = 0;
+        let expenses = 0;
+        let incomeRecords: string[] = [];
+        let expenseRecords: string[] = [];
+
+        // 递归读取 CSV 文件
+        function readCsvDir(dir: string): number {
+          let total = 0;
+          if (!fs.existsSync(dir)) return 0;
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              total += readCsvDir(fullPath);
+            } else if (entry.name.endsWith('.csv')) {
+              const lines = fs.readFileSync(fullPath, 'utf8').split('\n').filter(l => l.trim() && !l.startsWith('Date') && !l.startsWith('YYYY'));
+              lines.forEach(l => {
+                const parts = l.split(',');
+                const amount = parseFloat(parts[2]) || 0;
+                if (amount > 0) total += amount;
+              });
+            }
+          }
+          return total;
+        }
+
+        try {
+          revenue = readCsvDir(path.join(financeBase, 'Income'));
+          expenses = readCsvDir(path.join(financeBase, 'Expenses'));
+          incomeRecords = fs.existsSync(path.join(financeBase, 'Income')) ? ['从 ~/Finance/Income 读取'] : [];
+          expenseRecords = fs.existsSync(path.join(financeBase, 'Expenses')) ? ['从 ~/Finance/Expenses 读取'] : [];
+        } catch (e) {
+          console.error('读取财务文件失败:', e);
+        }
+
         const financeData = {
-          period: period || 'monthly',
-          revenue: Math.random() * 10000 + 5000,
-          expenses: Math.random() * 3000 + 1000,
-          profit: 0,
-          timestamp: new Date().toISOString()
+          period: period || 'all-time',
+          revenue,
+          expenses,
+          profit: revenue - expenses,
+          currency: 'PHP',
+          dataSource: path.join(homeDir, 'Finance'),
+          hasRealData: revenue > 0 || expenses > 0,
+          note: revenue === 0 && expenses === 0 ? '财务文件为空，请在 ~/Finance/Income 和 ~/Finance/Expenses 中添加数据' : '真实数据',
+          timestamp: new Date().toISOString(),
         };
-        
-        financeData.profit = financeData.revenue - financeData.expenses;
-        
-        // 知识归档分析
-        const archiveResult = await knowledgeEnhancedDevService.analyzeDevTask(
-          '财务报告归档',
-          financeData
-        );
-        
+
         result = {
           workflow: 'finance-monitoring',
-          steps: ['数据收集', '分析计算', '知识归档'],
+          steps: ['读取CSV', '汇总计算', '生成报告'],
           financeData,
-          archiveResult,
           timestamp: new Date().toISOString()
         };
         break;
@@ -144,7 +185,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('业务工作流API错误:', error);
+    logger.error('业务工作流API错误', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : '未知错误',

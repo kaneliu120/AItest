@@ -1,4 +1,7 @@
-// 技能评估服务 - 深度集成到Mission Control
+import fs from 'fs';
+import path from 'path';
+import pool from '@/shared/db/client';
+import { getSkillEvalWeights } from './skill-evaluator-config';
 
 export interface EvaluationCategory {
   name: string;
@@ -17,6 +20,7 @@ export interface EvaluationReport {
   categories: EvaluationCategory[];
   recommendations: string[];
   issues: string[];
+  runId?: string | null;
 }
 
 export interface EvaluationStats {
@@ -36,172 +40,12 @@ export interface EvaluationStats {
   }>;
 }
 
+const SKILL_ALLOWED_ROOT = process.env.SKILL_EVAL_ALLOWED_ROOT || '/Users/kane/.openclaw/workspace/skills';
+
 class SkillEvaluatorService {
-  private reports: EvaluationReport[] = [
-    {
-      id: 'test-skill-001',
-      skillName: '测试技能',
-      skillPath: '~/skill-quality-evaluator/test-skill/',
-      overallScore: 76,
-      grade: 'B',
-      evaluationDate: new Date().toISOString(),
-      categories: [
-        {
-          name: '代码质量',
-          score: 80,
-          weight: 30,
-          details: ['代码结构清晰', '有适当的注释', '遵循最佳实践'],
-        },
-        {
-          name: '文档完整性',
-          score: 70,
-          weight: 25,
-          details: ['README完整', '缺少API文档', '示例代码清晰'],
-        },
-        {
-          name: '测试覆盖率',
-          score: 60,
-          weight: 20,
-          details: ['基础测试存在', '缺少边缘情况测试', '测试覆盖率60%'],
-        },
-        {
-          name: '性能优化',
-          score: 85,
-          weight: 15,
-          details: ['响应时间优秀', '内存使用合理', '可扩展性好'],
-        },
-        {
-          name: '安全性',
-          score: 75,
-          weight: 10,
-          details: ['基本安全措施', '缺少输入验证', '依赖项安全'],
-        },
-      ],
-      recommendations: [
-        '增加API文档',
-        '补充边缘情况测试',
-        '添加输入验证',
-        '优化错误处理',
-      ],
-      issues: [
-        '缺少完整的API文档',
-        '测试覆盖率不足',
-        '输入验证不完整',
-      ],
-    },
-  ];
+  private startedAt = Date.now();
+  private registryFile = path.join(process.cwd(), 'data', 'skills', 'registry.json');
 
-  private stats: EvaluationStats = {
-    status: 'running',
-    version: '1.0.0',
-    uptime: '2小时',
-    lastEvaluation: new Date().toISOString(),
-    totalEvaluations: 5,
-    averageScore: 76,
-    grade: 'B',
-    recentReports: [
-      {
-        id: 'test-skill-001',
-        name: '测试技能',
-        score: 76,
-        grade: 'B',
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  };
-
-  // 获取评估统计
-  async getEvaluationStats(): Promise<EvaluationStats> {
-    this.updateStats();
-    return this.stats;
-  }
-
-  // 获取评估报告
-  async getEvaluationReports(): Promise<EvaluationReport[]> {
-    return this.reports;
-  }
-
-  // 评估技能
-  async evaluateSkill(skillPath: string, skillName?: string): Promise<EvaluationReport> {
-    // 模拟评估过程
-    const categories: EvaluationCategory[] = [
-      {
-        name: '代码质量',
-        score: Math.floor(Math.random() * 30) + 70, // 70-100
-        weight: 30,
-        details: this.generateCodeQualityDetails(),
-      },
-      {
-        name: '文档完整性',
-        score: Math.floor(Math.random() * 40) + 60, // 60-100
-        weight: 25,
-        details: this.generateDocumentationDetails(),
-      },
-      {
-        name: '测试覆盖率',
-        score: Math.floor(Math.random() * 50) + 50, // 50-100
-        weight: 20,
-        details: this.generateTestingDetails(),
-      },
-      {
-        name: '性能优化',
-        score: Math.floor(Math.random() * 30) + 70, // 70-100
-        weight: 15,
-        details: this.generatePerformanceDetails(),
-      },
-      {
-        name: '安全性',
-        score: Math.floor(Math.random() * 40) + 60, // 60-100
-        weight: 10,
-        details: this.generateSecurityDetails(),
-      },
-    ];
-
-    const overallScore = Math.round(
-      categories.reduce((sum, cat) => sum + (cat.score * cat.weight) / 100, 0)
-    );
-
-    const grade = this.calculateGrade(overallScore);
-    const skillNameToUse = skillName || `技能-${Date.now()}`;
-    const reportId = `skill-${Date.now()}`;
-
-    const report: EvaluationReport = {
-      id: reportId,
-      skillName: skillNameToUse,
-      skillPath,
-      overallScore,
-      grade,
-      evaluationDate: new Date().toISOString(),
-      categories,
-      recommendations: this.generateRecommendations(overallScore, categories),
-      issues: this.generateIssues(categories),
-    };
-
-    // 保存报告
-    this.reports.unshift(report);
-    if (this.reports.length > 10) {
-      this.reports = this.reports.slice(0, 10);
-    }
-
-    // 更新统计
-    this.updateStats();
-
-    return report;
-  }
-
-  // 获取报告详情
-  async getReportDetails(reportId: string): Promise<EvaluationReport | null> {
-    return this.reports.find(report => report.id === reportId) || null;
-  }
-
-  // 删除报告
-  async deleteReport(reportId: string): Promise<boolean> {
-    const initialLength = this.reports.length;
-    this.reports = this.reports.filter(report => report.id !== reportId);
-    return this.reports.length < initialLength;
-  }
-
-  // 计算等级
   private calculateGrade(score: number): string {
     if (score >= 90) return 'A';
     if (score >= 80) return 'B';
@@ -210,120 +54,560 @@ class SkillEvaluatorService {
     return 'F';
   }
 
-  // 生成建议
-  private generateRecommendations(score: number, categories: EvaluationCategory[]): string[] {
+  private validateSkillPath(skillPath: string): { ok: boolean; reason?: string; resolved?: string } {
+    if (!skillPath || skillPath.length > 500) return { ok: false, reason: '非法路径参数' };
+    const resolved = path.resolve(skillPath.replace(/^~\//, `${process.env.HOME || ''}/`));
+    const allowed = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
+    if (!resolved.startsWith(allowed)) return { ok: false, reason: `路径超出允许范围: ${allowed}` };
+    return { ok: true, resolved };
+  }
+
+  private ensureRegistryStorage() {
+    const dir = path.dirname(this.registryFile);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(this.registryFile)) {
+      fs.writeFileSync(this.registryFile, JSON.stringify({ items: [], updatedAt: new Date().toISOString() }, null, 2));
+    }
+  }
+
+  private getSkillType(skillPath: string): string {
+    const base = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
+    const rel = path.relative(base, skillPath).replace(/\\/g, '/');
+
+    // rel: category[/subcategory]/skill-name
+    // requirement: only show top-level category, missing -> other
+    const parent = path.dirname(rel).replace(/\\/g, '/');
+    if (parent === '.' || parent === '') return 'other';
+
+    const parts = parent.split('/').filter((p) => p && p !== '.');
+    if (parts.length >= 1) return parts[0];
+    return 'other';
+  }
+
+  private readRegistry(): Array<{ skillName: string; skillPath: string; status: 'active' | 'archived'; createdAt: string; updatedAt: string; mergedInto?: string; mergedAt?: string }> {
+    this.ensureRegistryStorage();
+    try {
+      const data = JSON.parse(fs.readFileSync(this.registryFile, 'utf-8'));
+      return Array.isArray(data.items) ? data.items : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeRegistry(items: Array<{ skillName: string; skillPath: string; status: 'active' | 'archived'; createdAt: string; updatedAt: string; mergedInto?: string; mergedAt?: string }>) {
+    this.ensureRegistryStorage();
+    fs.writeFileSync(this.registryFile, JSON.stringify({ items, updatedAt: new Date().toISOString() }, null, 2));
+  }
+
+  private evaluateByRules(skillPath: string): { categories: EvaluationCategory[]; recommendations: string[]; issues: string[]; overallScore: number; grade: string } {
+    const categories: EvaluationCategory[] = [];
     const recommendations: string[] = [];
-    
-    if (score < 80) {
-      recommendations.push('整体评分有待提升，建议全面优化');
-    }
-    
-    categories.forEach(cat => {
-      if (cat.score < 70) {
-        recommendations.push(`${cat.name} 需要改进 (当前: ${cat.score}分)`);
-      }
-    });
-    
-    if (recommendations.length === 0) {
-      recommendations.push('技能质量优秀，继续保持');
-    }
-    
-    return recommendations.slice(0, 5); // 最多5条建议
-  }
-
-  // 生成问题
-  private generateIssues(categories: EvaluationCategory[]): string[] {
     const issues: string[] = [];
-    
-    categories.forEach(cat => {
-      if (cat.score < 60) {
-        issues.push(`${cat.name} 存在严重问题 (${cat.score}分)`);
-      } else if (cat.score < 70) {
-        issues.push(`${cat.name} 需要关注 (${cat.score}分)`);
-      }
+    const weights = getSkillEvalWeights();
+
+    const skillMd = path.join(skillPath, 'SKILL.md');
+    const readme = path.join(skillPath, 'README.md');
+    const hasSkillMd = fs.existsSync(skillMd);
+    const hasReadme = fs.existsSync(readme);
+
+    const files: string[] = [];
+    if (fs.existsSync(skillPath)) {
+      for (const entry of fs.readdirSync(skillPath)) files.push(entry);
+    }
+
+    const hasTests = files.some((f) => /test|spec/i.test(f)) || fs.existsSync(path.join(skillPath, '__tests__'));
+    const hasScripts = files.some((f) => /\.sh$|\.js$|\.ts$/.test(f));
+
+    const docScore = hasSkillMd && hasReadme ? 92 : hasSkillMd || hasReadme ? 75 : 45;
+    categories.push({
+      name: '文档完整性',
+      score: docScore,
+      weight: weights.documentation,
+      details: [
+        hasSkillMd ? 'SKILL.md 存在' : '缺少 SKILL.md',
+        hasReadme ? 'README.md 存在' : '缺少 README.md',
+      ],
     });
-    
-    return issues;
+
+    const structureScore = fs.existsSync(skillPath) ? (files.length >= 3 ? 85 : 68) : 0;
+    categories.push({
+      name: '结构完整性',
+      score: structureScore,
+      weight: weights.structure,
+      details: [
+        fs.existsSync(skillPath) ? `目录存在，文件数: ${files.length}` : '目录不存在',
+        hasScripts ? '存在可执行脚本/代码文件' : '缺少脚本或代码文件',
+      ],
+    });
+
+    const testScore = hasTests ? 80 : 55;
+    categories.push({
+      name: '测试覆盖',
+      score: testScore,
+      weight: weights.testing,
+      details: [hasTests ? '检测到测试相关文件' : '未检测到测试相关文件'],
+    });
+
+    const securityScore = path.isAbsolute(skillPath) ? 78 : 60;
+    categories.push({
+      name: '安全与规范',
+      score: securityScore,
+      weight: weights.security,
+      details: ['路径已进行白名单校验', '基础输入校验已执行'],
+    });
+
+    const maintainScore = files.length > 5 ? 82 : 70;
+    categories.push({
+      name: '可维护性',
+      score: maintainScore,
+      weight: weights.maintainability,
+      details: ['按目录结构给出维护性估算'],
+    });
+
+    const overallScore = Math.round(categories.reduce((sum, c) => sum + (c.score * c.weight) / 100, 0));
+    const grade = this.calculateGrade(overallScore);
+
+    for (const c of categories) {
+      if (c.score < 70) recommendations.push(`${c.name} 建议优先优化（${c.score}分）`);
+      if (c.score < 60) issues.push(`${c.name} 存在明显短板（${c.score}分）`);
+    }
+    if (!hasSkillMd) issues.push('缺少 SKILL.md（必需）');
+    if (!hasReadme) recommendations.push('补充 README.md 说明安装与使用方式');
+
+    return {
+      categories,
+      recommendations: recommendations.slice(0, 8),
+      issues: issues.slice(0, 8),
+      overallScore,
+      grade,
+    };
   }
 
-  // 生成详情
-  private generateCodeQualityDetails(): string[] {
-    return [
-      '代码结构清晰，易于维护',
-      '命名规范，符合最佳实践',
-      '适当的注释和文档',
-      '错误处理机制完善',
-    ];
+  private async saveReport(report: EvaluationReport): Promise<void> {
+    await pool.query(
+      `INSERT INTO skill_evaluations
+      (id, run_id, skill_name, skill_path, overall_score, grade, evaluation_date, recommendations, issues)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [
+        report.id,
+        report.runId || null,
+        report.skillName,
+        report.skillPath,
+        report.overallScore,
+        report.grade,
+        report.evaluationDate,
+        JSON.stringify(report.recommendations || []),
+        JSON.stringify(report.issues || []),
+      ]
+    );
+
+    for (const cat of report.categories) {
+      await pool.query(
+        `INSERT INTO skill_evaluation_items (id, evaluation_id, category_name, score, weight, details)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [
+          `sei-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          report.id,
+          cat.name,
+          cat.score,
+          cat.weight,
+          JSON.stringify(cat.details || []),
+        ]
+      );
+    }
   }
 
-  private generateDocumentationDetails(): string[] {
-    return [
-      'README文档完整',
-      'API文档详细',
-      '安装和使用说明清晰',
-      '示例代码充分',
-    ];
-  }
+  async getEvaluationStats(): Promise<EvaluationStats> {
+    const [agg, latest, recent] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(*)::int AS total,
+                COALESCE(AVG(overall_score),0)::float AS avg_score
+         FROM skill_evaluations`
+      ),
+      pool.query(`SELECT evaluation_date FROM skill_evaluations ORDER BY evaluation_date DESC LIMIT 1`),
+      pool.query(`SELECT id, skill_name, overall_score, grade, evaluation_date FROM skill_evaluations ORDER BY evaluation_date DESC LIMIT 5`),
+    ]);
 
-  private generateTestingDetails(): string[] {
-    return [
-      '单元测试覆盖主要功能',
-      '集成测试完整',
-      '测试用例设计合理',
-      '测试覆盖率达标',
-    ];
-  }
+    const total = Number(agg.rows[0]?.total || 0);
+    const avg = Math.round(Number(agg.rows[0]?.avg_score || 0));
 
-  private generatePerformanceDetails(): string[] {
-    return [
-      '响应时间优秀',
-      '内存使用合理',
-      '可扩展性好',
-      '资源管理优化',
-    ];
-  }
-
-  private generateSecurityDetails(): string[] {
-    return [
-      '输入验证完善',
-      '认证授权机制安全',
-      '数据保护措施到位',
-      '依赖项安全性高',
-    ];
-  }
-
-  // 更新统计
-  private updateStats() {
-    const totalEvaluations = this.reports.length;
-    const averageScore = totalEvaluations > 0
-      ? Math.round(this.reports.reduce((sum, report) => sum + report.overallScore, 0) / totalEvaluations)
-      : 0;
-    
-    this.stats = {
-      ...this.stats,
-      totalEvaluations,
-      averageScore,
-      grade: this.calculateGrade(averageScore),
-      lastEvaluation: new Date().toISOString(),
-      recentReports: this.reports.slice(0, 5).map(report => ({
-        id: report.id,
-        name: report.skillName,
-        score: report.overallScore,
-        grade: report.grade,
-        timestamp: report.evaluationDate,
+    return {
+      status: 'running',
+      version: '2.0.0',
+      uptime: `${Math.floor((Date.now() - this.startedAt) / 1000)}s`,
+      lastEvaluation: latest.rows[0]?.evaluation_date || new Date(0).toISOString(),
+      totalEvaluations: total,
+      averageScore: avg,
+      grade: this.calculateGrade(avg),
+      recentReports: recent.rows.map((r) => ({
+        id: r.id,
+        name: r.skill_name,
+        score: Number(r.overall_score),
+        grade: r.grade,
+        timestamp: r.evaluation_date,
       })),
     };
   }
 
-  // 获取系统状态
+  async getEvaluationReports(limit = 50, filters?: { grade?: string; minScore?: number; hours?: number }): Promise<EvaluationReport[]> {
+    const where: string[] = [];
+    const vals: any[] = [];
+
+    if (filters?.grade) {
+      vals.push(filters.grade);
+      where.push(`grade = $${vals.length}`);
+    }
+    if (typeof filters?.minScore === 'number') {
+      vals.push(filters.minScore);
+      where.push(`overall_score >= $${vals.length}`);
+    }
+    if (typeof filters?.hours === 'number' && filters.hours > 0) {
+      vals.push(String(filters.hours));
+      where.push(`evaluation_date >= now() - ($${vals.length}::text || ' hours')::interval`);
+    }
+
+    vals.push(limit);
+
+    const rs = await pool.query(
+      `SELECT id, run_id, skill_name, skill_path, overall_score, grade, evaluation_date, recommendations, issues
+       FROM skill_evaluations
+       ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+       ORDER BY evaluation_date DESC
+       LIMIT $${vals.length}`,
+      vals
+    );
+
+    const reports: EvaluationReport[] = [];
+    for (const row of rs.rows) {
+      const items = await pool.query(
+        `SELECT category_name, score, weight, details
+         FROM skill_evaluation_items
+         WHERE evaluation_id=$1`,
+        [row.id]
+      );
+
+      reports.push({
+        id: row.id,
+        runId: row.run_id,
+        skillName: row.skill_name,
+        skillPath: row.skill_path,
+        overallScore: Number(row.overall_score),
+        grade: row.grade,
+        evaluationDate: row.evaluation_date,
+        categories: items.rows.map((i) => ({
+          name: i.category_name,
+          score: Number(i.score),
+          weight: Number(i.weight),
+          details: Array.isArray(i.details) ? i.details : [],
+        })),
+        recommendations: Array.isArray(row.recommendations) ? row.recommendations : [],
+        issues: Array.isArray(row.issues) ? row.issues : [],
+      });
+    }
+
+    return reports;
+  }
+
+  async createEvaluationRun(skillPath: string, skillName?: string): Promise<{ runId: string }> {
+    const v = this.validateSkillPath(skillPath);
+    if (!v.ok) throw new Error(v.reason || '路径校验失败');
+    if (!fs.existsSync(v.resolved!)) throw new Error('技能目录不存在');
+
+    const runId = `ser-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    await pool.query(
+      `INSERT INTO skill_evaluation_runs (id, skill_name, skill_path, status, created_at, updated_at)
+       VALUES ($1,$2,$3,'pending',now(),now())`,
+      [runId, skillName || path.basename(v.resolved!), v.resolved!]
+    );
+
+    void this.executeRun(runId);
+    return { runId };
+  }
+
+  private async executeRun(runId: string): Promise<void> {
+    const runRs = await pool.query(`SELECT * FROM skill_evaluation_runs WHERE id=$1`, [runId]);
+    const run = runRs.rows[0];
+    if (!run) return;
+
+    try {
+      await pool.query(`UPDATE skill_evaluation_runs SET status='running', started_at=now(), updated_at=now() WHERE id=$1`, [runId]);
+
+      const result = this.evaluateByRules(run.skill_path);
+      const report: EvaluationReport = {
+        id: `se-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        runId,
+        skillName: run.skill_name,
+        skillPath: run.skill_path,
+        overallScore: result.overallScore,
+        grade: result.grade,
+        evaluationDate: new Date().toISOString(),
+        categories: result.categories,
+        recommendations: result.recommendations,
+        issues: result.issues,
+      };
+
+      await this.saveReport(report);
+      await pool.query(`UPDATE skill_evaluation_runs SET status='completed', completed_at=now(), updated_at=now() WHERE id=$1`, [runId]);
+    } catch (e: any) {
+      await pool.query(
+        `UPDATE skill_evaluation_runs SET status='failed', error_message=$2, completed_at=now(), updated_at=now() WHERE id=$1`,
+        [runId, e?.message || 'unknown-error']
+      );
+    }
+  }
+
+  async getRunStatus(runId: string) {
+    const rs = await pool.query(`SELECT * FROM skill_evaluation_runs WHERE id=$1`, [runId]);
+    if (!rs.rows[0]) return null;
+    return rs.rows[0];
+  }
+
+  async getSkillTrend(skillName: string, limit = 50) {
+    const rs = await pool.query(
+      `SELECT id, overall_score, grade, evaluation_date
+       FROM skill_evaluations
+       WHERE skill_name=$1
+       ORDER BY evaluation_date DESC
+       LIMIT $2`,
+      [skillName, limit]
+    );
+    return rs.rows.map((r) => ({
+      id: r.id,
+      score: Number(r.overall_score),
+      grade: r.grade,
+      timestamp: r.evaluation_date,
+    }));
+  }
+
+  async getIssueTopN(limit = 10) {
+    const rs = await pool.query(
+      `SELECT issue, COUNT(*)::int AS cnt
+       FROM (
+         SELECT jsonb_array_elements_text(issues) AS issue
+         FROM skill_evaluations
+       ) t
+       GROUP BY issue
+       ORDER BY cnt DESC
+       LIMIT $1`,
+      [limit]
+    );
+    return rs.rows.map((r) => ({ issue: r.issue, count: Number(r.cnt) }));
+  }
+
+  async getReportDetails(reportId: string): Promise<EvaluationReport | null> {
+    const all = await this.getEvaluationReports(100);
+    return all.find((r) => r.id === reportId) || null;
+  }
+
+  async deleteReport(reportId: string): Promise<boolean> {
+    const rs = await pool.query(`DELETE FROM skill_evaluations WHERE id=$1`, [reportId]);
+    return (rs.rowCount || 0) > 0;
+  }
+
+  async listSkills(options?: { type?: string; status?: 'active' | 'archived' | 'all'; page?: number; pageSize?: number }) {
+    const allowed = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
+    const registry = this.readRegistry();
+    const regMap = new Map(registry.map((r) => [path.resolve(r.skillPath), r]));
+
+    const items: Array<{
+      skillName: string;
+      skillPath: string;
+      type: string;
+      status: 'active' | 'archived';
+      hasSkillMd: boolean;
+      lastScore?: number;
+      lastGrade?: string;
+      lastEvaluationAt?: string;
+      mergedInto?: string;
+      mergedAt?: string;
+    }> = [];
+
+    if (fs.existsSync(allowed)) {
+      const walk = (dir: string) => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const p = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            // skip archived/system folders from management list
+            if (entry.name === 'archived' || entry.name.startsWith('.')) continue;
+
+            const skillMd = path.join(p, 'SKILL.md');
+            if (fs.existsSync(skillMd)) {
+              const reg = regMap.get(path.resolve(p));
+              const status: 'active' | 'archived' = reg?.status || 'active';
+              items.push({
+                skillName: path.basename(p),
+                skillPath: p,
+                type: this.getSkillType(p),
+                status,
+                hasSkillMd: true,
+                mergedInto: reg?.mergedInto,
+                mergedAt: reg?.mergedAt,
+              });
+            } else {
+              walk(p);
+            }
+          }
+        }
+      };
+      walk(allowed);
+    }
+
+    const latestRs = await pool.query(
+      `SELECT DISTINCT ON (skill_name)
+          skill_name, overall_score, grade, evaluation_date
+       FROM skill_evaluations
+       ORDER BY skill_name, evaluation_date DESC`
+    );
+    const latestMap = new Map(latestRs.rows.map((r) => [r.skill_name, r]));
+
+    for (const i of items) {
+      const l = latestMap.get(i.skillName);
+      if (l) {
+        i.lastScore = Number(l.overall_score);
+        i.lastGrade = l.grade;
+        i.lastEvaluationAt = l.evaluation_date;
+      }
+    }
+
+    const typeCounts: Record<string, number> = {};
+    for (const i of items) typeCounts[i.type] = (typeCounts[i.type] || 0) + 1;
+
+    let filtered = items;
+    if (options?.type && options.type !== 'all') filtered = filtered.filter(i => i.type === options.type);
+    const st = options?.status || 'all';
+    if (st !== 'all') filtered = filtered.filter(i => i.status === st);
+
+    filtered = filtered.sort((a, b) => a.skillName.localeCompare(b.skillName));
+
+    const pageSize = Math.min(100, Math.max(1, Number(options?.pageSize || 30)));
+    const page = Math.max(1, Number(options?.page || 1));
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+    return { skills: paged, total, page, pageSize, totalPages, typeCounts };
+  }
+
+  async createSkill(input: { skillName: string; relativePath?: string; template?: string; evaluateNow?: boolean; type?: string }) {
+    const base = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
+    const folder = input.relativePath ? path.resolve(base, input.relativePath, input.skillName) : path.join(base, input.skillName);
+    const v = this.validateSkillPath(folder);
+    if (!v.ok) throw new Error(v.reason || '路径校验失败');
+    if (fs.existsSync(v.resolved!)) throw new Error('技能目录已存在');
+
+    fs.mkdirSync(v.resolved!, { recursive: true });
+    const skillMd = path.join(v.resolved!, 'SKILL.md');
+    const content = input.template || `---\nname: ${input.skillName}\ndescription: ${input.skillName} skill\n---\n\n# ${input.skillName}\n\n## Overview\n- TODO: add description\n`;
+    fs.writeFileSync(skillMd, content);
+
+    const registry = this.readRegistry();
+    registry.push({ skillName: input.skillName, skillPath: v.resolved!, status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    this.writeRegistry(registry);
+
+    let runId: string | undefined;
+    if (input.evaluateNow) {
+      const run = await this.createEvaluationRun(v.resolved!, input.skillName);
+      runId = run.runId;
+    }
+
+    return { skillName: input.skillName, skillPath: v.resolved!, runId };
+  }
+
+  async mergeSkills(input: { sourceSkillPaths: string[]; targetSkillPath: string }) {
+    if (!Array.isArray(input.sourceSkillPaths) || input.sourceSkillPaths.length === 0) {
+      throw new Error('缺少 sourceSkillPaths');
+    }
+
+    const targetV = this.validateSkillPath(input.targetSkillPath);
+    if (!targetV.ok || !targetV.resolved) throw new Error(targetV.reason || '目标路径非法');
+
+    const targetType = this.getSkillType(targetV.resolved);
+    const normalizedSources = input.sourceSkillPaths
+      .map((p) => this.validateSkillPath(p))
+      .filter((v) => v.ok && v.resolved)
+      .map((v) => v.resolved as string)
+      .filter((p) => path.resolve(p) !== path.resolve(targetV.resolved!));
+
+    if (normalizedSources.length === 0) throw new Error('没有可合并的source技能');
+
+    for (const sp of normalizedSources) {
+      if (this.getSkillType(sp) !== targetType) {
+        throw new Error(`类型不一致，无法合并: ${sp}`);
+      }
+    }
+
+    const registry = this.readRegistry();
+    const now = new Date().toISOString();
+
+    const ensureEntry = (skillPath: string) => {
+      const idx = registry.findIndex((r) => path.resolve(r.skillPath) === path.resolve(skillPath));
+      if (idx >= 0) return idx;
+      registry.push({
+        skillName: path.basename(skillPath),
+        skillPath,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      });
+      return registry.length - 1;
+    };
+
+    const targetIdx = ensureEntry(targetV.resolved);
+    registry[targetIdx] = { ...registry[targetIdx], status: 'active', updatedAt: now };
+
+    for (const sp of normalizedSources) {
+      const idx = ensureEntry(sp);
+      registry[idx] = {
+        ...registry[idx],
+        status: 'archived',
+        mergedInto: targetV.resolved,
+        mergedAt: now,
+        updatedAt: now,
+      };
+    }
+
+    this.writeRegistry(registry);
+
+    return {
+      merged: normalizedSources.length,
+      targetSkillPath: targetV.resolved,
+      sourceSkillPaths: normalizedSources,
+      type: targetType,
+      mergedAt: now,
+    };
+  }
+
+  async deleteSkill(input: { skillPath: string; hardDelete?: boolean }) {
+    const v = this.validateSkillPath(input.skillPath);
+    if (!v.ok || !v.resolved) throw new Error(v.reason || '路径校验失败');
+
+    if (!fs.existsSync(v.resolved)) throw new Error('技能目录不存在');
+
+    if (input.hardDelete) {
+      const trashBase = path.join(path.dirname(v.resolved), '.trash');
+      if (!fs.existsSync(trashBase)) fs.mkdirSync(trashBase, { recursive: true });
+      const target = path.join(trashBase, `${path.basename(v.resolved)}-${Date.now()}`);
+      fs.renameSync(v.resolved, target);
+    }
+
+    const registry = this.readRegistry();
+    const idx = registry.findIndex(r => path.resolve(r.skillPath) === path.resolve(v.resolved!));
+    if (idx >= 0) {
+      registry[idx] = { ...registry[idx], status: 'archived', updatedAt: new Date().toISOString() };
+    } else {
+      registry.push({ skillName: path.basename(v.resolved), skillPath: v.resolved, status: 'archived', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    }
+    this.writeRegistry(registry);
+
+    return { deleted: true, skillPath: v.resolved, hardDelete: !!input.hardDelete };
+  }
+
   getSystemStatus() {
     return {
       status: 'running',
-      version: '1.0.0',
-      uptime: '2小时',
-      totalReports: this.reports.length,
-      averageScore: this.stats.averageScore,
-      lastEvaluation: this.stats.lastEvaluation,
+      version: '2.0.0',
+      uptime: `${Math.floor((Date.now() - this.startedAt) / 1000)}s`,
     };
   }
 }

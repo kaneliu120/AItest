@@ -1,0 +1,17 @@
+const withOptimizedImages = require('next-optimized-images');
+
+module.exports = withOptimizedImages({
+  reactStrictMode: true,
+  images: {
+    optimizeImagesInDev: true,
+    mozjpeg: {
+      quality: 80,
+    },
+    optipng: {
+      optimizationLevel: 3,
+    },
+  },
+  webpack(config, options) {
+    return config;
+  },
+});

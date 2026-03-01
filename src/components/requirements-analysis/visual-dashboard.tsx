@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   BarChart3, 
   Target, 
@@ -23,51 +23,34 @@ interface VisualDashboardProps {
 
 export const VisualDashboard = ({ analysis, aiEnhancedAnalysis }: VisualDashboardProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'risks' | 'trends'>('overview');
-  const [metrics, setMetrics] = useState<any>(null);
 
-  useEffect(() => {
-    if (analysis) {
-      calculateMetrics();
-    }
-  }, [analysis]);
-
-  const calculateMetrics = () => {
-    if (!analysis) return;
+  const metrics = useMemo(() => {
+    if (!analysis) return null;
 
     const functionalReqs = analysis.categories.functional;
-    const totalEffort = analysis.effortEstimation.totalHours;
-    
-    const metricsData = {
-      // 基础指标
+
+    return {
       totalFeatures: functionalReqs.length,
       highPriorityFeatures: functionalReqs.filter((r: any) => r.priority === 'high').length,
       mediumPriorityFeatures: functionalReqs.filter((r: any) => r.priority === 'medium').length,
       lowPriorityFeatures: functionalReqs.filter((r: any) => r.priority === 'low').length,
-      
-      // 复杂度分布
       simpleFeatures: functionalReqs.filter((r: any) => r.complexity === 'simple').length,
       mediumFeatures: functionalReqs.filter((r: any) => r.complexity === 'medium').length,
       complexFeatures: functionalReqs.filter((r: any) => r.complexity === 'complex').length,
-      
-      // 工时分布
       effortByPriority: {
         high: functionalReqs.filter((r: any) => r.priority === 'high').reduce((sum: number, r: any) => sum + r.estimatedEffort, 0),
         medium: functionalReqs.filter((r: any) => r.priority === 'medium').reduce((sum: number, r: any) => sum + r.estimatedEffort, 0),
         low: functionalReqs.filter((r: any) => r.priority === 'low').reduce((sum: number, r: any) => sum + r.estimatedEffort, 0),
       },
-      
-      // 风险指标
       totalRisks: analysis.risks.length,
       highRisks: analysis.risks.filter((r: any) => r.probability === 'high' && r.impact === 'high').length,
-      mediumRisks: analysis.risks.filter((r: any) => 
-        (r.probability === 'medium' && r.impact === 'high') || 
+      mediumRisks: analysis.risks.filter((r: any) =>
+        (r.probability === 'medium' && r.impact === 'high') ||
         (r.probability === 'high' && r.impact === 'medium')
       ).length,
       lowRisks: analysis.risks.filter((r: any) => r.probability === 'low' || r.impact === 'low').length,
     };
-
-    setMetrics(metricsData);
-  };
+  }, [analysis]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

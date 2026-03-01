@@ -22,26 +22,63 @@ jobs:
     - name: 安装依赖
       run: npm ci
 
-    - name: Lint 检查
+    - name: Lint 检查（硬质量门 — 0 errors）
       run: npm run lint
-      continue-on-error: true
+
+    - name: MCP 命名一致性检查（前端）
+      run: npm run verify:mcp-terminology
 
     - name: TypeScript 类型检查
       run: npm run type-check
-      continue-on-error: true
+      continue-on-error: true  # 遗留 TS 错误渐进修复中，不阻断
 
     - name: 构建验证
       run: npm run build
       env:
         NODE_ENV: production
 
+    - name: 生产鉴权配置检查
+      run: npm run verify:prod-security
+      env:
+        NODE_ENV: production
+        WORKFLOW_ADMIN_TOKEN: ${{ secrets.WORKFLOW_ADMIN_TOKEN }}
+
+    - name: 安装 Playwright 浏览器
+      run: npx playwright install --with-deps chromium
+
+    - name: E2E（技能管理）
+      run: |
+        NODE_OPTIONS='--max-old-space-size=512 --expose-gc' npx next dev --port 3011 > /tmp/next-3011.log 2>&1 &
+        PID=$!
+        for i in {1..45}; do
+          if curl -sf http://127.0.0.1:3011/skill-evaluator >/dev/null; then
+            break
+          fi
+          sleep 1
+        done
+        npx playwright test e2e/skill-management.spec.ts
+        kill $PID
+
+    - name: API 验证（技能管理）
+      run: |
+        NODE_OPTIONS='--max-old-space-size=512 --expose-gc' npx next dev --port 3011 > /tmp/next-3011.log 2>&1 &
+        PID=$!
+        for i in {1..45}; do
+          if curl -sf http://127.0.0.1:3011/api/ecosystem/skill-evaluator?action=stats >/dev/null; then
+            break
+          fi
+          sleep 1
+        done
+        ./scripts/verify-skill-management.sh http://127.0.0.1:3011
+        kill $PID
+
     - name: 安全依赖扫描
       run: npm audit --audit-level=high
       continue-on-error: true
 
-    - name: ✅ 质量门通过
+    - name: ✅ 质量报告
       run: |
-        echo "Lint:    ✅"
-        echo "Types:   ✅"
-        echo "Build:   ✅"
-        echo "Audit:   ✅"
+        echo "Lint:    ✅ (0 errors enforced)"
+        echo "Types:   ⚠️  (continue-on-error — 渐进修复中)"
+        echo "Build:   ✅ (must pass)"
+        echo "Audit:   ✅ (informational)"

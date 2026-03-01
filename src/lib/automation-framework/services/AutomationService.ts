@@ -7,6 +7,7 @@ import { EventSystem, AutomationEvent } from '../core/EventSystem';
 import { FaultDiagnosisService, FaultDiagnosisServiceConfig } from './FaultDiagnosisService';
 // 导入自动化模块注册
 import { registerAutomationModules, getAllModules, executeModuleAction } from '@/lib/automation-modules/register';
+import { logger } from '@/lib/logger';
 
 export interface AutomationServiceConfig {
   dataDir: string;
@@ -63,7 +64,7 @@ export class AutomationService {
   private startTime: Date;
   private cleanupInterval?: NodeJS.Timeout;
   private taskCheckInterval?: NodeJS.Timeout;
-  private modules: any[] = [];
+  private modules: Array<AutomationModule & { actions?: Record<string, unknown>; healthCheck?: () => Promise<unknown> }> = [];
   
   constructor(config?: Partial<AutomationServiceConfig>) {
     this.config = {
@@ -175,7 +176,7 @@ export class AutomationService {
       return true;
       
     } catch (error) {
-      console.error('[AutomationService] Failed to start:', error);
+      logger.error('AutomationService start failed', error, { module: 'AutomationService' });
       this.status.status = 'error';
       this.status.lastError = error instanceof Error ? error.message : 'Unknown error';
       
@@ -200,7 +201,7 @@ export class AutomationService {
    */
   async initializeModules() {
     try {
-      this.modules = await registerAutomationModules();
+      this.modules = (await registerAutomationModules() as unknown) as Array<AutomationModule & { actions?: Record<string, unknown>; healthCheck?: () => Promise<unknown> }>;
       console.log(`自动化模块初始化完成，共 ${this.modules.length} 个模块`);
       
       // 注册模块到 ModuleManager
@@ -228,7 +229,7 @@ export class AutomationService {
       
       return { success: true, count: this.modules.length };
     } catch (error: any) {
-      console.error('自动化模块初始化失败:', error);
+      logger.error('自动化模块初始化失败', error, { module: 'AutomationService' });
       return { success: false, error: error.message };
     }
   }
@@ -280,7 +281,7 @@ export class AutomationService {
       return true;
       
     } catch (error) {
-      console.error('[AutomationService] Failed to stop:', error);
+      logger.error('AutomationService stop failed', error, { module: 'AutomationService' });
       this.status.status = 'error';
       this.status.lastError = error instanceof Error ? error.message : 'Unknown error';
       
@@ -378,7 +379,7 @@ export class AutomationService {
       }
       
     } catch (error) {
-      console.error('[AutomationService] Error checking pending tasks:', error);
+      logger.error('检查待执行任务失败', error, { module: 'AutomationService' });
       
       this.eventSystem.emit({
         type: 'service:error',
@@ -462,7 +463,7 @@ export class AutomationService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.taskScheduler.failTaskExecution(execution.id, errorMessage);
       
-      console.error(`[AutomationService] Task failed: ${task.id}`, error);
+      logger.error('任务执行失败', error, { module: 'AutomationService', taskId: task.id });
       
       // 触发任务失败事件
       this.eventSystem.emit({
@@ -498,8 +499,8 @@ export class AutomationService {
   public async executeModuleAction(
     moduleId: string,
     action: string,
-    parameters: Record<string, any>
-  ): Promise<any> {
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     try {
       // 优先尝试使用注册的实战模块
       const result = await executeModuleAction(moduleId, action, parameters);
@@ -524,7 +525,7 @@ export class AutomationService {
       
     } catch (error: any) {
       // 如果实战模块执行失败，记录错误
-      console.error(`模块动作执行失败: ${moduleId}.${action}`, error);
+      logger.error('模块动作执行失败', error, { module: 'AutomationService', moduleId, action });
       
       this.eventSystem.emit({
         type: 'module-action-failed',
@@ -597,7 +598,7 @@ export class AutomationService {
   
   // 处理错误事件
   private handleErrorEvent(event: AutomationEvent): void {
-    console.error('[AutomationService] Error event:', event.data);
+    logger.error('AutomationService error event', event.data, { module: 'AutomationService' });
     
     // 记录到数据总线
     this.dataBus.sendMessage({
@@ -708,7 +709,7 @@ export class AutomationService {
       });
       
     } catch (error) {
-      console.error('[AutomationService] Cleanup failed:', error);
+      logger.error('AutomationService cleanup failed', error, { module: 'AutomationService' });
       
       this.eventSystem.emit({
         type: 'service:error',

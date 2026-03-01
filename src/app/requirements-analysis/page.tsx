@@ -37,29 +37,29 @@ function fmtBytes(n: number) {
 }
 
 const DOC_META: Record<string, { label: string; color: string }> = {
-  srs:            { label: '需求规格说明书', color: 'bg-blue-50   border-blue-200   text-blue-700'   },
-  tdd:            { label: '技术设计文档',   color: 'bg-violet-50 border-violet-200 text-violet-700' },
-  'project-plan': { label: '项目计划',       color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-  deployment:     { label: '部署文档',       color: 'bg-orange-50 border-orange-200 text-orange-700' },
+  srs:            { label: 'Software Requirements Specification', color: 'bg-blue-50   border-blue-200   text-blue-700'   },
+  tdd:            { label: 'Technical Design Document',   color: 'bg-violet-50 border-violet-200 text-violet-700' },
+  'project-plan': { label: 'Project Plan',       color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+  deployment:     { label: 'Deployment Document',       color: 'bg-orange-50 border-orange-200 text-orange-700' },
 };
 
 const FALLBACK_DOCS = ['srs', 'tdd', 'project-plan', 'deployment'] as const;
 
 const MOCK_TASKS: Task[] = [
-  { id: '1', title: '搭建前端项目脚手架',  category: '前端开发', priority: 'high',   hours: 4  },
-  { id: '2', title: '设计数据库 ER 图',    category: '后端开发', priority: 'high',   hours: 6  },
-  { id: '3', title: '实现用户认证模块',    category: '后端开发', priority: 'high',   hours: 12 },
-  { id: '4', title: '开发核心业务 API',    category: '后端开发', priority: 'medium', hours: 20 },
-  { id: '5', title: '构建 CI/CD 流水线',   category: 'DevOps',   priority: 'medium', hours: 8  },
-  { id: '6', title: '编写 E2E 测试用例',   category: '测试',     priority: 'low',    hours: 10 },
+  { id: '1', title: 'Set up Frontend Project Scaffold',  category: 'Frontend Development', priority: 'high',   hours: 4  },
+  { id: '2', title: 'Design Database ER Chart',    category: 'Backend Development', priority: 'high',   hours: 6  },
+  { id: '3', title: 'Implement user auth module',    category: 'Backend Development', priority: 'high',   hours: 12 },
+  { id: '4', title: 'Develop core business API',    category: 'Backend Development', priority: 'medium', hours: 20 },
+  { id: '5', title: 'Build CI/CD Pipeline',   category: 'DevOps',   priority: 'medium', hours: 8  },
+  { id: '6', title: 'Write E2E Test Cases',   category: 'Testing',     priority: 'low',    hours: 10 },
 ];
 
 /* ─────────── Step Bar ─────────── */
 function StepBar({ current }: { current: Step }) {
   const steps: { n: Step; label: string; icon: React.ElementType }[] = [
-    { n: 1, label: '上传需求文档',  icon: Upload   },
-    { n: 2, label: '生成技术文档',  icon: FileCode },
-    { n: 3, label: '项目自动化启动', icon: Rocket   },
+    { n: 1, label: 'Upload Requirements Document',  icon: Upload   },
+    { n: 2, label: 'Generate Technical Document',  icon: FileCode },
+    { n: 3, label: 'Project automation started', icon: Rocket   },
   ];
   return (
     <div className="flex items-center gap-0">
@@ -78,7 +78,7 @@ function StepBar({ current }: { current: Step }) {
               <div className="min-w-0">
                 <p className={`text-xs font-semibold truncate ${active ? 'text-white' : done ? 'text-green-700' : 'text-slate-400'}`}>{s.label}</p>
                 <p className={`text-xs truncate ${active ? 'text-blue-100' : done ? 'text-green-500' : 'text-slate-300'}`}>
-                  {active ? '进行中' : done ? '已完成' : '待处理'}
+                  {active ? 'In Progress' : done ? 'Completed' : 'Pending'}
                 </p>
               </div>
             </div>
@@ -112,7 +112,7 @@ function AutoProgress({ tasks, onDone }: { tasks: Task[]; onDone: () => void }) 
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
       <div className="flex items-center gap-2 mb-2">
         <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-        <p className="font-semibold text-slate-800 text-sm">正在分配任务到自动化队列…</p>
+        <p className="font-semibold text-slate-800 text-sm">Assigning tasks to Automation Queue…</p>
       </div>
       {tasks.map((t, i) => (
         <div key={t.id} className={`flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-300
@@ -138,7 +138,7 @@ export default function RequirementsAnalysisPage() {
   const [text,         setText]         = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showText,     setShowText]     = useState(false);
-  const [launching,    setLaunching]    = useState(false);  // "开始项目" clicked
+  const [launching,    setLaunching]    = useState(false);  // "Start Project" clicked
   const [launched,     setLaunched]     = useState(false);  // automation done
 
   /* ── Dropzone ── */
@@ -176,20 +176,20 @@ export default function RequirementsAnalysisPage() {
       fd.append('generateDocs', 'true');
       const res  = await fetch('/api/requirements-analysis', { method: 'POST', body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '分析失败');
+      if (!res.ok) throw new Error(data.error || 'Analysis failed');
       setResult(data.data);
       // derive tasks now so they're ready
       const derived: Task[] = data.data?.analysis?.tasks?.length ? data.data.analysis.tasks : MOCK_TASKS;
       setTasks(derived);
       setStep(2);
     } catch (e: any) {
-      setError(e.message ?? '未知错误');
+      setError(e.message ?? 'Unknown error');
     } finally {
       setIsLoading(false);
     }
   }
 
-  /* ── Step 2 → 3: "开始项目" ── */
+  /* ── Step 2 → 3: "Start Project" ── */
   function handleStartProject() {
     setLaunching(true);
     setStep(3);
@@ -212,13 +212,13 @@ export default function RequirementsAnalysisPage() {
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <Sparkles className="h-3.5 w-3.5 opacity-75" />
-                <span className="text-xs font-medium opacity-75 uppercase tracking-wider">Mission Control · AI 需求分析</span>
+                <span className="text-xs font-medium opacity-75 uppercase tracking-wider">Mission Control · AI Requirements Analysis</span>
               </div>
-              <h1 className="text-xl font-bold">智能需求分析流水线</h1>
-              <p className="text-sm opacity-75 mt-0.5">上传需求文档 → 生成技术文档 → 一键启动项目自动化</p>
+              <h1 className="text-xl font-bold">Smart Requirements Analysis Pipeline</h1>
+              <p className="text-sm opacity-75 mt-0.5">Upload Requirements Document → Generate Technical Document → One-Click Project Automation</p>
             </div>
             <button onClick={reset} className="flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 rounded-xl px-3 py-2 transition-colors">
-              <RotateCcw className="w-3.5 h-3.5" />重新开始
+              <RotateCcw className="w-3.5 h-3.5" />Start Over
             </button>
           </div>
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5" />
@@ -227,7 +227,7 @@ export default function RequirementsAnalysisPage() {
         {/* Step Bar */}
         <StepBar current={step} />
 
-        {/* ═══ STEP 1: 上传需求 ═══ */}
+        {/* ═══ STEP 1: Upload Requirements ═══ */}
         {step === 1 && (
           <div className="space-y-4">
             <div
@@ -241,19 +241,19 @@ export default function RequirementsAnalysisPage() {
               {uploadedFile ? (
                 <>
                   <CheckCircle className="w-14 h-14 mx-auto text-green-500 mb-3" />
-                  <p className="font-semibold text-green-700 mb-1">文件已就绪</p>
+                  <p className="font-semibold text-green-700 mb-1">File Ready</p>
                   <p className="text-sm text-green-600">{uploadedFile.name} · {fmtBytes(uploadedFile.size)}</p>
-                  <p className="text-xs text-green-500 mt-2">可拖入新文件替换</p>
+                  <p className="text-xs text-green-500 mt-2">Drag in a new file to replace</p>
                 </>
               ) : (
                 <>
                   <Upload className="w-14 h-14 mx-auto text-slate-300 mb-3" />
                   <p className="font-semibold text-slate-700 mb-1">
-                    {isDragActive ? '释放文件以上传' : '拖放需求文档到此处'}
+                    {isDragActive ? 'Release file to upload' : 'Drag and drop requirements document here'}
                   </p>
-                  <p className="text-sm text-slate-400 mb-4">支持 TXT · MD · DOCX · PDF · HTML</p>
+                  <p className="text-sm text-slate-400 mb-4">Supports TXT · MD · DOCX · PDF · HTML</p>
                   <span className="inline-block text-xs bg-blue-600 text-white px-5 py-2 rounded-full font-medium">
-                    或点击选择文件
+                    or click to select file
                   </span>
                 </>
               )}
@@ -265,7 +265,7 @@ export default function RequirementsAnalysisPage() {
               className="text-sm text-slate-500 hover:text-blue-600 flex items-center gap-1.5 transition-colors"
             >
               <FileText className="w-3.5 h-3.5" />
-              {showText ? '收起文本输入' : '或直接输入需求文本（Markdown）'}
+              {showText ? 'Collapse text input' : 'or enter requirements text directly（Markdown）'}
               <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showText ? 'rotate-90' : ''}`} />
             </button>
             {showText && (
@@ -273,7 +273,7 @@ export default function RequirementsAnalysisPage() {
                 value={text}
                 onChange={e => setText(e.target.value)}
                 rows={8}
-                placeholder={'# 项目需求\n\n## 功能需求\n1. 功能一\n2. 功能二\n\n## 技术要求\n- 性能目标\n- 安全要求'}
+                placeholder={'# Project Requirements\n\n## Functional Requirements\n1. Feature 1\n2. Feature 2\n\n## Technical Requirements\n- Performance Goals\n- Security Requirements'}
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white font-mono text-sm text-slate-800 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             )}
@@ -291,22 +291,22 @@ export default function RequirementsAnalysisPage() {
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold flex items-center justify-center gap-2.5 hover:from-blue-700 hover:to-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-200"
             >
               {isLoading
-                ? <><Loader2 className="w-5 h-5 animate-spin" />AI 分析中，请稍候…</>
-                : <><Brain className="w-5 h-5" />生成技术文档<ArrowRight className="w-4 h-4 ml-1" /></>}
+                ? <><Loader2 className="w-5 h-5 animate-spin" />AI Analyzing，Please wait…</>
+                : <><Brain className="w-5 h-5" />Generate Technical Document<ArrowRight className="w-4 h-4 ml-1" /></>}
             </button>
           </div>
         )}
 
-        {/* ═══ STEP 2: 查看文档 + 开始项目 ═══ */}
+        {/* ═══ STEP 2: View Document + Start Project ═══ */}
         {step === 2 && result && (
           <div className="space-y-4">
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: '功能需求', val: result.analysis?.categories?.functional?.length ?? tasks.length, color: 'text-blue-600 bg-blue-50' },
-                { label: '总工时',   val: `${result.analysis?.effortEstimation?.totalHours ?? tasks.reduce((s,t)=>s+t.hours,0)}h`, color: 'text-orange-600 bg-orange-50' },
-                { label: '团队规模', val: `${result.analysis?.effortEstimation?.teamSize ?? 3}人`, color: 'text-emerald-600 bg-emerald-50' },
-                { label: '复杂度',   val: `${result.analysis?.complexity?.overall ?? 7}/10`,       color: 'text-violet-600 bg-violet-50' },
+                { label: 'Functional Requirements', val: result.analysis?.categories?.functional?.length ?? tasks.length, color: 'text-blue-600 bg-blue-50' },
+                { label: 'Total Hours',   val: `${result.analysis?.effortEstimation?.totalHours ?? tasks.reduce((s,t)=>s+t.hours,0)}h`, color: 'text-orange-600 bg-orange-50' },
+                { label: 'Team Size', val: `${result.analysis?.effortEstimation?.teamSize ?? 3}person`, color: 'text-emerald-600 bg-emerald-50' },
+                { label: 'Complexity',   val: `${result.analysis?.complexity?.overall ?? 7}/10`,       color: 'text-violet-600 bg-violet-50' },
               ].map(({ label, val, color }) => (
                 <div key={label} className={`rounded-2xl p-4 text-center ${color.split(' ')[1]}`}>
                   <p className={`text-2xl font-bold ${color.split(' ')[0]}`}>{val}</p>
@@ -319,8 +319,8 @@ export default function RequirementsAnalysisPage() {
             <div className="bg-white rounded-2xl border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4">
                 <FileCode className="w-4 h-4 text-blue-600" />
-                <h3 className="font-semibold text-slate-900">生成的技术文档</h3>
-                <span className="ml-auto text-xs text-slate-400">共 {result.documents ? Object.keys(result.documents).length : 4} 份</span>
+                <h3 className="font-semibold text-slate-900">Generated Technical Document</h3>
+                <span className="ml-auto text-xs text-slate-400">{result.documents ? Object.keys(result.documents).length : 4} documents</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {(result.documents
@@ -331,9 +331,9 @@ export default function RequirementsAnalysisPage() {
                   return (
                     <div key={key} className={`rounded-xl border p-4 ${meta.color}`}>
                       <p className="text-sm font-semibold">{meta.label}</p>
-                      <p className="text-xs opacity-60 mt-0.5 truncate">{title ?? '已生成'}</p>
+                      <p className="text-xs opacity-60 mt-0.5 truncate">{title ?? 'Generated'}</p>
                       <div className="mt-2 flex items-center gap-1 text-xs opacity-80">
-                        <CheckCircle className="w-3 h-3" />已就绪
+                        <CheckCircle className="w-3 h-3" />Ready
                       </div>
                     </div>
                   );
@@ -346,7 +346,7 @@ export default function RequirementsAnalysisPage() {
               <div className="bg-white rounded-2xl border border-slate-200 p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Layers className="w-4 h-4 text-violet-600" />
-                  <h3 className="font-semibold text-slate-900">推荐技术栈</h3>
+                  <h3 className="font-semibold text-slate-900">Recommended Tech Stack</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {result.analysis!.techStack!.frontend!.map((t, i) => (
@@ -363,9 +363,9 @@ export default function RequirementsAnalysisPage() {
             <div className="bg-white rounded-2xl border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-amber-500" />
-                <h3 className="font-semibold text-slate-900">待分配任务</h3>
+                <h3 className="font-semibold text-slate-900">Tasks to Assign</h3>
                 <span className="ml-auto text-xs bg-amber-50 text-amber-600 border border-amber-200 rounded-full px-2.5 py-0.5 font-medium">
-                  {tasks.length} 个任务
+                  {tasks.length}  tasks
                 </span>
               </div>
               <div className="space-y-1.5">
@@ -380,7 +380,7 @@ export default function RequirementsAnalysisPage() {
                   </div>
                 ))}
                 {tasks.length > 4 && (
-                  <p className="text-xs text-slate-400 text-center pt-1">还有 {tasks.length - 4} 个任务…</p>
+                  <p className="text-xs text-slate-400 text-center pt-1">and {tasks.length - 4}  tasks…</p>
                 )}
               </div>
             </div>
@@ -391,17 +391,17 @@ export default function RequirementsAnalysisPage() {
               className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-base flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:scale-[1.01] active:scale-100"
             >
               <Rocket className="w-5 h-5" />
-              开始项目
+              StartProject
               <ArrowRight className="w-5 h-5" />
             </button>
 
             <p className="text-xs text-slate-400 text-center">
-              点击后将自动分解任务并流转至 Mission Control 自动化队列
+              Click to auto-decompose tasks and route to Mission Control Automation Queue
             </p>
           </div>
         )}
 
-        {/* ═══ STEP 3: 自动化流转 ═══ */}
+        {/* ═══ STEP 3: Automated Workflow ═══ */}
         {step === 3 && (
           <div className="space-y-4">
             {launching && !launched ? (
@@ -415,17 +415,17 @@ export default function RequirementsAnalysisPage() {
                   <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200">
                     <Rocket className="w-9 h-9 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">项目已启动！</h3>
+                  <h3 className="text-xl font-bold text-slate-900 mb-1">Project started！</h3>
                   <p className="text-sm text-slate-500 mb-1">
-                    已将 <strong className="text-slate-700">{tasks.length}</strong> 个任务自动分配到执行队列
+                    Assigned <strong className="text-slate-700">{tasks.length}</strong>  tasks automatically assigned to queue
                   </p>
-                  <p className="text-xs text-slate-400 mb-6">自动化工作流已就绪，可前往对应模块查看进度</p>
+                  <p className="text-xs text-slate-400 mb-6">Automation workflow ready, go to corresponding module to view progress</p>
 
                   {/* Progress bar */}
                   <div className="max-w-xs mx-auto mb-6">
                     <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-                      <span>自动化进度</span>
-                      <span>已就绪</span>
+                      <span>Automation Progress</span>
+                      <span>Ready</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full w-full transition-all duration-700" />
@@ -435,9 +435,9 @@ export default function RequirementsAnalysisPage() {
                   {/* Task summary */}
                   <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto text-xs mb-6">
                     {[
-                      { label: '高优先级', val: tasks.filter(t=>t.priority==='high').length,   color: 'text-red-600 bg-red-50' },
-                      { label: '中优先级', val: tasks.filter(t=>t.priority==='medium').length, color: 'text-amber-600 bg-amber-50' },
-                      { label: '低优先级', val: tasks.filter(t=>t.priority==='low').length,    color: 'text-slate-600 bg-slate-100' },
+                      { label: 'High Priority', val: tasks.filter(t=>t.priority==='high').length,   color: 'text-red-600 bg-red-50' },
+                      { label: 'Medium Priority', val: tasks.filter(t=>t.priority==='medium').length, color: 'text-amber-600 bg-amber-50' },
+                      { label: 'Low Priority', val: tasks.filter(t=>t.priority==='low').length,    color: 'text-slate-600 bg-slate-100' },
                     ].map(({ label, val, color }) => (
                       <div key={label} className={`rounded-xl p-2.5 ${color.split(' ')[1]}`}>
                         <p className={`text-lg font-bold ${color.split(' ')[0]}`}>{val}</p>
@@ -449,13 +449,13 @@ export default function RequirementsAnalysisPage() {
 
                 {/* MC module quick access */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <p className="text-sm font-semibold text-slate-800 mb-3">前往 Mission Control 模块</p>
+                  <p className="text-sm font-semibold text-slate-800 mb-3">Go to Mission Control Module</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { icon: ListTodo,       label: '任务管理',     href: '/',          desc: '查看并跟踪任务',     color: 'text-blue-600 bg-blue-50' },
-                      { icon: GitBranch,      label: '工作流自动化', href: '/ecosystem', desc: '管理执行流程',       color: 'text-violet-600 bg-violet-50' },
-                      { icon: Server,         label: '工具生态系统', href: '/ecosystem', desc: '集成与工具配置',     color: 'text-emerald-600 bg-emerald-50' },
-                      { icon: LayoutDashboard,label: '主控台',       href: '/',          desc: '返回总览',          color: 'text-orange-600 bg-orange-50' },
+                      { icon: ListTodo,       label: 'Task Management',     href: '/',          desc: 'View and track tasks',     color: 'text-blue-600 bg-blue-50' },
+                      { icon: GitBranch,      label: 'Workflow Automation', href: '/ecosystem', desc: 'Manage execution flow',       color: 'text-violet-600 bg-violet-50' },
+                      { icon: Server,         label: 'MCPEcosystem', href: '/ecosystem', desc: 'Integration andMCPConfig',     color: 'text-emerald-600 bg-emerald-50' },
+                      { icon: LayoutDashboard,label: 'Dashboard',       href: '/',          desc: 'Back to Overview',          color: 'text-orange-600 bg-orange-50' },
                     ].map(m => (
                       <Link
                         key={m.label}
@@ -479,7 +479,7 @@ export default function RequirementsAnalysisPage() {
                   onClick={reset}
                   className="w-full py-3 rounded-2xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors"
                 >
-                  <RotateCcw className="w-4 h-4" />分析新项目
+                  <RotateCcw className="w-4 h-4" />Analyze New Project
                 </button>
               </div>
             ) : null}

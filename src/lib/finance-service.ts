@@ -341,20 +341,22 @@ class FinanceService {
 
   // 获取分类统计
   private getTopCategories() {
+    // 单次遍历同时计算分类汇总和总额，避免额外的 filter/reduce
     const categories = new Map<string, { income: number; expense: number }>();
+    let totalIncome = 0;
+    let totalExpenses = 0;
 
-    this.transactions.forEach(t => {
-      if (!categories.has(t.category)) {
-        categories.set(t.category, { income: 0, expense: 0 });
-      }
-
-      const categoryData = categories.get(t.category)!;
+    for (const t of this.transactions) {
+      const data = categories.get(t.category) ?? { income: 0, expense: 0 };
       if (t.type === 'income') {
-        categoryData.income += t.amount;
+        data.income += t.amount;
+        totalIncome += t.amount;
       } else {
-        categoryData.expense += t.amount;
+        data.expense += t.amount;
+        totalExpenses += t.amount;
       }
-    });
+      categories.set(t.category, data);
+    }
 
     const result: Array<{
       category: string;
@@ -362,16 +364,6 @@ class FinanceService {
       type: 'income' | 'expense';
       percentage: number;
     }> = [];
-
-    // 收入分类
-    const totalIncome = this.transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    // 支出分类
-    const totalExpenses = this.transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
 
     categories.forEach((data, category) => {
       if (data.income > 0) {
@@ -382,7 +374,6 @@ class FinanceService {
           percentage: totalIncome > 0 ? (data.income / totalIncome) * 100 : 0,
         });
       }
-
       if (data.expense > 0) {
         result.push({
           category,

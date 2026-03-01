@@ -1,12 +1,13 @@
 // 事件系统 - 模块间事件通信
 import { EventEmitter } from 'events';
+import { logger } from '@/lib/logger';
 
 export interface AutomationEvent {
   id: string;
   type: string;
   source: string;
   timestamp: string;
-  data: any;
+  data: unknown;
   metadata?: {
     priority?: 'low' | 'normal' | 'high' | 'critical';
     correlationId?: string;
@@ -39,13 +40,13 @@ export interface EventRule {
     filters?: Array<{
       field: string;
       operator: 'equals' | 'contains' | 'matches' | 'greaterThan' | 'lessThan';
-      value: any;
+      value: unknown;
     }>;
   };
   actions: Array<{
     type: 'emit' | 'call' | 'log' | 'notify';
     target: string;
-    parameters?: any;
+    parameters?: Record<string, unknown>;
   }>;
   enabled: boolean;
   metadata: {
@@ -98,7 +99,7 @@ export class EventSystem {
       eventType: '*', // 监听所有事件
       moduleId: 'system',
       handler: (event) => {
-        console.log(`[EventSystem] Event fired: ${event.type} from ${event.source}`);
+        logger.info('Event fired', { module: 'EventSystem', type: event.type, source: event.source });
       },
       priority: 10, // 最低优先级
       enabled: true
@@ -109,7 +110,7 @@ export class EventSystem {
       eventType: 'error',
       moduleId: 'system',
       handler: (event) => {
-        console.error(`[EventSystem] Error event:`, event.data);
+        logger.error('Error event', event.data, { module: 'EventSystem' });
       },
       priority: 1, // 最高优先级
       enabled: true
@@ -175,7 +176,7 @@ export class EventSystem {
         await handler.handler(event);
         handler.metadata.successCount++;
       } catch (error) {
-        console.error(`[EventSystem] Handler ${handler.id} failed:`, error);
+        logger.error('Handler failed', error, { module: 'EventSystem', handlerId: handler.id });
         
         // 触发错误事件
         this.emit({
@@ -315,7 +316,7 @@ export class EventSystem {
       try {
         this.executeRuleAction(action, event, rule);
       } catch (error) {
-        console.error(`[EventSystem] Rule ${rule.id} action failed:`, error);
+        logger.error('Rule action failed', error, { module: 'EventSystem', ruleId: rule.id });
         
         // 触发错误事件
         this.emit({
@@ -389,13 +390,13 @@ export class EventSystem {
   }
   
   // 获取事件字段值
-  private getEventFieldValue(event: AutomationEvent, fieldPath: string): any {
+  private getEventFieldValue(event: AutomationEvent, fieldPath: string): unknown {
     const parts = fieldPath.split('.');
-    let value: any = event;
+    let value: unknown = event;
     
     for (const part of parts) {
       if (value && typeof value === 'object' && part in value) {
-        value = value[part];
+        value = (value as Record<string, unknown>)[part];
       } else {
         return undefined;
       }

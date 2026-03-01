@@ -1,741 +1,461 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Pause, 
-  RefreshCw, 
-  Settings, 
-  Zap, 
-  Cpu, 
-  Database, 
-  Calendar,
-  Activity,
-  BarChart3,
-  Shield,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  ChevronRight,
-  ExternalLink,
-  Terminal
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import {
+  Zap, CheckCircle, Activity, Cpu, Play, RefreshCw,
+  Clock, AlertCircle, Circle, ChevronRight,
 } from 'lucide-react';
 
+// ─── 类型 ────────────────────────────────────────────────────────────────────
+interface ComponentStatus {
+  taskScheduler: boolean;
+  dataSync: boolean;
+  healthMonitor: boolean;
+  ecosystemWatcher: boolean;
+}
+interface Stats {
+  totalModules: number; enabledModules: number;
+  totalTasks: number; enabledTasks: number;
+  activeExecutions: number; totalEvents: number; totalMessages: number;
+}
 interface ServiceStatus {
-  status: 'starting' | 'running' | 'stopping' | 'stopped' | 'error';
-  uptime: number;
-  components: {
-    moduleManager: boolean;
-    taskScheduler: boolean;
-    dataBus: boolean;
-    eventSystem: boolean;
-  };
-  stats: {
-    totalModules: number;
-    enabledModules: number;
-    totalTasks: number;
-    enabledTasks: number;
-    activeExecutions: number;
-    totalEvents: number;
-    totalMessages: number;
-  };
+  status: string; uptime: number; version: string;
+  components: ComponentStatus; stats: Stats;
+  systemHealth: { cpu: number | null; memory: number | null };
+}
+interface Module {
+  id: string; name: string; status: 'running' | 'idle' | 'error';
+  description: string; lastRun: string; nextRun: string;
+  runCount: number; successRate: number; category: string;
+}
+interface Execution {
+  id: string; moduleId: string; module: string; action: string;
+  status: 'success' | 'running' | 'pending' | 'error';
+  duration: string; timestamp: string;
 }
 
-export default function MinimalAutomationDashboard() {
-  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [recentExecutions, setRecentExecutions] = useState<any[]>([]);
+// ─── MCP函数 ────────────────────────────────────────────────────────────────
+function fmtUptime(s: number) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+function fmtTime(iso: string) {
+  try {
+    const d = new Date(iso);
+    const now = Date.now();
+    const diff = now - d.getTime();
+    if (diff < 60000)  return '刚刚';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
+    return d.toLocaleDateString('zh-CN');
+  } catch { return iso; }
+}
 
-  const fetchServiceStatus = async () => {
+const STATUS_LABEL: Record<string, string> = {
+  running: '运行中', idle: '空闲', error: '异常',
+  success: '成功', pending: '等待', 
+};
+const STATUS_COLOR = {
+  running: 'bg-green-100 text-green-700 border-green-200',
+  idle:    'bg-gray-100  text-gray-600  border-gray-200',
+  error:   'bg-red-100   text-red-700   border-red-200',
+  success: 'bg-green-100 text-green-700 border-green-200',
+  pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+};
+
+const COMPONENT_LABELS: Record<keyof ComponentStatus, string> = {
+  taskScheduler:    '任务调度器',
+  dataSync:         '数据同步',
+  healthMonitor:    '健康监控',
+  ecosystemWatcher: '生态监控',
+};
+
+// ─── 主组件 ──────────────────────────────────────────────────────────────────
+export default function MinimalAutomationDashboard() {
+  const [service,    setService]    = useState<ServiceStatus | null>(null);
+  const [modules,    setModules]    = useState<Module[]>([]);
+  const [executions, setExecutions] = useState<Execution[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [activeTab,  setActiveTab]  = useState<'overview' | 'modules' | 'executions'>('overview');
+  const [triggering, setTriggering] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  const fetchAll = useCallback(async () => {
     try {
-      const response = await fetch('/api/automation?action=status');
-      const data = await response.json();
-      if (data.success) {
-        setServiceStatus(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch service status:', error);
+      const [statusRes, modulesRes, execRes] = await Promise.all([
+        fetch('/api/automation?action=status').then(r => r.json()),
+        fetch('/api/automation?action=modules').then(r => r.json()),
+        fetch('/api/automation?action=executions').then(r => r.json()),
+      ]);
+      if (statusRes.success)  setService(statusRes.data);
+      if (modulesRes.success) setModules(modulesRes.data.modules ?? []);
+      if (execRes.success)    setExecutions(execRes.data.executions ?? []);
+      setLastRefresh(new Date());
+    } catch (e) {
+      console.error('Automation fetch error:', e);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchRecentExecutions = async () => {
+  useEffect(() => {
+    fetchAll();
+    const t = setInterval(fetchAll, 60000);
+    return () => clearInterval(t);
+  }, [fetchAll]);
+
+  const runModule = async (moduleId: string) => {
+    setTriggering(moduleId);
     try {
-      // 模拟数据 - 实际应该从 API 获取
-      setRecentExecutions([
-        { id: 1, module: 'aiassist-automation', action: 'run-web-test', status: 'success', duration: '2.3s', timestamp: '2026-02-21 17:19:09' },
-        { id: 2, module: 'cortexaai-automation', action: 'run-api-test', status: 'success', duration: '1.8s', timestamp: '2026-02-21 17:19:09' },
-        { id: 3, module: 'aiassist-automation', action: 'screenshot', status: 'pending', duration: '--', timestamp: '2026-02-21 17:18:45' },
-        { id: 4, module: 'cortexaai-automation', action: 'performance-test', status: 'running', duration: '15.2s', timestamp: '2026-02-21 17:18:30' },
-      ]);
-    } catch (error) {
-      console.error('Failed to fetch executions:', error);
+      await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-module', moduleId }),
+      });
+      await fetchAll();
+    } finally {
+      setTriggering(null);
     }
   };
 
-  useEffect(() => {
-    fetchServiceStatus();
-    fetchRecentExecutions();
-    const interval = setInterval(fetchServiceStatus, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleStartService = () => {
-    // 实际应该调用 API
-    console.log('Starting service...');
-  };
-
-  const handleStopService = () => {
-    // 实际应该调用 API
-    console.log('Stopping service...');
-  };
-
-  const handleRunTest = (moduleId: string, action: string) => {
-    console.log(`Running ${action} on ${moduleId}`);
-    // 实际应该调用 API
-  };
+  // ── KPI 数据 ──
+  const kpis = [
+    {
+      label: '总模块',
+      value: service?.stats.totalModules ?? 0,
+      sub: `${service?.stats.enabledModules ?? 0} 启用中`,
+      icon: <Zap className="w-5 h-5 text-blue-500" />,
+      color: 'bg-blue-50 border-blue-100',
+    },
+    {
+      label: '运行任务',
+      value: service?.stats.totalTasks ?? 0,
+      sub: `${service?.stats.activeExecutions ?? 0} 活跃执行`,
+      icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+      color: 'bg-green-50 border-green-100',
+    },
+    {
+      label: '累计事件',
+      value: service?.stats.totalEvents ?? 0,
+      sub: `系统运行 ${fmtUptime(service?.uptime ?? 0)}`,
+      icon: <Activity className="w-5 h-5 text-purple-500" />,
+      color: 'bg-purple-50 border-purple-100',
+    },
+    {
+      label: '平均成功率',
+      value: modules.length
+        ? `${Math.round(modules.reduce((a, m) => a + m.successRate, 0) / modules.length)}%`
+        : '—',
+      sub: `${modules.filter(m => m.status === 'running').length} 个模块运行中`,
+      icon: <Cpu className="w-5 h-5 text-orange-500" />,
+      color: 'bg-orange-50 border-orange-100',
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Zap className="w-8 h-8 text-primary animate-pulse" />
-            </div>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold gradient-text">初始化自动化系统</h3>
-            <p className="text-muted-foreground mt-2">正在连接服务组件...</p>
-            <div className="mt-4 flex justify-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
+        <span className="text-slate-500">加载自动化数据…</span>
       </div>
     );
   }
 
-  if (!serviceStatus) {
-    return (
-      <div className="text-center py-16 space-y-6">
-        <div className="relative inline-block">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center mx-auto">
-            <XCircle className="w-12 h-12 text-red-500" />
-          </div>
-          <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-            <AlertCircle className="w-4 h-4 text-white" />
-          </div>
-        </div>
-        <div>
-          <h3 className="text-2xl font-bold mb-2">无法连接到自动化服务</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            自动化框架服务当前不可用。请检查服务是否正常运行，或尝试重新启动。
-          </p>
-        </div>
-        <div className="flex gap-3 justify-center">
-          <button 
-            onClick={fetchServiceStatus}
-            className="px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            重试连接
-          </button>
-          <button 
-            onClick={handleStartService}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2"
-          >
-            <Play className="w-4 h-4" />
-            启动服务
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const chartData = modules.map(m => ({
+    name:  m.name.replace('器', ''),
+    成功率: m.successRate,
+    运行次数: Math.min(m.runCount, 100),
+  }));
 
-  const statusConfig = {
-    starting: { color: 'from-yellow-500 to-amber-500', text: '启动中', icon: Activity },
-    running: { color: 'from-green-500 to-emerald-500', text: '运行中', icon: CheckCircle },
-    stopping: { color: 'from-yellow-500 to-amber-500', text: '停止中', icon: Activity },
-    stopped: { color: 'from-gray-500 to-slate-500', text: '已停止', icon: XCircle },
-    error: { color: 'from-red-500 to-rose-500', text: '错误', icon: AlertCircle }
-  }[serviceStatus.status];
-
-  const StatusIcon = statusConfig.icon;
+  const tabs = [
+    { id: 'overview',    label: '概览' },
+    { id: 'modules',     label: '模块管理' },
+    { id: 'executions',  label: '执行历史' },
+  ] as const;
 
   return (
-    <div className="space-y-8 p-6 animate-fade-in">
-      {/* 头部状态栏 */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
-              <Zap className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold gradient-text">自动化指挥中心</h1>
-              <p className="text-muted-foreground">模块化框架 · 实时监控 · 智能调度 · 企业级</p>
-            </div>
-          </div>
+    <div className="p-6 space-y-6">
+
+      {/* ── 页头 ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">自动化中心</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            系统状态：
+            <span className="inline-flex items-center gap-1 ml-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
+              <span className="text-green-600 font-medium">运行中</span>
+            </span>
+            <span className="ml-3 text-slate-400">v{service?.version ?? '2.0.0'} · 运行 {fmtUptime(service?.uptime ?? 0)}</span>
+          </p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3 p-4 rounded-xl glass border border-border/50">
-            <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${statusConfig.color} animate-pulse`} />
-            <div>
-              <p className="text-sm text-muted-foreground">系统状态</p>
-              <div className="flex items-center gap-2">
-                <StatusIcon className="w-5 h-5" />
-                <span className="font-semibold">{statusConfig.text}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400">
+            <Clock className="w-3 h-3 inline mr-1" />
+            {lastRefresh.toLocaleTimeString('zh-CN')} 更新
+          </span>
+          <Button variant="outline" size="sm" onClick={fetchAll}>
+            <RefreshCw className="w-3.5 h-3.5 mr-1" /> 刷新
+          </Button>
+        </div>
+      </div>
+
+      {/* ── KPI 卡片 ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map(k => (
+          <Card key={k.label} className={`border ${k.color}`}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-slate-500">{k.label}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{k.value}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{k.sub}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-white shadow-sm">{k.icon}</div>
               </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={handleStartService}
-              className="p-3 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-colors"
-              title="启动服务"
-            >
-              <Play className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleStopService}
-              className="p-3 rounded-xl bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors"
-              title="停止服务"
-            >
-              <Pause className="w-5 h-5" />
-            </button>
-            <button
-              onClick={fetchServiceStatus}
-              className="p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-colors"
-              title="刷新状态"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </button>
-            <button
-              className="p-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-colors"
-              title="设置"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* 标签页导航 - 科技感设计 */}
-      <div className="flex overflow-x-auto pb-2 border-b border-border/50">
-        {[
-          { id: 'overview', label: '系统概览', icon: BarChart3 },
-          { id: 'modules', label: '模块管理', icon: Cpu },
-          { id: 'tasks', label: '任务调度', icon: Calendar },
-          { id: 'executions', label: '执行监控', icon: Activity },
-          { id: 'events', label: '事件中心', icon: Terminal },
-          { id: 'security', label: '安全审计', icon: Shield },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              className={`flex items-center gap-2 px-5 py-3 font-medium transition-all whitespace-nowrap ${isActive 
-                ? 'text-primary border-b-2 border-primary relative' 
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
-              {tab.label}
-              {isActive && (
-                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary to-purple-500 rounded-full"></div>
-              )}
-            </button>
-          );
-        })}
+      {/* ── Tab 栏 ── */}
+      <div className="flex gap-1 border-b border-slate-200">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === t.id
+                ? 'text-blue-600 border-blue-600'
+                : 'text-slate-500 border-transparent hover:text-slate-700'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* 标签页内容 */}
+      {/* ══ 概览 Tab ══ */}
       {activeTab === 'overview' && (
-        <div className="space-y-8">
-          {/* 核心指标卡片 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="data-card card-hover p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10">
-                  <Cpu className="w-6 h-6 text-blue-400" />
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${serviceStatus.components.moduleManager 
-                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-400 border border-red-500/30'
-                }`}>
-                  {serviceStatus.components.moduleManager ? '正常' : '异常'}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">模块管理</h3>
-              <div className="text-3xl font-bold mb-1">
-                {serviceStatus.stats.enabledModules}<span className="text-xl text-muted-foreground">/{serviceStatus.stats.totalModules}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">启用/总数</p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <div className="data-card card-hover p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10">
-                  <Calendar className="w-6 h-6 text-purple-400" />
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${serviceStatus.components.taskScheduler 
-                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-400 border border-red-500/30'
-                }`}>
-                  {serviceStatus.components.taskScheduler ? '正常' : '异常'}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">任务调度</h3>
-              <div className="text-3xl font-bold mb-1">
-                {serviceStatus.stats.enabledTasks}<span className="text-xl text-muted-foreground">/{serviceStatus.stats.totalTasks}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">启用/总数</p>
-            </div>
-
-            <div className="data-card card-hover p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10">
-                  <Database className="w-6 h-6 text-green-400" />
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${serviceStatus.components.dataBus 
-                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-400 border border-red-500/30'
-                }`}>
-                  {serviceStatus.components.dataBus ? '正常' : '异常'}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">数据总线</h3>
-              <div className="text-3xl font-bold mb-1">
-                {serviceStatus.stats.totalMessages.toLocaleString()}
-              </div>
-              <p className="text-sm text-muted-foreground">总消息数</p>
-            </div>
-
-            <div className="data-card card-hover p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10">
-                  <Terminal className="w-6 h-6 text-orange-400" />
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${serviceStatus.components.eventSystem 
-                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-400 border border-red-500/30'
-                }`}>
-                  {serviceStatus.components.eventSystem ? '正常' : '异常'}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">事件系统</h3>
-              <div className="text-3xl font-bold mb-1">
-                {serviceStatus.stats.totalEvents.toLocaleString()}
-              </div>
-              <p className="text-sm text-muted-foreground">总事件数</p>
-            </div>
-          </div>
-
-          {/* 集成模块展示 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* AI Assist 模块 */}
-            <div className="glass card-hover rounded-2xl p-6 border border-border/50">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
-                    <Cpu className="w-8 h-8 text-blue-400" />
+          {/* 组件状态 */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">系统组件状态</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                {service && Object.entries(service.components).map(([key, ok]) => (
+                  <div key={key} className="flex items-center gap-2 p-3 rounded-lg bg-slate-50">
+                    {ok
+                      ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      : <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    }
+                    <span className="text-sm text-slate-700">
+                      {COMPONENT_LABELS[key as keyof ComponentStatus] ?? key}
+                    </span>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold">AI Assist 自动化测试</h3>
-                    <p className="text-sm text-muted-foreground">Web自动化测试 · UI测试 · 数据提取</p>
+                ))}
+              </div>
+              {service?.systemHealth.cpu !== null && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between text-xs text-slate-500">
+                    <span>CPU 使用率</span>
+                    <span>{service?.systemHealth.cpu ?? 0}%</span>
                   </div>
+                  <Progress value={service?.systemHealth.cpu ?? 0} className="h-1.5" />
+                  <div className="flex justify-between text-xs text-slate-500">
+                    <span>内存使用率</span>
+                    <span>{service?.systemHealth.memory ?? 0}%</span>
+                  </div>
+                  <Progress value={service?.systemHealth.memory ?? 0} className="h-1.5" />
                 </div>
-                <span className="px-3 py-1 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30 text-sm font-semibold">
-                  已集成
-                </span>
-              </div>
-              
-              <p className="text-muted-foreground mb-6">
-                基于 AI Assist 的自动化测试模块，支持 Web 自动化测试、UI 测试、截图和数据提取。
-              </p>
-              
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-400 border border-blue-500/20 text-sm">
-                  Web测试
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-400 border border-purple-500/20 text-sm">
-                  截图
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-400 border border-green-500/20 text-sm">
-                  数据提取
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-orange-400 border border-orange-500/20 text-sm">
-                  表单填写
-                </span>
-              </div>
-              
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 模块成功率图表 */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">模块成功率</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                  <Tooltip formatter={(v) => [`${v}%`, '成功率']} />
+                  <Bar dataKey="成功率" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* 近期执行摘要 */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="text-sm">
-                  <p className="text-muted-foreground">模块ID</p>
-                  <p className="font-mono text-foreground">aiassist-automation</p>
-                </div>
+                <CardTitle className="text-base">近期执行摘要</CardTitle>
                 <button
-                  onClick={() => handleRunTest('aiassist-automation', 'run-web-test')}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center gap-2"
+                  onClick={() => setActiveTab('executions')}
+                  className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-0.5"
                 >
-                  <Play className="w-4 h-4" />
-                  运行测试
+                  查看全部 <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
-            </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {executions.slice(0, 4).map(e => (
+                  <div key={e.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50">
+                    <Circle className={`w-2 h-2 shrink-0 ${
+                      e.status === 'success' ? 'fill-green-500 text-green-500'
+                      : e.status === 'running' ? 'fill-blue-500 text-blue-500 animate-pulse'
+                      : e.status === 'error'   ? 'fill-red-500 text-red-500'
+                      : 'fill-yellow-400 text-yellow-400'
+                    }`} />
+                    <span className="text-sm text-slate-700 flex-1 truncate">{e.module}</span>
+                    <span className="text-xs text-slate-400 truncate max-w-[120px]">{e.action}</span>
+                    <span className="text-xs text-slate-400 w-12 text-right">{e.duration}</span>
+                    <span className="text-xs text-slate-300">{fmtTime(e.timestamp)}</span>
+                  </div>
+                ))}
+                {executions.length === 0 && (
+                  <p className="text-sm text-slate-400 text-center py-4">暂无执行记录</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-            {/* CortexaAI 模块 */}
-            <div className="glass card-hover rounded-2xl p-6 border border-border/50">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-                    <Terminal className="w-8 h-8 text-purple-400" />
+      {/* ══ 模块管理 Tab ══ */}
+      {activeTab === 'modules' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {modules.map(m => (
+            <Card key={m.id} className="border border-slate-200">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-slate-900">{m.name}</h3>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${STATUS_COLOR[m.status] ?? ''}`}
+                      >
+                        {STATUS_LABEL[m.status] ?? m.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">{m.category}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    disabled={triggering === m.id}
+                    onClick={() => runModule(m.id)}
+                  >
+                    {triggering === m.id
+                      ? <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                      : <Play className="w-3 h-3 mr-1" />
+                    }
+                    {triggering === m.id ? '运行中…' : '运行'}
+                  </Button>
+                </div>
+
+                <p className="text-sm text-slate-600 mb-4">{m.description}</p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs text-slate-500">
+                    <span>成功率</span>
+                    <span className="font-medium text-slate-700">{m.successRate}%</span>
+                  </div>
+                  <Progress value={m.successRate} className="h-1.5" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">上次运行</span>
+                    <span>{fmtTime(m.lastRun)}</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">CortexaAI 自动化测试</h3>
-                    <p className="text-sm text-muted-foreground">API测试 · 性能测试 · 响应验证</p>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">下次运行</span>
+                    <span>{fmtTime(m.nextRun)}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-300 mb-0.5">累计执行</span>
+                    <span>{m.runCount} 次</span>
                   </div>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30 text-sm font-semibold">
-                  已集成
-                </span>
-              </div>
-              
-              <p className="text-muted-foreground mb-6">
-                基于 CortexaAI 的自动化测试模块，支持 API 测试、性能压力测试和响应验证。
-              </p>
-              
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-400 border border-purple-500/20 text-sm">
-                  API测试
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-orange-400 border border-orange-500/20 text-sm">
-                  性能测试
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-400 border border-green-500/20 text-sm">
-                  响应验证
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-400 border border-red-500/20 text-sm">
-                  压力测试
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="text-sm">
-                  <p className="text-muted-foreground">模块ID</p>
-                  <p className="font-mono text-foreground">cortexaai-automation</p>
-                </div>
-                <button
-                  onClick={() => handleRunTest('cortexaai-automation', 'run-api-test')}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center gap-2"
-                >
-                  <Play className="w-4 h-4" />
-                  运行测试
-                </button>
-              </div>
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          ))}
+          {modules.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-10 col-span-2">暂无模块数据</p>
+          )}
+        </div>
+      )}
 
-          {/* 最近执行记录 */}
-          <div className="glass rounded-2xl p-6 border border-border/50">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-xl font-bold">最近执行记录</h3>
-                <p className="text-sm text-muted-foreground">实时监控自动化任务的执行状态</p>
-              </div>
-              <button className="px-4 py-2 bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border border-primary/30 rounded-lg hover:bg-primary/20 transition-colors flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
-                刷新
-              </button>
+      {/* ══ 执行历史 Tab ══ */}
+      {activeTab === 'executions' && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">执行历史</CardTitle>
+              <span className="text-xs text-slate-400">共 {executions.length} 条记录</span>
             </div>
-            
-            <div className="overflow-x-auto rounded-xl border border-border/50">
-              <table className="w-full">
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-accent/30">
-                    <th className="text-left p-4 font-semibold">模块</th>
-                    <th className="text-left p-4 font-semibold">动作</th>
-                    <th className="text-left p-4 font-semibold">状态</th>
-                    <th className="text-left p-4 font-semibold">耗时</th>
-                    <th className="text-left p-4 font-semibold">时间</th>
-                    <th className="text-left p-4 font-semibold">操作</th>
+                  <tr className="border-b border-slate-100 text-xs text-slate-400 uppercase tracking-wide">
+                    <th className="text-left pb-2 pr-4 font-medium">模块</th>
+                    <th className="text-left pb-2 pr-4 font-medium">操作</th>
+                    <th className="text-left pb-2 pr-4 font-medium">状态</th>
+                    <th className="text-right pb-2 pr-4 font-medium">耗时</th>
+                    <th className="text-right pb-2 font-medium">时间</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {recentExecutions.map((exec) => (
-                    <tr key={exec.id} className="border-t border-border/50 hover:bg-accent/10 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${
-                            exec.module.includes('aiassist') ? 'bg-blue-500' : 'bg-purple-500'
-                          }`} />
-                          <span className="font-medium">{exec.module}</span>
-                        </div>
+                <tbody className="divide-y divide-slate-50">
+                  {executions.map(e => (
+                    <tr key={e.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-2.5 pr-4">
+                        <span className="font-medium text-slate-700">{e.module}</span>
                       </td>
-                      <td className="p-4">
-                        <code className="px-2 py-1 bg-accent/30 rounded text-sm">{exec.action}</code>
+                      <td className="py-2.5 pr-4 text-slate-500 max-w-[160px] truncate">{e.action}</td>
+                      <td className="py-2.5 pr-4">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] ${STATUS_COLOR[e.status] ?? ''}`}
+                        >
+                          {STATUS_LABEL[e.status] ?? e.status}
+                        </Badge>
                       </td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          exec.status === 'success' 
-                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30'
-                            : exec.status === 'running'
-                            ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 border border-blue-500/30'
-                            : exec.status === 'pending'
-                            ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border border-yellow-500/30'
-                            : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-400 border border-red-500/30'
-                        }`}>
-                          {exec.status === 'success' ? '成功' : 
-                           exec.status === 'running' ? '运行中' : 
-                           exec.status === 'pending' ? '等待中' : '失败'}
-                        </span>
-                      </td>
-                      <td className="p-4 font-mono">{exec.duration}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{exec.timestamp}</td>
-                      <td className="p-4">
-                        <button className="p-2 hover:bg-accent/30 rounded-lg transition-colors">
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                      </td>
+                      <td className="py-2.5 pr-4 text-right text-slate-400">{e.duration}</td>
+                      <td className="py-2.5 text-right text-slate-300 text-xs">{fmtTime(e.timestamp)}</td>
                     </tr>
                   ))}
+                  {executions.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-slate-400">暂无执行记录</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-            
-            <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <div>
-                  <p className="font-medium text-green-400">✅ 自动化测试模块已成功集成</p>
-                  <p className="text-sm text-green-500/80 mt-1">
-                    所有模块均可通过 API 调用或任务调度器执行。系统运行稳定，已准备好接管实际业务任务。
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 系统信息 */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="glass rounded-2xl p-6 border border-border/50">
-              <h3 className="text-lg font-bold mb-4">系统信息</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">服务状态</span>
-                  <span className="font-semibold">{statusConfig.text}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">运行时间</span>
-                  <span className="font-semibold">
-                    {Math.floor(serviceStatus.uptime / 3600)}小时 {Math.floor((serviceStatus.uptime % 3600) / 60)}分钟
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">活跃执行</span>
-                  <span className="font-semibold">{serviceStatus.stats.activeExecutions}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">API版本</span>
-                  <span className="font-semibold">v1.0.0</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass rounded-2xl p-6 border border-border/50">
-              <h3 className="text-lg font-bold mb-4">快速操作</h3>
-              <div className="space-y-3">
-                <button className="w-full p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-colors flex items-center justify-between">
-                  <span>运行 AI Assist 测试</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button className="w-full p-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-colors flex items-center justify-between">
-                  <span>运行 CortexaAI 测试</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button className="w-full p-3 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-colors flex items-center justify-between">
-                  <span>查看所有模块</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button className="w-full p-3 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500/20 transition-colors flex items-center justify-between">
-                  <span>创建新任务</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="glass rounded-2xl p-6 border border-border/50">
-              <h3 className="text-lg font-bold mb-4">系统健康</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm">模块管理器</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${serviceStatus.components.moduleManager ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {serviceStatus.components.moduleManager ? '正常' : '异常'}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-accent rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm">任务调度器</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${serviceStatus.components.taskScheduler ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {serviceStatus.components.taskScheduler ? '正常' : '异常'}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-accent rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm">数据总线</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${serviceStatus.components.dataBus ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {serviceStatus.components.dataBus ? '正常' : '异常'}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-accent rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm">事件系统</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${serviceStatus.components.eventSystem ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {serviceStatus.components.eventSystem ? '正常' : '异常'}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-accent rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
-
-      {/* 其他标签页内容 - 占位符 */}
-      {activeTab === 'modules' && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-            <Cpu className="w-10 h-10 text-primary" />
-          </div>
-          <h3 className="text-2xl font-bold mb-3">模块管理</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            模块管理功能正在积极开发中。当前已集成 AI Assist 和 CortexaAI 模块，更多模块即将上线。
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all">
-              查看所有模块
-            </button>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-              添加新模块
-            </button>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'tasks' && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
-            <Calendar className="w-10 h-10 text-green-500" />
-          </div>
-          <h3 className="text-2xl font-bold mb-3">任务调度</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            任务调度器支持定时任务、循环任务和事件触发任务。创建您的第一个自动化工作流。
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all">
-              创建新任务
-            </button>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-              导入任务模板
-            </button>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'executions' && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-6">
-            <Activity className="w-10 h-10 text-orange-500" />
-          </div>
-          <h3 className="text-2xl font-bold mb-3">执行监控</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            实时监控所有自动化任务的执行状态、日志和性能指标。快速诊断和解决问题。
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl hover:shadow-lg hover:shadow-orange-500/30 transition-all">
-              查看执行历史
-            </button>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-              实时监控面板
-            </button>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'events' && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-6">
-            <Terminal className="w-10 h-10 text-purple-500" />
-          </div>
-          <h3 className="text-2xl font-bold mb-3">事件中心</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            集中管理所有系统事件、日志和通知。设置告警规则，确保系统稳定运行。
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all">
-              查看事件日志
-            </button>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-              配置告警规则
-            </button>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'security' && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-10 h-10 text-red-500" />
-          </div>
-          <h3 className="text-2xl font-bold mb-3">安全审计</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            安全审计功能确保所有自动化操作都符合安全策略。监控权限、访问记录和潜在威胁。
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all">
-              安全报告
-            </button>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-              访问控制
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 页脚信息 */}
-      <div className="text-center text-sm text-muted-foreground pt-8 border-t border-border/50">
-        <p>Mission Control 自动化框架 v1.0.0 · 基于 Next.js 15 + TypeScript + Tailwind CSS</p>
-        <p className="mt-1">
-          访问 <a href="/api/automation" className="text-primary hover:underline">/api/automation</a> 查看完整 API 文档
-        </p>
-      </div>
     </div>
   );
 }

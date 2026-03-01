@@ -1,91 +1,144 @@
-import { financeService } from '@/lib/finance-service';
-import { NextRequest } from 'next/server';
-import { successResponse, errorResponse } from '@/lib/api-response';
-import { standardApiHandler } from '@/middleware/api-standardizer';
+import { financeStore } from '@/lib/finance-store';
+import { NextRequest, NextResponse } from 'next/server';
 
-export const GET = standardApiHandler(async (request: NextRequest, requestId: string) => {
+type MonthlyTrendItem = {
+  month: string;
+  income: number;
+  expenses: number;
+  profit: number;
+};
+
+type BudgetItem = {
+  id: string;
+  name: string;
+  category: string;
+  period: string;
+  allocated: number;
+  spent: number;
+  remaining: number;
+  status: 'on-track' | 'over-budget' | 'under-budget';
+};
+
+const budgetStore: BudgetItem[] = [];
+
+function buildMonthlyTrend(transactions: any[]): MonthlyTrendItem[] {
+  const grouped = new Map<string, { income: number; expenses: number }>();
+
+  for (const tx of transactions || []) {
+    const date = new Date(tx.date);
+    if (Number.isNaN(date.getTime())) continue;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const row = grouped.get(key) || { income: 0, expenses: 0 };
+    if (tx.type === 'income') row.income += Number(tx.amount || 0);
+    else row.expenses += Number(tx.amount || 0);
+    grouped.set(key, row);
+  }
+
+  return Array.from(grouped.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6)
+    .map(([month, v]) => ({
+      month,
+      income: v.income,
+      expenses: v.expenses,
+      profit: v.income - v.expenses,
+    }));
+}
+
+export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'stats';
-    
-    if (action === 'stats') {
-      const stats = await financeService.getFinancialStats();
-      return successResponse(stats, {
-        message: '财务统计获取成功',
-        requestId,
-      });
-    }
-    
+
     if (action === 'transactions') {
-      const transactions = await financeService.getRecentTransactions();
-      return successResponse({ transactions }, {
-        message: '交易记录获取成功',
-        requestId,
-      });
+      const transactions = await financeStore.getRecentTransactions();
+      return NextResponse.json({ success: true, data: { transactions } });
     }
-    
-    // 默认返回统计
-    const stats = await financeService.getFinancialStats();
-    return successResponse(stats, {
-      message: '财务统计获取成功',
-      requestId,
-    });
+
+    if (action === 'budgets') {
+      return NextResponse.json({ success: true, data: { budgets: budgetStore } });
+    }
+
+    // stats / summary (default)
+    const stats = await financeStore.getFinancialStats();
+    const transactions = await financeStore.getRecentTransactions();
+
+    const totalIncome = Number(stats.totalIncome || 0);
+    const totalExpenses = Number((stats as any).totalExpense || 0);
+    const netProfit = totalIncome - totalExpenses;
+    const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+
+    const summary = {
+      totalIncome,
+      totalExpenses,
+      netProfit,
+      profitMargin,
+      monthlyTrend: buildMonthlyTrend(transactions),
+    };
+
+    if (action === 'summary') {
+      return NextResponse.json({ success: true, data: summary });
+    }
+
+    // action=stats 保留兼容旧调用
+    return NextResponse.json({ success: true, data: summary });
   } catch (error) {
     console.error('财务API错误:', error);
-    return errorResponse(
-      error instanceof Error ? error.message : '未知错误',
-      {
-        statusCode: 500,
-        requestId,
-      }
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { status: 500 }
     );
   }
-});
+}
 
-export const POST = standardApiHandler(async (request: NextRequest, requestId: string) => {
+export async function POST(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const action = url.searchParams.get('action') || 'transactions';
     const body = await request.json();
-    const action = body.action || 'add-transaction';
-    
-    if (action === 'add-transaction') {
-      const { type, amount, description, category } = body;
-      
-      if (!type || !amount || !description) {
-        return errorResponse('缺少必要参数', {
-          statusCode: 400,
-          requestId,
-        });
+
+    if (action === 'budgets') {
+      const { name, category, period, allocated } = body;
+      if (!name || !allocated) {
+        return NextResponse.json({ success: false, error: '缺少必要参数: name, allocated' }, { status: 400 });
       }
-      
-      const transaction = await financeService.addTransaction({
-        type,
-        amount,
-        description,
-        category: category || '其他',
-        date: new Date().toISOString().split('T')[0],
-        currency: 'PHP',
-        status: 'completed',
-        tags: [],
-      });
-      
-      return successResponse(transaction, {
-        message: '交易添加成功',
-        requestId,
-      });
+
+      const item: BudgetItem = {
+        id: `bdg-${Date.now()}`,
+        name,
+        category: category || '运营',
+        period: period || 'monthly',
+        allocated: Number(allocated),
+        spent: 0,
+        remaining: Number(allocated),
+        status: 'under-budget',
+      };
+      budgetStore.unshift(item);
+      return NextResponse.json({ success: true, data: item });
     }
-    
-    return errorResponse('不支持的操作', {
-      statusCode: 400,
-      requestId,
+
+    const { type, amount, description, category, date, tags } = body;
+    if (!type || !amount || !description) {
+      return NextResponse.json({ success: false, error: '缺少必要参数: type, amount, description' }, { status: 400 });
+    }
+
+    const transaction = await financeStore.addTransaction({
+      type,
+      amount: Number(amount),
+      description,
+      category: category || '其他',
+      date: date || new Date().toISOString().split('T')[0],
+      currency: 'PHP',
+      status: 'completed',
+      tags: tags || [],
     });
+
+    return NextResponse.json({ success: true, data: transaction });
   } catch (error) {
     console.error('财务API POST错误:', error);
-    return errorResponse(
-      error instanceof Error ? error.message : '未知错误',
-      {
-        statusCode: 500,
-        requestId,
-      }
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { status: 500 }
     );
   }
-});
+}

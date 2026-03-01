@@ -175,7 +175,7 @@ class IntelligentTaskDispatcher {
         data: {
           ...response.data,
           dispatchDecision: {
-            system: decision.system,
+            system: decision.system as NonNullable<UnifiedRequest['system']>,
             strategy: decision.strategy,
             reason: decision.reason,
             confidence: decision.confidence,
@@ -365,7 +365,7 @@ class IntelligentTaskDispatcher {
   private async executeOptimistic(request: UnifiedRequest, decision: DispatchDecision): Promise<UnifiedResponse> {
     const modifiedRequest: UnifiedRequest = {
       ...request,
-      system: decision.system as any
+      system: decision.system as NonNullable<UnifiedRequest['system']>
     };
     
     return await unifiedGatewayService.processRequest(modifiedRequest);
@@ -379,7 +379,7 @@ class IntelligentTaskDispatcher {
       try {
         const modifiedRequest: UnifiedRequest = {
           ...request,
-          system: system as any
+          system: system as NonNullable<UnifiedRequest['system']>
         };
         
         const response = await unifiedGatewayService.processRequest(modifiedRequest);
@@ -405,12 +405,20 @@ class IntelligentTaskDispatcher {
       try {
         const modifiedRequest: UnifiedRequest = {
           ...request,
-          system: system as any
+          system: system as NonNullable<UnifiedRequest['system']>
         };
         
         return await unifiedGatewayService.processRequest(modifiedRequest);
       } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+        return {
+          success: false,
+          data: { error: error instanceof Error ? error.message : '未知错误' },
+          source: system as UnifiedResponse['source'],
+          taskType: 'mixed' as const,
+          cached: false,
+          responseTime: 0,
+          timestamp: new Date().toISOString()
+        };
       }
     });
     
@@ -445,7 +453,7 @@ class IntelligentTaskDispatcher {
       // 首先尝试主系统
       const primaryRequest: UnifiedRequest = {
         ...request,
-        system: decision.system as any
+        system: decision.system as NonNullable<UnifiedRequest['system']>
       };
       
       const primaryResponse = await unifiedGatewayService.processRequest(primaryRequest);
@@ -462,7 +470,7 @@ class IntelligentTaskDispatcher {
       const fallbackSystem = decision.alternatives[0].system;
       const fallbackRequest: UnifiedRequest = {
         ...request,
-        system: fallbackSystem as any
+        system: fallbackSystem as NonNullable<UnifiedRequest['system']>
       };
       
       return await unifiedGatewayService.processRequest(fallbackRequest);
@@ -481,14 +489,14 @@ class IntelligentTaskDispatcher {
     const history: TaskHistory = {
       taskId: request.id,
       query: request.query.substring(0, 100), // 截断长查询
-      taskType: response.data.taskType,
+      taskType: (response.taskType || (response.data as any)?.taskType || 'mixed') as string,
       priority: request.priority || 'medium',
       executionTime,
       success: response.success,
-      cached: response.data.cached,
+      cached: (response.cached ?? (response.data as any)?.cached ?? false) as boolean,
       timestamp: new Date().toISOString(),
       systemUsed: decision.system,
-      tokenUsage: response.data.tokenUsage?.total
+      tokenUsage: response.tokenUsage?.total ?? (response.data as any)?.tokenUsage?.total
     };
     
     this.taskHistory.unshift(history);
@@ -562,13 +570,13 @@ class IntelligentTaskDispatcher {
   }
 
   // 获取分发统计
-  getDispatchStats(): any {
+  getDispatchStats(): { totalTasks: number; successfulTasks: number; successRate: number; cachedTasks: number; cacheRate: number; averageExecutionTime: number; systemStats: Record<string, { total: number; successful: number; averageTime: number; totalTime: number }>; taskTypeStats: Record<string, { total: number; successful: number }>; lastUpdated: string } {
     const totalTasks = this.taskHistory.length;
     const successfulTasks = this.taskHistory.filter(t => t.success).length;
     const cachedTasks = this.taskHistory.filter(t => t.cached).length;
     
     // 按系统统计
-    const systemStats: Record<string, any> = {};
+    const systemStats: Record<string, { total: number; successful: number; averageTime: number; totalTime: number }> = {};
     this.taskHistory.forEach(task => {
       if (!systemStats[task.systemUsed]) {
         systemStats[task.systemUsed] = {
@@ -587,7 +595,7 @@ class IntelligentTaskDispatcher {
     });
     
     // 按任务类型统计
-    const taskTypeStats: Record<string, any> = {};
+    const taskTypeStats: Record<string, { total: number; successful: number }> = {};
     this.taskHistory.forEach(task => {
       if (!taskTypeStats[task.taskType]) {
         taskTypeStats[task.taskType] = {

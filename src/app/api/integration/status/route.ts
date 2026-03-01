@@ -14,7 +14,12 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
     
-    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    let config: any;
+    try {
+      config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    } catch {
+      return NextResponse.json({ success: false, error: '配置文件格式错误或无法读取' }, { status: 500 });
+    }
     
     // 实时检查系统状态
     const systems = Object.entries(config.systems).map(([name, sys]: [string, any]) => ({

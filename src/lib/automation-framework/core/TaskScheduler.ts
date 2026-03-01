@@ -1,6 +1,7 @@
 // 任务调度器 - 自动化任务执行管理
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/lib/logger';
 
 export interface ScheduledTask {
   id: string;
@@ -11,7 +12,7 @@ export interface ScheduledTask {
     timezone?: string;
     enabled: boolean;
   };
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   metadata: {
     created: string;
     updated: string;
@@ -34,7 +35,7 @@ export interface TaskExecution {
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime: string;
   endTime?: string;
-  result?: any;
+  result?: unknown;
   error?: string;
   logs: string[];
   metadata: {
@@ -98,7 +99,7 @@ export class TaskScheduler {
         const task = JSON.parse(content);
         tasks.push(task);
       } catch (error) {
-        console.error(`Error reading task ${file}:`, error);
+        logger.error('Error reading task file', error, { module: 'TaskScheduler', file });
       }
     }
     
@@ -134,7 +135,7 @@ export class TaskScheduler {
       const nextDate = new Date(Date.now() + 60 * 60 * 1000);
       return nextDate.toISOString();
     } catch (error) {
-      console.error(`Error calculating next run: ${cronExpression}`, error);
+      logger.error('Error calculating next run', error, { module: 'TaskScheduler', cronExpression });
       // 默认1小时后
       const nextDate = new Date(Date.now() + 60 * 60 * 1000);
       return nextDate.toISOString();
@@ -193,7 +194,7 @@ export class TaskScheduler {
   }
   
   // 完成任务执行
-  completeTaskExecution(executionId: string, result: any): boolean {
+  completeTaskExecution(executionId: string, result: unknown): boolean {
     const execution = this.getExecution(executionId);
     if (!execution) return false;
     
@@ -257,7 +258,7 @@ export class TaskScheduler {
       const content = fs.readFileSync(executionFile, 'utf-8');
       return JSON.parse(content);
     } catch (error) {
-      console.error(`Error reading execution ${executionId}:`, error);
+      logger.error('Error reading execution', error, { module: 'TaskScheduler', executionId });
       return null;
     }
   }
@@ -285,7 +286,7 @@ export class TaskScheduler {
           executions.push(execution);
         }
       } catch (error) {
-        console.error(`Error reading execution file ${file}:`, error);
+        logger.error('Error reading execution file', error, { module: 'TaskScheduler', file });
       }
     }
     
@@ -394,7 +395,7 @@ export class TaskScheduler {
           kept++;
         }
       } catch (error) {
-        console.error(`Error processing execution file ${file}:`, error);
+        logger.error('Error processing execution file', error, { module: 'TaskScheduler', file });
         kept++; // 出错时保留文件
       }
     }

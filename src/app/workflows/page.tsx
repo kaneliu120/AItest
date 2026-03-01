@@ -5,60 +5,89 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Play, Pause, StopCircle, RefreshCw, 
+import {
+  Play, Pause, StopCircle, RefreshCw,
   CheckCircle, XCircle, Clock, BarChart3,
-  Workflow, Zap, Shield, TrendingUp
+  Workflow, Zap, TrendingUp
 } from 'lucide-react';
-
-interface WorkflowDefinition {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  steps: Array<{
-    id: string;
-    name: string;
-    description: string;
-    module: string;
-    action: string;
-  }>;
-  triggers: Array<{
-    type: string;
-    schedule?: string;
-    eventType?: string;
-  }>;
-}
-
-interface WorkflowInstance {
-  id: string;
-  workflowId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'paused';
-  currentStep?: string;
-  stepsStatus: Record<string, any>;
-  startedAt: string;
-  completedAt?: string;
-  errors: string[];
-}
-
-interface WorkflowMetrics {
-  totalWorkflows: number;
-  runningWorkflows: number;
-  completedWorkflows: number;
-  failedWorkflows: number;
-  averageExecutionTime: number;
-  successRate: number;
-  stepSuccessRate: Record<string, number>;
-  moduleUsage: Record<string, number>;
-}
+import { WorkflowOverviewTab } from './_components/WorkflowOverviewTab';
+import { WorkflowInstancesTab } from './_components/WorkflowInstancesTab';
+import { WorkflowMetricsTab } from './_components/WorkflowMetricsTab';
+import type {
+  WorkflowDefinition, WorkflowInstance, WorkflowMetrics,
+  DlqItem, DlqStats, DiagnosticHistoryItem, TrendPoint,
+} from './_components/types';
 
 export default function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [instances, setInstances] = useState<WorkflowInstance[]>([]);
   const [metrics, setMetrics] = useState<WorkflowMetrics | null>(null);
+  const [trendPoints, setTrendPoints] = useState<TrendPoint[]>([]);
+  const [diagKindFilter, setDiagKindFilter] = useState<'all' | 'telegram-env' | 'discord-env' | 'network-check' | 'generic-env'>('all');
+  const [diagHoursFilter, setDiagHoursFilter] = useState<'24' | '72' | '168'>('24');
+  const [dlqItems, setDlqItems] = useState<DlqItem[]>([]);
+  const [dlqStats, setDlqStats] = useState<DlqStats | null>(null);
+  const [diagHistory, setDiagHistory] = useState<DiagnosticHistoryItem[]>([]);
+  const [dlqQuery, setDlqQuery] = useState('');
+  const [dlqPage, setDlqPage] = useState(1);
+  const [selectedDlq, setSelectedDlq] = useState<Record<string, boolean>>({});
+  const [metricsWindow, setMetricsWindow] = useState<'1h' | '24h' | '7d'>('24h');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+
+  const suggestDiagnosticCommand = (errorText: string) => {
+    const t = errorText.toLowerCase();
+    if (t.includes('telegram') || t.includes('bot') || t.includes('chat_id')) {
+      return 'echo "TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:+set}" && echo "TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:+set}"';
+    }
+    if (t.includes('discord') || t.includes('webhook')) {
+      return 'echo "DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:+set}"';
+    }
+    if (t.includes('fetch') || t.includes('network') || t.includes('timeout')) {
+      return 'curl -I https://api.telegram.org && curl -I https://discord.com';
+    }
+    return 'printenv | grep -E "TELEGRAM_BOT_TOKEN|TELEGRAM_CHAT_ID|DISCORD_WEBHOOK_URL"';
+  };
+
+  const copyDiagnostic = async (errorText: string) => {
+    const cmd = suggestDiagnosticCommand(errorText);
+    try {
+      await navigator.clipboard.writeText(cmd);
+      alert('Diagnostic command copied');
+    } catch (e) {
+      console.error('Copy failed:', e);
+      alert(`Copy failed, please copy manually:\n${cmd}`);
+    }
+  };
+
+  const runDiagnostic = async (errorText: string) => {
+    const t = errorText.toLowerCase();
+    const kind = t.includes('telegram') || t.includes('bot') || t.includes('chat_id')
+      ? 'telegram-env'
+      : t.includes('discord') || t.includes('webhook')
+      ? 'discord-env'
+      : t.includes('fetch') || t.includes('network') || t.includes('timeout')
+      ? 'network-check'
+      : 'generic-env';
+
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-notification-diagnostic', kind }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`Diagnostic result (${kind}):\n${JSON.stringify(data.data.output, null, 2)}`);
+        fetchDiagHistory();
+      } else {
+        alert(`Diagnostic failed: ${data.error}`);
+      }
+    } catch (e) {
+      console.error('Failed to run diagnostic:', e);
+      alert('Failed to run diagnostic');
+    }
+  };
 
   const fetchWorkflows = async () => {
     try {
@@ -69,7 +98,7 @@ export default function WorkflowsPage() {
         setWorkflows(data.data.workflows || []);
       }
     } catch (error) {
-      console.error('获取工作流失败:', error);
+      console.error('Failed to fetch workflows:', error);
     }
   };
 
@@ -82,20 +111,67 @@ export default function WorkflowsPage() {
         setInstances(data.data.instances || []);
       }
     } catch (error) {
-      console.error('获取实例失败:', error);
+      console.error('Failed to fetch instances:', error);
     }
   };
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (window: '1h' | '24h' | '7d' = metricsWindow) => {
     try {
-      const response = await fetch('/api/workflows?action=metrics');
+      const response = await fetch(`/api/workflows?action=metrics&window=${window}`);
       const data = await response.json();
       
       if (data.success) {
         setMetrics(data.data);
       }
     } catch (error) {
-      console.error('获取指标失败:', error);
+      console.error('Failed to fetch metrics:', error);
+    }
+  };
+
+  const fetchTrend = async (window: '1h' | '24h' | '7d' = metricsWindow) => {
+    try {
+      const hours = window === '1h' ? 1 : window === '7d' ? 168 : 24;
+      const response = await fetch(`/api/workflows?action=metrics-trend&hours=${hours}`);
+      const data = await response.json();
+      if (data.success) {
+        setTrendPoints(data.data.points || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch trend:', error);
+    }
+  };
+
+  const fetchDlq = async () => {
+    try {
+      const response = await fetch('/api/workflows?action=notification-dlq&limit=50');
+      const data = await response.json();
+      if (data.success) {
+        setDlqItems(data.data.items || []);
+        setDlqStats(data.data.stats || null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch DLQ:', error);
+    }
+  };
+
+  const fetchDiagHistory = async (kind: 'all' | 'telegram-env' | 'discord-env' | 'network-check' | 'generic-env' = diagKindFilter, hours: '24' | '72' | '168' = diagHoursFilter) => {
+    try {
+      const response = await fetch('/api/workflows?action=diagnostic-history&limit=100');
+      const data = await response.json();
+      if (data.success) {
+        const now = Date.now();
+        const cutoff = now - Number(hours) * 3600 * 1000;
+        const all = (data.data.items || []) as DiagnosticHistoryItem[];
+        const filtered = all.filter((i) => {
+          const t = new Date(i.createdAt).getTime();
+          const inTime = Number.isFinite(t) ? t >= cutoff : true;
+          const inKind = kind === 'all' ? true : i.kind === kind;
+          return inTime && inKind;
+        });
+        setDiagHistory(filtered);
+      }
+    } catch (error) {
+      console.error('Failed to fetch diagnostic history:', error);
     }
   };
 
@@ -115,14 +191,14 @@ export default function WorkflowsPage() {
       const data = await response.json();
       
       if (data.success) {
-        alert(`工作流 ${workflowId} 开始执行`);
+        alert(`Workflow ${workflowId} started`);
         fetchInstances();
       } else {
-        alert(`执行失败: ${data.error}`);
+        alert(`Execution failed: ${data.error}`);
       }
     } catch (error) {
-      console.error('执行工作流失败:', error);
-      alert('执行失败');
+      console.error('Failed to execute workflow:', error);
+      alert('Execution failed');
     }
   };
 
@@ -137,27 +213,78 @@ export default function WorkflowsPage() {
       const data = await response.json();
       
       if (data.success) {
-        alert(`操作成功: ${data.message}`);
+        alert(`Operation successful: ${data.message}`);
         fetchInstances();
       } else {
-        alert(`操作失败: ${data.error}`);
+        alert(`Operation failed: ${data.error}`);
       }
     } catch (error) {
-      console.error('控制工作流失败:', error);
-      alert('操作失败');
+      console.error('Failed to control workflow:', error);
+      alert('Operation failed');
+    }
+  };
+
+  const replayDlq = async (id?: string) => {
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'replay-notification-dlq',
+          ...(id ? { id } : { limit: 10 }),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`DLQ replay submitted: ${data.data?.queued || 0} items`);
+        fetchDlq();
+      } else {
+        alert(`DLQ replay failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to replay DLQ:', error);
+      alert('Failed to replay DLQ');
+    }
+  };
+
+  const clearDlq = async (opts: { all?: boolean; ids?: string[] }) => {
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear-notification-dlq', ...opts }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`DLQ cleared: ${data.data?.cleared || 0} items`);
+        setSelectedDlq({});
+        fetchDlq();
+      } else {
+        alert(`DLQ clear failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to clear DLQ:', error);
+      alert('Failed to clear DLQ');
     }
   };
 
   const refreshData = () => {
     setLoading(true);
-    Promise.all([fetchWorkflows(), fetchInstances(), fetchMetrics()])
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetchWorkflows(),
+      fetchInstances(),
+      fetchMetrics(metricsWindow),
+      fetchTrend(metricsWindow),
+      fetchDlq(),
+      fetchDiagHistory(diagKindFilter, diagHoursFilter),
+    ]).finally(() => setLoading(false));
   };
 
   useEffect(() => {
     refreshData();
     
-    // 每30秒刷新一次数据
+    // Refresh data every 30 seconds
     const interval = setInterval(refreshData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -200,13 +327,29 @@ export default function WorkflowsPage() {
     return `${Math.floor(duration / 60000)}m`;
   };
 
+  const filteredDlq = dlqItems.filter(item => {
+    const q = dlqQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.message.toLowerCase().includes(q) ||
+      item.stepId.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    );
+  });
+
+  const dlqPageSize = 10;
+  const dlqTotalPages = Math.max(1, Math.ceil(filteredDlq.length / dlqPageSize));
+  const safeDlqPage = Math.min(dlqPage, dlqTotalPages);
+  const pagedDlq = filteredDlq.slice((safeDlqPage - 1) * dlqPageSize, safeDlqPage * dlqPageSize);
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-            <p className="mt-2 text-gray-600">加载工作流数据...</p>
+            <p className="mt-2 text-gray-600">Loading workflow data...</p>
           </div>
         </div>
       </div>
@@ -215,218 +358,71 @@ export default function WorkflowsPage() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Workflow className="w-8 h-8" />
-            工作流协调器
+            Workflow Orchestrator
           </h1>
           <p className="text-gray-600 mt-2">
-            基于数据总线的自动化工作流协调系统
+            Automated workflow orchestration system
           </p>
         </div>
-        <Button onClick={refreshData} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          刷新
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            value={metricsWindow}
+            onChange={(e) => {
+              const w = e.target.value as '1h' | '24h' | '7d';
+              setMetricsWindow(w);
+              fetchMetrics(w);
+              fetchTrend(w);
+            }}
+            className="border rounded px-2 py-2 text-sm"
+          >
+            <option value="1h">Window: 1h</option>
+            <option value="24h">Window: 24h</option>
+            <option value="7d">Window: 7d</option>
+          </select>
+          <Button onClick={refreshData} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            概览
-          </TabsTrigger>
+            <BarChart3 className="w-4 h-4 mr-2" />Overview</TabsTrigger>
           <TabsTrigger value="workflows">
             <Workflow className="w-4 h-4 mr-2" />
-            工作流
+            Workflow
           </TabsTrigger>
           <TabsTrigger value="instances">
             <Zap className="w-4 h-4 mr-2" />
-            实例
+            Instances
           </TabsTrigger>
           <TabsTrigger value="metrics">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            指标
-          </TabsTrigger>
+            <TrendingUp className="w-4 h-4 mr-2" />Metrics</TabsTrigger>
         </TabsList>
 
-        {/* 概览标签页 */}
-        <TabsContent value="overview" className="space-y-6">
-          {/* 指标卡片 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  总工作流
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {metrics?.totalWorkflows || 0}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {workflows.length} 个定义
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  运行中
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {metrics?.runningWorkflows || 0}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  当前活跃实例
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  成功率
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {metrics?.successRate?.toFixed(1) || 0}%
-                </div>
-                <Progress 
-                  value={metrics?.successRate || 0} 
-                  className="mt-2"
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  平均时间
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {metrics?.averageExecutionTime ? 
-                    `${Math.round(metrics.averageExecutionTime / 1000)}s` : 
-                    '0s'
-                  }
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  平均执行时间
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 预定义工作流 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                预定义工作流
-              </CardTitle>
-              <CardDescription>
-                系统内置的自动化工作流
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {workflows.slice(0, 4).map((workflow) => (
-                  <div key={workflow.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <div className="font-medium">{workflow.name}</div>
-                      <div className="text-sm text-gray-500">{workflow.description}</div>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="outline">v{workflow.version}</Badge>
-                        <Badge variant="outline">{workflow.steps.length} 步骤</Badge>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      onClick={() => executeWorkflow(workflow.id)}
-                    >
-                      <Play className="w-4 h-4 mr-1" />
-                      执行
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 最近实例 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>最近工作流实例</CardTitle>
-              <CardDescription>
-                最近执行的工作流实例状态
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {instances.slice(0, 5).map((instance) => (
-                  <div key={instance.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {getStatusBadge(instance.status)}
-                      <div>
-                        <div className="font-medium">
-                          {workflows.find(w => w.id === instance.workflowId)?.name || instance.workflowId}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          开始: {formatTime(instance.startedAt)}
-                          {instance.completedAt && ` | 时长: ${formatDuration(instance.startedAt, instance.completedAt)}`}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {instance.status === 'running' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => controlWorkflow('pause', instance.id)}
-                        >
-                          <Pause className="w-3 h-3" />
-                        </Button>
-                      )}
-                      {instance.status === 'paused' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => controlWorkflow('resume', instance.id)}
-                        >
-                          <Play className="w-3 h-3" />
-                        </Button>
-                      )}
-                      {(instance.status === 'running' || instance.status === 'paused') && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => controlWorkflow('cancel', instance.id)}
-                        >
-                          <StopCircle className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* 工作流标签页 */}
+        <WorkflowOverviewTab
+          metrics={metrics}
+          workflows={workflows}
+          instances={instances}
+          getStatusBadge={getStatusBadge}
+          formatTime={formatTime}
+          formatDuration={formatDuration}
+          executeWorkflow={executeWorkflow}
+          controlWorkflow={controlWorkflow}
+        />
+        {/* Workflows Tab */}
         <TabsContent value="workflows">
           <Card>
             <CardHeader>
-              <CardTitle>工作流定义</CardTitle>
+              <CardTitle>Workflow Definitions</CardTitle>
               <CardDescription>
-                所有已注册的工作流定义
+                All registered Workflow Definitions
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -440,19 +436,19 @@ export default function WorkflowsPage() {
                         <div className="flex gap-2 mt-2">
                           <Badge variant="outline">ID: {workflow.id}</Badge>
                           <Badge variant="outline">v{workflow.version}</Badge>
-                          <Badge variant="outline">{workflow.steps.length} 步骤</Badge>
+                          <Badge variant="outline">{workflow.steps.length} Steps</Badge>
                         </div>
                       </div>
                       <Button 
                         onClick={() => executeWorkflow(workflow.id)}
                       >
                         <Play className="w-4 h-4 mr-2" />
-                        执行
+                        Execute
                       </Button>
                     </div>
                     
                     <div className="mt-4">
-                      <div className="font-medium mb-2">步骤:</div>
+                      <div className="font-medium mb-2">Steps:</div>
                       <div className="space-y-2">
                         {workflow.steps.map((step, index) => (
                           <div key={step.id} className="flex items-center gap-3 text-sm">
@@ -470,12 +466,12 @@ export default function WorkflowsPage() {
                     </div>
                     
                     <div className="mt-4">
-                      <div className="font-medium mb-2">触发器:</div>
+                      <div className="font-medium mb-2">Triggers:</div>
                       <div className="flex gap-2">
                         {workflow.triggers.map((trigger, index) => (
                           <Badge key={index} variant="secondary">
-                            {trigger.type === 'schedule' ? `计划: ${trigger.schedule}` : 
-                             trigger.type === 'event' ? `事件: ${trigger.eventType}` : 
+                            {trigger.type === 'schedule' ? `Schedule: ${trigger.schedule}` : 
+                             trigger.type === 'event' ? `Event: ${trigger.eventType}` : 
                              trigger.type}
                           </Badge>
                         ))}
@@ -488,247 +484,38 @@ export default function WorkflowsPage() {
           </Card>
         </TabsContent>
 
-        {/* 实例标签页 */}
-        <TabsContent value="instances">
-          <Card>
-            <CardHeader>
-              <CardTitle>工作流实例</CardTitle>
-              <CardDescription>
-                所有执行中的工作流实例
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {instances.map((instance) => {
-                  const workflow = workflows.find(w => w.id === instance.workflowId);
-                  
-                  return (
-                    <div key={instance.id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            {getStatusBadge(instance.status)}
-                            <div className="font-bold text-lg">
-                              {workflow?.name || instance.workflowId}
-                            </div>
-                          </div>
-                          <div className="text-gray-600 mt-1">
-                            实例ID: {instance.id}
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            <div className="text-sm">
-                              <span className="font-medium">开始:</span> {formatTime(instance.startedAt)}
-                            </div>
-                            {instance.completedAt && (
-                              <div className="text-sm">
-                                <span className="font-medium">结束:</span> {formatTime(instance.completedAt)}
-                              </div>
-                            )}
-                            <div className="text-sm">
-                              <span className="font-medium">时长:</span> {formatDuration(instance.startedAt, instance.completedAt)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {instance.status === 'running' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => controlWorkflow('pause', instance.id)}
-                            >
-                              <Pause className="w-3 h-3" />
-                            </Button>
-                          )}
-                          {instance.status === 'paused' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => controlWorkflow('resume', instance.id)}
-                            >
-                              <Play className="w-3 h-3" />
-                            </Button>
-                          )}
-                          {(instance.status === 'running' || instance.status === 'paused') && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => controlWorkflow('cancel', instance.id)}
-                            >
-                              <StopCircle className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {instance.currentStep && (
-                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                          <div className="font-medium text-blue-700">当前步骤:</div>
-                          <div className="text-blue-600">{instance.currentStep}</div>
-                        </div>
-                      )}
-                      
-                      {instance.errors.length > 0 && (
-                        <div className="mt-4 p-3 bg-red-50 rounded-lg">
-                          <div className="font-medium text-red-700">错误:</div>
-                          <ul className="text-red-600 text-sm list-disc list-inside">
-                            {instance.errors.map((error, index) => (
-                              <li key={index}>{error}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4">
-                        <div className="font-medium mb-2">步骤状态:</div>
-                        <div className="space-y-2">
-                          {Object.entries(instance.stepsStatus || {}).map(([stepId, stepStatus]) => (
-                            <div key={stepId} className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                {getStatusBadge(stepStatus.status)}
-                                <span>{stepId}</span>
-                              </div>
-                              <div className="text-gray-500">
-                                {stepStatus.startedAt && `开始: ${formatTime(stepStatus.startedAt)}`}
-                                {stepStatus.completedAt && ` | 结束: ${formatTime(stepStatus.completedAt)}`}
-                                {stepStatus.attempts > 0 && ` | 尝试: ${stepStatus.attempts}`}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* 指标标签页 */}
-        <TabsContent value="metrics">
-          <Card>
-            <CardHeader>
-              <CardTitle>工作流指标</CardTitle>
-              <CardDescription>
-                详细的工作流执行指标和统计
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {metrics ? (
-                <div className="space-y-6">
-                  {/* 总体指标 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          执行统计
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span>总计:</span>
-                            <span className="font-bold">{metrics.totalWorkflows}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>成功:</span>
-                            <span className="font-bold text-green-600">{metrics.completedWorkflows}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>失败:</span>
-                            <span className="font-bold text-red-600">{metrics.failedWorkflows}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>运行中:</span>
-                            <span className="font-bold text-blue-600">{metrics.runningWorkflows}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          性能指标
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span>成功率:</span>
-                            <span className="font-bold">{metrics.successRate.toFixed(1)}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>平均时间:</span>
-                            <span className="font-bold">
-                              {Math.round(metrics.averageExecutionTime / 1000)}s
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>步骤成功率:</span>
-                            <span className="font-bold">
-                              {Object.keys(metrics.stepSuccessRate).length > 0 ? 
-                                `${Object.values(metrics.stepSuccessRate).reduce((a, b) => a + b, 0) / Object.values(metrics.stepSuccessRate).length}%` : 
-                                'N/A'}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          模块使用
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {Object.entries(metrics.moduleUsage)
-                            .sort(([, a], [, b]) => b - a)
-                            .slice(0, 5)
-                            .map(([module, count]) => (
-                              <div key={module} className="flex justify-between">
-                                <span className="capitalize">{module}:</span>
-                                <span className="font-bold">{count}</span>
-                              </div>
-                            ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* 步骤成功率图表 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>步骤成功率</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {Object.entries(metrics.stepSuccessRate)
-                          .sort(([, a], [, b]) => b - a)
-                          .slice(0, 10)
-                          .map(([stepKey, successRate]) => (
-                            <div key={stepKey}>
-                              <div className="flex justify-between text-sm mb-1">
-                                <span className="truncate">{stepKey}</span>
-                                <span>{successRate.toFixed(1)}%</span>
-                              </div>
-                              <Progress value={successRate} className="h-2" />
-                            </div>
-                          ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  暂无指标数据
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <WorkflowInstancesTab
+          instances={instances}
+          workflows={workflows}
+          getStatusBadge={getStatusBadge}
+          formatTime={formatTime}
+          formatDuration={formatDuration}
+          controlWorkflow={controlWorkflow}
+        />
+        <WorkflowMetricsTab
+          metrics={metrics}
+          metricsWindow={metricsWindow}
+          trendPoints={trendPoints}
+          dlqItems={dlqItems}
+          dlqStats={dlqStats}
+          dlqPage={dlqPage}
+          setDlqPage={setDlqPage}
+          dlqQuery={dlqQuery}
+          setDlqQuery={setDlqQuery}
+          selectedDlq={selectedDlq}
+          setSelectedDlq={setSelectedDlq}
+          diagHistory={diagHistory}
+          diagKindFilter={diagKindFilter}
+          setDiagKindFilter={setDiagKindFilter}
+          diagHoursFilter={diagHoursFilter}
+          setDiagHoursFilter={setDiagHoursFilter}
+          replayDlq={replayDlq}
+          fetchDlq={fetchDlq}
+          clearDlq={clearDlq}
+          fetchDiagHistory={fetchDiagHistory}
+          copyDiagnostic={copyDiagnostic}
+          runDiagnostic={runDiagnostic}
+        />
       </Tabs>
     </div>
   );

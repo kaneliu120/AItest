@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { contextAwareCacheService } from '@/lib/context-aware-cache-service';
+import { makeRequestId, logApiStart, logApiEnd, logApiError } from '@/lib/observability';
+import { contextAwareCacheService, CacheStrategy } from '@/lib/context-aware-cache-service';
 import { unifiedGatewayService, UnifiedRequest, UnifiedResponse } from '@/lib/unified-gateway-service';
 
 // 生成请求ID
@@ -7,8 +8,20 @@ function generateRequestId(): string {
   return `ctx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+const VALID_SYSTEMS = ['mission-control','okms','openclaw','auto'] as const;
+const VALID_PRIORITIES = ['low','medium','high','critical'] as const;
+
+function asSystem(v: unknown): UnifiedRequest['system'] {
+  return typeof v === 'string' && (VALID_SYSTEMS as readonly string[]).includes(v) ? (v as UnifiedRequest['system']) : undefined;
+}
+function asPriority(v: unknown): UnifiedRequest['priority'] {
+  return typeof v === 'string' && (VALID_PRIORITIES as readonly string[]).includes(v) ? (v as UnifiedRequest['priority']) : 'medium';
+}
+
 // GET: 获取缓存信息和统计
 export async function GET(request: NextRequest) {
+  const requestId = makeRequestId('api');
+  logApiStart(request.nextUrl.pathname, requestId, { method: 'GET' });
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action') || 'stats';
@@ -20,7 +33,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: stats,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'items':
@@ -31,7 +44,7 @@ export async function GET(request: NextRequest) {
           success: true,
           data: items,
           total: items.length,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'strategies':
@@ -41,7 +54,7 @@ export async function GET(request: NextRequest) {
           success: true,
           data: strategies,
           total: strategies.length,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'health':
@@ -67,7 +80,7 @@ export async function GET(request: NextRequest) {
               semanticHitRate: cacheStats.semanticHitRate
             }
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'analyze':
@@ -102,59 +115,69 @@ export async function GET(request: NextRequest) {
             wordCount: query.split(/\s+/).length,
             analysis: '上下文特征分析需要完整请求对象'
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       default:
         return NextResponse.json({
           success: false,
           error: `未知操作: ${action}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          requestId,
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('上下文缓存API错误:', error);
+    logApiError('api/v3/cache', requestId, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId,
     }, { status: 500 });
   }
 }
 
 // POST: 缓存操作和管理
 export async function POST(request: NextRequest) {
+  const requestId = makeRequestId('api');
+  logApiStart(request.nextUrl.pathname, requestId, { method: 'POST' });
   try {
-    const body = await request.json();
-    const { action } = body;
+    const body = await request.json() as Record<string, unknown>;
+    const action = body.action;
     
     if (!action) {
       return NextResponse.json({
         success: false,
         error: '缺少 action 参数',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        requestId,
       }, { status: 400 });
     }
     
     switch (action) {
       case 'query':
         // 上下文感知查询
-        const { query, priority, context, system, strategy } = body;
+        const query = typeof body.query === 'string' ? body.query : '';
+        const priority = body.priority;
+        const context = body.context;
+        const system = body.system;
+        const strategy = typeof body.strategy === 'string' ? body.strategy : undefined;
         
         if (!query) {
           return NextResponse.json({
             success: false,
             error: '缺少 query 参数',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            requestId,
           }, { status: 400 });
         }
         
         const cacheRequest: UnifiedRequest = {
           id: generateRequestId(),
           query,
-          system: system as any,
-          priority: priority || 'medium',
-          context: context || {},
+          system: asSystem(system),
+          priority: asPriority(priority),
+          context: (context && typeof context === 'object' ? context as Record<string, unknown> : {}),
           metadata: {
             source: 'api',
             method: 'POST',
@@ -215,7 +238,8 @@ export async function POST(request: NextRequest) {
         
       case 'add-strategy':
         // 添加缓存策略
-        const { strategyName, strategyConfig } = body;
+        const strategyName = typeof body.strategyName === 'string' ? body.strategyName : '';
+        const strategyConfig = body.strategyConfig;
         
         if (!strategyName || !strategyConfig) {
           return NextResponse.json({
@@ -225,17 +249,20 @@ export async function POST(request: NextRequest) {
           }, { status: 400 });
         }
         
-        contextAwareCacheService.addStrategy(strategyName, strategyConfig);
+        if (typeof strategyConfig !== 'object' || strategyConfig === null) {
+          return NextResponse.json({ success: false, error: 'strategyConfig 必须是对象', code: 'VALIDATION_ERROR' }, { status: 400 });
+        }
+        contextAwareCacheService.addStrategy(strategyName, strategyConfig as CacheStrategy);
         return NextResponse.json({
           success: true,
           data: contextAwareCacheService.getStrategy(strategyName),
           message: '缓存策略添加成功',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'update-config':
         // 更新相似度配置
-        const { similarityConfig } = body;
+        const similarityConfig = body.similarityConfig;
         if (!similarityConfig) {
           return NextResponse.json({
             success: false,
@@ -248,7 +275,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: '相似度配置更新成功',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'clear':
@@ -257,12 +284,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: '上下文缓存已清空',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'remove-strategy':
         // 移除缓存策略
-        const { removeStrategyName } = body;
+        const removeStrategyName = typeof body.removeStrategyName === 'string' ? body.removeStrategyName : '';
         if (!removeStrategyName) {
           return NextResponse.json({
             success: false,
@@ -275,12 +302,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: removed,
           message: removed ? '缓存策略移除成功' : '缓存策略未找到',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'test-similarity':
         // 测试相似度计算
-        const { query1, query2 } = body;
+        const query1 = typeof body.query1 === 'string' ? body.query1 : '';
+        const query2 = typeof body.query2 === 'string' ? body.query2 : '';
         
         if (!query1 || !query2) {
           return NextResponse.json({
@@ -308,10 +336,10 @@ export async function POST(request: NextRequest) {
         // 这里简化处理，实际应该调用相似度计算方法
         // 由于方法是私有的，我们返回基本分析
         
-        const keywords1 = query1.toLowerCase().split(/[\s,，.。!！?？;；:：]+/).filter(w => w.length > 1);
-        const keywords2 = query2.toLowerCase().split(/[\s,，.。!！?？;；:：]+/).filter(w => w.length > 1);
+        const keywords1 = query1.toLowerCase().split(/[\s,，.。!！?？;；:：]+/).filter((w: string) => w.length > 1);
+        const keywords2 = query2.toLowerCase().split(/[\s,，.。!！?？;；:：]+/).filter((w: string) => w.length > 1);
         
-        const intersection = keywords1.filter(k => keywords2.includes(k));
+        const intersection = keywords1.filter((k: string) => keywords2.includes(k));
         const union = [...new Set([...keywords1, ...keywords2])];
         const jaccardSimilarity = union.length > 0 ? intersection.length / union.length : 0;
         
@@ -327,7 +355,7 @@ export async function POST(request: NextRequest) {
             jaccardSimilarity: jaccardSimilarity.toFixed(3),
             analysis: '基于关键词的Jaccard相似度计算'
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       case 'batch-query':
@@ -411,22 +439,24 @@ export async function POST(request: NextRequest) {
             cacheHitRate: `${((cacheHits / batchResults.length) * 100).toFixed(1)}%`,
             results: batchResults
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         
       default:
         return NextResponse.json({
           success: false,
           error: `未知操作: ${action}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          requestId,
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('上下文缓存API错误:', error);
+    logApiError('api/v3/cache', requestId, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId,
     }, { status: 500 });
   }
 }

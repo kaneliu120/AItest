@@ -4,6 +4,7 @@
  */
 
 import path from 'path';
+import { logger } from './logger';
 import { dataBusService, StandardEventTypes, createStandardEvent } from './data-bus-service';
 
 export interface IntegrationConfig {
@@ -55,6 +56,7 @@ export interface IntegrationResult {
 class ModuleIntegrationService {
   private config: IntegrationConfig;
   private status: Map<string, IntegrationStatus> = new Map();
+  private healthCheckIntervalId?: ReturnType<typeof setInterval>;
 
   constructor(config: Partial<IntegrationConfig> = {}) {
     this.config = {
@@ -98,7 +100,7 @@ class ModuleIntegrationService {
     // 订阅集成事件
     this.subscribeToEvents();
     
-    console.log('🚀 模块集成服务初始化完成');
+    logger.info('🚀 模块集成服务初始化完成');
   }
 
   /**
@@ -122,9 +124,16 @@ class ModuleIntegrationService {
    * 启动健康检查
    */
   private startHealthChecks(): void {
-    setInterval(() => {
+    this.healthCheckIntervalId = setInterval(() => {
       this.checkAllModules();
     }, this.config.monitoring.checkInterval);
+  }
+
+  stopHealthChecks(): void {
+    if (this.healthCheckIntervalId !== undefined) {
+      clearInterval(this.healthCheckIntervalId);
+      this.healthCheckIntervalId = undefined;
+    }
   }
 
   /**
@@ -216,7 +225,7 @@ class ModuleIntegrationService {
         issues: [`检查失败: ${errorMessage}`],
       });
       
-      console.error(`模块检查错误 (${module}):`, error);
+      logger.error(`模块检查错误 (${module}):`, error);
     }
   }
 
@@ -519,7 +528,7 @@ class ModuleIntegrationService {
     dataBusService.subscribe('workflow:step-executing', async (event) => {
       const { workflowId, instanceId, step } = event.data;
       
-      console.log(`🔗 工作流步骤执行: ${workflowId} - ${step.name}`);
+      logger.info(`🔗 工作流步骤执行: ${workflowId} - ${step.name}`);
       
       // 这里可以添加模块执行逻辑
       // 根据step.module和step.action调用相应的模块处理器
@@ -1105,7 +1114,7 @@ class ModuleIntegrationService {
    */
   updateConfig(newConfig: Partial<IntegrationConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    console.log('模块配置已更新');
+    logger.info('模块配置已更新');
   }
 
   /**
@@ -1148,5 +1157,5 @@ class ModuleIntegrationService {
 // 创建全局模块集成服务实例
 export const moduleIntegrationService = new ModuleIntegrationService();
 
-console.log('🔗 模块集成服务已启动');
-console.log('📋 已配置模块: finance, freelance, tasks, automation, monitoring');
+logger.info('🔗 模块集成服务已启动');
+logger.info('📋 已配置模块: finance, freelance, tasks, automation, monitoring');

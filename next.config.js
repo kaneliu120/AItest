@@ -1,13 +1,18 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    unoptimized: true,
+  },
   typescript: {
-    // 允许生产构建在存在 TypeScript 错误时也能通过
-    // 类型错误通过单独的 type-check 步骤捕获
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // 同样允许 lint 错误不阻断构建
-    ignoreDuringBuilds: true,
+  // 移除 basePath: '/mission'，直接用根路径
+  // 修复 Turbopack workspace 根目录识别问题
+  turbopack: {
+    root: path.resolve(__dirname),
   },
 };
 
