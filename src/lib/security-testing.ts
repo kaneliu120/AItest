@@ -1,4 +1,4 @@
-// 安全测试集成 - OWASP ZAP 和其他安全工具
+// SecurityTest集成 - OWASP ZAP 和OtherSecurityTool
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
@@ -13,7 +13,7 @@ export class OWASPZAPIntegration {
     result: string;
     vulnerabilities?: Array<{
       alert: string;
-      risk: 'High' | 'Medium' | 'Low' | 'Informational';
+      risk: 'High' | 'Center' | 'Low' | 'Informational';
       description: string;
       solution: string;
       url: string;
@@ -27,13 +27,13 @@ export class OWASPZAPIntegration {
     };
   }> {
     try {
-      // 检查ZAP是否可用
+      // CheckZAPwhether itavailable
       const zapAvailable = await this.checkZAPAvailability();
       
       if (!zapAvailable.available) {
         return {
           success: false,
-          result: `ZAP不可用: ${zapAvailable.message}`,
+          result: `ZAPunavailable: ${zapAvailable.message}`,
           vulnerabilities: [],
           summary: {
             totalAlerts: 0,
@@ -45,13 +45,13 @@ export class OWASPZAPIntegration {
         };
       }
       
-      // 模拟安全扫描结果
+      // 模拟SecurityScanresult
       const vulnerabilities = this.generateMockVulnerabilities(url, scanType);
       const summary = this.calculateSummary(vulnerabilities);
       
       return {
         success: true,
-        result: `安全扫描完成: ${url} (${scanType}扫描)`,
+        result: `SecurityScanCompleted: ${url} (${scanType}Scan)`,
         vulnerabilities,
         summary
       };
@@ -59,7 +59,7 @@ export class OWASPZAPIntegration {
     } catch (error) {
       return {
         success: false,
-        result: `安全扫描失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        result: `SecurityScanfailed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         vulnerabilities: [],
         summary: {
           totalAlerts: 0,
@@ -78,7 +78,7 @@ export class OWASPZAPIntegration {
     version?: string;
   }> {
     try {
-      // 检查ZAP命令行工具
+      // CheckZAP命令行Tool
       const { stdout, stderr } = await execAsync('which zap-cli || which zap.sh || echo "not-found"', {
         timeout: 5000
       });
@@ -86,29 +86,29 @@ export class OWASPZAPIntegration {
       if (stdout.includes('not-found')) {
         return {
           available: false,
-          message: 'OWASP ZAP未安装。安装方法: brew install owasp-zap 或下载 from https://www.zaproxy.org/download/'
+          message: 'OWASP ZAP未Install. Installmethod: brew install owasp-zap orDownload from https://www.zaproxy.org/download/'
         };
       }
       
-      // 尝试获取版本
-      let version = '未知版本';
+      // 尝试FetchVersion
+      let version = 'UnknownVersion';
       try {
         const versionOutput = await execAsync('zap-cli --version 2>/dev/null || echo "ZAP CLI"');
         version = versionOutput.stdout.trim();
       } catch {
-        // 忽略版本检查错误
+        // 忽略VersionCheckerror
       }
       
       return {
         available: true,
-        message: 'OWASP ZAP可用',
+        message: 'OWASP ZAPavailable',
         version
       };
       
     } catch (error) {
       return {
         available: false,
-        message: `检查失败: ${error instanceof Error ? error.message : '未知错误'}`
+        message: `Checkfailed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -116,61 +116,61 @@ export class OWASPZAPIntegration {
   static generateMockVulnerabilities(url: string, scanType: string) {
     const baseVulnerabilities = [
       {
-        alert: '跨站脚本 (XSS)',
+        alert: '跨站Script (XSS)',
         risk: 'High' as const,
-        description: '在用户输入中检测到未过滤的脚本标签',
-        solution: '实施输入验证和输出编码',
+        description: 'inUser输入Center检测to未filter'sScriptTag',
+        solution: '实施输入Validate和输出Encoding',
         url: `${url}/contact`
       },
       {
-        alert: 'SQL注入',
+        alert: 'SQL injection',
         risk: 'High' as const,
-        description: '用户输入直接传递给数据库查询',
-        solution: '使用参数化查询或ORM',
+        description: 'User输入直接传递给data库查询',
+        solution: 'usingParameters化查询orORM',
         url: `${url}/search`
       },
       {
-        alert: '不安全的HTTP头',
-        risk: 'Medium' as const,
-        description: '缺少安全相关的HTTP头',
-        solution: '添加Content-Security-Policy, X-Frame-Options等',
+        alert: '不Security'sHTTP头',
+        risk: 'Center' as const,
+        description: 'Missing Security相Off'sHTTP头',
+        solution: 'AddContent-Security-Policy, X-Frame-Options等',
         url: url
       },
       {
-        alert: '敏感信息泄露',
-        risk: 'Medium' as const,
-        description: '错误页面泄露堆栈跟踪信息',
-        solution: '配置自定义错误页面',
+        alert: '敏感information泄露',
+        risk: 'Center' as const,
+        description: 'error页面泄露堆栈Traceinformation',
+        solution: 'ConfigurationCustomerror页面',
         url: `${url}/error`
       },
       {
-        alert: '缺少HTTPS重定向',
+        alert: 'Missing HTTPS重定to',
         risk: 'Low' as const,
-        description: 'HTTP版本未重定向到HTTPS',
-        solution: '配置HTTP到HTTPS的301重定向',
+        description: 'HTTPVersion未重定totoHTTPS',
+        solution: 'ConfigurationHTTPtoHTTPS's301重定to',
         url: url
       },
       {
-        alert: '过时的JavaScript库',
+        alert: '过时'sJavaScript库',
         risk: 'Low' as const,
-        description: '检测到jQuery 1.x版本，存在已知漏洞',
-        solution: '更新到最新版本',
+        description: '检测tojQuery 1.xVersion, 存inalready知漏洞',
+        solution: 'Updateto最NewVersion',
         url: `${url}/assets/js/jquery.js`
       },
       {
-        alert: '目录列表启用',
+        alert: '目录Listenabled',
         risk: 'Informational' as const,
-        description: 'Web服务器配置允许目录浏览',
-        solution: '在服务器配置中禁用目录列表',
+        description: 'Webservervice器Configuration允许目录浏览',
+        solution: 'inservervice器ConfigurationCenterdisabled目录List',
         url: `${url}/uploads/`
       }
     ];
     
-    // 根据扫描类型过滤漏洞
+    // 根据ScanTypefilter漏洞
     if (scanType === 'passive') {
       return baseVulnerabilities.filter(v => v.risk === 'Informational' || v.risk === 'Low');
     } else if (scanType === 'active') {
-      return baseVulnerabilities.filter(v => v.risk === 'Medium' || v.risk === 'High');
+      return baseVulnerabilities.filter(v => v.risk === 'Center' || v.risk === 'High');
     }
     
     return baseVulnerabilities;
@@ -180,7 +180,7 @@ export class OWASPZAPIntegration {
     return {
       totalAlerts: vulnerabilities.length,
       highRisk: vulnerabilities.filter(v => v.risk === 'High').length,
-      mediumRisk: vulnerabilities.filter(v => v.risk === 'Medium').length,
+      mediumRisk: vulnerabilities.filter(v => v.risk === 'Center').length,
       lowRisk: vulnerabilities.filter(v => v.risk === 'Low').length,
       informational: vulnerabilities.filter(v => v.risk === 'Informational').length
     };
@@ -192,9 +192,9 @@ export class OWASPZAPIntegration {
     logs?: string[];
   }> {
     const installCommands = [
-      '# 安装OWASP ZAP (macOS)',
+      '# InstallOWASP ZAP (macOS)',
       'brew install owasp-zap',
-      '# 或下载并解压',
+      '# orDownloadanddecompress',
       'curl -L https://github.com/zaproxy/zaproxy/releases/download/v2.14.0/ZAP_2.14.0.dmg -o /tmp/ZAP.dmg',
       'hdiutil mount /tmp/ZAP.dmg',
       'cp -R /Volumes/ZAP\\ 2.14.0/ZAP.app /Applications/',
@@ -203,7 +203,7 @@ export class OWASPZAPIntegration {
     
     return {
       success: false,
-      message: '请手动安装OWASP ZAP。安装命令已记录。',
+      message: '请手动InstallOWASP ZAP. Install命令alreadyLog. ',
       logs: installCommands
     };
   }
@@ -218,17 +218,17 @@ export class NessusIntegration {
     status?: 'running' | 'completed' | 'failed';
   }> {
     try {
-      // 模拟Nessus扫描
+      // 模拟NessusScan
       return {
         success: true,
-        result: `Nessus漏洞扫描已启动: ${target}`,
+        result: `Nessus漏洞ScanalreadyStart: ${target}`,
         scanId: `nessus_${Date.now()}`,
         status: 'running'
       };
     } catch (error) {
       return {
         success: false,
-        result: `Nessus扫描失败: ${error instanceof Error ? error.message : '未知错误'}`
+        result: `NessusScanfailed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -239,38 +239,38 @@ export class NessusIntegration {
     vulnerabilities?: Array<{
       pluginId: string;
       pluginName: string;
-      severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'Info';
+      severity: 'Critical' | 'High' | 'Center' | 'Low' | 'Info';
       description: string;
       solution: string;
     }>;
   }> {
-    // 模拟扫描结果
+    // 模拟Scanresult
     const vulnerabilities = [
       {
         pluginId: '12345',
-        pluginName: 'SSL/TLS弱加密算法',
+        pluginName: 'SSL/TLS弱Encrypt算法',
         severity: 'High' as const,
-        description: '服务器支持弱加密算法 (RC4, 3DES)',
-        solution: '禁用弱加密算法，仅启用TLS 1.2+和强加密套件'
+        description: 'servervice器支持弱Encrypt算法 (RC4, 3DES)',
+        solution: 'disabled弱Encrypt算法, 仅enabledTLS 1.2+和强Encrypt套件'
       },
       {
         pluginId: '67890',
-        pluginName: 'SSH弱密钥交换算法',
-        severity: 'Medium' as const,
-        description: 'SSH服务器支持弱密钥交换算法',
-        solution: '更新SSH配置，禁用弱算法'
+        pluginName: 'SSH弱Key交换算法',
+        severity: 'Center' as const,
+        description: 'SSHservervice器支持弱Key交换算法',
+        solution: 'UpdateSSHConfiguration, disabled弱算法'
       }
     ];
     
     return {
       success: true,
-      result: `扫描结果获取成功: ${scanId}`,
+      result: `ScanresultFetchsuccess: ${scanId}`,
       vulnerabilities
     };
   }
 }
 
-// 安全工具管理器
+// SecurityTool管理器
 export class SecurityToolManager {
   static async getAvailableTools(): Promise<Array<{
     id: string;
@@ -284,7 +284,7 @@ export class SecurityToolManager {
       {
         id: 'owasp-zap',
         name: 'OWASP ZAP',
-        description: 'Web应用安全扫描器',
+        description: 'WebApplicationSecurityScan器',
         type: 'scanner' as const,
         installed: await this.checkToolInstallation('zap'),
         health: 'healthy' as const
@@ -292,7 +292,7 @@ export class SecurityToolManager {
       {
         id: 'nessus',
         name: 'Nessus',
-        description: '漏洞评估扫描器',
+        description: '漏洞EvaluationScan器',
         type: 'scanner' as const,
         installed: false,
         health: 'unknown' as const
@@ -300,7 +300,7 @@ export class SecurityToolManager {
       {
         id: 'nmap',
         name: 'Nmap',
-        description: '网络发现和安全审计',
+        description: '网络发现和Security审计',
         type: 'scanner' as const,
         installed: await this.checkToolInstallation('nmap'),
         health: 'healthy' as const
@@ -308,7 +308,7 @@ export class SecurityToolManager {
       {
         id: 'sqlmap',
         name: 'sqlmap',
-        description: 'SQL注入检测工具',
+        description: 'SQL injection检测Tool',
         type: 'analyzer' as const,
         installed: await this.checkToolInstallation('sqlmap'),
         health: 'healthy' as const
@@ -316,7 +316,7 @@ export class SecurityToolManager {
       {
         id: 'nikto',
         name: 'Nikto',
-        description: 'Web服务器扫描器',
+        description: 'Webservervice器Scan器',
         type: 'scanner' as const,
         installed: await this.checkToolInstallation('nikto'),
         health: 'healthy' as const
@@ -356,7 +356,7 @@ export class SecurityToolManager {
       default:
         return {
           success: false,
-          result: `不支持的安全工具: ${toolId}`
+          result: `UnsupportedSecurityTool: ${toolId}`
         };
     }
   }
@@ -372,7 +372,7 @@ export class SecurityToolManager {
     }>;
   }> {
     try {
-      // 模拟nmap扫描结果
+      // 模拟nmapScanresult
       const ports = [
         { port: 22, state: 'open' as const, service: 'ssh', version: 'OpenSSH 8.9' },
         { port: 80, state: 'open' as const, service: 'http', version: 'nginx 1.24' },
@@ -384,13 +384,13 @@ export class SecurityToolManager {
       
       return {
         success: true,
-        result: `Nmap扫描完成: ${target}`,
+        result: `NmapScanCompleted: ${target}`,
         ports
       };
     } catch (error) {
       return {
         success: false,
-        result: `Nmap扫描失败: ${error instanceof Error ? error.message : '未知错误'}`
+        result: `NmapScanfailed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -406,11 +406,11 @@ export class SecurityToolManager {
     }>;
   }> {
     try {
-      // 模拟sqlmap扫描结果
+      // 模拟sqlmapScanresult
       return {
         success: true,
-        result: `SQLMap扫描完成: ${target}`,
-        vulnerable: Math.random() > 0.7, // 30%概率检测到漏洞
+        result: `SQLMapScanCompleted: ${target}`,
+        vulnerable: Math.random() > 0.7, // 30%概率检测to漏洞
         injectionPoints: Math.random() > 0.7 ? [
           { parameter: 'id', type: 'boolean-based blind', payload: "' OR '1'='1" },
           { parameter: 'search', type: 'error-based', payload: "' UNION SELECT null,version()--" }
@@ -419,7 +419,7 @@ export class SecurityToolManager {
     } catch (error) {
       return {
         success: false,
-        result: `SQLMap扫描失败: ${error instanceof Error ? error.message : '未知错误'}`
+        result: `SQLMapScanfailed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -435,11 +435,11 @@ export class SecurityToolManager {
       },
       detailedResults: scanResults,
       recommendations: [
-        '定期进行安全扫描',
-        '及时修补发现的漏洞',
-        '实施Web应用防火墙(WAF)',
-        '启用HTTPS和HSTS',
-        '定期更新软件和依赖'
+        '定期In ProgressSecurityScan',
+        '及时修补发现's漏洞',
+        '实施WebApplication防火墙(WAF)',
+        'enabledHTTPS和HSTS',
+        '定期Update软件和依赖'
       ]
     };
     

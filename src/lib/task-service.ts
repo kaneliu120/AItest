@@ -1,6 +1,6 @@
 /**
- * 任务服务
- * 提供任务管理功能
+ * Taskservervice
+ * 提供Task管理功can
  */
 
 export interface Task {
@@ -34,70 +34,70 @@ export interface CreateTaskInput {
   tags?: string[];
 }
 
-class TaskService {
+class Taskservervice {
   private tasks: Task[] = [
     {
       id: 'task-1',
-      title: '修复生态系统UI界面',
-      description: '全面检查并修复工具生态系统UI界面问题',
+      title: 'Fix ecosystem system UI',
+      description: 'Comprehensive check and fix of tool ecosystem system UI issues',
       priority: 'high',
       status: 'in-progress',
       createdAt: '2026-02-22T10:00:00Z',
       updatedAt: '2026-02-23T07:30:00Z',
       dueDate: '2026-02-23T18:00:00Z',
-      assignedTo: '小A',
-      tags: ['UI', '修复', '优先级'],
+      assignedTo: 'SmallA',
+      tags: ['UI', 'Fix', 'Priority'],
     },
     {
       id: 'task-2',
-      title: '优化API响应性能',
-      description: '优化所有API端点的响应时间和错误处理',
+      title: 'optimizeAPIResponsePerformance',
+      description: 'Optimize all API endpoint response time and error handling',
       priority: 'medium',
       status: 'pending',
       createdAt: '2026-02-22T14:30:00Z',
       updatedAt: '2026-02-22T14:30:00Z',
       dueDate: '2026-02-24T12:00:00Z',
-      tags: ['API', '性能', '优化'],
+      tags: ['API', 'Performance', 'optimize'],
     },
     {
       id: 'task-3',
-      title: '部署知识管理系统',
-      description: '完成知识管理系统的生产环境部署',
+      title: 'Deploy Knowledge Management System',
+      description: 'Complete knowledge management system production environment deployment',
       priority: 'critical',
       status: 'completed',
       createdAt: '2026-02-21T09:00:00Z',
       updatedAt: '2026-02-22T17:30:00Z',
       dueDate: '2026-02-22T18:00:00Z',
-      assignedTo: '小A',
-      tags: ['部署', '生产', '完成'],
+      assignedTo: 'SmallA',
+      tags: ['Deployment', 'Production', 'Completed'],
     },
     {
       id: 'task-4',
-      title: '编写项目文档',
-      description: '编写完整的项目技术文档和使用指南',
+      title: 'Write Project Documentation',
+      description: 'Write complete project technical documentation and usage guide',
       priority: 'low',
       status: 'pending',
       createdAt: '2026-02-23T08:00:00Z',
       updatedAt: '2026-02-23T08:00:00Z',
       dueDate: '2026-02-25T17:00:00Z',
-      tags: ['文档', '维护'],
+      tags: ['document', 'maintenance'],
     },
     {
       id: 'task-5',
-      title: '测试自动化工作流',
-      description: '测试和验证自动化工作流的正确性',
+      title: 'TestAutomationWorkflow',
+      description: 'Test and validate automation workflow correctness',
       priority: 'medium',
       status: 'in-progress',
       createdAt: '2026-02-22T16:00:00Z',
       updatedAt: '2026-02-23T07:45:00Z',
       dueDate: '2026-02-23T16:00:00Z',
-      assignedTo: '系统',
-      tags: ['测试', '自动化', '工作流'],
+      assignedTo: 'System',
+      tags: ['Test', 'Automation', 'Workflow'],
     },
   ];
 
   /**
-   * 获取任务统计
+   * FetchTaskStatistics
    */
   async getTaskStats(): Promise<TaskStats> {
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -124,7 +124,7 @@ class TaskService {
   }
 
   /**
-   * 获取任务列表
+   * FetchTaskList
    */
   async getTasks(): Promise<Task[]> {
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -132,7 +132,7 @@ class TaskService {
   }
 
   /**
-   * 创建新任务
+   * CreateNewTask
    */
   async createTask(input: CreateTaskInput): Promise<Task> {
     await new Promise(resolve => setTimeout(resolve, 200));
@@ -155,7 +155,7 @@ class TaskService {
   }
 
   /**
-   * 更新任务状态
+   * UpdateTaskStatus
    */
   async updateTaskStatus(taskId: string, status: Task['status']): Promise<Task | null> {
     await new Promise(resolve => setTimeout(resolve, 150));
@@ -171,7 +171,7 @@ class TaskService {
   }
 
   /**
-   * 删除任务
+   * DeleteTask
    */
   async deleteTask(taskId: string): Promise<boolean> {
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -182,7 +182,7 @@ class TaskService {
   }
 
   /**
-   * 获取系统状态
+   * FetchSystemStatus
    */
   getSystemStatus() {
     return {
@@ -194,5 +194,5 @@ class TaskService {
   }
 }
 
-// 导出单例实例
-export const taskService = new TaskService();
+// Export单例实例
+export const taskservervice = new Taskservervice();

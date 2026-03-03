@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { intelligentTaskDispatcher } from '@/lib/intelligent-task-dispatcher';
 import { enhancedIntelligentDispatcher } from '@/lib/intelligent-task-dispatcher-fix';
-import { dispatcherMonitoringService } from '@/lib/dispatcher-monitoring-service';
-import { unifiedGatewayService, UnifiedRequest } from '@/lib/unified-gateway-service';
+import { dispatcherMonitoringservervice } from '@/lib/dispatcher-monitoring-service';
+import { unifiedGatewayservervice, UnifiedRequest } from '@/lib/unified-gateway-service';
 import { logger } from '@/lib/logger';
 import { makeRequestId, logApiStart, logApiEnd, logApiError } from '@/lib/observability';
 
-// 生成请求ID
+// GenerateRequestID
 function generateRequestId(): string {
   return `disp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -21,7 +21,7 @@ function asPriority(v: unknown): UnifiedRequest['priority'] {
   return typeof v === 'string' && (VALID_PRIORITIES as readonly string[]).includes(v) ? (v as UnifiedRequest['priority']) : 'medium';
 }
 
-// GET: 获取分发统计和状态
+// GET: FetchDispatchStatistics和Status
 export async function GET(request: NextRequest) {
   const requestId = makeRequestId('api');
   logApiStart(request.nextUrl.pathname, requestId, { method: 'GET' });
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     
     switch (action) {
       case 'stats':
-        // 获取分发统计
+        // FetchDispatchStatistics
         const stats = intelligentTaskDispatcher.getDispatchStats();
         return NextResponse.json({
           success: true,
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         });
         
       case 'performance':
-        // 获取系统性能报告
+        // FetchSystemPerformanceReport
         const performance = intelligentTaskDispatcher.getSystemPerformanceReport();
         return NextResponse.json({
           success: true,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         });
         
       case 'history':
-        // 获取任务历史
+        // FetchTask历史
         const limit = parseInt(searchParams.get('limit') || '50');
         const history = intelligentTaskDispatcher.getTaskHistory(limit);
         return NextResponse.json({
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         });
         
       case 'config':
-        // 获取当前配置
+        // FetchCurrentConfiguration
         const config = intelligentTaskDispatcher.getConfig();
         return NextResponse.json({
           success: true,
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         });
         
       case 'health':
-        // 健康检查
+        // HealthCheck
         const cacheStats = enhancedIntelligentDispatcher.getCacheStats();
         return NextResponse.json({
           success: true,
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
         });
         
       case 'cache-stats':
-        // 缓存统计
+        // CacheStatistics
         const detailedCacheStats = enhancedIntelligentDispatcher.getCacheStats();
         return NextResponse.json({
           success: true,
@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
         });
         
       case 'monitoring':
-        // 监控数据（以 dispatcher 历史为主，避免不同运行实例导致的内存隔离偏差）
-        const dashboardData = dispatcherMonitoringService.getDashboardData();
+        // Monitoringdata(以 dispatcher 历史for主, 避免不同运行实例导致's内存隔离偏差)
+        const dashboardData = dispatcherMonitoringservervice.getDashboardData();
         const statsFromHistory = intelligentTaskDispatcher.getDispatchStats();
         return NextResponse.json({
           success: true,
@@ -138,14 +138,14 @@ export async function GET(request: NextRequest) {
         });
         
       case 'alerts':
-        // 警报数据
+        // Alertdata
         const alertType = searchParams.get('type') || 'active';
         let alerts;
         if (alertType === 'active') {
-          alerts = dispatcherMonitoringService.getActiveAlerts();
+          alerts = dispatcherMonitoringservervice.getActiveAlerts();
         } else {
           const limit = parseInt(searchParams.get('limit') || '50');
-          alerts = dispatcherMonitoringService.getAllAlerts(limit);
+          alerts = dispatcherMonitoringservervice.getAllAlerts(limit);
         }
         return NextResponse.json({
           success: true,
@@ -158,24 +158,24 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown operation: ${action}`,
           timestamp: new Date().toISOString(),
           requestId
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v2/dispatcher', requestId, error);
-    logger.error('智能分发API错误', error, { module: 'api/v2/dispatcher', requestId });
+    logger.error('Intelligent dispatch API error', error, { module: 'api/v2/dispatcher', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId
     }, { status: 500 });
   }
 }
 
-// POST: 分发任务和管理
+// POST: DispatchTask和管理
 export async function POST(request: NextRequest) {
   const requestId = makeRequestId('api');
   logApiStart(request.nextUrl.pathname, requestId, { method: 'POST' });
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数',
+        error: 'Missing action parameter',
         timestamp: new Date().toISOString(),
         requestId
       }, { status: 400 });
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'dispatch':
-        // 分发任务
+        // DispatchTask
         const query = typeof body.query === 'string' ? body.query : '';
         const system = body.system;
         const priority = body.priority;
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少 query 参数',
+            error: 'Missing query parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -232,10 +232,10 @@ export async function POST(request: NextRequest) {
         
         let response;
         if (useCache) {
-          // 使用带缓存的增强分发器
+          // using带Cache's增强Dispatch器
           response = await enhancedIntelligentDispatcher.dispatchTaskWithCache(dispatchRequest);
         } else {
-          // 使用原始分发器
+          // using原始Dispatch器
           response = await intelligentTaskDispatcher.dispatchTask(dispatchRequest);
         }
         
@@ -247,12 +247,12 @@ export async function POST(request: NextRequest) {
         });
         
       case 'update-config':
-        // 更新配置
+        // UpdateConfiguration
         const { config } = body;
         if (!config) {
           return NextResponse.json({
             success: false,
-            error: '缺少 config 参数',
+            error: 'Missing  config Parameters',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -262,74 +262,74 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: intelligentTaskDispatcher.getConfig(),
-          message: '配置更新成功',
+          message: 'ConfigurationUpdated successfully',
           timestamp: new Date().toISOString(),
           requestId
         });
         
       case 'clear-history':
-        // 清空历史记录
+        // Clear历史Log
         intelligentTaskDispatcher.clearHistory();
         return NextResponse.json({
           success: true,
-          message: '历史记录已清空',
+          message: 'History log cleared',
           timestamp: new Date().toISOString(),
           requestId
         });
         
       case 'clear-cache':
-        // 清空缓存
+        // ClearCache
         enhancedIntelligentDispatcher.clearCache();
         return NextResponse.json({
           success: true,
-          message: '缓存已清空',
+          message: 'Cache cleared',
           timestamp: new Date().toISOString(),
           requestId
         });
         
       case 'resolve-alert':
-        // 解决警报
+        // 解决Alert
         const alertId = typeof body.alertId === 'string' ? body.alertId : '';
         if (!alertId) {
           return NextResponse.json({
             success: false,
-            error: '缺少 alertId 参数',
+            error: 'Missing alertId parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
         }
         
-        const resolved = dispatcherMonitoringService.resolveAlert(alertId);
+        const resolved = dispatcherMonitoringservervice.resolveAlert(alertId);
         return NextResponse.json({
           success: resolved,
-          message: resolved ? '警报已解决' : '警报未找到或已解决',
+          message: resolved ? 'Alert resolved' : 'Alert not found or already resolved',
           timestamp: new Date().toISOString(),
           requestId
         });
         
       case 'clear-monitoring':
-        // 清空监控数据
-        dispatcherMonitoringService.clearAll();
+        // ClearMonitoringdata
+        dispatcherMonitoringservervice.clearAll();
         return NextResponse.json({
           success: true,
-          message: '监控数据已清空',
+          message: 'MonitoringdataalreadyClear',
           timestamp: new Date().toISOString(),
           requestId
         });
         
       case 'compare':
-        // 比较智能分发和基础分发的性能
+        // 比较智canDispatch和basicDispatch'sPerformance
         const compareQuery = typeof body.compareQuery === 'string' ? body.compareQuery : '';
         if (!compareQuery) {
           return NextResponse.json({
             success: false,
-            error: '缺少 compareQuery 参数',
+            error: 'Missing  compareQuery Parameters',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
         }
         
-        // 创建相同的请求
+        // Create相同'sRequest
         const compareRequest: UnifiedRequest = {
           id: generateRequestId(),
           query: compareQuery,
@@ -338,10 +338,10 @@ export async function POST(request: NextRequest) {
           metadata: { source: 'compare-test' }
         };
         
-        // 并行执行两种分发方式
+        // and行Execute两种Dispatch方式
         const [intelligentResult, basicResult] = await Promise.all([
           intelligentTaskDispatcher.dispatchTask(compareRequest),
-          unifiedGatewayService.processRequest(compareRequest)
+          unifiedGatewayservervice.processRequest(compareRequest)
         ]);
         
         return NextResponse.json({
@@ -363,7 +363,7 @@ export async function POST(request: NextRequest) {
             },
             improvement: {
               timeImprovement: `${((basicResult.data.responseTime - intelligentResult.data.responseTime) / basicResult.data.responseTime * 100).toFixed(1)}%`,
-              systemMatch: intelligentResult.data.source === 'auto' ? '智能选择' : '指定系统'
+              systemMatch: intelligentResult.data.source === 'auto' ? 'Auto-selected' : 'Specified system'
             }
           },
           timestamp: new Date().toISOString(),
@@ -371,19 +371,19 @@ export async function POST(request: NextRequest) {
         });
         
       case 'batch-dispatch':
-        // 批量分发
+        // batchDispatch
         const { queries } = body;
         
         if (!Array.isArray(queries) || queries.length === 0) {
           return NextResponse.json({
             success: false,
-            error: '缺少有效的 queries 数组',
+            error: 'Missing valid queries array',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
         }
         
-        // 限制批量大小
+        // 限制batchLargeSmall
         const limitedQueries = queries.slice(0, 10);
         
         const batchResults = await Promise.all(
@@ -401,14 +401,14 @@ export async function POST(request: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : '未知错误',
+                error: error instanceof Error ? error.message : 'Unknown error',
                 query: q
               };
             }
           })
         );
         
-        // 计算批量统计
+        // 计算batchStatistics
         const successful = batchResults.filter(r => r.success).length;
         const failed = batchResults.filter(r => !r.success).length;
         const responseTimes = batchResults.filter(r => r.success).map(r => (r as { data?: { responseTime?: number } }).data?.responseTime ?? 0);
@@ -432,17 +432,17 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown operation: ${action}`,
           timestamp: new Date().toISOString(),
           requestId
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v2/dispatcher', requestId, error);
-    logger.error('智能分发API错误', error, { module: 'api/v2/dispatcher', requestId });
+    logger.error('Intelligent dispatch API error', error, { module: 'api/v2/dispatcher', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId
     }, { status: 500 });

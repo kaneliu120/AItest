@@ -12,11 +12,11 @@ export async function POST(request: NextRequest) {
     const key = String(body?.key || '').trim();
     const fillOnlyMissing = body?.fillOnlyMissing !== false;
     const tpl = TASK_TEMPLATES.find(t => t.key === key || t.goalTitle === key);
-    if (!tpl) return NextResponse.json({ success: false, error: '模板不存在' }, { status: 404 });
+    if (!tpl) return NextResponse.json({ success: false, error: 'Template does not exist' }, { status: 404 });
 
     const all = await listMissionTasks();
     const goal = all.find(t => t.level === 1 && t.title === tpl.goalTitle);
-    if (!goal) return NextResponse.json({ success: false, error: '未找到对应一级目标' }, { status: 400 });
+    if (!goal) return NextResponse.json({ success: false, error: 'No matching top-level goal found' }, { status: 400 });
 
     const created: any[] = [];
 
@@ -43,6 +43,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: { key, goalTitle: tpl.goalTitle, createdCount: created.length, created } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

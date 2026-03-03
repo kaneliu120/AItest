@@ -29,9 +29,9 @@ export function formatRelativeTime(date: Date | string) {
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
   if (diffInSeconds < 60) return "刚刚";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}分钟前`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}小时前`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}天前`;
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}min前`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}Small时前`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d前`;
   return formatDate(d);
 }
 

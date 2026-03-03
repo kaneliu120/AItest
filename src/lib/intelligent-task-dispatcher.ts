@@ -1,15 +1,15 @@
-// 智能任务分发系统
-import { unifiedGatewayService, UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
-import { apiMonitoringService } from './api-monitoring-service';
-import { dispatcherMonitoringService } from './dispatcher-monitoring-service';
+// 智canTaskDispatchSystem
+import { unifiedGatewayservervice, UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
+import { apiMonitoringservervice } from './api-monitoring-service';
+import { dispatcherMonitoringservervice } from './dispatcher-monitoring-service';
 
-// 任务优先级定义
+// TaskPriority定义
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 
-// 任务执行策略
+// TaskExecute策略
 export type ExecutionStrategy = 'sequential' | 'parallel' | 'fallback' | 'optimistic';
 
-// 任务历史记录
+// Task历史Log
 export interface TaskHistory {
   taskId: string;
   query: string;
@@ -23,7 +23,7 @@ export interface TaskHistory {
   tokenUsage?: number;
 }
 
-// 系统性能指标
+// SystemPerformancemetrics
 export interface SystemPerformance {
   system: string;
   taskType: string;
@@ -35,15 +35,15 @@ export interface SystemPerformance {
   costPerRequest?: number; // 预估成本
 }
 
-// 智能分发配置
+// 智canDispatchConfiguration
 export interface DispatchConfig {
-  // 性能权重
+  // Performance权重
   performanceWeight: number; // 0-1
   costWeight: number; // 0-1  
   reliabilityWeight: number; // 0-1
   cacheWeight: number; // 0-1
   
-  // 策略配置
+  // 策略Configuration
   defaultStrategy: ExecutionStrategy;
   enablePredictiveRouting: boolean;
   enableLoadBalancing: boolean;
@@ -51,13 +51,13 @@ export interface DispatchConfig {
   timeoutMs: number;
 }
 
-// 分发决策
+// Dispatchdecision making
 export interface DispatchDecision {
   system: string;
   strategy: ExecutionStrategy;
   reason: string;
   confidence: number; // 0-1
-  estimatedTime: number; // 毫秒
+  estimatedTime: number; // 毫s
   estimatedCost: number; // 预估成本
   alternatives: Array<{
     system: string;
@@ -89,7 +89,7 @@ class IntelligentTaskDispatcher {
     this.initializeSystemPerformance();
   }
 
-  // 初始化系统性能数据
+  // InitializeSystemPerformancedata
   private initializeSystemPerformance(): void {
     const systems = ['mission-control', 'okms', 'openclaw'];
     const taskTypes = ['code', 'knowledge', 'skill', 'mixed'];
@@ -103,7 +103,7 @@ class IntelligentTaskDispatcher {
           totalRequests: 0,
           successfulRequests: 0,
           averageResponseTime: 0,
-          successRate: 1.0, // 初始假设100%成功率
+          successRate: 1.0, // 初始false设100%success率
           lastUsed: new Date().toISOString(),
           costPerRequest: this.estimateCost(system, taskType)
         });
@@ -113,11 +113,11 @@ class IntelligentTaskDispatcher {
 
   // 预估成本
   private estimateCost(system: string, taskType: string): number {
-    // 基于系统类型和任务类型的成本预估
+    // 基于SystemType和TaskType's成本预估
     const baseCosts: Record<string, number> = {
-      'mission-control': 0.5, // 中等成本
-      'okms': 0.3, // 较低成本 (本地RAG)
-      'openclaw': 0.8 // 较高成本 (可能调用外部API)
+      'mission-control': 0.5, // Center等成本
+      'okms': 0.3, // 较Low成本 (LocalRAG)
+      'openclaw': 0.8 // 较High成本 (可can调用External APIs)
     };
     
     const taskMultipliers: Record<string, number> = {
@@ -133,18 +133,18 @@ class IntelligentTaskDispatcher {
     return baseCost * multiplier;
   }
 
-  // 智能分发任务
+  // 智canDispatchTask
   async dispatchTask(request: UnifiedRequest): Promise<UnifiedResponse> {
     const startTime = Date.now();
     
     try {
-      // 1. 分析任务
+      // 1. AnalyticsTask
       const taskAnalysis = this.analyzeTask(request);
       
-      // 2. 做出分发决策
+      // 2. 做出Dispatchdecision making
       const decision = this.makeDispatchDecision(request, taskAnalysis);
       
-      // 3. 执行任务
+      // 3. ExecuteTask
       let response: UnifiedResponse;
       
       switch (decision.strategy) {
@@ -163,13 +163,13 @@ class IntelligentTaskDispatcher {
           break;
       }
       
-      // 4. 记录历史和学习
+      // 4. Log历史和学习
       await this.recordTaskHistory(request, response, decision, Date.now() - startTime);
       
-      // 5. 更新系统性能
+      // 5. UpdateSystemPerformance
       this.updateSystemPerformance(decision.system, taskAnalysis.taskType, response, Date.now() - startTime);
       
-      // 6. 在响应中添加分发决策信息
+      // 6. inResponseCenterAddDispatchdecision makinginformation
       return {
         ...response,
         data: {
@@ -187,40 +187,40 @@ class IntelligentTaskDispatcher {
       };
       
     } catch (error) {
-      console.error('智能任务分发失败:', error);
+      console.error('Intelligent task dispatch failed:', error);
       
-      // 回退到基础统一网关
-      return await unifiedGatewayService.processRequest(request);
+      // 回退tobasicUnified Gateway
+      return await unifiedGatewayservervice.processRequest(request);
     }
   }
 
-  // 分析任务
+  // AnalyticsTask
   private analyzeTask(request: UnifiedRequest): {
     taskType: string;
     complexity: 'low' | 'medium' | 'high';
     urgency: 'low' | 'medium' | 'high';
     estimatedTokens: number;
   } {
-    // 使用统一网关的分类器（简化版本）
+    // usingUnified Gateway'sCategory器(简化Version)
     const query = request.query.toLowerCase();
     
-    // 任务类型分析
+    // TaskTypeAnalytics
     let taskType = 'mixed';
-    if (query.includes('代码') || query.includes('开发') || query.includes('编程')) {
+    if (query.includes('code') || query.includes('Development') || query.includes('coding')) {
       taskType = 'code';
-    } else if (query.includes('知识') || query.includes('查询') || query.includes('搜索')) {
+    } else if (query.includes('knowledge') || query.includes('query') || query.includes('Search')) {
       taskType = 'knowledge';
-    } else if (query.includes('执行') || query.includes('运行') || query.includes('操作')) {
+    } else if (query.includes('Execute') || query.includes('run') || query.includes('operation')) {
       taskType = 'skill';
     }
     
-    // 复杂度分析（基于查询长度和关键词）
+    // complexityAnalytics(基于查询长度和Off键词)
     let complexity: 'low' | 'medium' | 'high' = 'medium';
     const queryLength = query.length;
     if (queryLength < 20) complexity = 'low';
     else if (queryLength > 100) complexity = 'high';
     
-    // 紧急度分析（基于优先级）
+    // Urgent度Analytics(基于Priority)
     let urgency: 'low' | 'medium' | 'high' = 'medium';
     switch (request.priority) {
       case 'low': urgency = 'low'; break;
@@ -239,42 +239,42 @@ class IntelligentTaskDispatcher {
     };
   }
 
-  // 做出分发决策
+  // 做出Dispatchdecision making
   private makeDispatchDecision(request: UnifiedRequest, analysis: ReturnType<typeof this.analyzeTask>): DispatchDecision {
     const systems = ['mission-control', 'okms', 'openclaw'];
     const taskType = analysis.taskType;
     
-    // 计算每个系统的得分
+    // 计算每 System's得分
     const systemScores = systems.map(system => {
       const performance = this.systemPerformance.get(`${system}:${taskType}`);
       if (!performance) {
         return {
           system,
-          score: 0.5, // 默认分数
-          reason: '无历史性能数据'
+          score: 0.5, // Default分数
+          reason: 'No historical performance data'
         };
       }
       
-      // 计算综合得分
+      // 计算Overall score
       let score = 0;
       
-      // 1. 性能得分 (响应时间)
+      // 1. Performance得分 (Responsetime)
       const performanceScore = this.calculatePerformanceScore(performance.averageResponseTime);
       score += performanceScore * this.config.performanceWeight;
       
-      // 2. 可靠性得分 (成功率)
+      // 2. reliability得分 (success率)
       const reliabilityScore = performance.successRate;
       score += reliabilityScore * this.config.reliabilityWeight;
       
-      // 3. 成本得分 (成本越低得分越高)
+      // 3. 成本得分 (成本越Low得分越High)
       const costScore = performance.costPerRequest ? 1 / performance.costPerRequest : 1;
       score += costScore * this.config.costWeight;
       
-      // 4. 缓存得分 (基于历史缓存命中率)
+      // 4. Cache得分 (基于历史Cachehit rate)
       const cacheScore = this.calculateCacheScore(system, taskType);
       score += cacheScore * this.config.cacheWeight;
       
-      // 5. 负载均衡考虑
+      // 5. load balancing考虑
       if (this.config.enableLoadBalancing) {
         const loadScore = this.calculateLoadScore(system);
         score *= loadScore;
@@ -283,30 +283,30 @@ class IntelligentTaskDispatcher {
       return {
         system,
         score,
-        reason: `性能:${performanceScore.toFixed(2)}, 可靠性:${reliabilityScore.toFixed(2)}, 成本:${costScore.toFixed(2)}`
+        reason: `Performance:${performanceScore.toFixed(2)}, reliability:${reliabilityScore.toFixed(2)}, cost:${costScore.toFixed(2)}`
       };
     });
     
-    // 排序并选择最佳系统
+    // Sortand选择最佳System
     systemScores.sort((a, b) => b.score - a.score);
     const bestSystem = systemScores[0];
     
-    // 确定执行策略
+    // 确定Execute策略
     let strategy: ExecutionStrategy = this.config.defaultStrategy;
     let reason = '';
     
     if (analysis.urgency === 'high' || request.priority === 'critical') {
       strategy = 'parallel';
-      reason = '高优先级任务，使用并行执行';
+      reason = 'High priority task, using parallel execution';
     } else if (analysis.complexity === 'high') {
       strategy = 'fallback';
-      reason = '复杂任务，使用回退策略';
+      reason = 'Complex task, using fallback strategy';
     } else if (bestSystem.score < 0.7 && systemScores[1] && systemScores[1].score > 0.6) {
       strategy = 'optimistic';
-      reason = '多个系统表现相近，使用乐观执行';
+      reason = 'Multiple systems performing similarly, using optimistic execution';
     }
     
-    // 预估时间和成本
+    // 预估time和成本
     const performance = this.systemPerformance.get(`${bestSystem.system}:${taskType}`);
     const estimatedTime = performance ? performance.averageResponseTime : 1000;
     const estimatedCost = performance ? performance.costPerRequest || 1.0 : 1.0;
@@ -318,28 +318,28 @@ class IntelligentTaskDispatcher {
       confidence: bestSystem.score,
       estimatedTime,
       estimatedCost,
-      alternatives: systemScores.slice(1, 3) // 前3个备选
+      alternatives: systemScores.slice(1, 3) // 前3alternatives
     };
   }
 
-  // 计算性能得分 (响应时间越短得分越高)
+  // 计算Performance得分 (Responsetime越短得分越High)
   private calculatePerformanceScore(responseTime: number): number {
     if (responseTime <= 0) return 1.0;
     
-    // 响应时间在1秒内得1分，超过5秒得0分，线性插值
-    const maxTime = 5000; // 5秒
+    // Responsetimein1s内得1分, 超过5s得0分, 线性插值
+    const maxTime = 5000; // 5s
     const score = Math.max(0, 1 - (responseTime / maxTime));
     return Math.min(1, score);
   }
 
-  // 计算缓存得分
+  // 计算Cache得分
   private calculateCacheScore(system: string, taskType: string): number {
-    // 从历史记录中计算缓存命中率
+    // From历史LogCenter计算Cachehit rate
     const relevantHistory = this.taskHistory.filter(
       task => task.systemUsed === system && task.taskType === taskType
     );
     
-    if (relevantHistory.length === 0) return 0.5; // 默认
+    if (relevantHistory.length === 0) return 0.5; // Default
     
     const cacheHits = relevantHistory.filter(task => task.cached).length;
     const cacheRate = cacheHits / relevantHistory.length;
@@ -349,29 +349,29 @@ class IntelligentTaskDispatcher {
 
   // 计算负载得分
   private calculateLoadScore(system: string): number {
-    // 基于最近使用频率计算负载
+    // 基于最近using频率计算负载
     const now = Date.now();
     const recentTasks = this.taskHistory.filter(
       task => task.systemUsed === system && 
-      now - new Date(task.timestamp).getTime() < 60000 // 最近1分钟
+      now - new Date(task.timestamp).getTime() < 60000 // 最近1min
     );
     
-    // 任务越多，负载越高，得分越低
-    const loadFactor = Math.min(1, recentTasks.length / 10); // 最多10个任务/分钟
-    return 1 - (loadFactor * 0.3); // 最多降低30%得分
+    // Task越More, 负载越High, 得分越Low
+    const loadFactor = Math.min(1, recentTasks.length / 10); // 最More10 Task/min
+    return 1 - (loadFactor * 0.3); // 最More降Low30%得分
   }
 
-  // 执行策略：乐观执行 (使用最佳系统)
+  // Execute策略: 乐观Execute (using最佳System)
   private async executeOptimistic(request: UnifiedRequest, decision: DispatchDecision): Promise<UnifiedResponse> {
     const modifiedRequest: UnifiedRequest = {
       ...request,
       system: decision.system as NonNullable<UnifiedRequest['system']>
     };
     
-    return await unifiedGatewayService.processRequest(modifiedRequest);
+    return await unifiedGatewayservervice.processRequest(modifiedRequest);
   }
 
-  // 执行策略：顺序执行 (按优先级尝试多个系统)
+  // Execute策略: 顺序Execute (byPriority尝试More System)
   private async executeSequential(request: UnifiedRequest, decision: DispatchDecision): Promise<UnifiedResponse> {
     const systemsToTry = [decision.system, ...decision.alternatives.map(a => a.system)];
     
@@ -382,21 +382,21 @@ class IntelligentTaskDispatcher {
           system: system as NonNullable<UnifiedRequest['system']>
         };
         
-        const response = await unifiedGatewayService.processRequest(modifiedRequest);
+        const response = await unifiedGatewayservervice.processRequest(modifiedRequest);
         
         if (response.success) {
           return response;
         }
       } catch (error) {
-        console.warn(`系统 ${system} 执行失败:`, error);
-        // 继续尝试下一个系统
+        console.warn(`System ${system} Executefailed:`, error);
+        // 继续尝试下一 System
       }
     }
     
-    throw new Error('所有系统执行失败');
+    throw new Error('All systems execution failed');
   }
 
-  // 执行策略：并行执行 (同时尝试多个系统，取最快成功结果)
+  // Execute策略: and行Execute (同时尝试More System, 取最快successresult)
   private async executeParallel(request: UnifiedRequest, decision: DispatchDecision): Promise<UnifiedResponse> {
     const systemsToTry = [decision.system, ...decision.alternatives.map(a => a.system)];
     const limitedSystems = systemsToTry.slice(0, this.config.maxParallelTasks);
@@ -408,11 +408,11 @@ class IntelligentTaskDispatcher {
           system: system as NonNullable<UnifiedRequest['system']>
         };
         
-        return await unifiedGatewayService.processRequest(modifiedRequest);
+        return await unifiedGatewayservervice.processRequest(modifiedRequest);
       } catch (error) {
         return {
           success: false,
-          data: { error: error instanceof Error ? error.message : '未知错误' },
+          data: { error: error instanceof Error ? error.message : 'Unknown error' },
           source: system as UnifiedResponse['source'],
           taskType: 'mixed' as const,
           cached: false,
@@ -422,7 +422,7 @@ class IntelligentTaskDispatcher {
       }
     });
     
-    // 使用Promise.race等待第一个成功的结果
+    // usingPromise.race等待第一 success'sresult
     return new Promise((resolve, reject) => {
       let completed = 0;
       let hasSuccess = false;
@@ -435,37 +435,37 @@ class IntelligentTaskDispatcher {
             hasSuccess = true;
             resolve(result);
           } else if (completed === promises.length && !hasSuccess) {
-            reject(new Error('所有并行执行都失败'));
+            reject(new Error('所Alland行Execute都failed'));
           }
         }).catch(() => {
           completed++;
           if (completed === promises.length && !hasSuccess) {
-            reject(new Error('所有并行执行都失败'));
+            reject(new Error('所Alland行Execute都failed'));
           }
         });
       });
     });
   }
 
-  // 执行策略：回退执行 (主系统失败时回退到备选)
+  // Execute策略: 回退Execute (主Systemfailed时回退to备选)
   private async executeWithFallback(request: UnifiedRequest, decision: DispatchDecision): Promise<UnifiedResponse> {
     try {
-      // 首先尝试主系统
+      // 首先尝试主System
       const primaryRequest: UnifiedRequest = {
         ...request,
         system: decision.system as NonNullable<UnifiedRequest['system']>
       };
       
-      const primaryResponse = await unifiedGatewayService.processRequest(primaryRequest);
+      const primaryResponse = await unifiedGatewayservervice.processRequest(primaryRequest);
       
       if (primaryResponse.success) {
         return primaryResponse;
       }
     } catch (error) {
-      console.warn(`主系统 ${decision.system} 执行失败:`, error);
+      console.warn(`主System ${decision.system} Executefailed:`, error);
     }
     
-    // 主系统失败，尝试第一个备选
+    // 主Systemfailed, 尝试第一alternatives
     if (decision.alternatives.length > 0) {
       const fallbackSystem = decision.alternatives[0].system;
       const fallbackRequest: UnifiedRequest = {
@@ -473,13 +473,13 @@ class IntelligentTaskDispatcher {
         system: fallbackSystem as NonNullable<UnifiedRequest['system']>
       };
       
-      return await unifiedGatewayService.processRequest(fallbackRequest);
+      return await unifiedGatewayservervice.processRequest(fallbackRequest);
     }
     
-    throw new Error('主系统和备选系统都执行失败');
+    throw new Error('主System和备选System都Executefailed');
   }
 
-  // 记录任务历史
+  // LogTask历史
   private async recordTaskHistory(
     request: UnifiedRequest, 
     response: UnifiedResponse, 
@@ -501,13 +501,13 @@ class IntelligentTaskDispatcher {
     
     this.taskHistory.unshift(history);
     
-    // 限制历史记录大小
+    // 限制历史LogLargeSmall
     if (this.taskHistory.length > this.maxHistorySize) {
       this.taskHistory = this.taskHistory.slice(0, this.maxHistorySize);
     }
     
-    // 记录到监控系统
-    apiMonitoringService.recordMetric({
+    // LogtoMonitoringSystem
+    apiMonitoringservervice.recordMetric({
       endpoint: '/api/v2/dispatcher/dispatch',
       method: 'POST',
       responseTime: executionTime,
@@ -516,11 +516,11 @@ class IntelligentTaskDispatcher {
       userId: request.userId
     });
     
-    // 记录到分发器监控系统
-    dispatcherMonitoringService.recordTaskExecution(history);
+    // LogtoDispatch器MonitoringSystem
+    dispatcherMonitoringservervice.recordTaskExecution(history);
   }
 
-  // 更新系统性能
+  // UpdateSystemPerformance
   private updateSystemPerformance(
     system: string, 
     taskType: string, 
@@ -544,38 +544,38 @@ class IntelligentTaskDispatcher {
       return;
     }
     
-    //    // 更新系统性能数据
+    //    // UpdateSystemPerformancedata
     current.totalRequests += 1;
     current.successfulRequests += response.success ? 1 : 0;
     
-    // 更新平均响应时间 (指数移动平均)
+    // Update平均Responsetime (指数move平均)
     const alpha = 0.3; // 平滑因子
     current.averageResponseTime = alpha * executionTime + (1 - alpha) * current.averageResponseTime;
     
-    // 更新成功率
+    // Updated successfully率
     current.successRate = current.successfulRequests / current.totalRequests;
     current.lastUsed = new Date().toISOString();
     
     this.systemPerformance.set(key, current);
   }
 
-  // 获取任务历史
+  // FetchTask历史
   getTaskHistory(limit = 50): TaskHistory[] {
     return this.taskHistory.slice(0, limit);
   }
 
-  // 获取系统性能报告
+  // FetchSystemPerformanceReport
   getSystemPerformanceReport(): SystemPerformance[] {
     return Array.from(this.systemPerformance.values());
   }
 
-  // 获取分发统计
+  // FetchDispatchStatistics
   getDispatchStats(): { totalTasks: number; successfulTasks: number; successRate: number; cachedTasks: number; cacheRate: number; averageExecutionTime: number; systemStats: Record<string, { total: number; successful: number; averageTime: number; totalTime: number }>; taskTypeStats: Record<string, { total: number; successful: number }>; lastUpdated: string } {
     const totalTasks = this.taskHistory.length;
     const successfulTasks = this.taskHistory.filter(t => t.success).length;
     const cachedTasks = this.taskHistory.filter(t => t.cached).length;
     
-    // 按系统统计
+    // bySystemStatistics
     const systemStats: Record<string, { total: number; successful: number; averageTime: number; totalTime: number }> = {};
     this.taskHistory.forEach(task => {
       if (!systemStats[task.systemUsed]) {
@@ -594,7 +594,7 @@ class IntelligentTaskDispatcher {
       stats.averageTime = stats.totalTime / stats.total;
     });
     
-    // 按任务类型统计
+    // byTaskTypeStatistics
     const taskTypeStats: Record<string, { total: number; successful: number }> = {};
     this.taskHistory.forEach(task => {
       if (!taskTypeStats[task.taskType]) {
@@ -623,22 +623,22 @@ class IntelligentTaskDispatcher {
     };
   }
 
-  // 清空历史记录 (用于测试)
+  // Clear历史Log (用于Test)
   clearHistory(): void {
     this.taskHistory = [];
     this.initializeSystemPerformance();
   }
 
-  // 更新配置
+  // UpdateConfiguration
   updateConfig(newConfig: Partial<DispatchConfig>): void {
     this.config = { ...this.config, ...newConfig };
   }
 
-  // 获取当前配置
+  // FetchCurrentConfiguration
   getConfig(): DispatchConfig {
     return { ...this.config };
   }
 }
 
-// 导出单例实例
+// Export单例实例
 export const intelligentTaskDispatcher = new IntelligentTaskDispatcher();

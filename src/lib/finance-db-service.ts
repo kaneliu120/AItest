@@ -1,21 +1,21 @@
 /**
- * 基于数据库的财务服务
- * 使用SQLite进行数据持久化
+ * 基于data库'sFinanceservervice
+ * usingSQLiteIn Progressdata持久化
  */
 
 import { getDatabase, dbUtils, TABLE_SCHEMAS } from './database';
 import { Transaction, Budget, FinancialSummary } from './finance-service';
 
-export class FinanceDbService {
+export class FinanceDbservervice {
   private db = getDatabase();
 
   constructor() {
-    // 确保数据库已初始化
+    // 确保data库alreadyInitialize
     this.initialize();
   }
 
   private async initialize(): Promise<void> {
-    // 数据库会在第一次使用时自动初始化
+    // data库willin第一 timesusing时自动Initialize
   }
 
   // ===== 交易管理 =====
@@ -55,7 +55,7 @@ export class FinanceDbService {
     const pageSize = filters?.pageSize || 20;
     const offset = (page - 1) * pageSize;
 
-    // 获取总数
+    // Fetch总数
     const countResult = this.db.query<{ count: number }>(
       'transactions',
       where,
@@ -63,7 +63,7 @@ export class FinanceDbService {
     );
     const total = countResult[0]?.count || 0;
 
-    // 获取分页数据
+    // FetchPaginationdata
     const rows = this.db.query(
       'transactions',
       where,
@@ -124,7 +124,7 @@ export class FinanceDbService {
     return changes > 0;
   }
 
-  // ===== 预算管理 =====
+  // ===== budget管理 =====
 
   async addBudget(data: Omit<Budget, 'id'>): Promise<Budget> {
     const budget: Budget = {
@@ -188,13 +188,13 @@ export class FinanceDbService {
     return changes > 0;
   }
 
-  // ===== 财务分析 =====
+  // ===== FinanceAnalytics =====
 
   async getFinancialSummary(): Promise<FinancialSummary> {
-    // 获取全量数据（移除 pageSize 限制，避免超过1000条时汇总错误）
+    // FetchAll量data(remove pageSize 限制, 避免超过1000 时汇总error)
     const { transactions: txList } = await this.getTransactions({ page: 1, pageSize: 100000 });
 
-    // 单次遍历同时计算所有聚合指标，替代原来的多次 filter/forEach
+    // 单 timestraverse同时计算所Allaggregationmetrics, 替代原来'sMore times filter/forEach
     let totalIncome = 0;
     let totalExpenses = 0;
     const monthlyData: Record<string, { income: number; expenses: number; profit: number }> = {};
@@ -211,7 +211,7 @@ export class FinanceDbService {
       md.profit = md.income - md.expenses;
       monthlyData[month] = md;
 
-      // 分类分析
+      // CategoryAnalytics
       const ca = categoryAnalysis[t.category] ?? { income: 0, expense: 0 };
       if (isIncome) ca.income += t.amount; else ca.expense += t.amount;
       categoryAnalysis[t.category] = ca;
@@ -263,7 +263,7 @@ export class FinanceDbService {
       this.getBudgets(),
     ]);
 
-    // 月度趋势分析
+    // 月度趋势Analytics
     const monthlyData: Record<string, { income: number; expense: number; profit: number }> = {};
     
     transactions.transactions.forEach(t => {
@@ -289,7 +289,7 @@ export class FinanceDbService {
       }))
       .sort((a, b) => b.month.localeCompare(a.month));
 
-    // 分类分析
+    // CategoryAnalytics
     const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
     
     transactions.transactions.forEach(t => {
@@ -311,7 +311,7 @@ export class FinanceDbService {
       netProfit: data.income - data.expense,
     }));
 
-    // 预算执行情况
+    // budgetExecute情况
     const budgetPerformance = budgets.map(budget => {
       const actualSpent = transactions.transactions
         .filter(t => t.type === 'expense' && t.category === budget.category)
@@ -370,12 +370,12 @@ export class FinanceDbService {
     };
   }
 
-  // ===== 数据迁移 =====
+  // ===== datamigration =====
 
   async migrateFromMemory(memoryTransactions: Transaction[], memoryBudgets: Budget[]): Promise<void> {
-    console.log('开始从内存数据迁移到数据库...');
+    console.log('On始From内存datamigrationtodata库...');
 
-    // 迁移交易数据
+    // migration交易data
     if (memoryTransactions.length > 0) {
       const dbTransactions = memoryTransactions.map(tx => ({
         ...tx,
@@ -385,10 +385,10 @@ export class FinanceDbService {
       }));
 
       this.db.batchInsert('transactions', dbTransactions);
-      console.log(`迁移了 ${memoryTransactions.length} 条交易记录`);
+      console.log(`migration了 ${memoryTransactions.length}  交易Log`);
     }
 
-    // 迁移预算数据
+    // migrationbudgetdata
     if (memoryBudgets.length > 0) {
       const dbBudgets = memoryBudgets.map(budget => ({
         ...budget,
@@ -397,13 +397,13 @@ export class FinanceDbService {
       }));
 
       this.db.batchInsert('budgets', dbBudgets);
-      console.log(`迁移了 ${memoryBudgets.length} 条预算记录`);
+      console.log(`migration了 ${memoryBudgets.length}  budgetLog`);
     }
 
-    console.log('数据迁移完成');
+    console.log('datamigrationCompleted');
   }
 
-  // ===== 数据备份 =====
+  // ===== dataBackup =====
 
   async backupDatabase(backupPath?: string): Promise<string> {
     const defaultPath = `./data/backups/finance-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.db`;
@@ -413,7 +413,7 @@ export class FinanceDbService {
     return path;
   }
 
-  // ===== 数据清理 =====
+  // ===== data清理 =====
 
   async cleanupOldData(daysToKeep: number = 365): Promise<number> {
     const cutoffDate = new Date();
@@ -425,10 +425,10 @@ export class FinanceDbService {
       status: 'completed',
     });
 
-    console.log(`清理了 ${changes} 条超过 ${daysToKeep} 天的交易记录`);
+    console.log(`清理了 ${changes}  超过 ${daysToKeep} d's交易Log`);
     return changes;
   }
 }
 
-// 全局实例
-export const financeDbService = new FinanceDbService();
+// Global实例
+export const financeDbservervice = new FinanceDbservervice();

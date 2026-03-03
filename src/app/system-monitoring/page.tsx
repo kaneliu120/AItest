@@ -253,7 +253,7 @@ export default function SimpleSystemMonitoringPage() {
               <Server className="h-8 w-8" />
               System Monitoring Center
             </h1>
-            <p className="text-muted-foreground">Real-time system performance monitoring、Component health and alert status</p>
+            <p className="text-muted-foreground">Real-time system performance monitoring, Component health and alert status</p>
           </div>
           <div className="flex items-center gap-3">
             <Button

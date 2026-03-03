@@ -198,12 +198,12 @@ export default function TaskDetailPage() {
       <div className="bg-white border rounded p-4">
         <h2 className="font-semibold mb-2">Task Info</h2>
         <div className="text-sm space-y-1">
-          <p>Description: {task.description || '—'}</p>
+          <p>Description: {task.description || '-'}</p>
           <p>Workflow Stage: {task.workflowStage || 'draft'}</p>
-          <p>Analysis Doc: {task.analysisDocUrl ? <a className="text-blue-600 underline" href={task.analysisDocUrl} target="_blank">View</a> : '—'}</p>
-          <p>Target Price: {task.targetPrice ?? '—'} {task.currency || 'PHP'}</p>
-          <p>Owner: {task.owner || '—'}</p>
-          <p>Category: {task.category || '—'}</p>
+          <p>Analysis Doc: {task.analysisDocUrl ? <a className="text-blue-600 underline" href={task.analysisDocUrl} target="_blank">View</a> : '-'}</p>
+          <p>Target Price: {task.targetPrice ?? '-'} {task.currency || 'PHP'}</p>
+          <p>Owner: {task.owner || '-'}</p>
+          <p>Category: {task.category || '-'}</p>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {(workflowActions[stage] || []).map((a) => {
@@ -298,7 +298,7 @@ export default function TaskDetailPage() {
           {events.length === 0 && <p className="text-sm text-gray-500">No workflow events yet</p>}
           {events.map((e: any) => (
             <div key={e.id} className="border rounded p-2 text-sm">
-              <div className="font-medium">{e.event_type}：{e.from_stage || '-'} → {e.to_stage}</div>
+              <div className="font-medium">{e.event_type}: {e.from_stage || '-'} → {e.to_stage}</div>
               <div className="text-xs text-gray-500">{new Date(e.created_at).toLocaleString('zh-CN')} · actor: {e.actor || 'system'}</div>
             </div>
           ))}

@@ -212,7 +212,7 @@ export default function TestingCenterPage() {
           <Button size="sm" onClick={runAll} disabled={!!running}
             className="bg-blue-600 hover:bg-blue-700 text-white">
             {running === 'all'
-              ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Executing…</>
+              ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Executing...</>
               : <><Play className="w-3.5 h-3.5 mr-1" />Run All Tests</>
             }
           </Button>
@@ -224,7 +224,7 @@ export default function TestingCenterPage() {
         {[
           { label: 'Total Tests', value: summary?.totalTests ?? 0, icon: <BarChart3 className="w-5 h-5 text-blue-500" />, color: 'bg-blue-50 border-blue-100', sub: 'Total Executed' },
           { label: 'Success Rate',   value: `${passRate}%`, icon: <CheckCircle className="w-5 h-5 text-green-500" />, color: 'bg-green-50 border-green-100', sub: `${summary?.passedTests ?? 0} Passed / ${summary?.failedTests ?? 0} Failed` },
-          { label: 'Avg Duration', value: summary?.avgDuration ? `${summary.avgDuration}ms` : '—', icon: <Clock className="w-5 h-5 text-purple-500" />, color: 'bg-purple-50 border-purple-100', sub: 'All Tests' },
+          { label: 'Avg Duration', value: summary?.avgDuration ? `${summary.avgDuration}ms` : '-', icon: <Clock className="w-5 h-5 text-purple-500" />, color: 'bg-purple-50 border-purple-100', sub: 'All Tests' },
           { label: 'Recent Run', value: summary?.lastRun ? fmtTime(summary.lastRun) : 'Not Run', icon: <Zap className="w-5 h-5 text-orange-500" />, color: 'bg-orange-50 border-orange-100', sub: 'Last execution time' },
         ].map(k => (
           <Card key={k.label} className={`border ${k.color}`}>
@@ -274,7 +274,7 @@ export default function TestingCenterPage() {
               <Button size="sm" onClick={() => runTest('run-all-health', 'APIHealthyCheck')} disabled={!!running}
                 className="bg-green-600 hover:bg-green-700 text-white">
                 {running === 'run-all-health'
-                  ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Detecting…</>
+                  ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Detecting...</>
                   : <><Play className="w-3.5 h-3.5 mr-1" />Start Detection</>
                 }
               </Button>
@@ -330,7 +330,7 @@ export default function TestingCenterPage() {
             <Button size="sm" onClick={() => runTest('run-performance', 'PerformanceTest')} disabled={!!running}
               className="bg-purple-600 hover:bg-purple-700 text-white">
               {running === 'run-performance'
-                ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Testing…</>
+                ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Testing...</>
                 : <><Cpu className="w-3.5 h-3.5 mr-1" />RunPerformanceTest</>
               }
             </Button>
@@ -379,7 +379,7 @@ export default function TestingCenterPage() {
               <p className="text-xs text-slate-500 font-medium mb-1">Scoring Criteria</p>
               <div className="flex gap-4 text-xs">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> &lt; 200ms Excellent</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" /> 200–500ms General</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" /> 200-500ms General</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> &gt; 500ms Needs Optimization</span>
               </div>
             </CardContent>
@@ -393,12 +393,12 @@ export default function TestingCenterPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold text-slate-800">Security Scan</h2>
-              <p className="text-xs text-slate-500">Check CORS Config、Sensitive Route Exposure、Security Response Headers</p>
+              <p className="text-xs text-slate-500">Check CORS Config, Sensitive Route Exposure, Security Response Headers</p>
             </div>
             <Button size="sm" onClick={() => runTest('run-security', 'Security Scan')} disabled={!!running}
               className="bg-red-600 hover:bg-red-700 text-white">
               {running === 'run-security'
-                ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Scanning…</>
+                ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Scanning...</>
                 : <><Shield className="w-3.5 h-3.5 mr-1" />Start Scan</>
               }
             </Button>
@@ -408,8 +408,8 @@ export default function TestingCenterPage() {
             <Card className="border border-dashed border-slate-300">
               <CardContent className="p-10 text-center text-slate-400">
                 <Shield className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">Click「Start Scan」Run Security Scan</p>
-                <p className="text-xs mt-1">Detection Items：CORS Config · Sensitive Routes · X-Frame-Options</p>
+                <p className="text-sm">Click"Start Scan"Run Security Scan</p>
+                <p className="text-xs mt-1">Detection Items: CORS Config · Sensitive Routes · X-Frame-Options</p>
               </CardContent>
             </Card>
           ) : (
@@ -444,7 +444,7 @@ export default function TestingCenterPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Custom URL Test</CardTitle>
-              <CardDescription className="text-xs">Enter any URL，Detect availability and response info</CardDescription>
+              <CardDescription className="text-xs">Enter any URL, Detect availability and response info</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2">
@@ -560,7 +560,7 @@ export default function TestingCenterPage() {
                       <Progress value={passRate} className="h-2" />
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400">Avg Duration {summary.avgDuration}ms · Recent: {summary.lastRun ? fmtTime(summary.lastRun) : '—'}</p>
+                  <p className="text-xs text-slate-400">Avg Duration {summary.avgDuration}ms · Recent: {summary.lastRun ? fmtTime(summary.lastRun) : '-'}</p>
                 </CardContent>
               </Card>
 
@@ -622,7 +622,7 @@ export default function TestingCenterPage() {
                               {STATUS_CFG[r.status]?.label}
                             </Badge>
                           </td>
-                          <td className="p-3 text-right text-slate-400 text-xs">{r.duration > 0 ? `${r.duration}ms` : '—'}</td>
+                          <td className="p-3 text-right text-slate-400 text-xs">{r.duration > 0 ? `${r.duration}ms` : '-'}</td>
                           <td className="p-3 text-xs text-slate-500 font-mono max-w-[200px] truncate">{r.output}</td>
                           <td className="p-3 text-right text-slate-300 text-xs">{fmtTime(r.timestamp)}</td>
                         </tr>

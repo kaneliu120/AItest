@@ -1,26 +1,26 @@
-// 统一API网关服务
+// 统一API网Offservervice
 import { Redis } from 'ioredis';
-import { apiMonitoringService } from './api-monitoring-service';
+import { apiMonitoringservervice } from './api-monitoring-service';
 
-// 系统类型定义
+// SystemType定义
 export type SystemType = 'mission-control' | 'okms' | 'openclaw' | 'auto';
 
-// 任务分类定义
+// TaskCategory定义
 export type TaskType = 'code' | 'knowledge' | 'skill' | 'mixed';
 
-// 统一请求接口
+// 统一RequestInterface
 export interface UnifiedRequest {
   id: string;
   query: string;
-  system?: SystemType; // 指定系统或自动选择
+  system?: SystemType; // 指定Systemor自动选择
   priority?: 'low' | 'medium' | 'high' | 'critical';
-  context?: Record<string, any>; // 上下文信息
+  context?: Record<string, any>; // 上下文information
   userId?: string;
   sessionId?: string;
   metadata?: Record<string, any>;
 }
 
-// 统一响应接口
+// 统一ResponseInterface
 export interface UnifiedResponse {
   success: boolean;
   data: any;
@@ -37,7 +37,7 @@ export interface UnifiedResponse {
   suggestions?: string[]; // 后续建议
 }
 
-// 缓存项接口
+// Cache项Interface
 interface CacheItem {
   queryVector: number[];
   response: UnifiedResponse;
@@ -46,34 +46,34 @@ interface CacheItem {
   lastUsed: string;
 }
 
-// 任务分类器
+// TaskCategory器
 class TaskClassifier {
-  // 代码相关关键词
+  // code相OffOff键词
   private codeKeywords = [
-    '代码', '开发', '编程', '前端', '后端', 'API', '函数', '类', '接口',
-    '组件', '页面', '路由', '数据库', '部署', '构建', '测试', '调试',
-    'bug', '错误', '修复', '优化', '重构', '架构', '设计模式'
+    'code', 'Development', '编程', '前端', '后端', 'API', 'function', 'class', 'Interface',
+    'Component', '页面', 'route', 'data库', 'Deployment', '构建', 'Test', 'Debug',
+    'bug', 'error', '修复', 'optimize', '重构', '架构', '设计模式'
   ];
 
-  // 知识相关关键词  
+  // 知识相OffOff键词  
   private knowledgeKeywords = [
-    '知识', '文档', '学习', '研究', '查询', '搜索', '信息', '资料',
-    '教程', '指南', '最佳实践', '经验', '历史', '记录', '归档',
-    '总结', '分析', '报告', '统计', '数据', '内容'
+    '知识', 'document', '学习', '研究', '查询', 'Search', 'information', '资料',
+    '教程', 'guide', '最佳实践', '经验', '历史', 'Log', 'Archived',
+    '总结', 'Analytics', 'Report', 'Statistics', 'data', 'content'
   ];
 
-  // 技能相关关键词
+  // Skill相OffOff键词
   private skillKeywords = [
-    '执行', '运行', '操作', '工具', '技能', '命令', '脚本', '自动化',
-    '工作流', '任务', '计划', '定时', '监控', '告警', '通知', '发送',
-    '创建', '删除', '更新', '修改', '配置', '设置', '安装', '部署'
+    'Execute', '运行', '操作', 'Tool', 'Skill', '命令', 'Script', 'Automation',
+    'Workflow', 'Task', '计划', '定时', 'Monitoring', 'Alert', 'Notification', 'Send',
+    'Create', 'Delete', 'Update', 'modify', 'Configuration', 'Settings', 'Install', 'Deployment'
   ];
 
-  // 分类任务
+  // CategoryTask
   classify(query: string): TaskType {
     const lowerQuery = query.toLowerCase();
     
-    // 统计关键词匹配
+    // StatisticsOff键词匹配
     let codeScore = 0;
     let knowledgeScore = 0;
     let skillScore = 0;
@@ -90,7 +90,7 @@ class TaskClassifier {
       if (lowerQuery.includes(keyword.toLowerCase())) skillScore++;
     });
 
-    // 确定主要类型
+    // 确定主need toType
     const scores = [
       { type: 'code' as TaskType, score: codeScore },
       { type: 'knowledge' as TaskType, score: knowledgeScore },
@@ -99,16 +99,16 @@ class TaskClassifier {
 
     scores.sort((a, b) => b.score - a.score);
     
-    // 如果最高分>0且明显高于其他，返回该类型
+    // if最High分>0且明显High于Other, 返回该Type
     if (scores[0].score > 0 && scores[0].score > scores[1].score * 1.5) {
       return scores[0].type;
     }
 
-    // 否则返回混合类型
+    // Nothen返回混合Type
     return 'mixed';
   }
 
-  // 根据任务类型选择系统
+  // 根据TaskType选择System
   selectSystem(taskType: TaskType): SystemType {
     switch (taskType) {
       case 'code':
@@ -118,26 +118,26 @@ class TaskClassifier {
       case 'skill':
         return 'openclaw';
       case 'mixed':
-        return 'auto'; // 自动分发
+        return 'auto'; // 自动Dispatch
       default:
         return 'mission-control';
     }
   }
 }
 
-// 统一API网关服务
-export class UnifiedGatewayService {
+// 统一API网Offservervice
+export class UnifiedGatewayservervice {
   private redis: Redis;
   private classifier: TaskClassifier;
   private cacheEnabled = true;
-  private cacheTTL = 3600; // 1小时缓存
+  private cacheTTL = 3600; // 1Small时Cache
   
-  // 缓存统计
+  // CacheStatistics
   cacheHits: number;
   cacheMisses: number;
 
   constructor() {
-    // 初始化Redis连接
+    // InitializeRedisConnect
     this.redis = new Redis({
       host: 'localhost',
       port: 6379,
@@ -149,27 +149,27 @@ export class UnifiedGatewayService {
 
     this.classifier = new TaskClassifier();
     
-    // 初始化缓存统计
+    // InitializeCacheStatistics
     this.cacheHits = 0;
     this.cacheMisses = 0;
 
-    // 监听Redis连接状态
+    // 监听RedisConnectStatus
     this.redis.on('connect', () => {
-      console.log('✅ Redis连接成功 - 统一API网关缓存启用');
+      console.log('✅ RedisConnectsuccess - 统一API网OffCacheenabled');
     });
 
     this.redis.on('error', (error) => {
-      console.error('❌ Redis连接错误:', error);
+      console.error('❌ RedisConnecterror:', error);
       this.cacheEnabled = false;
     });
   }
 
-  // 处理统一请求
+  // Process统一Request
   async processRequest(request: UnifiedRequest): Promise<UnifiedResponse> {
     const startTime = Date.now();
     
     try {
-      // 1. 检查缓存
+      // 1. Check cache
       let cachedResponse = await this.getCachedResponse(request);
       if (cachedResponse) {
         cachedResponse.cached = true;
@@ -177,26 +177,26 @@ export class UnifiedGatewayService {
         return cachedResponse;
       }
 
-      // 2. 分类任务
+      // 2. CategoryTask
       const taskType = this.classifier.classify(request.query);
       
-      // 3. 选择系统（如果未指定）
+      // 3. 选择System(ifUnassigned)
       const targetSystem = request.system || this.classifier.selectSystem(taskType);
 
-      // 4. 分发到对应系统
+      // 4. Dispatchtofor应System
       let responseData;
       let sourceSystem: SystemType = targetSystem;
 
       if (targetSystem === 'auto') {
-        // 自动分发：根据任务类型选择最优系统
+        // 自动Dispatch: 根据TaskType选择最优System
         responseData = await this.distributeToOptimalSystem(request, taskType);
         sourceSystem = 'auto';
       } else {
-        // 指定系统分发
+        // 指定SystemDispatch
         responseData = await this.distributeToSystem(request, targetSystem);
       }
 
-      // 5. 构建响应
+      // 5. 构建Response
       const response: UnifiedResponse = {
         success: true,
         data: responseData,
@@ -207,21 +207,21 @@ export class UnifiedGatewayService {
         timestamp: new Date().toISOString()
       };
 
-      // 6. 缓存响应
+      // 6. Cache response
       await this.cacheResponse(request, response);
 
-      // 7. 记录监控指标
+      // 7. LogMonitoringmetrics
       this.recordMetrics(request, response);
 
       return response;
 
     } catch (error) {
-      console.error('统一网关处理错误:', error);
+      console.error('Unified GatewayProcesserror:', error);
       
       return {
         success: false,
         data: {
-          error: error instanceof Error ? error.message : '未知错误',
+          error: error instanceof Error ? error.message : 'Unknown error',
           requestId: request.id
         },
         source: request.system || 'mission-control',
@@ -233,9 +233,9 @@ export class UnifiedGatewayService {
     }
   }
 
-  // 分发到最优系统（自动模式）
+  // Dispatchto最优System(自动模式)
   private async distributeToOptimalSystem(request: UnifiedRequest, taskType: TaskType): Promise<any> {
-    // 根据任务类型并行调用相关系统
+    // 根据TaskTypeand行调用相OffSystem
     const promises: Promise<any>[] = [];
     
     if (taskType === 'code' || taskType === 'mixed') {
@@ -250,21 +250,21 @@ export class UnifiedGatewayService {
       promises.push(this.callOpenClaw(request));
     }
 
-    // 并行执行，取第一个成功的结果
+    // and行Execute, 取第一 success'sresult
     const results = await Promise.allSettled(promises);
     
-    // 优先选择成功的响应
+    // 优先选择success'sResponse
     for (const result of results) {
       if (result.status === 'fulfilled') {
         return result.value;
       }
     }
 
-    // 如果都失败，返回错误
-    throw new Error('所有系统调用失败');
+    // if都failed, 返回error
+    throw new Error('所AllSystem调用failed');
   }
 
-  // 分发到指定系统
+  // Dispatchto指定System
   private async distributeToSystem(request: UnifiedRequest, system: SystemType): Promise<any> {
     switch (system) {
       case 'mission-control':
@@ -274,17 +274,17 @@ export class UnifiedGatewayService {
       case 'openclaw':
         return await this.callOpenClaw(request);
       default:
-        throw new Error(`未知系统: ${system}`);
+        throw new Error(`UnknownSystem: ${system}`);
     }
   }
 
   // 调用Mission Control
   private async callMissionControl(request: UnifiedRequest): Promise<any> {
     try {
-      // 调用Mission Control生态系统API
+      // 调用Mission Control生态SystemAPI
       const response = await fetch('http://localhost:3001/api/ecosystem/status?format=json');
       if (!response.ok) {
-        throw new Error(`Mission Control API错误: ${response.status}`);
+        throw new Error(`Mission Control APIerror: ${response.status}`);
       }
       
       const data = await response.json();
@@ -297,13 +297,13 @@ export class UnifiedGatewayService {
         source: 'real-api'
       };
     } catch (error) {
-      console.error('调用Mission Control失败:', error);
-      // 回退到模拟数据
+      console.error('调用Mission Controlfailed:', error);
+      // 回退to模拟data
       return {
         system: 'mission-control',
         action: 'processed',
         query: request.query,
-        result: 'Mission Control处理完成 (模拟)',
+        result: 'Mission ControlProcessCompleted (模拟)',
         timestamp: new Date().toISOString(),
         source: 'fallback'
       };
@@ -313,10 +313,10 @@ export class UnifiedGatewayService {
   // 调用OKMS
   private async callOKMS(request: UnifiedRequest): Promise<any> {
     try {
-      // 调用OKMS搜索API
+      // 调用OKMSSearchAPI
       const response = await fetch('http://localhost:8000/api/v1/search?q=' + encodeURIComponent(request.query));
       if (!response.ok) {
-        throw new Error(`OKMS API错误: ${response.status}`);
+        throw new Error(`OKMS APIerror: ${response.status}`);
       }
       
       const data = await response.json();
@@ -329,13 +329,13 @@ export class UnifiedGatewayService {
         source: 'real-api'
       };
     } catch (error) {
-      console.error('调用OKMS失败:', error);
-      // 回退到模拟数据
+      console.error('调用OKMSfailed:', error);
+      // 回退to模拟data
       return {
         system: 'okms',
         action: 'knowledge-retrieved',
         query: request.query,
-        knowledge: '相关知识点检索完成 (模拟)',
+        knowledge: '相Off知识点检索Completed (模拟)',
         timestamp: new Date().toISOString(),
         source: 'fallback'
       };
@@ -345,32 +345,32 @@ export class UnifiedGatewayService {
   // 调用OpenClaw
   private async callOpenClaw(request: UnifiedRequest): Promise<any> {
     try {
-      // 这里应该调用OpenClaw的API
-      // 由于OpenClaw是本地服务，暂时使用模拟数据
-      // 实际应该调用OpenClaw的技能执行API
+      // 这里should调用OpenClaw'sAPI
+      // due toOpenClawYesLocalservervice, 暂时using模拟data
+      // 实际should调用OpenClaw'sSkillExecuteAPI
       return {
         system: 'openclaw',
         action: 'skill-executed',
         query: request.query,
-        result: 'OpenClaw技能执行完成 (需要配置API)',
+        result: 'OpenClawSkillExecuteCompleted (need toConfigurationAPI)',
         timestamp: new Date().toISOString(),
         source: 'simulated',
-        note: '需要配置OpenClaw API端点'
+        note: 'need toConfigurationOpenClaw APIendpoint'
       };
     } catch (error) {
-      console.error('调用OpenClaw失败:', error);
+      console.error('调用OpenClawfailed:', error);
       return {
         system: 'openclaw',
         action: 'error',
         query: request.query,
-        error: error instanceof Error ? error.message : '未知错误',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
         source: 'error'
       };
     }
   }
 
-  // 缓存管理
+  // Cache管理
   private async getCachedResponse(request: UnifiedRequest): Promise<UnifiedResponse | null> {
     if (!this.cacheEnabled) return null;
 
@@ -381,17 +381,17 @@ export class UnifiedGatewayService {
       if (cached) {
         const parsed = JSON.parse(cached) as UnifiedResponse;
         
-        // 检查缓存是否过期（基于使用频率）
+        // Check cachewhether itexpired(基于using频率)
         const cacheAge = Date.now() - new Date(parsed.timestamp).getTime();
-        const maxAge = this.cacheTTL * 1000; // 转换为毫秒
+        const maxAge = this.cacheTTL * 1000; // convertfor毫s
         
         if (cacheAge < maxAge) {
-          // 更新最后使用时间
+          // Update最后usingtime
           await this.redis.expire(cacheKey, this.cacheTTL);
           this.cacheHits++;
           return parsed;
         } else {
-          // 缓存过期，删除
+          // Cacheexpired, Delete
           await this.redis.del(cacheKey);
           this.cacheMisses++;
         }
@@ -399,7 +399,7 @@ export class UnifiedGatewayService {
         this.cacheMisses++;
       }
     } catch (error) {
-      console.warn('缓存读取失败:', error);
+      console.warn('Cache读取failed:', error);
     }
 
     return null;
@@ -414,13 +414,13 @@ export class UnifiedGatewayService {
       
       await this.redis.setex(cacheKey, this.cacheTTL, cacheValue);
     } catch (error) {
-      console.warn('缓存写入失败:', error);
+      console.warn('Cache写入failed:', error);
     }
   }
 
-  // 记录监控指标
+  // LogMonitoringmetrics
   private recordMetrics(request: UnifiedRequest, response: UnifiedResponse): void {
-    apiMonitoringService.recordMetric({
+    apiMonitoringservervice.recordMetric({
       endpoint: '/api/v1/unified/process',
       method: 'POST',
       responseTime: response.responseTime,
@@ -430,17 +430,17 @@ export class UnifiedGatewayService {
     });
   }
 
-  // 获取缓存统计
+  // FetchCacheStatistics
   async getCacheStats(): Promise<any> {
     if (!this.cacheEnabled) {
-      return { enabled: false, message: '缓存未启用' };
+      return { enabled: false, message: 'Cache未enabled' };
     }
 
     try {
       const keys = await this.redis.keys('unified:*');
       const totalSize = keys.length;
       
-      // 获取一些缓存示例
+      // Fetch一些CacheExample
       const sampleKeys = keys.slice(0, 5);
       const samples = [];
       
@@ -468,11 +468,11 @@ export class UnifiedGatewayService {
           : '0%'
       };
     } catch (error) {
-      return { enabled: false, error: error instanceof Error ? error.message : '未知错误' };
+      return { enabled: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
-  // 清空缓存
+  // ClearCache
   async clearCache(): Promise<boolean> {
     if (!this.cacheEnabled) return false;
 
@@ -483,16 +483,16 @@ export class UnifiedGatewayService {
       }
       return true;
     } catch (error) {
-      console.error('清空缓存失败:', error);
+      console.error('ClearCachefailed:', error);
       return false;
     }
   }
 
-  // 关闭连接
+  // CloseConnect
   async close(): Promise<void> {
     await this.redis.quit();
   }
 }
 
-// 导出单例实例
-export const unifiedGatewayService = new UnifiedGatewayService();
+// Export单例实例
+export const unifiedGatewayservervice = new UnifiedGatewayservervice();

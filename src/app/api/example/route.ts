@@ -1,6 +1,6 @@
 /**
- * API 示例路由
- * 展示标准 NextResponse 响应格式
+ * API Exampleroute
+ * 展示standard NextResponse ResponseFormat
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const items = Array.from({ length: pageSize }, (_, i) => ({
       id: `item-${(page - 1) * pageSize + i + 1}`,
-      name: `项目 ${(page - 1) * pageSize + i + 1}`,
+      name: `Project ${(page - 1) * pageSize + i + 1}`,
       createdAt: new Date().toISOString(),
     }));
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: { received: body } });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

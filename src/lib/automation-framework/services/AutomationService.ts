@@ -1,15 +1,15 @@
-// 自动化服务 - 核心自动化功能
+// Automationservervice - 核心Automation功can
 import path from 'path';
 import { ModuleManager, AutomationModule, ModuleConfig } from '../core/ModuleManager';
 import { TaskScheduler, ScheduledTask, TaskExecution } from '../core/TaskScheduler';
 import { DataBus, DataMessage } from '../core/DataBus';
 import { EventSystem, AutomationEvent } from '../core/EventSystem';
-import { FaultDiagnosisService, FaultDiagnosisServiceConfig } from './FaultDiagnosisService';
-// 导入自动化模块注册
+import { FaultDiagnosisservervice, FaultDiagnosisserverviceConfig } from './FaultDiagnosisservervice';
+// ImportAutomationModuleRegister
 import { registerAutomationModules, getAllModules, executeModuleAction } from '@/lib/automation-modules/register';
 import { logger } from '@/lib/logger';
 
-export interface AutomationServiceConfig {
+export interface AutomationserverviceConfig {
   dataDir: string;
   maxConcurrentTasks: number;
   defaultRetryPolicy: {
@@ -22,12 +22,12 @@ export interface AutomationServiceConfig {
     keepEventDays: number;
     keepMessageDays: number;
   };
-  faultDiagnosis: FaultDiagnosisServiceConfig;
+  faultDiagnosis: FaultDiagnosisserverviceConfig;
 }
 
-export interface ServiceStatus {
+export interface serverviceStatus {
   status: 'starting' | 'running' | 'stopping' | 'stopped' | 'error';
-  uptime: number; // 秒
+  uptime: number; // s
   components: {
     moduleManager: boolean;
     taskScheduler: boolean;
@@ -53,20 +53,20 @@ export interface ServiceStatus {
   lastError?: string;
 }
 
-export class AutomationService {
-  private config: AutomationServiceConfig;
+export class Automationservervice {
+  private config: AutomationserverviceConfig;
   private moduleManager: ModuleManager;
   private taskScheduler: TaskScheduler;
   private dataBus: DataBus;
   private eventSystem: EventSystem;
-  private faultDiagnosisService: FaultDiagnosisService;
-  private status: ServiceStatus;
+  private faultDiagnosisservervice: FaultDiagnosisservervice;
+  private status: serverviceStatus;
   private startTime: Date;
   private cleanupInterval?: NodeJS.Timeout;
   private taskCheckInterval?: NodeJS.Timeout;
   private modules: Array<AutomationModule & { actions?: Record<string, unknown>; healthCheck?: () => Promise<unknown> }> = [];
   
-  constructor(config?: Partial<AutomationServiceConfig>) {
+  constructor(config?: Partial<AutomationserverviceConfig>) {
     this.config = {
       dataDir: path.join(process.cwd(), 'data', 'automation'),
       maxConcurrentTasks: 10,
@@ -113,43 +113,43 @@ export class AutomationService {
       }
     };
     
-    // 初始化组件
+    // InitializeComponent
     this.moduleManager = new ModuleManager(this.config.dataDir);
     this.taskScheduler = new TaskScheduler(this.config.dataDir);
     this.dataBus = new DataBus();
     this.eventSystem = new EventSystem();
-    this.faultDiagnosisService = new FaultDiagnosisService(
+    this.faultDiagnosisservervice = new FaultDiagnosisservervice(
       this.config.faultDiagnosis
     );
   }
   
-  // 启动服务
+  // Startservervice
   async start(): Promise<boolean> {
     try {
-      console.log('[AutomationService] Starting...');
+      console.log('[Automationservervice] Starting...');
       this.status.status = 'starting';
       
-      // 初始化事件系统
+      // InitializeEventSystem
       this.setupEventSystem();
       
-      // 初始化数据总线
+      // InitializeData Bus
       this.setupDataBus();
       
-      // 初始化实战模块
+      // Initialize实战Module
       await this.initializeModules();
       
-      // 启动定时任务
+      // Start定时Task
       this.startScheduledTasks();
       
-      // 启动清理任务
+      // Start清理Task
       this.startCleanupTask();
       
-      // 启动故障诊断服务
+      // StartFault Diagnosisservervice
       if (this.config.faultDiagnosis.enabled) {
-        await this.faultDiagnosisService.start();
+        await this.faultDiagnosisservervice.start();
       }
       
-      // 更新状态
+      // UpdateStatus
       this.status.status = 'running';
       this.status.components = {
         moduleManager: true,
@@ -159,7 +159,7 @@ export class AutomationService {
         faultDiagnosis: this.config.faultDiagnosis.enabled
       };
       
-      // 触发启动事件
+      // TriggerStartEvent
       this.eventSystem.emit({
         type: 'service:started',
         source: 'automation-service',
@@ -172,11 +172,11 @@ export class AutomationService {
         }
       });
       
-      console.log('[AutomationService] Started successfully');
+      console.log('[Automationservervice] Started successfully');
       return true;
       
     } catch (error) {
-      logger.error('AutomationService start failed', error, { module: 'AutomationService' });
+      logger.error('Automationservervice start failed', error, { module: 'Automationservervice' });
       this.status.status = 'error';
       this.status.lastError = error instanceof Error ? error.message : 'Unknown error';
       
@@ -197,16 +197,16 @@ export class AutomationService {
   }
 
   /**
-   * 初始化模块系统
+   * InitializeModuleSystem
    */
   async initializeModules() {
     try {
       this.modules = (await registerAutomationModules() as unknown) as Array<AutomationModule & { actions?: Record<string, unknown>; healthCheck?: () => Promise<unknown> }>;
-      console.log(`自动化模块初始化完成，共 ${this.modules.length} 个模块`);
+      console.log(`AutomationModuleInitializeCompleted, 共 ${this.modules.length}  Module`);
       
-      // 注册模块到 ModuleManager
+      // RegisterModuleto ModuleManager
       for (const module of this.modules) {
-        // 检查是否已注册，避免重复
+        // Checkwhether italreadyRegister, 避免重复
         const existing = this.moduleManager.getAllModules().find(m => m.id === module.id);
         if (!existing) {
             this.moduleManager.registerModule({
@@ -214,7 +214,7 @@ export class AutomationService {
             name: module.name,
             version: module.version,
             description: module.description,
-            author: module.author || '小A',
+            author: module.author || 'SmallA',
             enabled: module.enabled,
             category: module.category,
             dependencies: module.dependencies,
@@ -229,25 +229,25 @@ export class AutomationService {
       
       return { success: true, count: this.modules.length };
     } catch (error: any) {
-      logger.error('自动化模块初始化失败', error, { module: 'AutomationService' });
+      logger.error('AutomationModuleInitialization failed', error, { module: 'Automationservervice' });
       return { success: false, error: error.message };
     }
   }
 
   /**
-   * 获取所有模块
+   * Fetch所AllModule
    */
   getAllModules() {
     return this.modules;
   }
   
-  // 停止服务
+  // Stopservervice
   async stop(): Promise<boolean> {
     try {
-      console.log('[AutomationService] Stopping...');
+      console.log('[Automationservervice] Stopping...');
       this.status.status = 'stopping';
       
-      // 停止定时任务
+      // Stop定时Task
       if (this.cleanupInterval) {
         clearInterval(this.cleanupInterval);
       }
@@ -255,7 +255,7 @@ export class AutomationService {
         clearInterval(this.taskCheckInterval);
       }
       
-      // 触发停止事件
+      // TriggerStopEvent
       this.eventSystem.emit({
         type: 'service:stopping',
         source: 'automation-service',
@@ -267,7 +267,7 @@ export class AutomationService {
         }
       });
       
-      // 更新状态
+      // UpdateStatus
       this.status.status = 'stopped';
       this.status.components = {
         moduleManager: false,
@@ -277,11 +277,11 @@ export class AutomationService {
         faultDiagnosis: false
       };
       
-      console.log('[AutomationService] Stopped successfully');
+      console.log('[Automationservervice] Stopped successfully');
       return true;
       
     } catch (error) {
-      logger.error('AutomationService stop failed', error, { module: 'AutomationService' });
+      logger.error('Automationservervice stop failed', error, { module: 'Automationservervice' });
       this.status.status = 'error';
       this.status.lastError = error instanceof Error ? error.message : 'Unknown error';
       
@@ -289,9 +289,9 @@ export class AutomationService {
     }
   }
   
-  // 设置事件系统
+  // SettingsEventSystem
   private setupEventSystem(): void {
-    // 注册服务事件处理器
+    // RegisterserverviceEventProcess器
     this.eventSystem.registerHandler({
       eventType: 'module:*',
       moduleId: 'automation-service',
@@ -323,39 +323,39 @@ export class AutomationService {
     });
   }
   
-  // 设置数据总线
+  // SettingsData Bus
   private setupDataBus(): void {
-    // 订阅系统频道
+    // 订阅SystemChannel
     this.dataBus.subscribe('automation-service', 'system');
     this.dataBus.subscribe('automation-service', 'module-events');
     this.dataBus.subscribe('automation-service', 'task-events');
     this.dataBus.subscribe('automation-service', 'error-events');
     
-    // 注册消息处理器
+    // RegisterMessageProcess器
     this.dataBus.onMessage('automation-service', (message) => {
       this.handleDataBusMessage(message);
     });
   }
   
-  // 启动定时任务检查
+  // Start定时TaskCheck
   private startScheduledTasks(): void {
     this.taskCheckInterval = setInterval(() => {
       this.checkAndExecutePendingTasks();
-    }, 10000); // 每10秒检查一次
+    }, 10000); // 每10sCheck一 times
     
-    console.log('[AutomationService] Scheduled task checker started');
+    console.log('[Automationservervice] Scheduled task checker started');
   }
   
-  // 启动清理任务
+  // Start清理Task
   private startCleanupTask(): void {
     this.cleanupInterval = setInterval(() => {
       this.performCleanup();
-    }, 3600000); // 每小时清理一次
+    }, 3600000); // 每Small时清理一 times
     
-    console.log('[AutomationService] Cleanup task started');
+    console.log('[Automationservervice] Cleanup task started');
   }
   
-  // 检查并执行待处理任务
+  // CheckandExecutePendingTask
   private async checkAndExecutePendingTasks(): Promise<void> {
     try {
       const pendingTasks = this.taskScheduler.getPendingTasks();
@@ -364,22 +364,22 @@ export class AutomationService {
         return;
       }
       
-      console.log(`[AutomationService] Found ${pendingTasks.length} pending tasks`);
+      console.log(`[Automationservervice] Found ${pendingTasks.length} pending tasks`);
       
       for (const task of pendingTasks) {
-        // 检查并发限制
+        // Checkand发限制
         const activeExecutions = this.getActiveExecutions();
         if (activeExecutions >= this.config.maxConcurrentTasks) {
-          console.log(`[AutomationService] Max concurrent tasks reached (${this.config.maxConcurrentTasks})`);
+          console.log(`[Automationservervice] Max concurrent tasks reached (${this.config.maxConcurrentTasks})`);
           break; 
         }
         
-        // 执行任务
+        // ExecuteTask
         await this.executeTask(task);
       }
       
     } catch (error) {
-      logger.error('检查待执行任务失败', error, { module: 'AutomationService' });
+      logger.error('Check待ExecuteTaskfailed', error, { module: 'Automationservervice' });
       
       this.eventSystem.emit({
         type: 'service:error',
@@ -395,13 +395,13 @@ export class AutomationService {
     }
   }
   
-  // 执行任务
+  // ExecuteTask
   private async executeTask(task: ScheduledTask): Promise<void> {
     const execution = this.taskScheduler.startTaskExecution(task.id);
     
-    console.log(`[AutomationService] Starting task execution: ${task.id} (${task.moduleId}.${task.action})`);
+    console.log(`[Automationservervice] Starting task execution: ${task.id} (${task.moduleId}.${task.action})`);
     
-    // 触发任务开始事件
+    // TriggerTaskOn始Event
     this.eventSystem.emit({
       type: 'task:started',
       source: 'automation-service',
@@ -418,31 +418,31 @@ export class AutomationService {
     });
     
     try {
-      // 获取模块
+      // FetchModule
       const module = this.moduleManager.getAllModules().find(m => m.id === task.moduleId);
       if (!module) {
         throw new Error(`Module not found: ${task.moduleId}`);
       }
       
-      // 检查模块健康状态
+      // CheckModuleHealthStatus
       const health = this.moduleManager.getModuleHealth(task.moduleId);
       if (health.status === 'error') {
         throw new Error(`Module health check failed: ${health.issues.join(', ')}`);
       }
       
-      // 执行任务
+      // ExecuteTask
       const result = await this.executeModuleAction(
         task.moduleId,
         task.action,
         task.parameters || {}
       );
       
-      // 完成任务
+      // CompletedTask
       this.taskScheduler.completeTaskExecution(execution.id, result);
       
-      console.log(`[AutomationService] Task completed: ${task.id}`);
+      console.log(`[Automationservervice] Task completed: ${task.id}`);
       
-      // 触发任务完成事件
+      // TriggerTaskCompletedEvent
       this.eventSystem.emit({
         type: 'task:completed',
         source: 'automation-service',
@@ -459,13 +459,13 @@ export class AutomationService {
       });
       
     } catch (error) {
-      // 任务失败
+      // Taskfailed
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.taskScheduler.failTaskExecution(execution.id, errorMessage);
       
-      logger.error('任务执行失败', error, { module: 'AutomationService', taskId: task.id });
+      logger.error('TaskExecutefailed', error, { module: 'Automationservervice', taskId: task.id });
       
-      // 触发任务失败事件
+      // TriggerTaskfailedEvent
       this.eventSystem.emit({
         type: 'task:failed',
         source: 'automation-service',
@@ -480,14 +480,14 @@ export class AutomationService {
         }
       });
       
-      // 检查重试策略
+      // CheckRetry策略
       if (task.retryPolicy && execution.metadata.retryCount < task.retryPolicy.maxRetries) {
         const retryDelay = task.retryPolicy.retryDelay * 
           Math.pow(task.retryPolicy.backoffMultiplier, execution.metadata.retryCount);
         
-        console.log(`[AutomationService] Scheduling retry for task ${task.id} in ${retryDelay}ms`);
+        console.log(`[Automationservervice] Scheduling retry for task ${task.id} in ${retryDelay}ms`);
         
-        // 安排重试（模拟）
+        // 安排Retry(模拟)
         setTimeout(() => {
           this.executeTask(task); 
         }, retryDelay);
@@ -495,17 +495,17 @@ export class AutomationService {
     }
   }
   
-  // 执行模块动作
+  // ExecuteModule动作
   public async executeModuleAction(
     moduleId: string,
     action: string,
     parameters: Record<string, unknown>
   ): Promise<unknown> {
     try {
-      // 优先尝试使用注册的实战模块
+      // 优先尝试usingRegister's实战Module
       const result = await executeModuleAction(moduleId, action, parameters);
       
-      // 记录执行历史
+      // LogExecute历史
       this.eventSystem.emit({
         type: 'module-action-executed',
         source: 'automation-service',
@@ -524,8 +524,8 @@ export class AutomationService {
       return result;
       
     } catch (error: any) {
-      // 如果实战模块执行失败，记录错误
-      logger.error('模块动作执行失败', error, { module: 'AutomationService', moduleId, action });
+      // if实战ModuleExecutefailed, Logerror
+      logger.error('Module动作Executefailed', error, { module: 'Automationservervice', moduleId, action });
       
       this.eventSystem.emit({
         type: 'module-action-failed',
@@ -547,27 +547,27 @@ export class AutomationService {
   }
 
   /**
-   * 检查模块健康状态
+   * CheckModuleHealthStatus
    */
   async checkModuleHealth(moduleId: string) {
     const module = this.modules.find(m => m.id === moduleId);
     if (!module) {
-      return { status: 'error', message: '模块未找到' };
+      return { status: 'error', message: 'ModuleNot found' };
     }
     
     if (module.healthCheck) {
       return await module.healthCheck();
     }
     
-    return { status: 'healthy', message: '模块正常' };
+    return { status: 'healthy', message: 'ModuleNormal' };
   }
   
-  // 处理模块事件
+  // ProcessModuleEvent
   private handleModuleEvent(event: AutomationEvent): void {
-    // 更新模块统计
+    // UpdateModuleStatistics
     this.updateStats();
     
-    // 记录到数据总线
+    // LogtoData Bus
     this.dataBus.sendMessage({
       type: 'module-event',
       source: 'automation-service',
@@ -579,12 +579,12 @@ export class AutomationService {
     });
   }
   
-  // 处理任务事件
+  // ProcessTaskEvent
   private handleTaskEvent(event: AutomationEvent): void {
-    // 更新任务统计
+    // UpdateTaskStatistics
     this.updateStats();
     
-    // 记录到数据总线
+    // LogtoData Bus
     this.dataBus.sendMessage({
       type: 'task-event',
       source: 'automation-service',
@@ -596,11 +596,11 @@ export class AutomationService {
     });
   }
   
-  // 处理错误事件
+  // ProcesserrorEvent
   private handleErrorEvent(event: AutomationEvent): void {
-    logger.error('AutomationService error event', event.data, { module: 'AutomationService' });
+    logger.error('Automationservervice error event', event.data, { module: 'Automationservervice' });
     
-    // 记录到数据总线
+    // LogtoData Bus
     this.dataBus.sendMessage({
       type: 'error-event',
       source: 'automation-service',
@@ -612,20 +612,20 @@ export class AutomationService {
     });
   }
   
-  // 处理数据总线消息
+  // ProcessData BusMessage
   private handleDataBusMessage(message: DataMessage): void {
-    // 更新消息统计
+    // UpdateMessageStatistics
     this.updateStats();
     
-    // 根据消息类型处理
+    // 根据MessageTypeProcess
     switch (message.type) {
       case 'module-event':
       case 'task-event':
       case 'error-event':
-        // 这些事件已经处理过，忽略
+        // 这些Eventalready经Process过, 忽略
         break;
       default:
-        // 转发到事件系统
+        // 转发toEventSystem
         this.eventSystem.emit({
           type: `message:${message.type}`,
           source: 'data-bus',
@@ -638,17 +638,17 @@ export class AutomationService {
     }
   }
   
-  // 获取活跃执行数
+  // FetchActiveExecute数
   private getActiveExecutions(): number {
-    // 简化实现：从任务调度器获取
+    // 简化实现: FromTaskScheduling器Fetch
     const tasks = this.taskScheduler.getAllTasks();
     return tasks.filter(t => 
       t.metadata.lastRun && 
-      new Date(t.metadata.lastRun).getTime() > Date.now() - 300000 // 5分钟内
+      new Date(t.metadata.lastRun).getTime() > Date.now() - 300000 // 5min内
     ).length;
   }
   
-  // 更新统计信息
+  // UpdateStatisticsinformation
   private updateStats(): void {
     const modules = this.moduleManager.getAllModules();
     const tasks = this.taskScheduler.getAllTasks();
@@ -668,33 +668,33 @@ export class AutomationService {
     this.status.uptime = Math.floor((Date.now() - this.startTime.getTime()) / 1000);
   }
   
-  // 执行清理任务
+  // Execute清理Task
   private performCleanup(): void {
     try {
-      console.log('[AutomationService] Performing cleanup...');
+      console.log('[Automationservervice] Performing cleanup...');
       
-      // 清理旧执行记录
+      // 清理OldExecuteLog
       const executionCleanup = this.taskScheduler.cleanupOldExecutions(
         this.config.cleanupSettings.keepExecutionDays
       );
       
-      // 清理旧事件
+      // 清理OldEvent
       const eventCleanup = this.eventSystem.cleanupOldEvents(
         this.config.cleanupSettings.keepEventDays
       );
       
-      // 清理旧消息
+      // 清理OldMessage
       const messageCleanup = this.dataBus.cleanupOldMessages(
-        this.config.cleanupSettings.keepMessageDays * 24 // 转换为小时
+        this.config.cleanupSettings.keepMessageDays * 24 // convertforSmall时
       );
       
-      console.log('[AutomationService] Cleanup completed:', {
+      console.log('[Automationservervice] Cleanup completed:', {
         executions: executionCleanup,
         events: eventCleanup,
         messages: messageCleanup
       });
       
-      // 触发清理完成事件
+      // Trigger清理CompletedEvent
       this.eventSystem.emit({
         type: 'service:cleanup-completed',
         source: 'automation-service',
@@ -709,7 +709,7 @@ export class AutomationService {
       });
       
     } catch (error) {
-      logger.error('AutomationService cleanup failed', error, { module: 'AutomationService' });
+      logger.error('Automationservervice cleanup failed', error, { module: 'Automationservervice' });
       
       this.eventSystem.emit({
         type: 'service:error',
@@ -725,38 +725,38 @@ export class AutomationService {
     }
   }
   
-  // 获取服务状态
-  getStatus(): ServiceStatus {
+  // Get service status
+  getStatus(): serverviceStatus {
     this.updateStats();
     return { ...this.status };
   }
   
-  // 获取运行时间
+  // Fetch运行time
   getUptime(): number {
     return Math.floor((Date.now() - this.startTime.getTime()) / 1000);
   }
   
-  // 获取模块管理器
+  // FetchModule管理器
   getModuleManager(): ModuleManager {
     return this.moduleManager;
   }
   
-  // 获取任务调度器
+  // FetchTaskScheduling器
   getTaskScheduler(): TaskScheduler {
     return this.taskScheduler;
   }
   
-  // 获取数据总线
+  // FetchData Bus
   getDataBus(): DataBus {
     return this.dataBus;
   }
   
-  // 获取事件系统
+  // FetchEventSystem
   getEventSystem(): EventSystem {
     return this.eventSystem;
   }
   
-  // 手动触发任务
+  // 手动TriggerTask
   async triggerTask(taskId: string): Promise<{
     success: boolean;
     executionId?: string;
@@ -779,7 +779,7 @@ export class AutomationService {
         };
       }
       
-      // 执行任务
+      // ExecuteTask
       await this.executeTask(task);
       
       return {
@@ -795,7 +795,7 @@ export class AutomationService {
     }
   }
   
-  // 注册新模块
+  // RegisterNewModule
   async registerModule(moduleData: Omit<AutomationModule, 'metadata'>): Promise<{
     success: boolean;
     module?: AutomationModule;
@@ -804,7 +804,7 @@ export class AutomationService {
     try {
       const module = await this.moduleManager.registerModule(moduleData);
       
-      // 触发模块注册事件
+      // TriggerModuleRegisterEvent
       this.eventSystem.emit({
         type: 'module:registered',
         source: 'automation-service',
@@ -830,7 +830,7 @@ export class AutomationService {
     }
   }
   
-  // 创建新任务
+  // CreateNewTask
   createTask(taskData: Omit<ScheduledTask, 'id' | 'metadata'>): {
     success: boolean;
     task?: ScheduledTask;
@@ -839,7 +839,7 @@ export class AutomationService {
     try {
       const task = this.taskScheduler.createTask(taskData);
       
-      // 触发任务创建事件
+      // TriggerTaskCreateEvent
       this.eventSystem.emit({
         type: 'task:created',
         source: 'automation-service',
@@ -866,8 +866,8 @@ export class AutomationService {
     }
   }
   
-  // 导出服务状态
-  exportServiceState(): string {
+  // ExportserverviceStatus
+  exportserverviceState(): string {
     const state = {
       config: this.config,
       status: this.getStatus(),
@@ -882,8 +882,8 @@ export class AutomationService {
     return JSON.stringify(state, null, 2);
   }
   
-  // 导入服务状态
-  async importServiceState(stateJson: string): Promise<{
+  // ImportserverviceStatus
+  async importserverviceState(stateJson: string): Promise<{
     success: boolean;
     imported: {
       modules: number;
@@ -897,7 +897,7 @@ export class AutomationService {
       let importedModules = 0;
       let importedTasks = 0;
       
-      // 导入模块
+      // ImportModule
       if (state.modules && Array.isArray(state.modules)) {
         for (const moduleData of state.modules) {
           try {
@@ -909,7 +909,7 @@ export class AutomationService {
         }
       }
       
-      // 导入任务
+      // ImportTask
       if (state.tasks && Array.isArray(state.tasks)) {
         for (const taskData of state.tasks) {
           try {
@@ -921,7 +921,7 @@ export class AutomationService {
         }
       }
       
-      // 导入数据总线状态
+      // ImportData BusStatus
       if (state.dataBusState) {
         const result = this.dataBus.importState(state.dataBusState);
         if (result.errors) {
@@ -929,7 +929,7 @@ export class AutomationService {
         }
       }
       
-      // 导入事件系统状态
+      // ImportEventSystemStatus
       if (state.eventSystemState) {
         const result = this.eventSystem.importState(state.eventSystemState);
         if (result.errors) {
@@ -955,50 +955,50 @@ export class AutomationService {
     }
   }
 
-  // ==================== 故障诊断服务方法 ====================
+  // ==================== Fault Diagnosisservervicemethod ====================
 
-  // 获取故障诊断服务
-  getFaultDiagnosisService(): FaultDiagnosisService {
-    return this.faultDiagnosisService;
+  // FetchFault Diagnosisservervice
+  getFaultDiagnosisservervice(): FaultDiagnosisservervice {
+    return this.faultDiagnosisservervice;
   }
 
-  // 获取故障诊断状态
+  // FetchFault DiagnosisStatus
   getFaultDiagnosisStatus() {
-    return this.faultDiagnosisService.getStatus();
+    return this.faultDiagnosisservervice.getStatus();
   }
 
-  // 获取诊断历史
+  // Fetch诊断历史
   getFaultDiagnosisHistory(limit: number = 50) {
-    // 简化版本，返回空数组
+    // 简化Version, 返回nullArray
     return [];
   }
 
-  // 获取故障历史
+  // Fetch故障历史
   getFaultHistory() {
-    // 简化版本，返回空数组
+    // 简化Version, 返回nullArray
     return [];
   }
 
-  // 获取所有诊断规则
+  // Fetch所All诊断规then
   getFaultDiagnosisRules() {
-    return this.faultDiagnosisService.getAllRules();
+    return this.faultDiagnosisservervice.getAllRules();
   }
 
-  // 添加自定义诊断规则
+  // AddCustom诊断规then
   addFaultDiagnosisRule(rule: any): string {
-    // 简化版本，返回规则ID
+    // 简化Version, 返回规thenID
     return `rule-${Date.now()}`;
   }
 
-  // 执行手动修复
+  // Execute手动修复
   async executeFaultRepair(faultId: string, repairStepId: string) {
-    // 简化版本，返回成功
-    return { success: true, message: '修复执行成功' };
+    // 简化Version, 返回success
+    return { success: true, message: '修复Executesuccess' };
   }
 
-  // 更新故障诊断配置
-  updateFaultDiagnosisConfig(newConfig: Partial<FaultDiagnosisServiceConfig>) {
-    this.faultDiagnosisService.updateConfig(newConfig);
+  // UpdateFault DiagnosisConfiguration
+  updateFaultDiagnosisConfig(newConfig: Partial<FaultDiagnosisserverviceConfig>) {
+    this.faultDiagnosisservervice.updateConfig(newConfig);
     this.config.faultDiagnosis = { ...this.config.faultDiagnosis, ...newConfig };
   }
 }

@@ -1,11 +1,11 @@
-// 全局类型定义
+// GlobalType定义
 
-// 基础类型
+// basicType
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 export type Maybe<T> = T | null | undefined;
 
-// API 响应类型
+// API ResponseType
 export interface ApiResponse<T = any> {
   data: T;
   message?: string;
@@ -31,7 +31,7 @@ export interface ApiError {
   timestamp: string;
 }
 
-// 用户相关类型
+// User相OffType
 export interface User {
   id: string;
   email: string;
@@ -44,7 +44,7 @@ export interface User {
 
 export type UserRole = 'admin' | 'user' | 'guest';
 
-// 系统状态类型
+// SystemStatusType
 export interface SystemStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
   components: ComponentStatus[];
@@ -69,7 +69,7 @@ export interface SystemMetrics {
   errorRate: number;
 }
 
-// 工具类型
+// ToolType
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
@@ -82,7 +82,7 @@ export type RequireOnlyOne<T, Keys extends keyof T = keyof T> =
   Pick<T, Exclude<keyof T, Keys>> & 
   { [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, undefined>> }[Keys];
 
-// 事件类型
+// EventType
 export interface Event<T = any> {
   type: string;
   payload: T;
@@ -90,7 +90,7 @@ export interface Event<T = any> {
   source: string;
 }
 
-// 配置类型
+// ConfigurationType
 export interface AppConfig {
   api: {
     baseUrl: string;
@@ -109,12 +109,12 @@ export interface AppConfig {
   };
 }
 
-// 通用工具类型
+// 通用ToolType
 export type ValueOf<T> = T[keyof T];
 export type ArrayElement<ArrayType extends readonly unknown[]> = 
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
-// 类型守卫
+// Type守卫
 export function isApiError(error: any): error is ApiError {
   return error && typeof error === 'object' && 'code' in error && 'message' in error;
 }
@@ -127,7 +127,7 @@ export function isSystemStatus(status: any): status is SystemStatus {
   return status && typeof status === 'object' && 'status' in status && 'components' in status;
 }
 
-// 枚举类型
+// 枚举Type
 export enum HttpMethod {
   GET = 'GET',
   POST = 'POST',
@@ -151,7 +151,7 @@ export enum HttpStatus {
   SERVICE_UNAVAILABLE = 503,
 }
 
-// 时间相关类型
+// time相OffType
 export type DateRange = {
   start: Date | string;
   end: Date | string;
@@ -159,7 +159,7 @@ export type DateRange = {
 
 export type TimeUnit = 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 
-// 导出所有类型
+// Export所AllType
 export * from './errors';
 export * from './forms';
 export * from './validation';

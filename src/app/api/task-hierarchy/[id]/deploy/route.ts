@@ -13,6 +13,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const res = await moveStage(id, 'deployed', 'deploy', body?.actor, body?.payload);
     return NextResponse.json({ success: true, data: res });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 400 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 400 });
   }
 }

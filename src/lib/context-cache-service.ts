@@ -1,17 +1,17 @@
 /**
- * 上下文智能缓存服务
- * 提供智能缓存管理，支持TTL、LRU淘汰、缓存统计等功能
+ * 上下文智canCacheservervice
+ * 提供智canCache管理, 支持TTL, LRU淘汰, CacheStatistics等功can
  */
 
 export interface CacheItem {
   value: any;
   timestamp: number;
-  ttl?: number; // 生存时间（秒）
+  ttl?: number; // 生存time(s)
   accessCount: number;
   lastAccessed: number;
 }
 
-export class ContextCacheService {
+export class ContextCacheservervice {
   private cache: Map<string, CacheItem>;
   private maxSize: number;
   private stats: {
@@ -34,9 +34,9 @@ export class ContextCacheService {
     };
   }
 
-  // 设置缓存
+  // SettingsCache
   set(key: string, value: any, ttl?: number): void {
-    // 检查是否需要淘汰
+    // Checkwhether itneed to淘汰
     if (this.cache.size >= this.maxSize && !this.cache.has(key)) {
       this.evictLRU();
     }
@@ -52,7 +52,7 @@ export class ContextCacheService {
     this.stats.sets++;
   }
 
-  // 获取缓存
+  // FetchCache
   get(key: string): any {
     const item = this.cache.get(key);
     
@@ -61,14 +61,14 @@ export class ContextCacheService {
       return undefined;
     }
 
-    // 检查是否过期
+    // Checkwhether itexpired
     if (item.ttl && Date.now() - item.timestamp > item.ttl * 1000) {
       this.cache.delete(key);
       this.stats.misses++;
       return undefined;
     }
 
-    // 更新访问统计
+    // Update访问Statistics
     item.accessCount++;
     item.lastAccessed = Date.now();
     
@@ -76,7 +76,7 @@ export class ContextCacheService {
     return item.value;
   }
 
-  // 删除缓存
+  // DeleteCache
   delete(key: string): boolean {
     const deleted = this.cache.delete(key);
     if (deleted) {
@@ -85,19 +85,19 @@ export class ContextCacheService {
     return deleted;
   }
 
-  // 清空缓存
+  // ClearCache
   clear(): number {
     const size = this.cache.size;
     this.cache.clear();
     return size;
   }
 
-  // 获取所有缓存键
+  // Fetch所AllCache键
   getAllKeys(): string[] {
     return Array.from(this.cache.keys());
   }
 
-  // 获取缓存状态
+  // FetchCacheStatus
   getCacheStatus(): any {
     const now = Date.now();
     const items = Array.from(this.cache.entries()).map(([key, item]) => ({
@@ -117,11 +117,11 @@ export class ContextCacheService {
       maxSize: this.maxSize,
       usage: Math.round((this.cache.size / this.maxSize) * 100),
       stats: this.stats,
-      items: items.slice(0, 50) // 只返回前50个
+      items: items.slice(0, 50) // 只返回前50 
     };
   }
 
-  // 获取缓存统计
+  // FetchCacheStatistics
   getCacheStats(): any {
     const hitRate = this.stats.hits + this.stats.misses > 0 
       ? Math.round((this.stats.hits / (this.stats.hits + this.stats.misses)) * 100) 
@@ -154,7 +154,7 @@ export class ContextCacheService {
     }
   }
 
-  // 清理过期缓存
+  // 清理expiredCache
   cleanupExpired(): number {
     const now = Date.now();
     let cleaned = 0;
@@ -170,5 +170,5 @@ export class ContextCacheService {
   }
 }
 
-// 导出单例实例
-export const contextCacheService = new ContextCacheService();
+// Export单例实例
+export const contextCacheservervice = new ContextCacheservervice();

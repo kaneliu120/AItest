@@ -1,9 +1,9 @@
-// API监控服务
+// APIMonitoringservervice
 export interface ApiMetric {
   endpoint: string;
   method: string;
   timestamp: string;
-  responseTime: number; // 毫秒
+  responseTime: number; // 毫s
   statusCode: number;
   success: boolean;
   userId?: string;
@@ -25,8 +25,8 @@ export interface ApiStats {
     avgResponseTime: number;
     lastCalled: string;
   }>;
-  hourlyTraffic: Record<string, number>; // 小时 -> 请求数
-  dailyTraffic: Record<string, number>; // 日期 -> 请求数
+  hourlyTraffic: Record<string, number>; // Small时 -> Request数
+  dailyTraffic: Record<string, number>; // date -> Request数
 }
 
 export interface PerformanceAlert {
@@ -40,15 +40,15 @@ export interface PerformanceAlert {
   resolvedAt?: string;
 }
 
-class ApiMonitoringService {
+class ApiMonitoringservervice {
   private metrics: ApiMetric[] = [];
-  private maxMetrics = 10000; // 最多保存10000条记录
+  private maxMetrics = 10000; // 最MoreSave10000 Log
   private alerts: PerformanceAlert[] = [];
   private statsCache: ApiStats | null = null;
   private lastStatsUpdate = 0;
-  private statsCacheTTL = 60000; // 1分钟缓存
+  private statsCacheTTL = 60000; // 1minCache
 
-  // 记录API调用
+  // LogAPI调用
   recordMetric(metric: Omit<ApiMetric, 'timestamp'>): void {
     const fullMetric: ApiMetric = {
       ...metric,
@@ -57,23 +57,23 @@ class ApiMonitoringService {
 
     this.metrics.push(fullMetric);
 
-    // 限制记录数量
+    // 限制Logquantity
     if (this.metrics.length > this.maxMetrics) {
       this.metrics = this.metrics.slice(-this.maxMetrics);
     }
 
-    // 清除缓存
+    // ClearCache
     this.statsCache = null;
 
-    // 检查性能问题
+    // CheckPerformance问题
     this.checkPerformance(fullMetric);
   }
 
-  // 获取API统计
+  // FetchAPIStatistics
   getStats(): ApiStats {
     const now = Date.now();
     
-    // 使用缓存
+    // usingCache
     if (this.statsCache && now - this.lastStatsUpdate < this.statsCacheTTL) {
       return this.statsCache;
     }
@@ -84,7 +84,7 @@ class ApiMonitoringService {
       return this.statsCache;
     }
 
-    // 计算基本统计
+    // 计算基本Statistics
     const totalRequests = this.metrics.length;
     const successfulRequests = this.metrics.filter(m => m.success).length;
     const failedRequests = totalRequests - successfulRequests;
@@ -96,7 +96,7 @@ class ApiMonitoringService {
     const p95ResponseTime = responseTimes[p95Index] || 0;
     const p99ResponseTime = responseTimes[p99Index] || 0;
 
-    // 按端点统计
+    // byendpointStatistics
     const endpoints: Record<string, any> = {};
     this.metrics.forEach(metric => {
       const key = `${metric.method} ${metric.endpoint}`;
@@ -120,14 +120,14 @@ class ApiMonitoringService {
       endpoints[key].lastCalled = metric.timestamp;
     });
 
-    // 计算端点平均响应时间
+    // 计算endpoint平均Responsetime
     Object.keys(endpoints).forEach(key => {
       const endpoint = endpoints[key];
       endpoint.avgResponseTime = endpoint.responseTimes.reduce((sum: number, time: number) => sum + time, 0) / endpoint.responseTimes.length;
       delete endpoint.responseTimes;
     });
 
-    // 按小时统计流量
+    // bySmall时Statistics流量
     const hourlyTraffic: Record<string, number> = {};
     this.metrics.forEach(metric => {
       const date = new Date(metric.timestamp);
@@ -135,7 +135,7 @@ class ApiMonitoringService {
       hourlyTraffic[hourKey] = (hourlyTraffic[hourKey] || 0) + 1;
     });
 
-    // 按天统计流量
+    // bydStatistics流量
     const dailyTraffic: Record<string, number> = {};
     this.metrics.forEach(metric => {
       const date = new Date(metric.timestamp);
@@ -159,7 +159,7 @@ class ApiMonitoringService {
     return this.statsCache;
   }
 
-  // 获取性能告警
+  // FetchPerformanceAlert
   getAlerts(includeResolved = false): PerformanceAlert[] {
     if (includeResolved) {
       return this.alerts;
@@ -167,7 +167,7 @@ class ApiMonitoringService {
     return this.alerts.filter(alert => !alert.resolved);
   }
 
-  // 标记告警为已解决
+  // 标记Alertforalready解决
   resolveAlert(alertId: string): boolean {
     const alert = this.alerts.find(a => a.id === alertId);
     if (alert && !alert.resolved) {
@@ -178,25 +178,25 @@ class ApiMonitoringService {
     return false;
   }
 
-  // 获取端点性能详情
+  // FetchendpointPerformanceDetails
   getEndpointStats(endpoint: string, method = 'GET') {
     const key = `${method} ${endpoint}`;
     const stats = this.getStats();
     return stats.endpoints[key] || null;
   }
 
-  // 获取最近指标
+  // Fetch最近metrics
   getRecentMetrics(limit = 100): ApiMetric[] {
     return this.metrics.slice(-limit).reverse();
   }
 
-  // 清空指标（用于测试）
+  // Clearmetrics(用于Test)
   clearMetrics(): void {
     this.metrics = [];
     this.statsCache = null;
   }
 
-  // 私有方法
+  // Privatemethod
   private getEmptyStats(): ApiStats {
     return {
       totalRequests: 0,
@@ -212,17 +212,17 @@ class ApiMonitoringService {
   }
 
   private checkPerformance(metric: ApiMetric): void {
-    // 检查慢响应
-    if (metric.responseTime > 1000) { // 超过1秒
+    // Check慢Response
+    if (metric.responseTime > 1000) { // 超过1s
       this.createAlert({
         endpoint: metric.endpoint,
         type: 'slow_response',
         severity: metric.responseTime > 3000 ? 'high' : 'medium',
-        message: `API响应时间过长: ${metric.responseTime}ms (端点: ${metric.endpoint})`
+        message: `APIResponsetime过长: ${metric.responseTime}ms (endpoint: ${metric.endpoint})`
       });
     }
 
-    // 检查错误率（基于最近100个请求）
+    // Checkerror率(基于最近100 Request)
     const recentMetrics = this.metrics.slice(-100);
     if (recentMetrics.length >= 20) {
       const endpointMetrics = recentMetrics.filter(m => 
@@ -233,12 +233,12 @@ class ApiMonitoringService {
         const errorCount = endpointMetrics.filter(m => !m.success).length;
         const errorRate = errorCount / endpointMetrics.length;
         
-        if (errorRate > 0.1) { // 错误率超过10%
+        if (errorRate > 0.1) { // error率超过10%
           this.createAlert({
             endpoint: metric.endpoint,
             type: 'high_error_rate',
             severity: errorRate > 0.3 ? 'high' : 'medium',
-            message: `API错误率过高: ${(errorRate * 100).toFixed(1)}% (端点: ${metric.endpoint})`
+            message: `APIerror率过High: ${(errorRate * 100).toFixed(1)}% (endpoint: ${metric.endpoint})`
           });
         }
       }
@@ -253,7 +253,7 @@ class ApiMonitoringService {
       resolved: false
     };
 
-    // 避免重复告警
+    // 避免重复Alert
     const existingAlert = this.alerts.find(a => 
       a.endpoint === newAlert.endpoint && 
       a.type === newAlert.type && 
@@ -263,7 +263,7 @@ class ApiMonitoringService {
     if (!existingAlert) {
       this.alerts.push(newAlert);
       
-      // 限制告警数量
+      // 限制Alertquantity
       if (this.alerts.length > 100) {
         this.alerts = this.alerts.slice(-100);
       }
@@ -271,10 +271,10 @@ class ApiMonitoringService {
   }
 }
 
-// 导出单例实例
-export const apiMonitoringService = new ApiMonitoringService();
+// Export单例实例
+export const apiMonitoringservervice = new ApiMonitoringservervice();
 
-// Next.js中间件包装器
+// Next.jsCenter间件包装器
 export function withApiMonitoring(handler: Function) {
   return async function monitoredHandler(...args: any[]) {
     const startTime = Date.now();
@@ -292,12 +292,12 @@ export function withApiMonitoring(handler: Function) {
     } finally {
       const responseTime = Date.now() - startTime;
       
-      // 提取端点信息
+      // 提取endpointinformation
       const [req] = args;
       const endpoint = req?.url?.split('?')[0] || 'unknown';
       const method = req?.method || 'GET';
       
-      apiMonitoringService.recordMetric({
+      apiMonitoringservervice.recordMetric({
         endpoint,
         method,
         responseTime,

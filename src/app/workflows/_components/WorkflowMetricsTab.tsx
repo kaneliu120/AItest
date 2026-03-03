@@ -143,7 +143,7 @@ export function WorkflowMetricsTab({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-slate-900 tracking-tight">
                     <TrendingUp className="w-4 h-4 text-blue-600" />
-                    Metrics Trend ({metricsWindow}）
+                    Metrics Trend ({metricsWindow})
                   </CardTitle>
                   <CardDescription>Success Rate and average duration time series</CardDescription>
                 </CardHeader>

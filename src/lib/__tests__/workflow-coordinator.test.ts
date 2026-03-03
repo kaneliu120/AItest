@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * WorkflowCoordinator 最小单元测试套件
+ * WorkflowCoordinator 最Small单元Test套件
  * 覆盖: registerWorkflow, startWorkflow, pauseWorkflow/resumeWorkflow, stopWorkflow
  */
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';

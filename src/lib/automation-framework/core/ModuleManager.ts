@@ -1,4 +1,4 @@
-// 自动化模块管理器 - 核心组件
+// AutomationModule管理器 - 核心Component
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/logger';
@@ -46,7 +46,7 @@ export class ModuleManager {
     this.modulesDir = path.join(baseDir, 'modules');
     this.configDir = path.join(baseDir, 'config');
     
-    // 确保目录存在
+    // 确保目录存in
     if (!fs.existsSync(this.modulesDir)) {
       fs.mkdirSync(this.modulesDir, { recursive: true });
     }
@@ -55,7 +55,7 @@ export class ModuleManager {
     }
   }
   
-  // 注册新模块
+  // RegisterNewModule
   async registerModule(module: Omit<AutomationModule, 'metadata'>): Promise<AutomationModule> {
     const fullModule: AutomationModule = {
       ...module,
@@ -73,7 +73,7 @@ export class ModuleManager {
     return fullModule;
   }
   
-  // 获取所有模块
+  // Fetch所AllModule
   getAllModules(): AutomationModule[] {
     const modules: AutomationModule[] = [];
     
@@ -96,7 +96,7 @@ export class ModuleManager {
     return modules;
   }
   
-  // 获取模块配置
+  // FetchModuleConfiguration
   getModuleConfig(moduleId: string): ModuleConfig | null {
     const configFile = path.join(this.configDir, `${moduleId}.json`);
     
@@ -113,13 +113,13 @@ export class ModuleManager {
     }
   }
   
-  // 保存模块配置
+  // SaveModuleConfiguration
   saveModuleConfig(config: ModuleConfig): void {
     const configFile = path.join(this.configDir, `${config.moduleId}.json`);
     fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
   }
   
-  // 启用/禁用模块
+  // enabled/disabledModule
   toggleModule(moduleId: string, enabled: boolean): boolean {
     const moduleFile = path.join(this.modulesDir, `${moduleId}.json`);
     
@@ -141,7 +141,7 @@ export class ModuleManager {
     }
   }
   
-  // 更新模块运行统计
+  // UpdateModule运行Statistics
   updateModuleStats(moduleId: string, success: boolean): boolean {
     const moduleFile = path.join(this.modulesDir, `${moduleId}.json`);
     
@@ -156,7 +156,7 @@ export class ModuleManager {
       module.metadata.lastRun = new Date().toISOString();
       module.metadata.runCount += 1;
       
-      // 计算成功率
+      // 计算success率
       if (module.metadata.runCount > 0) {
         const successCount = Math.floor(module.metadata.successRate * module.metadata.runCount / 100);
         const newSuccessCount = success ? successCount + 1 : successCount;
@@ -171,7 +171,7 @@ export class ModuleManager {
     }
   }
   
-  // 检查模块依赖
+  // CheckModule依赖
   checkDependencies(moduleId: string): {
     satisfied: boolean;
     missing: string[];
@@ -208,7 +208,7 @@ export class ModuleManager {
     };
   }
   
-  // 获取模块健康状态
+  // FetchModuleHealthStatus
   getModuleHealth(moduleId: string): {
     status: 'healthy' | 'warning' | 'error' | 'unknown';
     issues: string[];
@@ -229,7 +229,7 @@ export class ModuleManager {
     const issues: string[] = [];
     let status: 'healthy' | 'warning' | 'error' | 'unknown' = 'healthy';
     
-    // 检查依赖
+    // Check依赖
     const deps = this.checkDependencies(moduleId);
     if (!deps.satisfied) {
       if (deps.missing.length > 0) {
@@ -242,13 +242,13 @@ export class ModuleManager {
       }
     }
     
-    // 检查运行状态
+    // Check运行Status
     if (module.metadata.runCount > 0 && module.metadata.successRate < 80) {
       issues.push(`Low success rate: ${module.metadata.successRate}%`);
       status = status === 'error' ? 'error' : 'warning';
     }
     
-    // 检查最近运行时间
+    // Check最近运行time
     if (module.metadata.lastRun) {
       const lastRun = new Date(module.metadata.lastRun);
       const now = new Date();
@@ -268,7 +268,7 @@ export class ModuleManager {
     };
   }
   
-  // 导出模块数据
+  // ExportModuledata
   exportModuleData(moduleId: string): string {
     const module = this.getAllModules().find(m => m.id === moduleId);
     const config = this.getModuleConfig(moduleId);
@@ -287,7 +287,7 @@ export class ModuleManager {
     return JSON.stringify(exportData, null, 2);
   }
   
-  // 导入模块数据
+  // ImportModuledata
   async importModuleData(data: string): Promise<{
     success: boolean;
     moduleId?: string;
@@ -303,10 +303,10 @@ export class ModuleManager {
         };
       }
       
-      // 注册模块
+      // RegisterModule
       const module = await this.registerModule(importData.module);
       
-      // 保存配置
+      // SaveConfiguration
       if (importData.config) {
         this.saveModuleConfig(importData.config);
       }

@@ -1,6 +1,6 @@
 /**
- * CortexaAI 自动化测试模块
- * 集成 CortexaAI 自动化测试工具
+ * CortexaAI AutomationTestModule
+ * 集成 CortexaAI AutomationTestTool
  */
 
 import { exec } from 'child_process';
@@ -12,135 +12,135 @@ const TOOL_PATH = path.join(process.env.HOME || '/Users/kane', '.openclaw/worksp
 
 export const cortexaaiModule = {
   id: 'cortexaai-automation',
-  name: 'CortexaAI 自动化测试',
+  name: 'CortexaAI AutomationTest',
   version: '1.0.0',
-  description: '基于 CortexaAI 的自动化测试模块，支持 API 测试和性能测试',
-  author: '小A',
+  description: '基于 CortexaAI 'sAutomationTestModule, 支持 API Test和PerformanceTest',
+  author: 'SmallA',
   enabled: true,
   category: 'testing' as const,
   dependencies: [] as string[],
   
-  // 配置参数
+  // ConfigurationParameters
   configSchema: {
     apiEndpoint: {
       type: 'string',
       default: 'http://localhost:3000',
-      description: 'API 端点'
+      description: 'API endpoint'
     },
     authToken: {
       type: 'string',
       default: '',
-      description: '认证令牌'
+      description: 'AuthToken'
     },
     timeout: {
       type: 'number',
       default: 30000,
-      description: '超时时间（毫秒）'
+      description: 'Timeouttime(毫s)'
     },
     retryCount: {
       type: 'number',
       default: 3,
-      description: '重试次数'
+      description: 'Retry times数'
     }
   },
   
-  // 可用动作
+  // available动作
   actions: {
     'run-api-test': {
-      name: '运行 API 测试',
-      description: '运行 API 接口测试',
+      name: '运行 API Test',
+      description: '运行 API InterfaceTest',
       parameters: {
         endpoint: {
           type: 'string',
           required: true,
-          description: 'API 端点'
+          description: 'API endpoint'
         },
         method: {
           type: 'string',
           enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
           default: 'GET',
-          description: 'HTTP 方法'
+          description: 'HTTP method'
         },
         headers: {
           type: 'object',
           required: false,
-          description: '请求头'
+          description: 'Request头'
         },
         body: {
           type: 'object',
           required: false,
-          description: '请求体'
+          description: 'Request体'
         },
         expectedStatus: {
           type: 'number',
           required: false,
-          description: '期望状态码'
+          description: '期望Status码'
         }
       }
     },
     'run-performance-test': {
-      name: '运行性能测试',
-      description: '运行性能压力测试',
+      name: '运行PerformanceTest',
+      description: '运行Performance压力Test',
       parameters: {
         endpoint: {
           type: 'string',
           required: true,
-          description: '测试端点'
+          description: 'Testendpoint'
         },
         concurrentUsers: {
           type: 'number',
           default: 10,
-          description: '并发用户数'
+          description: 'and发User数'
         },
         duration: {
           type: 'number',
           default: 60,
-          description: '测试时长（秒）'
+          description: 'Test时长(s)'
         },
         rampUp: {
           type: 'number',
           default: 10,
-          description: '预热时间（秒）'
+          description: '预热time(s)'
         }
       }
     },
     'validate-response': {
-      name: '验证响应',
-      description: '验证 API 响应',
+      name: 'ValidateResponse',
+      description: 'Validate API Response',
       parameters: {
         response: {
           type: 'object',
           required: true,
-          description: 'API 响应'
+          description: 'API Response'
         },
         schema: {
           type: 'object',
           required: true,
-          description: '验证模式'
+          description: 'Validate模式'
         },
         rules: {
           type: 'array',
           required: false,
-          description: '验证规则'
+          description: 'Validate规then'
         }
       }
     }
   },
   
-  // 健康检查
+  // HealthCheck
   healthCheck: async () => {
     try {
       const { stdout } = await execAsync(`node ${TOOL_PATH}`);
       if (stdout.includes('CortexaAI Tool')) {
-        return { status: 'healthy', message: 'CortexaAI 模块正常: ' + stdout.trim() };
+        return { status: 'healthy', message: 'CortexaAI ModuleNormal: ' + stdout.trim() };
       }
-      return { status: 'warning', message: 'CortexaAI 响应异常' };
+      return { status: 'warning', message: 'CortexaAI ResponseAbnormal' };
     } catch (error: any) {
-      return { status: 'error', message: 'CortexaAI 模块异常: ' + error.message };
+      return { status: 'error', message: 'CortexaAI ModuleAbnormal: ' + error.message };
     }
   },
   
-  // 执行动作
+  // Execute动作
   execute: async (action: string, parameters: any) => {
     switch (action) {
       case 'run-api-test':
@@ -150,12 +150,12 @@ export const cortexaaiModule = {
       case 'validate-response':
         return await validateResponse(parameters);
       default:
-        throw new Error(`未知动作: ${action}`);
+        throw new Error(`Unknown动作: ${action}`);
     }
   }
 };
 
-// API 测试实现
+// API Test实现
 async function runApiTest(parameters: any) {
   const { endpoint, method, headers, body, expectedStatus } = parameters;
   
@@ -189,7 +189,7 @@ async function runApiTest(parameters: any) {
   }
 }
 
-// 性能测试实现
+// PerformanceTest实现
 async function runPerformanceTest(parameters: any) {
   const { endpoint, concurrentUsers, duration, rampUp } = parameters;
   
@@ -224,7 +224,7 @@ async function runPerformanceTest(parameters: any) {
   }
 }
 
-// 响应验证实现
+// ResponseValidate实现
 async function validateResponse(parameters: any) {
   const { response, schema, rules } = parameters;
   

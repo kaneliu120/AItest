@@ -42,7 +42,7 @@ export interface EvaluationStats {
 
 const SKILL_ALLOWED_ROOT = process.env.SKILL_EVAL_ALLOWED_ROOT || '/Users/kane/.openclaw/workspace/skills';
 
-class SkillEvaluatorService {
+class SkillEvaluatorservervice {
   private startedAt = Date.now();
   private registryFile = path.join(process.cwd(), 'data', 'skills', 'registry.json');
 
@@ -55,10 +55,10 @@ class SkillEvaluatorService {
   }
 
   private validateSkillPath(skillPath: string): { ok: boolean; reason?: string; resolved?: string } {
-    if (!skillPath || skillPath.length > 500) return { ok: false, reason: '非法路径参数' };
+    if (!skillPath || skillPath.length > 500) return { ok: false, reason: '非法pathParameters' };
     const resolved = path.resolve(skillPath.replace(/^~\//, `${process.env.HOME || ''}/`));
     const allowed = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
-    if (!resolved.startsWith(allowed)) return { ok: false, reason: `路径超出允许范围: ${allowed}` };
+    if (!resolved.startsWith(allowed)) return { ok: false, reason: `path超出允许范围: ${allowed}` };
     return { ok: true, resolved };
   }
 
@@ -120,12 +120,12 @@ class SkillEvaluatorService {
 
     const docScore = hasSkillMd && hasReadme ? 92 : hasSkillMd || hasReadme ? 75 : 45;
     categories.push({
-      name: '文档完整性',
+      name: 'document完整性',
       score: docScore,
       weight: weights.documentation,
       details: [
-        hasSkillMd ? 'SKILL.md 存在' : '缺少 SKILL.md',
-        hasReadme ? 'README.md 存在' : '缺少 README.md',
+        hasSkillMd ? 'SKILL.md 存in' : 'Missing  SKILL.md',
+        hasReadme ? 'README.md 存in' : 'Missing  README.md',
       ],
     });
 
@@ -135,44 +135,44 @@ class SkillEvaluatorService {
       score: structureScore,
       weight: weights.structure,
       details: [
-        fs.existsSync(skillPath) ? `目录存在，文件数: ${files.length}` : '目录不存在',
-        hasScripts ? '存在可执行脚本/代码文件' : '缺少脚本或代码文件',
+        fs.existsSync(skillPath) ? `目录存in, file数: ${files.length}` : '目录does not exist',
+        hasScripts ? '存in可ExecuteScript/codefile' : 'Missing Scriptorcodefile',
       ],
     });
 
     const testScore = hasTests ? 80 : 55;
     categories.push({
-      name: '测试覆盖',
+      name: 'Test覆盖',
       score: testScore,
       weight: weights.testing,
-      details: [hasTests ? '检测到测试相关文件' : '未检测到测试相关文件'],
+      details: [hasTests ? '检测toTest相Offfile' : '未检测toTest相Offfile'],
     });
 
     const securityScore = path.isAbsolute(skillPath) ? 78 : 60;
     categories.push({
-      name: '安全与规范',
+      name: 'Securityand规范',
       score: securityScore,
       weight: weights.security,
-      details: ['路径已进行白名单校验', '基础输入校验已执行'],
+      details: ['pathalreadyIn Progress白名单校验', 'basic输入校验alreadyExecute'],
     });
 
     const maintainScore = files.length > 5 ? 82 : 70;
     categories.push({
-      name: '可维护性',
+      name: 'maintainability',
       score: maintainScore,
       weight: weights.maintainability,
-      details: ['按目录结构给出维护性估算'],
+      details: ['by目录结构给出maintenance性估算'],
     });
 
     const overallScore = Math.round(categories.reduce((sum, c) => sum + (c.score * c.weight) / 100, 0));
     const grade = this.calculateGrade(overallScore);
 
     for (const c of categories) {
-      if (c.score < 70) recommendations.push(`${c.name} 建议优先优化（${c.score}分）`);
-      if (c.score < 60) issues.push(`${c.name} 存在明显短板（${c.score}分）`);
+      if (c.score < 70) recommendations.push(`${c.name} 建议优先optimize(${c.score}分)`);
+      if (c.score < 60) issues.push(`${c.name} 存in明显短板(${c.score}分)`);
     }
-    if (!hasSkillMd) issues.push('缺少 SKILL.md（必需）');
-    if (!hasReadme) recommendations.push('补充 README.md 说明安装与使用方式');
+    if (!hasSkillMd) issues.push('Missing  SKILL.md(必需)');
+    if (!hasReadme) recommendations.push('补充 README.md 说明Installandusing方式');
 
     return {
       categories,
@@ -310,8 +310,8 @@ class SkillEvaluatorService {
 
   async createEvaluationRun(skillPath: string, skillName?: string): Promise<{ runId: string }> {
     const v = this.validateSkillPath(skillPath);
-    if (!v.ok) throw new Error(v.reason || '路径校验失败');
-    if (!fs.existsSync(v.resolved!)) throw new Error('技能目录不存在');
+    if (!v.ok) throw new Error(v.reason || 'path校验failed');
+    if (!fs.existsSync(v.resolved!)) throw new Error('Skill目录does not exist');
 
     const runId = `ser-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     await pool.query(
@@ -493,8 +493,8 @@ class SkillEvaluatorService {
     const base = path.resolve(SKILL_ALLOWED_ROOT.replace(/^~\//, `${process.env.HOME || ''}/`));
     const folder = input.relativePath ? path.resolve(base, input.relativePath, input.skillName) : path.join(base, input.skillName);
     const v = this.validateSkillPath(folder);
-    if (!v.ok) throw new Error(v.reason || '路径校验失败');
-    if (fs.existsSync(v.resolved!)) throw new Error('技能目录已存在');
+    if (!v.ok) throw new Error(v.reason || 'path校验failed');
+    if (fs.existsSync(v.resolved!)) throw new Error('Skill目录already exists');
 
     fs.mkdirSync(v.resolved!, { recursive: true });
     const skillMd = path.join(v.resolved!, 'SKILL.md');
@@ -516,11 +516,11 @@ class SkillEvaluatorService {
 
   async mergeSkills(input: { sourceSkillPaths: string[]; targetSkillPath: string }) {
     if (!Array.isArray(input.sourceSkillPaths) || input.sourceSkillPaths.length === 0) {
-      throw new Error('缺少 sourceSkillPaths');
+      throw new Error('Missing sourceSkillPaths');
     }
 
     const targetV = this.validateSkillPath(input.targetSkillPath);
-    if (!targetV.ok || !targetV.resolved) throw new Error(targetV.reason || '目标路径非法');
+    if (!targetV.ok || !targetV.resolved) throw new Error(targetV.reason || '目标path非法');
 
     const targetType = this.getSkillType(targetV.resolved);
     const normalizedSources = input.sourceSkillPaths
@@ -529,11 +529,11 @@ class SkillEvaluatorService {
       .map((v) => v.resolved as string)
       .filter((p) => path.resolve(p) !== path.resolve(targetV.resolved!));
 
-    if (normalizedSources.length === 0) throw new Error('没有可合并的source技能');
+    if (normalizedSources.length === 0) throw new Error('没All可合and'ssourceSkill');
 
     for (const sp of normalizedSources) {
       if (this.getSkillType(sp) !== targetType) {
-        throw new Error(`类型不一致，无法合并: ${sp}`);
+        throw new Error(`Type不一致, Unable to 合and: ${sp}`);
       }
     }
 
@@ -580,9 +580,9 @@ class SkillEvaluatorService {
 
   async deleteSkill(input: { skillPath: string; hardDelete?: boolean }) {
     const v = this.validateSkillPath(input.skillPath);
-    if (!v.ok || !v.resolved) throw new Error(v.reason || '路径校验失败');
+    if (!v.ok || !v.resolved) throw new Error(v.reason || 'path校验failed');
 
-    if (!fs.existsSync(v.resolved)) throw new Error('技能目录不存在');
+    if (!fs.existsSync(v.resolved)) throw new Error('Skill目录does not exist');
 
     if (input.hardDelete) {
       const trashBase = path.join(path.dirname(v.resolved), '.trash');
@@ -612,4 +612,4 @@ class SkillEvaluatorService {
   }
 }
 
-export const skillEvaluatorService = new SkillEvaluatorService();
+export const skillEvaluatorservervice = new SkillEvaluatorservervice();

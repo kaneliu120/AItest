@@ -1,4 +1,4 @@
-import { deploymentService } from '@/lib/deployment-service';
+import { deploymentservervice } from '@/lib/deployment-service';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -7,12 +7,12 @@ export async function GET(request: NextRequest) {
     const action = url.searchParams.get('action') || 'stats';
 
     if (action === 'stats') {
-      const stats = await deploymentService.getDeploymentStats();
+      const stats = await deploymentservervice.getDeploymentStats();
       return NextResponse.json({ success: true, data: stats });
     }
 
     if (action === 'environments') {
-      const environments = await deploymentService.getEnvironments();
+      const environments = await deploymentservervice.getEnvironments();
       return NextResponse.json({ success: true, data: { environments } });
     }
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       const page = parseInt(url.searchParams.get('page') || '1');
       const pageSize = parseInt(url.searchParams.get('pageSize') || '20');
 
-      const deployments = await deploymentService.getDeployments({
+      const deployments = await deploymentservervice.getDeployments({
         projectId: projectId || undefined,
         environmentId: environmentId || undefined,
         status: status || undefined,
@@ -40,24 +40,24 @@ export async function GET(request: NextRequest) {
 
     const environmentId = url.searchParams.get('environmentId');
     if (environmentId) {
-      const environment = await deploymentService.getEnvironment(environmentId);
-      if (!environment) return NextResponse.json({ success: false, error: '环境未找到' }, { status: 404 });
+      const environment = await deploymentservervice.getEnvironment(environmentId);
+      if (!environment) return NextResponse.json({ success: false, error: 'EnvironmentNot found' }, { status: 404 });
       return NextResponse.json({ success: true, data: environment });
     }
 
     const deploymentId = url.searchParams.get('deploymentId');
     if (deploymentId) {
-      const deployment = await deploymentService.getDeployment(deploymentId);
-      if (!deployment) return NextResponse.json({ success: false, error: '部署未找到' }, { status: 404 });
+      const deployment = await deploymentservervice.getDeployment(deploymentId);
+      if (!deployment) return NextResponse.json({ success: false, error: 'DeploymentNot found' }, { status: 404 });
       return NextResponse.json({ success: true, data: deployment });
     }
 
-    const stats = await deploymentService.getDeploymentStats();
+    const stats = await deploymentservervice.getDeploymentStats();
     return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('部署API错误:', error);
+    console.error('DeploymentAPIerror:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
 
     if (action === 'create-environment') {
       const { name, type, url, configuration } = body;
-      if (!name || !type) return NextResponse.json({ success: false, error: '缺少 name 或 type' }, { status: 400 });
-      const env = await deploymentService.createEnvironment({ 
+      if (!name || !type) return NextResponse.json({ success: false, error: 'Missing  name or type' }, { status: 400 });
+      const env = await deploymentservervice.createEnvironment({ 
         name, type, url, configuration: configuration || {}, status: 'active' 
       });
       return NextResponse.json({ success: true, data: env });
@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
     if (action === 'create-deployment') {
       const { projectId, projectName, environmentId, version, deployedBy } = body;
       if (!projectId || !environmentId || !version) {
-        return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing required parameters' }, { status: 400 });
       }
-      const deployment = await deploymentService.createDeployment({
+      const deployment = await deploymentservervice.createDeployment({
         projectId, 
         projectName: projectName || `Project ${projectId}`,
         environmentId, 
@@ -95,17 +95,17 @@ export async function POST(request: NextRequest) {
     if (action === 'rollback') {
       const { deploymentId, rollbackVersion } = body;
       if (!deploymentId || !rollbackVersion) {
-        return NextResponse.json({ success: false, error: '缺少 deploymentId 或 rollbackVersion' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing  deploymentId or rollbackVersion' }, { status: 400 });
       }
-      const result = await deploymentService.rollbackDeployment(deploymentId, rollbackVersion);
+      const result = await deploymentservervice.rollbackDeployment(deploymentId, rollbackVersion);
       return NextResponse.json({ success: true, data: { success: result } });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported operation' }, { status: 400 });
   } catch (error) {
-    console.error('部署API POST错误:', error);
+    console.error('DeploymentAPI POSTerror:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

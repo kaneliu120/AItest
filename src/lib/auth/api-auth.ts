@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * 验证请求是否携带有效的 API 密钥。
- * 从 x-api-key 请求头或 apiKey 查询参数中读取，与 API_SECRET_KEY 环境变量比对。
- * 生产环境未配置密钥时拒绝所有请求；开发环境未配置密钥时放行。
+ * ValidateRequestwhether it携带All效's API Key. 
+ * From x-api-key Request头or apiKey 查询ParametersCenter读取, and API_SECRET_KEY Environmentvariable比for. 
+ * 生产Environment未ConfigurationKey时拒绝所AllRequest；dev environment未ConfigurationKey时放行. 
  */
 export function isApiAuthorized(request: NextRequest): boolean {
   const secret = process.env.API_SECRET_KEY;
@@ -20,7 +20,7 @@ export function isApiAuthorized(request: NextRequest): boolean {
   return true;
 }
 
-/** 未授权时返回标准 401 响应 */
+/** Unauthorized时返回standard 401 Response */
 export function unauthorizedResponse(): NextResponse {
-  return NextResponse.json({ success: false, error: '未授权' }, { status: 401 });
+  return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 }

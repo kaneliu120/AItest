@@ -6,7 +6,7 @@ import type { WorkflowStage } from '@/lib/workflow-constants';
 export async function GET() {
   try {
     const tasks = await pool.query(`SELECT id,parent_id,level,title,workflow_stage,target_price FROM mission_tasks ORDER BY created_at DESC`);
-    const tx = await pool.query(`SELECT task_id, amount, status, category FROM finance_transactions WHERE category='任务回款'`);
+    const tx = await pool.query(`SELECT task_id, amount, status, category FROM finance_transactions WHERE category='Task Payment'`);
 
     const rows = tasks.rows as Array<any>;
     const goals = rows.filter(r => r.level === 1);
@@ -48,6 +48,6 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: { totals, goalMetrics } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

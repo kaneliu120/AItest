@@ -1,21 +1,21 @@
 /**
- * 简化版数据库服务
- * 用于测试和开发环境
+ * 简化版data库servervice
+ * 用于Test和dev environment
  */
 
-// 内存数据库模拟
+// 内存data库模拟
 export class SimpleDatabase {
   private data: Record<string, any[]> = {};
 
-  // 初始化表
+  // Initialize表
   createTable(tableName: string): void {
     if (!this.data[tableName]) {
       this.data[tableName] = [];
-      console.log(`表 ${tableName} 已创建`);
+      console.log(`表 ${tableName} alreadyCreate`);
     }
   }
 
-  // 插入数据
+  // insertdata
   insert<T extends Record<string, any>>(tableName: string, data: T): string {
     this.createTable(tableName);
     
@@ -26,7 +26,7 @@ export class SimpleDatabase {
     return id;
   }
 
-  // 查询数据
+  // 查询data
   query<T = any>(tableName: string, where?: Record<string, any>): T[] {
     if (!this.data[tableName]) {
       return [];
@@ -45,7 +45,7 @@ export class SimpleDatabase {
     return results as T[];
   }
 
-  // 更新数据
+  // Updatedata
   update(tableName: string, data: Record<string, any>, where: Record<string, any>): number {
     if (!this.data[tableName]) {
       return 0;
@@ -70,7 +70,7 @@ export class SimpleDatabase {
     return updatedCount;
   }
 
-  // 删除数据
+  // Deletedata
   delete(tableName: string, where: Record<string, any>): number {
     if (!this.data[tableName]) {
       return 0;
@@ -84,7 +84,7 @@ export class SimpleDatabase {
     return initialLength - this.data[tableName].length;
   }
 
-  // 批量插入
+  // batchinsert
   batchInsert<T extends Record<string, any>>(tableName: string, data: T[]): void {
     this.createTable(tableName);
     
@@ -93,7 +93,7 @@ export class SimpleDatabase {
     });
   }
 
-  // 获取表统计
+  // Fetch表Statistics
   getTableStats(tableName: string): { count: number; size: number } {
     if (!this.data[tableName]) {
       return { count: 0, size: 0 };
@@ -105,39 +105,39 @@ export class SimpleDatabase {
     return { count, size };
   }
 
-  // 清空表
+  // Clear表
   clearTable(tableName: string): void {
     if (this.data[tableName]) {
       this.data[tableName] = [];
     }
   }
 
-  // 导出数据
+  // Exportdata
   exportData(): Record<string, any[]> {
     return { ...this.data };
   }
 
-  // 导入数据
+  // Importdata
   importData(data: Record<string, any[]>): void {
     this.data = { ...data };
   }
 
-  // 生成ID
+  // GenerateID
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 }
 
-// 全局实例
+// Global实例
 export const simpleDb = new SimpleDatabase();
 
-// 工具函数
+// Toolfunction
 export const dbUtils = {
   serializeJson(data: any): string {
     try {
       return JSON.stringify(data);
     } catch (error) {
-      console.error('JSON序列化失败:', error);
+      console.error('JSONserializefailed:', error);
       return '{}';
     }
   },
@@ -146,7 +146,7 @@ export const dbUtils = {
     try {
       return JSON.parse(json);
     } catch (error) {
-      console.error('JSON反序列化失败:', error);
+      console.error('JSONdeserializefailed:', error);
       return defaultValue;
     }
   },

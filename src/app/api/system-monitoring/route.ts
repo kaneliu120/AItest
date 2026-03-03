@@ -1,7 +1,7 @@
 /**
- * 系统监控 API — 扩展版 (取代健康监控)
- * 功能: 实时系统指标 + 进程监控 + 网络监控 + 日志分析 + 告警管理
- * 数据: 100% 真实系统数据 (无模拟)
+ * SystemMonitoring API - extend版 (取代HealthMonitoring)
+ * 功can: 实时Systemmetrics + 进程Monitoring + 网络Monitoring + LoggingAnalytics + Alert管理
+ * data: 100% true实Systemdata (None模拟)
  */
 import { NextResponse } from 'next/server';
 import os from 'os';
@@ -12,13 +12,13 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// 系统监控配置
+// SystemMonitoringConfiguration
 const MONITORING_CONFIG = {
-  // 监控间隔 (秒)
+  // Monitoring间隔 (s)
   collectionInterval: 60,
-  // 历史数据保留 (小时)
+  // 历史data保留 (Small时)
   historyRetention: 24,
-  // 告警阈值
+  // Alert阈值
   thresholds: {
     cpu: { warning: 70, critical: 90 },
     memory: { warning: 80, critical: 95 },
@@ -26,19 +26,19 @@ const MONITORING_CONFIG = {
     responseTime: { warning: 1000, critical: 5000 }, // ms
     errorRate: { warning: 5, critical: 10 }, // %
   },
-  // 监控的系统组件
+  // Monitoring'sSystemComponent
   components: [
-    { id: 'mission-control-frontend', name: 'Mission Control 前端', type: 'web', port: 3001 },
+    { id: 'mission-control-frontend', name: 'Mission Control Frontend', type: 'web', port: 3001 },
     { id: 'mission-control-api', name: 'Mission Control API', type: 'api', port: 3001 },
-    { id: 'knowledge-management', name: '知识管理系统', type: 'api', port: 8081 },
-    { id: 'database', name: 'SQLite 数据库', type: 'database', path: 'data/' },
-    { id: 'redis', name: 'Redis 缓存', type: 'cache', optional: true },
-    { id: 'nginx', name: 'Nginx 代理', type: 'proxy', optional: true },
-    { id: 'cron', name: '定时任务', type: 'cron', optional: true },
+    { id: 'knowledge-management', name: 'Knowledge Management System', type: 'api', port: 8081 },
+    { id: 'database', name: 'SQLite Database', type: 'database', path: 'data/' },
+    { id: 'redis', name: 'Redis Cache', type: 'cache', optional: true },
+    { id: 'nginx', name: 'Nginx Proxy', type: 'proxy', optional: true },
+    { id: 'cron', name: 'Scheduled Tasks', type: 'cron', optional: true },
   ],
 };
 
-// 系统指标接口
+// SystemmetricsInterface
 interface SystemMetrics {
   timestamp: string;
   cpu: {
@@ -91,7 +91,7 @@ interface SystemMetrics {
   };
 }
 
-// 组件健康状态接口
+// ComponentHealthStatusInterface
 interface ComponentHealth {
   id: string;
   name: string;
@@ -108,7 +108,7 @@ interface ComponentHealth {
   }>;
 }
 
-// 告警接口
+// AlertInterface
 interface Alert {
   id: string;
   componentId: string;
@@ -122,22 +122,22 @@ interface Alert {
   resolved: boolean;
 }
 
-// 获取系统指标
+// FetchSystemmetrics
 async function getSystemMetrics(): Promise<SystemMetrics> {
   const startTime = Date.now();
   
-  // CPU 信息
+  // CPU information
   const cpus = os.cpus();
   const loadAvg = os.loadavg();
   const cpuUsage = Math.min(100, Math.round((loadAvg[0] / cpus.length) * 100));
   
-  // 内存信息
+  // 内存information
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   const usedMem = totalMem - freeMem;
   const memUsage = Math.round((usedMem / totalMem) * 100);
   
-  // 磁盘信息 (根目录)
+  // 磁盘information (根目录)
   let diskUsage = 0;
   try {
     const stats = await fs.statfs('/');
@@ -146,10 +146,10 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
     const used = total - free;
     diskUsage = Math.round((used / total) * 100);
   } catch (error) {
-    console.warn('获取磁盘信息失败:', error);
+    console.warn('Failed to fetch disk information:', error);
   }
   
-  // 网络信息
+  // 网络information
   const interfaces = os.networkInterfaces();
   const networkInterfaces = Object.entries(interfaces).flatMap(([name, addrs]) => 
     (addrs || []).map(addr => ({
@@ -160,20 +160,20 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
     }))
   );
   
-  // 进程信息 (简化版)
+  // 进程information (简化版)
   let processStats = { total: 0, running: 0, sleeping: 0, zombie: 0, nodeProcesses: 0 };
   try {
     const { stdout } = await execAsync('ps aux | wc -l');
-    processStats.total = parseInt(stdout.trim()) - 1; // 减去标题行
+    processStats.total = parseInt(stdout.trim()) - 1; // 减去title行
     
-    // 统计Node进程
+    // StatisticsNode进程
     const nodeProcesses = await execAsync('ps aux | grep node | grep -v grep | wc -l');
     processStats.nodeProcesses = parseInt(nodeProcesses.stdout.trim());
   } catch (error) {
-    console.warn('获取进程信息失败:', error);
+    console.warn('Failed to fetch process information:', error);
   }
   
-  // Node.js 进程信息
+  // Node.js Processinformation
   const nodeMemory = process.memoryUsage();
   const heapUsedMB = Math.round(nodeMemory.heapUsed / 1024 / 1024);
   const heapTotalMB = Math.round(nodeMemory.heapTotal / 1024 / 1024);
@@ -196,11 +196,11 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
       used: usedMem,
       free: freeMem,
       usage: memUsage,
-      swapTotal: 0, // macOS需要额外命令
+      swapTotal: 0, // macOSneed to额外命令
       swapUsed: 0,
     },
     disk: {
-      total: 0, // 需要更复杂的获取
+      total: 0, // need to更复杂'sFetch
       used: 0,
       free: 0,
       usage: diskUsage,
@@ -208,7 +208,7 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
     },
     network: {
       interfaces: networkInterfaces,
-      connections: 0, // 需要netstat
+      connections: 0, // need tonetstat
       latency: responseTime,
     },
     processes: processStats,
@@ -223,7 +223,7 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
   };
 }
 
-// 检查组件健康状态
+// CheckComponentHealthStatus
 async function checkComponentHealth(component: any): Promise<ComponentHealth> {
   const startTime = Date.now();
   const now = new Date().toISOString();
@@ -241,7 +241,7 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
     switch (component.type) {
       case 'web':
       case 'api':
-        // 检查端口是否响应
+        // Checkportwhether itResponse
         const response = await fetch(`http://localhost:${component.port}/api/health`, {
           signal: AbortSignal.timeout(5000),
         });
@@ -252,12 +252,12 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
           baseHealth.responseTime = Date.now() - startTime;
           baseHealth.metrics = data.data?.metrics || {};
           
-          // 检查健康分
+          // CheckHealth分
           if (data.data?.overallHealth < 70) {
             baseHealth.status = 'degraded';
             baseHealth.issues?.push({
               severity: 'warning',
-              message: `健康分较低: ${data.data.overallHealth}%`,
+              message: `Health score low: ${data.data.overallHealth}%`,
               timestamp: now,
             });
           }
@@ -272,7 +272,7 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
         break;
         
       case 'database':
-        // 检查数据库文件
+        // Checkdata库file
         const dbPath = path.join(process.cwd(), component.path);
         try {
           await fs.access(dbPath);
@@ -286,14 +286,14 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
           baseHealth.status = 'unhealthy';
           baseHealth.issues?.push({
             severity: 'critical',
-            message: `数据库文件不可访问: ${error}`,
+            message: `Database file not accessible: ${error}`,
             timestamp: now,
           });
         }
         break;
         
       case 'cache':
-        // 检查Redis (可选)
+        // CheckRedis (Optional)
         if (!component.optional) {
           try {
             const { stdout } = await execAsync('redis-cli ping');
@@ -315,7 +315,7 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
     baseHealth.status = 'unhealthy';
     baseHealth.issues?.push({
       severity: 'critical',
-      message: `检查失败: ${error.message}`,
+      message: `Checkfailed: ${error.message}`,
       timestamp: now,
     });
   }
@@ -323,12 +323,12 @@ async function checkComponentHealth(component: any): Promise<ComponentHealth> {
   return baseHealth;
 }
 
-// 生成告警
+// GenerateAlert
 function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): Alert[] {
   const alerts: Alert[] = [];
   const now = new Date().toISOString();
   
-  // CPU 告警
+  // CPU Alert
   if (metrics.cpu.usage >= MONITORING_CONFIG.thresholds.cpu.critical) {
     alerts.push({
       id: `cpu-critical-${Date.now()}`,
@@ -337,7 +337,7 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
       currentValue: metrics.cpu.usage,
       threshold: MONITORING_CONFIG.thresholds.cpu.critical,
       severity: 'critical',
-      message: `CPU使用率过高: ${metrics.cpu.usage}% (阈值: ${MONITORING_CONFIG.thresholds.cpu.critical}%)`,
+      message: `CPU usage critically high: ${metrics.cpu.usage}% (threshold: ${MONITORING_CONFIG.thresholds.cpu.critical}%)`,
       timestamp: now,
       acknowledged: false,
       resolved: false,
@@ -350,14 +350,14 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
       currentValue: metrics.cpu.usage,
       threshold: MONITORING_CONFIG.thresholds.cpu.warning,
       severity: 'warning',
-      message: `CPU使用率较高: ${metrics.cpu.usage}% (阈值: ${MONITORING_CONFIG.thresholds.cpu.warning}%)`,
+      message: `CPU usage high: ${metrics.cpu.usage}% (threshold: ${MONITORING_CONFIG.thresholds.cpu.warning}%)`,
       timestamp: now,
       acknowledged: false,
       resolved: false,
     });
   }
   
-  // 内存告警
+  // 内存Alert
   if (metrics.memory.usage >= MONITORING_CONFIG.thresholds.memory.critical) {
     alerts.push({
       id: `memory-critical-${Date.now()}`,
@@ -366,7 +366,7 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
       currentValue: metrics.memory.usage,
       threshold: MONITORING_CONFIG.thresholds.memory.critical,
       severity: 'critical',
-      message: `内存使用率过高: ${metrics.memory.usage}% (阈值: ${MONITORING_CONFIG.thresholds.memory.critical}%)`,
+      message: `Memory usage critically high: ${metrics.memory.usage}% (threshold: ${MONITORING_CONFIG.thresholds.memory.critical}%)`,
       timestamp: now,
       acknowledged: false,
       resolved: false,
@@ -379,24 +379,24 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
       currentValue: metrics.memory.usage,
       threshold: MONITORING_CONFIG.thresholds.memory.warning,
       severity: 'warning',
-      message: `内存使用率较高: ${metrics.memory.usage}% (阈值: ${MONITORING_CONFIG.thresholds.memory.warning}%)`,
+      message: `Memory usage high: ${metrics.memory.usage}% (threshold: ${MONITORING_CONFIG.thresholds.memory.warning}%)`,
       timestamp: now,
       acknowledged: false,
       resolved: false,
     });
   }
   
-  // 组件健康告警
+  // ComponentHealthAlert
   components.forEach(component => {
     if (component.status === 'unhealthy') {
       alerts.push({
         id: `component-unhealthy-${component.id}-${Date.now()}`,
         componentId: component.id,
         metric: 'component.status',
-        currentValue: 0, // 不健康为0
-        threshold: 1, // 健康为1
+        currentValue: 0, // 不Healthfor0
+        threshold: 1, // Healthfor1
         severity: 'critical',
-        message: `${component.name} 组件不健康: ${component.issues?.[0]?.message || '未知错误'}`,
+        message: `${component.name} component unhealthy: ${component.issues?.[0]?.message || 'Unknown error'}`,
         timestamp: now,
         acknowledged: false,
         resolved: false,
@@ -406,10 +406,10 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
         id: `component-degraded-${component.id}-${Date.now()}`,
         componentId: component.id,
         metric: 'component.status',
-        currentValue: 0.5, // 降级为0.5
+        currentValue: 0.5, // degradationfor0.5
         threshold: 1,
         severity: 'warning',
-        message: `${component.name} 组件降级运行`,
+        message: `${component.name} component degraded`,
         timestamp: now,
         acknowledged: false,
         resolved: false,
@@ -420,7 +420,7 @@ function generateAlerts(metrics: SystemMetrics, components: ComponentHealth[]): 
   return alerts;
 }
 
-// 计算整体健康分
+// 计算整体Health分
 function calculateOverallHealth(metrics: SystemMetrics, components: ComponentHealth[]): number {
   let score = 100;
   
@@ -438,42 +438,42 @@ function calculateOverallHealth(metrics: SystemMetrics, components: ComponentHea
   if (metrics.disk.usage >= 95) score -= 20;
   else if (metrics.disk.usage >= 85) score -= 10;
   
-  // 组件扣分
+  // Component扣分
   components.forEach(component => {
     if (component.status === 'unhealthy') score -= 20;
     else if (component.status === 'degraded') score -= 10;
     else if (component.status === 'unknown') score -= 5;
   });
   
-  // 确保在0-100范围内
+  // 确保in0-100范围内
   return Math.max(0, Math.min(100, score));
 }
 
-// 主GET处理函数
+// 主GETProcessfunction
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'overview';
     
-    // 获取系统指标
+    // FetchSystemmetrics
     const systemMetrics = await getSystemMetrics();
     
-    // 检查所有组件健康状态
+    // Check所AllComponentHealthStatus
     const componentHealthPromises = MONITORING_CONFIG.components.map(checkComponentHealth);
     const componentsHealth = await Promise.all(componentHealthPromises);
     
-    // 生成告警
+    // GenerateAlert
     const alerts = generateAlerts(systemMetrics, componentsHealth);
     
-    // 计算整体健康分
+    // 计算整体Health分
     const overallHealth = calculateOverallHealth(systemMetrics, componentsHealth);
     
-    // 统计
+    // Statistics
     const healthyComponents = componentsHealth.filter(c => c.status === 'healthy').length;
     const degradedComponents = componentsHealth.filter(c => c.status === 'degraded').length;
     const unhealthyComponents = componentsHealth.filter(c => c.status === 'unhealthy').length;
     
-    // 响应数据
+    // Responsedata
     const responseData = {
       success: true,
       data: {
@@ -490,7 +490,7 @@ export async function GET(request: Request) {
         },
         metrics: systemMetrics,
         components: componentsHealth,
-        alerts: alerts.filter(a => !a.resolved), // 只返回未解决的告警
+        alerts: alerts.filter(a => !a.resolved), // 只返回未解决'sAlert
         config: {
           collectionInterval: MONITORING_CONFIG.collectionInterval,
           thresholds: MONITORING_CONFIG.thresholds,
@@ -501,11 +501,11 @@ export async function GET(request: Request) {
     return NextResponse.json(responseData);
     
   } catch (error: any) {
-    console.error('系统监控API错误:', error);
+    console.error('SystemMonitoringAPIerror:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error.message || '系统监控服务内部错误',
+        error: error.message || 'SystemMonitoringserverviceInternalerror',
         data: {
           timestamp: new Date().toISOString(),
           overallHealth: 0,

@@ -3,7 +3,7 @@ import os from 'os';
 
 export async function GET(request: NextRequest) {
   try {
-    // 收集系统指标
+    // 收集Systemmetrics
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
     const usedMem = totalMem - freeMem;

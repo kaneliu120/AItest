@@ -1,6 +1,6 @@
 /**
- * PostgreSQL 数据库存储模块
- * 替代原来的 SQLite 存储
+ * PostgreSQL data库存储Module
+ * 替代原来's SQLite 存储
  */
 
 import { Pool, PoolConfig } from 'pg';
@@ -33,10 +33,10 @@ export interface TaskStats {
   total: number;
 }
 
-// 数据库连接池配置
+// data库Connect池Configuration
 const poolConfig: PoolConfig = {
   connectionString: process.env.DATABASE_URL,
-  max: 20, // 最大连接数
+  max: 20, // 最LargeConnect数
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 };
@@ -47,22 +47,22 @@ class PostgresStore {
   constructor() {
     this.pool = new Pool(poolConfig);
     
-    // 测试连接
+    // TestConnect
     this.testConnection();
   }
 
   private async testConnection(): Promise<void> {
     try {
       const client = await this.pool.connect();
-      logger.info('PostgreSQL 连接成功', { module: 'postgres-store' });
+      logger.info('PostgreSQL Connectsuccess', { module: 'postgres-store' });
       client.release();
     } catch (error) {
-      logger.error('PostgreSQL 连接失败', error, { module: 'postgres-store' });
+      logger.error('PostgreSQL Connection failed', error, { module: 'postgres-store' });
       throw error;
     }
   }
 
-  // 获取所有任务
+  // Fetch所AllTask
   async getAllTasks(): Promise<Task[]> {
     const query = `
       SELECT 
@@ -82,12 +82,12 @@ class PostgresStore {
         source: row.source || 'manual'
       }));
     } catch (error) {
-      logger.error('获取任务列表失败', error, { module: 'postgres-store' });
+      logger.error('FetchTaskListfailed', error, { module: 'postgres-store' });
       return [];
     }
   }
 
-  // 获取任务统计
+  // FetchTaskStatistics
   async getTaskStats(): Promise<TaskStats> {
     const query = `
       SELECT 
@@ -118,7 +118,7 @@ class PostgresStore {
         total
       };
     } catch (error) {
-      logger.error('获取任务统计失败', error, { module: 'postgres-store' });
+      logger.error('FetchTaskStatisticsfailed', error, { module: 'postgres-store' });
       return {
         totalTasks: 0,
         pendingTasks: 0,
@@ -132,7 +132,7 @@ class PostgresStore {
     }
   }
 
-  // 创建任务
+  // CreateTask
   async createTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task | null> {
     const query = `
       INSERT INTO tasks (
@@ -163,18 +163,18 @@ class PostgresStore {
 
       return this.mapRowToTask(result.rows[0]);
     } catch (error) {
-      logger.error('创建任务失败', error, { module: 'postgres-store' });
+      logger.error('Create task failed', error, { module: 'postgres-store' });
       return null;
     }
   }
 
-  // 更新任务
+  // UpdateTask
   async updateTask(id: string, updates: Partial<Task>): Promise<Task | null> {
     const fields: string[] = [];
     const values: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
 
-    // 构建动态更新字段
+    // 构建动态UpdateField
     if (updates.title !== undefined) {
       fields.push(`title = $${paramIndex}`);
       values.push(updates.title);
@@ -217,7 +217,7 @@ class PostgresStore {
       paramIndex++;
     }
 
-    // 总是更新updated_at
+    // 总YesUpdateupdated_at
     fields.push(`updated_at = $${paramIndex}`);
     values.push(new Date().toISOString());
     paramIndex++;
@@ -242,12 +242,12 @@ class PostgresStore {
       }
       return this.mapRowToTask(result.rows[0]);
     } catch (error) {
-      logger.error('更新任务失败', error, { module: 'postgres-store' });
+      logger.error('UpdateTaskfailed', error, { module: 'postgres-store' });
       return null;
     }
   }
 
-  // 删除任务
+  // DeleteTask
   async deleteTask(id: string): Promise<boolean> {
     const query = 'DELETE FROM tasks WHERE id = $1';
     
@@ -255,12 +255,12 @@ class PostgresStore {
       const result = await this.pool.query(query, [id]);
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
-      logger.error('删除任务失败', error, { module: 'postgres-store' });
+      logger.error('DeleteTaskfailed', error, { module: 'postgres-store' });
       return false;
     }
   }
 
-  // 映射数据库行到Task对象
+  // 映射data库行toTaskObject
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapRowToTask(row: Record<string, any>): Task {
     return {
@@ -270,7 +270,7 @@ class PostgresStore {
       priority: row.priority,
       status: row.status,
       source: row.source || 'manual',
-      type: 'general', // 默认类型，可根据需要扩展
+      type: 'general', // DefaultType, 可根据need toextend
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       dueDate: row.due_date,
@@ -280,11 +280,11 @@ class PostgresStore {
     };
   }
 
-  // 关闭连接池
+  // CloseConnect池
   async close(): Promise<void> {
     await this.pool.end();
   }
 }
 
-// 导出单例实例
+// Export单例实例
 export const postgresStore = new PostgresStore();

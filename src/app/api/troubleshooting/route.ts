@@ -5,11 +5,11 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 const MC = 'http://localhost:3001';
 
-// ─── 内存中的已解决问题记录 ────────────────────────────────────────────────
+// ─── 内存Center'salready解决问题Log ────────────────────────────────────────────────
 const resolvedIds = new Set<string>();
 const appliedFixes = new Map<string, string>(); // issueId → fixNote
 
-// ─── 内部请求 ─────────────────────────────────────────────────────────────
+// ─── InternalRequest ─────────────────────────────────────────────────────────────
 async function fetchInternal(path: string) {
   try {
     const r = await fetch(`${MC}${path}`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
@@ -17,7 +17,7 @@ async function fetchInternal(path: string) {
   } catch { return null; }
 }
 
-// ─── 从测试结果派生问题列表 ───────────────────────────────────────────────
+// ─── FromTestresult派生问题List ───────────────────────────────────────────────
 interface Issue {
   id: string;
   component: string;
@@ -28,7 +28,7 @@ interface Issue {
   solution: string;
   category: string;
   testResultId?: string;
-  fixAction?: string;  // 对应的自动修复 action
+  fixAction?: string;  // for应's自动修复 action
 }
 
 function deriveIssues(testResults: Array<{
@@ -41,26 +41,26 @@ function deriveIssues(testResults: Array<{
     if (r.status !== 'failed' && r.status !== 'error') continue;
     if (resolvedIds.has(r.id)) continue;
 
-    // 根据测试分类和输出派生严重程度和建议
+    // 根据TestCategory和输出派生Critical程度和建议
     let severity: 'high' | 'medium' | 'low' = 'medium';
-    let solution = '检查相关服务并重启';
+    let solution = 'Check related services and restart';
     let fixAction = 'restart-service';
 
     if (r.category === 'api') {
       severity = 'high';
-      solution = `API 端点不可用：${r.output}。检查 Next.js 路由文件，确认 handler 已导出。`;
+      solution = `API endpoint unavailable: ${r.output}. Check Next.js route file, confirm handler is exported. `;
       fixAction = 'check-api';
     } else if (r.category === 'performance') {
       severity = r.duration > 1000 ? 'high' : 'medium';
-      solution = `响应时间 ${r.duration}ms 超标。建议检查数据库查询、添加缓存层或优化聚合逻辑。`;
+      solution = `Response time ${r.duration}ms exceeds threshold. Recommend checking DB queries, adding cache layer, or optimizing aggregation logic. `;
       fixAction = 'optimize-performance';
     } else if (r.category === 'security') {
       severity = 'high';
-      solution = `安全检测失败：${r.output}。建议立即修复安全配置。`;
+      solution = `Security check failed: ${r.output}. Recommend fixing security configuration immediately. `;
       fixAction = 'fix-security';
     } else if (r.category === 'health') {
       severity = 'medium';
-      solution = '系统资源异常。检查进程内存泄漏，考虑重启服务。';
+      solution = 'System resource abnormal. Check process memory leaks, consider restarting service. ';
       fixAction = 'run-diagnostic';
     }
 
@@ -78,43 +78,43 @@ function deriveIssues(testResults: Array<{
     });
   }
 
-  // 如果没有失败的测试，返回空（系统健康）
+  // if没Allfailed'sTest, 返回null(SystemHealth)
   return issues;
 }
 
-// ─── 真实修复操作 ─────────────────────────────────────────────────────────
+// ─── true实修复操作 ─────────────────────────────────────────────────────────
 async function applyFix(issue: Issue): Promise<{ success: boolean; message: string }> {
   try {
     if (issue.fixAction === 'check-api') {
-      // 重新测试该 API 端点
+      // re-Test该 API endpoint
       const res = await fetchInternal('/api/test?action=results&limit=50');
-      return { success: true, message: `已触发 API 检测，请在测试中心查看最新结果` };
+      return { success: true, message: `API check triggered, please view latest results in Test Center` };
     }
     if (issue.fixAction === 'optimize-performance') {
-      // 触发性能测试
+      // TriggerPerformanceTest
       await fetch(`${MC}/api/test`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run-performance' }),
       });
-      return { success: true, message: '已重新运行性能测试，数据已更新' };
+      return { success: true, message: 'Performance test re-run initiated, data will be updated' };
     }
     if (issue.fixAction === 'fix-security') {
       await fetch(`${MC}/api/test`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run-security' }),
       });
-      return { success: true, message: '已重新执行安全扫描' };
+      return { success: true, message: 'Security scan re-initiated' };
     }
     if (issue.fixAction === 'run-diagnostic') {
       await fetch(`${MC}/api/test`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run-diagnostic' }),
       });
-      return { success: true, message: '已运行系统诊断，请查看最新健康报告' };
+      return { success: true, message: 'System diagnostics running, please view the latest health report' };
     }
-    return { success: true, message: '修复操作已执行' };
+    return { success: true, message: 'Fix operation executed' };
   } catch (e) {
-    return { success: false, message: `修复失败: ${e instanceof Error ? e.message : '未知错误'}` };
+    return { success: false, message: `Fix failed: ${e instanceof Error ? e.message : 'Unknown error'}` };
   }
 }
 
@@ -123,13 +123,13 @@ export async function GET(request: NextRequest) {
   try {
     const action = request.nextUrl.searchParams.get('action') || 'issues';
 
-    // ── 问题列表（从测试中心流转） ──
+    // ── 问题List(FromTestCenter流转) ──
     if (action === 'issues') {
       const res = await fetchInternal('/api/test?action=results&limit=50');
       const results = res?.data?.results ?? [];
       const issues = deriveIssues(results);
 
-      // 统计数据
+      // Statisticsdata
       const summary = {
         total:        issues.length,
         active:       issues.filter(i => i.status === 'active').length,
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { issues, summary } });
     }
 
-    // ── 系统健康快照 ──
+    // ── SystemHealth快照 ──
     if (action === 'system-snapshot') {
       const [healthRes, testSumRes, autoRes] = await Promise.all([
         fetchInternal('/api/health'),
@@ -184,21 +184,21 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // ── 诊断工具列表 ──
+    // ── 诊断ToolList ──
     if (action === 'tools') {
       const tools = [
-        { id: 'health',   name: '系统健康检查', description: '全面检测所有 API 端点可用性', icon: 'server',   duration: '~5s',  action: 'run-all-health',  category: 'health' },
-        { id: 'perf',     name: '性能分析',     description: '测量 API 响应时间并评级',       icon: 'cpu',      duration: '~15s', action: 'run-performance', category: 'performance' },
-        { id: 'security', name: '安全扫描',     description: '检查 CORS、敏感路由暴露等',     icon: 'shield',   duration: '~5s',  action: 'run-security',    category: 'security' },
-        { id: 'diag',     name: '系统诊断',     description: '分析 Node 进程、端口、内存',    icon: 'terminal', duration: '~3s',  action: 'run-diagnostic',  category: 'health' },
+        { id: 'health',   name: 'System Health Check', description: 'Comprehensive check of all API endpoint availability', icon: 'server',   duration: '~5s',  action: 'run-all-health',  category: 'health' },
+        { id: 'perf',     name: 'Performance Analytics',     description: 'Measure API response times and ratings',       icon: 'cpu',      duration: '~15s', action: 'run-performance', category: 'performance' },
+        { id: 'security', name: 'Security Scan',     description: 'Check CORS, sensitive route exposure, etc.',     icon: 'shield',   duration: '~5s',  action: 'run-security',    category: 'security' },
+        { id: 'diag',     name: 'System Diagnostics', description: 'Analyze Node processes, ports, memory',    icon: 'terminal', duration: '~3s',  action: 'run-diagnostic',  category: 'health' },
       ];
       return NextResponse.json({ success: true, data: { tools } });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的 action' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, issueId } = body;
 
-    // ── 全系统扫描（调用测试中心所有测试） ──
+    // ── AllSystemScan(调用TestCenter所AllTest) ──
     if (action === 'full-scan') {
       const results = await Promise.allSettled([
         fetch(`${MC}/api/test`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'run-all-health' }) }),
@@ -217,46 +217,46 @@ export async function POST(request: NextRequest) {
         fetch(`${MC}/api/test`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'run-diagnostic' }) }),
       ]);
       const succeeded = results.filter(r => r.status === 'fulfilled').length;
-      return NextResponse.json({ success: true, data: { scanned: succeeded, total: 4, message: `${succeeded}/4 项扫描完成` } });
+      return NextResponse.json({ success: true, data: { scanned: succeeded, total: 4, message: `${succeeded}/4 scans completed` } });
     }
 
-    // ── 运行单个诊断工具 ──
+    // ── 运行单 诊断Tool ──
     if (action === 'run-tool') {
       const { toolAction } = body;
-      if (!toolAction) return NextResponse.json({ success: false, error: '缺少 toolAction' }, { status: 400 });
+      if (!toolAction) return NextResponse.json({ success: false, error: 'Missing  toolAction' }, { status: 400 });
       const res = await fetch(`${MC}/api/test`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: toolAction }),
       });
       const data = await res.json();
-      return NextResponse.json({ success: data.success, data: data.data, message: data.success ? '诊断完成' : '诊断失败' });
+      return NextResponse.json({ success: data.success, data: data.data, message: data.success ? 'Diagnostics completed' : 'Diagnostics failed' });
     }
 
-    // ── 标记为已解决 ──
+    // ── 标记foralready解决 ──
     if (action === 'resolve') {
-      if (!issueId) return NextResponse.json({ success: false, error: '缺少 issueId' }, { status: 400 });
+      if (!issueId) return NextResponse.json({ success: false, error: 'Missing  issueId' }, { status: 400 });
       resolvedIds.add(issueId);
-      return NextResponse.json({ success: true, data: { resolved: true, issueId }, message: '问题已标记为已解决' });
+      return NextResponse.json({ success: true, data: { resolved: true, issueId }, message: 'Issue marked as resolved' });
     }
 
-    // ── 应用修复 ──
+    // ── Application修复 ──
     if (action === 'apply-fix') {
-      if (!issueId) return NextResponse.json({ success: false, error: '缺少 issueId' }, { status: 400 });
+      if (!issueId) return NextResponse.json({ success: false, error: 'Missing  issueId' }, { status: 400 });
 
-      // 重新获取问题信息
+      // re-Fetch问题information
       const res = await fetchInternal('/api/test?action=results&limit=50');
       const results = res?.data?.results ?? [];
       const issues  = deriveIssues(results);
       const issue   = issues.find(i => i.id === issueId);
 
-      if (!issue) return NextResponse.json({ success: false, error: '问题不存在或已解决' }, { status: 404 });
+      if (!issue) return NextResponse.json({ success: false, error: 'Issue does not exist or is already resolved' }, { status: 404 });
 
       const fixResult = await applyFix(issue);
       if (fixResult.success) appliedFixes.set(issueId, fixResult.message);
       return NextResponse.json({ success: fixResult.success, data: { issueId, fixNote: fixResult.message }, message: fixResult.message });
     }
 
-    // ── 导出诊断报告 ──
+    // ── Export诊断Report ──
     if (action === 'export-report') {
       const [issuesRes, snapshotRes] = await Promise.all([
         fetchInternal('/api/troubleshooting?action=issues'),
@@ -277,9 +277,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported operation' }, { status: 400 });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

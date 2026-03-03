@@ -3,7 +3,7 @@ import { aiAssistModule } from './aiassist';
 import { cortexaaiModule } from './cortexaai';
 
 /**
- * 注册所有自动化模块
+ * Register所AllAutomationModule
  */
 export async function registerAutomationModules() {
   const modules = [
@@ -11,19 +11,19 @@ export async function registerAutomationModules() {
     cortexaaiModule
   ];
   
-  console.log(`注册 ${modules.length} 个自动化模块:`);
+  console.log(`Register ${modules.length}  AutomationModule:`);
   
   for (const module of modules) {
     console.log(`  • ${module.name} (${module.id})`);
     
-    // 这里应该调用自动化框架的注册API
-    // 暂时记录到控制台
+    // 这里should调用AutomationFramework'sRegisterAPI
+    // 暂时LogtoDashboard
     try {
-      // 模拟注册
+      // 模拟Register
       await new Promise(resolve => setTimeout(resolve, 100));
-      console.log(`    ✅ ${module.name} 注册成功`);
+      console.log(`    ✅ ${module.name} Registersuccess`);
     } catch (error) {
-      logger.error('模块注册失败', error, { moduleId: module.id, moduleName: module.name });
+      logger.error('ModuleRegisterfailed', error, { moduleId: module.id, moduleName: module.name });
     }
   }
   
@@ -31,7 +31,7 @@ export async function registerAutomationModules() {
 }
 
 /**
- * 获取所有已注册模块
+ * Fetch所AllalreadyRegisterModule
  */
 export function getAllModules() {
   return [
@@ -41,7 +41,7 @@ export function getAllModules() {
 }
 
 /**
- * 根据ID获取模块
+ * 根据IDFetchModule
  */
 export function getModuleById(moduleId: string) {
   const modules = getAllModules();
@@ -49,17 +49,17 @@ export function getModuleById(moduleId: string) {
 }
 
 /**
- * 执行模块动作
+ * ExecuteModule动作
  */
 export async function executeModuleAction(moduleId: string, action: string, parameters: Record<string, unknown>) {
   const module = getModuleById(moduleId);
   if (!module) {
-    throw new Error(`模块未找到: ${moduleId}`);
+    throw new Error(`ModuleNot found: ${moduleId}`);
   }
   
   const moduleActions = module.actions as Record<string, unknown>;
   if (!moduleActions[action]) {
-    throw new Error(`动作未找到: ${action}`);
+    throw new Error(`动作Not found: ${action}`);
   }
   
   return await module.execute(action, parameters);

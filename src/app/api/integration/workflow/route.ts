@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { unifiedGatewayService } from '@/lib/unified-gateway-service';
+import { unifiedGatewayservervice } from '@/lib/unified-gateway-service';
 import { intelligentTaskDispatcher } from '@/lib/intelligent-task-dispatcher';
-import { knowledgeEnhancedDevService } from '@/lib/knowledge-enhanced-dev-service';
-import { automationEfficiencyService } from '@/lib/automation-efficiency-service';
+import { knowledgeEnhancedDevservervice } from '@/lib/knowledge-enhanced-dev-service';
+import { automationEfficiencyservervice } from '@/lib/automation-efficiency-service';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (!workflow) {
       return NextResponse.json({
         success: false,
-        error: '缺少 workflow 参数',
+        error: 'Missing workflow parameters',
         timestamp: new Date().toISOString()
       }, { status: 400 });
     }
@@ -28,24 +28,24 @@ export async function POST(request: NextRequest) {
     
     switch (workflow) {
       case 'outsource-project': {
-        // 外包项目管理工作流
+        // OutsourceProject管理Workflow
         const { projectTitle, budget, deadline } = parameters || {};
         
-        // 1. 知识增强分析
-        const analysis = await knowledgeEnhancedDevService.analyzeDevTask(
-          `外包项目: ${projectTitle}`,
+        // 1. Knowledge EnhancedAnalytics
+        const analysis = await knowledgeEnhancedDevservervice.analyzeDevTask(
+          `OutsourceProject: ${projectTitle}`,
           { budget, deadline }
         );
         
-        // 2. 智能任务分发
+        // 2. 智canTaskDispatch
         const dispatch = await intelligentTaskDispatcher.dispatchTask({
           id: `workflow-${Date.now()}`,
-          query: `管理外包项目: ${projectTitle}`,
+          query: `Manage Outsource Project: ${projectTitle}`,
           context: analysis
         });
         
-        // 3. 自动化效率优化
-        const optimization = await automationEfficiencyService.processAutomationTask({
+        // 3. AutomationEfficiency Optimization
+        const optimization = await automationEfficiencyservervice.processAutomationTask({
           type: 'optimization',
           priority: 'high',
           complexity: 'medium',
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         
         result = {
           workflow: 'outsource-project',
-          steps: ['知识分析', '任务分发', '效率优化'],
+          steps: ['Knowledge Analytics', 'TaskDispatch', 'Efficiency Optimization'],
           analysis,
           dispatch,
           optimization,
@@ -67,25 +67,25 @@ export async function POST(request: NextRequest) {
       }
         
       case 'product-development': {
-        // 产品开发工作流
+        // ProductDevelopmentWorkflow
         const { feature, requirements } = parameters || {};
         
-        // 1. 统一网关处理
-        const gatewayResult = await unifiedGatewayService.processRequest({
+        // 1. Unified GatewayProcess
+        const gatewayResult = await unifiedGatewayservervice.processRequest({
           id: `dev_${Date.now()}`,
-          query: `开发功能: ${feature}`,
+          query: `Develop Feature: ${feature}`,
           context: { requirements },
           priority: 'high'
         });
         
-        // 2. 知识增强分析
-        const devAnalysis = await knowledgeEnhancedDevService.analyzeDevTask(
-          `开发 ${feature}`,
+        // 2. Knowledge EnhancedAnalytics
+        const devAnalysis = await knowledgeEnhancedDevservervice.analyzeDevTask(
+          `Develop ${feature}`,
           { requirements, gatewayResult }
         );
         
-        // 3. 自动化处理
-        const automationResult = await automationEfficiencyService.processAutomationTask({
+        // 3. Automation Process
+        const automationResult = await automationEfficiencyservervice.processAutomationTask({
           type: 'code-generation',
           priority: 'high',
           complexity: 'high',
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         
         result = {
           workflow: 'product-development',
-          steps: ['需求分析', '知识增强', '自动化处理'],
+          steps: ['Requirements Analysis', 'Knowledge Enhanced', 'Automation Process'],
           gatewayResult,
           devAnalysis,
           automationResult,
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       }
         
       case 'finance-monitoring': {
-        // 财务监控工作流 — 读取真实 CSV 文件
+        // FinanceMonitoringWorkflow - 读取true实 CSV file
         const { period } = parameters || {};
         const fs = await import('fs');
         const path = await import('path');
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
         let incomeRecords: string[] = [];
         let expenseRecords: string[] = [];
 
-        // 递归读取 CSV 文件
+        // recursive读取 CSV file
         function readCsvDir(dir: string): number {
           let total = 0;
           if (!fs.existsSync(dir)) return 0;
@@ -144,10 +144,10 @@ export async function POST(request: NextRequest) {
         try {
           revenue = readCsvDir(path.join(financeBase, 'Income'));
           expenses = readCsvDir(path.join(financeBase, 'Expenses'));
-          incomeRecords = fs.existsSync(path.join(financeBase, 'Income')) ? ['从 ~/Finance/Income 读取'] : [];
-          expenseRecords = fs.existsSync(path.join(financeBase, 'Expenses')) ? ['从 ~/Finance/Expenses 读取'] : [];
+          incomeRecords = fs.existsSync(path.join(financeBase, 'Income')) ? ['Read from ~/Finance/Income'] : [];
+          expenseRecords = fs.existsSync(path.join(financeBase, 'Expenses')) ? ['Read from ~/Finance/Expenses'] : [];
         } catch (e) {
-          console.error('读取财务文件失败:', e);
+          console.error('Failed to read finance files:', e);
         }
 
         const financeData = {
@@ -158,13 +158,13 @@ export async function POST(request: NextRequest) {
           currency: 'PHP',
           dataSource: path.join(homeDir, 'Finance'),
           hasRealData: revenue > 0 || expenses > 0,
-          note: revenue === 0 && expenses === 0 ? '财务文件为空，请在 ~/Finance/Income 和 ~/Finance/Expenses 中添加数据' : '真实数据',
+          note: revenue === 0 && expenses === 0 ? 'Finance files are empty, please add data in ~/Finance/Income and ~/Finance/Expenses' : 'real data',
           timestamp: new Date().toISOString(),
         };
 
         result = {
           workflow: 'finance-monitoring',
-          steps: ['读取CSV', '汇总计算', '生成报告'],
+          steps: ['Read CSV', 'Aggregate calculation', 'Generate Report'],
           financeData,
           timestamp: new Date().toISOString()
         };
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知工作流: ${workflow}`,
+          error: `UnknownWorkflow: ${workflow}`,
           timestamp: new Date().toISOString()
         }, { status: 400 });
     }
@@ -185,10 +185,10 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error('业务工作流API错误', error);
+    logger.error('Business workflow API error', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

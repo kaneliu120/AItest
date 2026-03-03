@@ -7,15 +7,15 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// 监听连接池错误，防止未处理的 rejection 崩溃进程
+// 监听Connect池error, 防止未Process's rejection 崩溃进程
 pool.on('error', (err) => {
-  console.error('[db/client] 连接池空闲客户端发生错误:', err.message);
+  console.error('[db/client] Connect池null闲client端发生error:', err.message);
 });
 
-// 连接建立时记录（仅开发环境）
+// Connect建立时Log(仅dev environment)
 if (process.env.NODE_ENV !== 'production') {
   pool.on('connect', () => {
-    console.log('[db/client] 新数据库连接已建立');
+    console.log('[db/client] Newdata库Connectalready建立');
   });
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { unifiedGatewayService, UnifiedRequest } from '@/lib/unified-gateway-service';
+import { unifiedGatewayservervice, UnifiedRequest } from '@/lib/unified-gateway-service';
 
-// 生成请求ID
+// GenerateRequestID
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -16,7 +16,7 @@ function asPriority(v: unknown): UnifiedRequest['priority'] {
   return typeof v === 'string' && (VALID_PRIORITIES as readonly string[]).includes(v) ? (v as UnifiedRequest['priority']) : 'medium';
 }
 
-// GET: 处理查询请求
+// GET: Process查询Request
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
     
     switch (action) {
       case 'process':
-        // 处理查询
+        // Process查询
         const query = searchParams.get('q');
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少查询参数 q',
+            error: 'Missing query parameter q',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           }
         };
 
-        const response = await unifiedGatewayService.processRequest(unifiedRequest);
+        const response = await unifiedGatewayservervice.processRequest(unifiedRequest);
         
         return NextResponse.json({
           success: true,
@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
         });
 
       case 'cache-stats':
-        // 获取缓存统计
-        const cacheStats = await unifiedGatewayService.getCacheStats();
+        // FetchCacheStatistics
+        const cacheStats = await unifiedGatewayservervice.getCacheStats();
         return NextResponse.json({
           success: true,
           data: cacheStats,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         });
 
       case 'health':
-        // 健康检查
+        // HealthCheck
         return NextResponse.json({
           success: true,
           data: {
@@ -82,21 +82,21 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown operation: ${action}`,
           timestamp: new Date().toISOString()
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('统一网关API错误:', error);
+    console.error('Unified gateway API error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
 }
 
-// POST: 处理复杂请求
+// POST: Process复杂Request
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -105,14 +105,14 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数',
+        error: 'Missing action parameter',
         timestamp: new Date().toISOString()
       }, { status: 400 });
     }
 
     switch (action) {
       case 'process':
-        // 处理统一请求
+        // Process统一Request
         const b = body as Record<string, unknown>;
         const query = typeof b.query === 'string' ? b.query : '';
         const system = b.system;
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少 query 参数',
+            error: 'Missing query parameter',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
           }
         };
 
-        const response = await unifiedGatewayService.processRequest(unifiedRequest);
+        const response = await unifiedGatewayservervice.processRequest(unifiedRequest);
         
         return NextResponse.json({
           success: true,
@@ -154,28 +154,28 @@ export async function POST(request: NextRequest) {
         });
 
       case 'clear-cache':
-        // 清空缓存
-        const cleared = await unifiedGatewayService.clearCache();
+        // ClearCache
+        const cleared = await unifiedGatewayservervice.clearCache();
         return NextResponse.json({
           success: true,
           data: { cleared },
-          message: cleared ? '缓存已清空' : '缓存清空失败',
+          message: cleared ? 'Cache cleared' : 'Cache clear failed',
           timestamp: new Date().toISOString()
         });
 
       case 'batch-process':
-        // 批量处理
+        // batchProcess
         const { queries } = body;
         
         if (!Array.isArray(queries) || queries.length === 0) {
           return NextResponse.json({
             success: false,
-            error: '缺少有效的 queries 数组',
+            error: 'Missing valid queries array',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
 
-        // 限制批量大小
+        // 限制batchLargeSmall
         const limitedQueries = queries.slice(0, 10);
         
         const batchResults = await Promise.all(
@@ -189,11 +189,11 @@ export async function POST(request: NextRequest) {
             };
             
             try {
-              return await unifiedGatewayService.processRequest(req);
+              return await unifiedGatewayservervice.processRequest(req);
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : '未知错误',
+                error: error instanceof Error ? error.message : 'Unknown error',
                 query: q
               };
             }
@@ -214,15 +214,15 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown operation: ${action}`,
           timestamp: new Date().toISOString()
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('统一网关API错误:', error);
+    console.error('Unified gateway API error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

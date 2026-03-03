@@ -1,4 +1,4 @@
-// 任务调度器 - 自动化任务执行管理
+// TaskScheduling器 - AutomationTaskExecute管理
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/logger';
@@ -24,7 +24,7 @@ export interface ScheduledTask {
   };
   retryPolicy?: {
     maxRetries: number;
-    retryDelay: number; // 毫秒
+    retryDelay: number; // 毫s
     backoffMultiplier: number;
   };
 }
@@ -52,7 +52,7 @@ export class TaskScheduler {
     this.tasksDir = path.join(baseDir, 'tasks');
     this.executionsDir = path.join(baseDir, 'executions');
     
-    // 确保目录存在
+    // 确保目录存in
     if (!fs.existsSync(this.tasksDir)) {
       fs.mkdirSync(this.tasksDir, { recursive: true });
     }
@@ -61,7 +61,7 @@ export class TaskScheduler {
     }
   }
   
-  // 创建新任务
+  // CreateNewTask
   createTask(taskData: Omit<ScheduledTask, 'id' | 'metadata'>): ScheduledTask {
     const task: ScheduledTask = {
       ...taskData,
@@ -74,7 +74,7 @@ export class TaskScheduler {
       }
     };
     
-    // 计算下次运行时间
+    // 计算下 times运行time
     if (task.schedule.enabled) {
       task.metadata.nextRun = this.calculateNextRun(task.schedule.cron);
     }
@@ -83,7 +83,7 @@ export class TaskScheduler {
     return task;
   }
   
-  // 获取所有任务
+  // Fetch所AllTask
   getAllTasks(): ScheduledTask[] {
     const tasks: ScheduledTask[] = [];
     
@@ -106,7 +106,7 @@ export class TaskScheduler {
     return tasks;
   }
   
-  // 获取待执行任务
+  // Fetch待ExecuteTask
   getPendingTasks(): ScheduledTask[] {
     const now = new Date();
     const tasks = this.getAllTasks();
@@ -120,29 +120,29 @@ export class TaskScheduler {
     });
   }
   
-  // 保存任务
+  // SaveTask
   private saveTask(task: ScheduledTask): void {
     const taskFile = path.join(this.tasksDir, `${task.id}.json`);
     fs.writeFileSync(taskFile, JSON.stringify(task, null, 2));
   }
   
-  // 计算下次运行时间（简化版本，不依赖cron-parser）
+  // 计算下 times运行time(简化Version, 不依赖cron-parser)
   private calculateNextRun(cronExpression: string): string {
     try {
-      // 简化实现：对于常见的cron表达式
-      // 例如：*/5 * * * * 表示每5分钟
-      // 这里我们简单返回1小时后
+      // 简化实现: for于常见'scron表达式
+      // e.g.: */5 * * * * 表示每5min
+      // 这里我们简单返回1Small时后
       const nextDate = new Date(Date.now() + 60 * 60 * 1000);
       return nextDate.toISOString();
     } catch (error) {
       logger.error('Error calculating next run', error, { module: 'TaskScheduler', cronExpression });
-      // 默认1小时后
+      // Default1Small时后
       const nextDate = new Date(Date.now() + 60 * 60 * 1000);
       return nextDate.toISOString();
     }
   }
   
-  // 更新任务下次运行时间
+  // UpdateTask下 times运行time
   updateTaskNextRun(taskId: string): boolean {
     const tasks = this.getAllTasks();
     const task = tasks.find(t => t.id === taskId);
@@ -156,7 +156,7 @@ export class TaskScheduler {
     return true;
   }
   
-  // 启用/禁用任务
+  // enabled/disabledTask
   toggleTask(taskId: string, enabled: boolean): boolean {
     const tasks = this.getAllTasks();
     const task = tasks.find(t => t.id === taskId);
@@ -176,7 +176,7 @@ export class TaskScheduler {
     return true;
   }
   
-  // 开始任务执行
+  // On始TaskExecute
   startTaskExecution(taskId: string): TaskExecution {
     const execution: TaskExecution = {
       id: `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -193,7 +193,7 @@ export class TaskScheduler {
     return execution;
   }
   
-  // 完成任务执行
+  // CompletedTaskExecute
   completeTaskExecution(executionId: string, result: unknown): boolean {
     const execution = this.getExecution(executionId);
     if (!execution) return false;
@@ -214,7 +214,7 @@ export class TaskScheduler {
     return true;
   }
   
-  // 任务执行失败
+  // TaskExecutefailed
   failTaskExecution(executionId: string, error: string): boolean {
     const execution = this.getExecution(executionId);
     if (!execution) return false;
@@ -235,7 +235,7 @@ export class TaskScheduler {
     return true;
   }
   
-  // 添加执行日志
+  // AddExecuteLogging
   addExecutionLog(executionId: string, log: string): boolean {
     const execution = this.getExecution(executionId);
     if (!execution) return false;
@@ -246,7 +246,7 @@ export class TaskScheduler {
     return true;
   }
   
-  // 获取执行记录
+  // FetchExecuteLog
   getExecution(executionId: string): TaskExecution | null {
     const executionFile = path.join(this.executionsDir, `${executionId}.json`);
     
@@ -263,7 +263,7 @@ export class TaskScheduler {
     }
   }
   
-  // 获取任务的所有执行记录
+  // FetchTask's所AllExecuteLog
   getTaskExecutions(taskId: string, limit: number = 50): TaskExecution[] {
     const executions: TaskExecution[] = [];
     
@@ -293,13 +293,13 @@ export class TaskScheduler {
     return executions;
   }
   
-  // 保存执行记录
+  // SaveExecuteLog
   private saveExecution(execution: TaskExecution): void {
     const executionFile = path.join(this.executionsDir, `${execution.id}.json`);
     fs.writeFileSync(executionFile, JSON.stringify(execution, null, 2));
   }
   
-  // 更新任务统计
+  // UpdateTaskStatistics
   private updateTaskStats(taskId: string, success: boolean): void {
     const tasks = this.getAllTasks();
     const task = tasks.find(t => t.id === taskId);
@@ -312,7 +312,7 @@ export class TaskScheduler {
     }
     task.metadata.updated = new Date().toISOString();
     
-    // 更新下次运行时间
+    // Update下 times运行time
     if (task.schedule.enabled) {
       task.metadata.nextRun = this.calculateNextRun(task.schedule.cron);
     }
@@ -320,7 +320,7 @@ export class TaskScheduler {
     this.saveTask(task);
   }
   
-  // 获取任务统计
+  // FetchTaskStatistics
   getTaskStats(taskId: string): {
     totalRuns: number;
     successRate: number;
@@ -364,7 +364,7 @@ export class TaskScheduler {
     };
   }
   
-  // 清理旧执行记录
+  // 清理OldExecuteLog
   cleanupOldExecutions(daysToKeep: number = 30): {
     deleted: number;
     kept: number;
@@ -396,14 +396,14 @@ export class TaskScheduler {
         }
       } catch (error) {
         logger.error('Error processing execution file', error, { module: 'TaskScheduler', file });
-        kept++; // 出错时保留文件
+        kept++; // 出错时保留file
       }
     }
     
     return { deleted, kept };
   }
   
-  // 导出任务数据
+  // ExportTaskdata
   exportTaskData(taskId: string): string {
     const task = this.getAllTasks().find(t => t.id === taskId);
     const executions = this.getTaskExecutions(taskId, 100);

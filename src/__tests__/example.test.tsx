@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect } from '@jest/globals';
 
-// 示例测试组件
+// ExampleTestComponent
 function ExampleComponent({ title = 'Hello World' }: { title?: string }) {
   return (
     <div>
@@ -29,7 +29,7 @@ describe('ExampleComponent', () => {
   });
 });
 
-// 工具函数测试示例
+// ToolfunctionTestExample
 function add(a: number, b: number): number {
   return a + b;
 }
@@ -67,7 +67,7 @@ describe('Utility Functions', () => {
   });
 });
 
-// API 客户端测试示例
+// API client端TestExample
 class ApiClient {
   private baseUrl: string;
 
@@ -95,16 +95,16 @@ describe('ApiClient', () => {
     expect(apiClient).toBeInstanceOf(ApiClient);
   });
 
-  // 注意：这是一个异步测试示例
+  // 注意: 这Yes一 asyncTestExample
   it.skip('fetches health status (requires actual API)', async () => {
-    // 这个测试需要实际的API，所以跳过
-    // 在实际项目中，可以使用jest.mock来模拟fetch
+    // 这 Testneed to实际'sAPI, so跳过
+    // in实际ProjectCenter, canusingjest.mock来模拟fetch
     const result = await apiClient.getHealth();
     expect(result).toHaveProperty('status');
   });
 });
 
-// 错误处理测试示例
+// errorProcessTestExample
 function divide(a: number, b: number): number {
   if (b === 0) {
     throw new Error('Division by zero');
@@ -124,7 +124,7 @@ describe('Error Handling', () => {
   });
 });
 
-// 组件交互测试示例
+// Component交互TestExample
 function Counter({ initialCount = 0 }: { initialCount?: number }) {
   const [count, setCount] = React.useState(initialCount);
 
@@ -166,7 +166,7 @@ describe('Counter Component', () => {
 
     expect(countDisplay).toHaveTextContent('0');
     
-    // 模拟点击 - 使用act包装状态更新
+    // 模拟点击 - usingact包装StatusUpdate
     await act(async () => {
       incrementButton.click();
     });
@@ -197,7 +197,7 @@ describe('Counter Component', () => {
     const resetButton = screen.getByTestId('reset');
     const countDisplay = screen.getByTestId('count');
 
-    // 先增加几次 (从3开始，点击2次应该是5)
+    // 先increase几 times (From3On始, 点击2 timesshouldYes5)
     await act(async () => {
       incrementButton.click();
     });
@@ -208,7 +208,7 @@ describe('Counter Component', () => {
     });
     expect(countDisplay).toHaveTextContent('5');
     
-    // 重置
+    // Reset
     await act(async () => {
       resetButton.click();
     });
@@ -216,7 +216,7 @@ describe('Counter Component', () => {
   });
 });
 
-// 快照测试示例
+// 快照TestExample
 function Header({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <header>
@@ -243,7 +243,7 @@ describe('Header Component Snapshot', () => {
   });
 });
 
-// 测试覆盖率报告
+// Test覆盖率Report
 export { 
   ExampleComponent, 
   add, 

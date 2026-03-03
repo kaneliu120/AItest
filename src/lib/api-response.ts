@@ -1,6 +1,6 @@
 /**
- * API响应格式标准化
- * 所有API必须使用此格式返回响应
+ * APIResponseFormatstandard化
+ * 所AllAPImustusing此Format返回Response
  */
 
 export interface ApiResponse<T = any> {
@@ -9,15 +9,15 @@ export interface ApiResponse<T = any> {
   error?: ApiError;
   message?: string;
   
-  // 元数据
+  // 元data
   timestamp: string;
   requestId?: string;
   version: string;
   
-  // 分页支持
+  // Pagination支持
   pagination?: PaginationInfo;
   
-  // 缓存信息
+  // Cacheinformation
   cached?: boolean;
   cacheExpiry?: string;
 }
@@ -26,7 +26,7 @@ export interface ApiError {
   code: string;
   message: string;
   details?: any;
-  stack?: string; // 仅开发环境
+  stack?: string; // 仅dev environment
 }
 
 export interface PaginationInfo {
@@ -50,7 +50,7 @@ export interface ApiMetadata {
 }
 
 /**
- * 成功响应
+ * successResponse
  */
 export function successResponse<T>(
   data: T,
@@ -84,7 +84,7 @@ export function successResponse<T>(
 }
 
 /**
- * 错误响应
+ * errorResponse
  */
 export function errorResponse(
   error: ApiError | string,
@@ -104,7 +104,7 @@ export function errorResponse(
       }
     : error;
 
-  // 如果是500错误，添加堆栈信息（仅开发环境）
+  // ifYes500error, Add堆栈information(仅dev environment)
   if (statusCode >= 500 && process.env.NODE_ENV === 'development') {
     apiError.stack = new Error().stack;
   }
@@ -119,7 +119,7 @@ export function errorResponse(
 }
 
 /**
- * 分页响应
+ * PaginationResponse
  */
 export function paginatedResponse<T>(
   items: T[],
@@ -151,10 +151,10 @@ export function paginatedResponse<T>(
 }
 
 /**
- * 空响应（用于删除等操作）
+ * nullResponse(用于Delete等操作)
  */
 export function emptyResponse(
-  message: string = '操作成功',
+  message: string = 'Operation successful',
   options: {
     requestId?: string;
   } = {}
@@ -169,11 +169,11 @@ export function emptyResponse(
 }
 
 /**
- * 验证错误响应
+ * Validation errorResponse
  */
 export function validationErrorResponse(
   errors: Record<string, string[]>,
-  message: string = '验证失败'
+  message: string = 'Validatefailed'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_VALIDATION',
@@ -183,10 +183,10 @@ export function validationErrorResponse(
 }
 
 /**
- * 未授权响应
+ * UnauthorizedResponse
  */
 export function unauthorizedResponse(
-  message: string = '未授权访问'
+  message: string = 'Unauthorized访问'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_UNAUTHORIZED',
@@ -195,10 +195,10 @@ export function unauthorizedResponse(
 }
 
 /**
- * 未找到响应
+ * Not foundResponse
  */
 export function notFoundResponse(
-  message: string = '资源未找到'
+  message: string = 'resourceNot found'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_NOT_FOUND',
@@ -207,7 +207,7 @@ export function notFoundResponse(
 }
 
 /**
- * 服务器错误响应
+ * serverver errorResponse
  */
 export function serverErrorResponse(
   error: Error | string,
@@ -217,7 +217,7 @@ export function serverErrorResponse(
   
   return errorResponse({
     code: 'ERR_INTERNAL',
-    message: '服务器内部错误',
+    message: 'servervice器Internalerror',
     details: process.env.NODE_ENV === 'development' ? { originalError: message } : undefined,
   }, { 
     statusCode: 500,
@@ -226,7 +226,7 @@ export function serverErrorResponse(
 }
 
 /**
- * 中间件：添加请求ID
+ * Center间件: AddRequestID
  */
 export function withRequestId(
   handler: (req: Request, requestId: string) => Promise<ApiResponse>
@@ -245,7 +245,7 @@ export function withRequestId(
 }
 
 /**
- * 中间件：添加处理时间
+ * Center间件: AddProcesstime
  */
 export function withProcessingTime(
   handler: (req: Request) => Promise<ApiResponse>
@@ -256,7 +256,7 @@ export function withProcessingTime(
     try {
       const response = await handler(req);
       
-      // 添加处理时间到响应数据中
+      // AddProcesstimetoResponsedataCenter
       if (response.data && typeof response.data === 'object') {
         (response.data as any).metadata = {
           ...(response.data as any).metadata,
@@ -272,7 +272,7 @@ export function withProcessingTime(
 }
 
 /**
- * 工具函数：从请求中提取分页参数
+ * Toolfunction: FromRequestCenter提取PaginationParameters
  */
 export function extractPaginationParams(
   searchParams: URLSearchParams,
@@ -288,7 +288,7 @@ export function extractPaginationParams(
 }
 
 /**
- * 工具函数：从请求中提取排序参数
+ * Toolfunction: FromRequestCenter提取SortParameters
  */
 export function extractSortParams(
   searchParams: URLSearchParams
@@ -300,7 +300,7 @@ export function extractSortParams(
 }
 
 /**
- * 工具函数：从请求中提取过滤参数
+ * Toolfunction: FromRequestCenter提取filterParameters
  */
 export function extractFilterParams(
   searchParams: URLSearchParams,
@@ -324,7 +324,7 @@ export function extractFilterParams(
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 
-/** 生成带 requestId 的成功 JSON 响应 */
+/** Generate带 requestId 'ssuccess JSON Response */
 export function ok<T>(data: T, status = 200): NextResponse {
   return NextResponse.json(
     { success: true, data, requestId: randomUUID(), timestamp: new Date().toISOString() },
@@ -332,7 +332,7 @@ export function ok<T>(data: T, status = 200): NextResponse {
   );
 }
 
-/** 生成带 requestId 的失败 JSON 响应 */
+/** Generate带 requestId 'sfailed JSON Response */
 export function fail(
   error: string,
   status = 500,

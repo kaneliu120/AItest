@@ -1,6 +1,6 @@
 /**
- * Analytics 聚合 API
- * 整合 finance / tasks / freelance / ecosystem / health 的真实数据
+ * Analytics aggregation API
+ * Integrates real data from finance / tasks / freelance / ecosystem / health
  */
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     monthlyTrend:   fd?.monthlyTrend   ?? [],
     currentMonth:   fd?.currentMonth   ?? { income: 0, expenses: 0, profit: 0 },
     currency:       fd?.currency       ?? 'PHP',
-    // 收入 vs 支出 分类饼图数据
+    // Income vs Expense category pie chart data
     categoryBreakdown: (() => {
       const map: Record<string, number> = {};
       transactions.forEach(t => {
@@ -65,12 +65,12 @@ export async function GET(request: NextRequest) {
     pending:        td?.pendingTasks  ?? 0,
     overdue:        td?.overdueTasks  ?? 0,
     completionRate: td?.completionRate ?? 0,
-    // 状态分布（用于饼图）
+    // Status distribution (for pie chart)
     statusDist: td ? [
-      { name: '已完成', value: td.completedTasks  ?? 0, color: '#22c55e' },
-      { name: '进行中', value: td.inProgressTasks ?? 0, color: '#3b82f6' },
-      { name: '待处理', value: td.pendingTasks    ?? 0, color: '#f59e0b' },
-      { name: '已逾期', value: td.overdueTasks    ?? 0, color: '#ef4444' },
+      { name: 'Completed', value: td.completedTasks  ?? 0, color: '#22c55e' },
+      { name: 'In Progress', value: td.inProgressTasks ?? 0, color: '#3b82f6' },
+      { name: 'Pending', value: td.pendingTasks    ?? 0, color: '#f59e0b' },
+      { name: 'Overdue', value: td.overdueTasks    ?? 0, color: '#ef4444' },
     ] : [],
     available: !!td,
   };
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     available: !!hd,
   };
 
-  // ── 综合得分 ──────────────────────────────────────────────────────────────
+  // ── Overall score ──────────────────────────────────────────────────────────────
   const overallScore = Math.round(
     (tasks.completionRate * 0.3) +
     (ecosystem.healthRate * 0.3) +

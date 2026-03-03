@@ -34,7 +34,7 @@ interface Stats {
 }
 
 // ─── Config ────────────────────────────────────────────────────────────────────
-// Project Status Flow：Create→Analysis→Accept→Automation→Publish→Pending Payment→Paid→Completed
+// Project Status Flow: Create→Analysis→Accept→Automation→Publish→Pending Payment→Paid→Completed
 const STATUS_FLOW: ProjectStatus[] = ['Create','Analysis','Accept','Automation','Publish','Pending Payment','Paid','Completed','Cancelled'];
 
 const STATUS_CFG: Record<ProjectStatus, { color: string; bg: string; dot: string }> = {
@@ -83,7 +83,7 @@ function StatusStepper({ status }: { status: ProjectStatus }) {
   );
 }
 
-// ─── Modal：Add/EditProject ─────────────────────────────────────────────────────
+// ─── Modal: Add/EditProject ─────────────────────────────────────────────────────
 function ProjectDialog({ project, clients, onClose, onSave }: {
   project: Project | null;
   clients: Client[];
@@ -163,7 +163,7 @@ function ProjectDialog({ project, clients, onClose, onSave }: {
             ]} />
           </div>
 
-          <Select label="Business Source（Channel）" name="businessSource" options={BIZ_SOURCES} />
+          <Select label="Business Source(Channel)" name="businessSource" options={BIZ_SOURCES} />
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -174,7 +174,7 @@ function ProjectDialog({ project, clients, onClose, onSave }: {
                   setForm(p => ({ ...p, clientId: e.target.value, clientName: c?.name ?? '' }));
                 }}
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                <option value="">— Select Client —</option>
+                <option value="">- Select Client -</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.company ? ` (${c.company})` : ''}</option>)}
               </select>
             </div>
@@ -208,7 +208,7 @@ function ProjectDialog({ project, clients, onClose, onSave }: {
   );
 }
 
-// ─── Modal：AddClient ───────────────────────────────────────────────────────────
+// ─── Modal: AddClient ───────────────────────────────────────────────────────────
 function ClientDialog({ onClose, onSave }: { onClose: () => void; onSave: (d: any) => Promise<void> }) {
   const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', notes: '' });
   const [saving, setSaving] = useState(false);
@@ -232,7 +232,7 @@ function ClientDialog({ onClose, onSave }: { onClose: () => void; onSave: (d: an
         <form onSubmit={handleSubmit} className="p-5 space-y-3">
           {[
             { l: 'Name *', k: 'name', ph: 'ClientName' },
-            { l: 'Company',   k: 'company', ph: 'Company Name（Optional）' },
+            { l: 'Company',   k: 'company', ph: 'Company Name(Optional)' },
             { l: 'Email',   k: 'email', ph: 'email@example.com' },
             { l: 'Phone',   k: 'phone', ph: '+63 912...' },
           ].map(({ l, k, ph }) => (
@@ -507,7 +507,7 @@ export default function FreelancePage() {
         </CardContent>
       </Card>
 
-      {/* ── Project List（Pagination）──────────────────────────────────────────────── */}
+      {/* ── Project List(Pagination)──────────────────────────────────────────────── */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -552,7 +552,7 @@ export default function FreelancePage() {
           {filtered.length > 0 && (
             <div className="flex items-center justify-between pt-4 border-t mt-4 flex-wrap gap-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <span>Page <strong>{pageStart + 1}</strong>–<strong>{Math.min(pageStart + pageSize, filtered.length)}</strong> items，Total <strong>{filtered.length}</strong> items</span>
+                <span>Page <strong>{pageStart + 1}</strong>-<strong>{Math.min(pageStart + pageSize, filtered.length)}</strong> items, Total <strong>{filtered.length}</strong> items</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs">Per page</span>
                   <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
@@ -574,7 +574,7 @@ export default function FreelancePage() {
                       acc.push(p); return acc;
                     }, [])
                     .map((item, idx) =>
-                      item === '...' ? <span key={`d${idx}`} className="px-1 text-xs text-muted-foreground">…</span> :
+                      item === '...' ? <span key={`d${idx}`} className="px-1 text-xs text-muted-foreground">...</span> :
                       <button key={item} onClick={() => setPage(item as number)}
                         className={`w-7 h-7 text-xs rounded border ${safePage === item ? 'bg-blue-500 text-white border-blue-500 font-semibold' : 'hover:bg-gray-50'}`}>
                         {item}

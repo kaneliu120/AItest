@@ -1,6 +1,6 @@
 /**
- * 数据库模块 - PostgreSQL 兼容版本
- * 替代原来的 better-sqlite3 版本
+ * data库Module - PostgreSQL 兼容Version
+ * 替代原来's better-sqlite3 Version
  */
 
 export { 
@@ -10,7 +10,7 @@ export {
   type DatabaseConnection 
 } from './database-postgres';
 
-// 兼容性导出
+// 兼容性Export
 export const Database = {
-  // 空实现，仅用于兼容
+  // null实现, 仅用于兼容
 };

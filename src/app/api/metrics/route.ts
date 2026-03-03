@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// 简单的指标收集
+// 简单'smetrics收集
 let requestCount = 0;
 let errorCount = 0;
 const responseTimes: number[] = [];
@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    // 收集基本指标
+    // 收集基本metrics
     requestCount++;
     
-    // 模拟一些指标数据
+    // 模拟一些metricsdata
     const metrics = {
       http_requests_total: requestCount,
       http_errors_total: errorCount,
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         }
       },
       node_memory_usage_bytes: process.memoryUsage().heapUsed,
-      node_cpu_usage: process.cpuUsage().user / 1000000, // 转换为秒
+      node_cpu_usage: process.cpuUsage().user / 1000000, // convertfors
       uptime_seconds: process.uptime(),
     };
 
@@ -67,7 +67,7 @@ uptime_seconds ${metrics.uptime_seconds}
     const responseTime = Date.now() - startTime;
     responseTimes.push(responseTime);
     
-    // 保持最近1000个响应时间
+    // 保持最近1000 Responsetime
     if (responseTimes.length > 1000) {
       responseTimes.shift();
     }

@@ -1,8 +1,8 @@
-// 简化的故障排查服务
+// 简化's故障排查servervice
 import { FaultDiagnosisEngine, FaultDetectionRule } from '../core/FaultDiagnosisEngine';
 import { logger } from '@/lib/logger';
 
-export interface FaultDiagnosisServiceConfig {
+export interface FaultDiagnosisserverviceConfig {
   enabled: boolean;
   checkInterval: number;
   autoRepair: boolean;
@@ -11,10 +11,10 @@ export interface FaultDiagnosisServiceConfig {
   dataRetentionDays: number;
 }
 
-export interface ServiceStatus {
+export interface serverviceStatus {
   status: 'starting' | 'running' | 'stopping' | 'stopped' | 'error';
   uptime: number;
-  config: FaultDiagnosisServiceConfig;
+  config: FaultDiagnosisserverviceConfig;
   stats: {
     totalFaultsDetected: number;
     autoRepaired: number;
@@ -26,18 +26,18 @@ export interface ServiceStatus {
   lastError?: string;
 }
 
-export class FaultDiagnosisService {
+export class FaultDiagnosisservervice {
   private engine: FaultDiagnosisEngine;
-  private config: FaultDiagnosisServiceConfig;
-  private status: ServiceStatus;
+  private config: FaultDiagnosisserverviceConfig;
+  private status: serverviceStatus;
   private isRunning: boolean = false;
   private checkIntervalId?: NodeJS.Timeout;
 
-  constructor(config?: Partial<FaultDiagnosisServiceConfig>) {
+  constructor(config?: Partial<FaultDiagnosisserverviceConfig>) {
     this.engine = new FaultDiagnosisEngine();
     this.config = {
       enabled: true,
-      checkInterval: 30000, // 30秒
+      checkInterval: 30000, // 30s
       autoRepair: false,
       notificationEnabled: true,
       severityThreshold: 'medium',
@@ -60,14 +60,14 @@ export class FaultDiagnosisService {
     };
   }
 
-  // 启动服务
+  // Startservervice
   async start(): Promise<void> {
     if (this.isRunning) return;
     
     this.status.status = 'starting';
     this.isRunning = true;
     
-    // 开始定期检查
+    // On始定期Check
     if (this.config.enabled) {
       this.checkIntervalId = setInterval(() => {
         this.performCheck().catch(console.error);
@@ -78,7 +78,7 @@ export class FaultDiagnosisService {
     this.status.uptime = Date.now();
   }
 
-  // 停止服务
+  // Stopservervice
   async stop(): Promise<void> {
     if (!this.isRunning) return;
     
@@ -93,7 +93,7 @@ export class FaultDiagnosisService {
     this.status.status = 'stopped';
   }
 
-  // 执行检查
+  // ExecuteCheck
   private async performCheck(): Promise<void> {
     try {
       const context = {
@@ -110,20 +110,20 @@ export class FaultDiagnosisService {
         this.status.stats.totalFaultsDetected += results.length;
         this.status.stats.pendingFaults = results.length;
         
-        // 处理故障
+        // Process故障
         for (const result of results) {
           await this.handleFault(result as Record<string, unknown>);
         }
       }
     } catch (error) {
       this.status.lastError = error instanceof Error ? error.message : String(error);
-      logger.error('故障检查失败', error, { module: 'FaultDiagnosisService' });
+      logger.error('故障Checkfailed', error, { module: 'FaultDiagnosisservervice' });
     }
   }
 
-  // 获取系统指标
+  // FetchSystemmetrics
   private async getSystemMetrics(): Promise<Record<string, number>> {
-    // 简化的系统指标
+    // 简化'sSystemmetrics
     return {
       cpuUsage: Math.random() * 100,
       memoryUsage: Math.random() * 100,
@@ -136,27 +136,27 @@ export class FaultDiagnosisService {
     };
   }
 
-  // 处理故障
+  // Process故障
   private async handleFault(fault: Record<string, unknown>): Promise<void> {
-    console.log(`检测到故障: ${fault.description} (严重性: ${fault.severity})`);
+    console.log(`检测to故障: ${fault.description} (Critical性: ${fault.severity})`);
     
     if (this.config.autoRepair && fault.automaticRepairAvailable) {
       try {
-        // 执行自动修复
+        // Execute自动修复
         await this.performAutoRepair(fault);
         this.status.stats.autoRepaired++;
       } catch (error) {
-        logger.error('自动修复失败', error, { module: 'FaultDiagnosisService' });
+        logger.error('自动修复failed', error, { module: 'FaultDiagnosisservervice' });
       }
     }
   }
 
-  // 执行自动修复
+  // Execute自动修复
   private async performAutoRepair(fault: Record<string, unknown>): Promise<void> {
     const steps = fault.repairSteps;
     if (Array.isArray(steps)) {
       for (const step of steps as Array<{ description?: string; action?: () => Promise<unknown> }>) {
-        console.log(`执行修复步骤: ${step.description || '未知步骤'}`);
+        console.log(`Execute修复Step: ${step.description || 'UnknownStep'}`);
         if (typeof step.action === 'function') {
           await step.action();
         }
@@ -164,37 +164,37 @@ export class FaultDiagnosisService {
     }
   }
 
-  // 获取服务状态
-  getStatus(): ServiceStatus {
+  // Get service status
+  getStatus(): serverviceStatus {
     return { ...this.status };
   }
 
-  // 获取所有规则
+  // Fetch所All规then
   getAllRules(): FaultDetectionRule[] {
     return this.engine.getAllRules();
   }
 
-  // 添加规则
+  // Add规then
   addRule(rule: FaultDetectionRule): void {
     this.engine.addRule(rule);
   }
 
-  // 移除规则
+  // remove规then
   removeRule(ruleId: string): boolean {
     return this.engine.removeRule(ruleId);
   }
 
-  // 启用/禁用规则
+  // enabled/disabled规then
   setRuleEnabled(ruleId: string, enabled: boolean): boolean {
     return this.engine.setRuleEnabled(ruleId, enabled);
   }
 
-  // 更新配置
-  updateConfig(config: Partial<FaultDiagnosisServiceConfig>): void {
+  // UpdateConfiguration
+  updateConfig(config: Partial<FaultDiagnosisserverviceConfig>): void {
     this.config = { ...this.config, ...config };
     this.status.config = this.config;
     
-    // 重启服务如果配置变更需要
+    // RestartserverviceifConfiguration变更need to
     if (this.isRunning && this.checkIntervalId) {
       clearInterval(this.checkIntervalId);
       if (this.config.enabled) {

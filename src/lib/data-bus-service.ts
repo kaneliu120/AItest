@@ -1,7 +1,7 @@
 import { logger } from './logger';
 /**
- * 数据总线服务
- * 标准化模块间数据传递
+ * Data Busservervice
+ * standard化Module间data传递
  */
 
 export interface DataEvent {
@@ -12,7 +12,7 @@ export interface DataEvent {
   metadata?: {
     correlationId?: string;
     priority?: 'low' | 'medium' | 'high' | 'critical';
-    ttl?: number; // 生存时间（毫秒）
+    ttl?: number; // 生存time(毫s)
     retryCount?: number;
   };
 }
@@ -29,7 +29,7 @@ export interface Subscription {
 
 export interface DataBusConfig {
   maxQueueSize: number;
-  defaultTTL: number; // 默认生存时间（毫秒）
+  defaultTTL: number; // Default生存time(毫s)
   retryAttempts: number;
   retryDelay: number;
   enableLogging: boolean;
@@ -45,7 +45,7 @@ export interface DataBusMetrics {
   averageProcessingTime: number;
 }
 
-class DataBusService {
+class DataBusservervice {
   private handlers: Map<string, Map<string, EventHandler>> = new Map();
   private eventQueue: DataEvent[] = [];
   private metrics: DataBusMetrics;
@@ -55,9 +55,9 @@ class DataBusService {
   constructor(config: Partial<DataBusConfig> = {}) {
     this.config = {
       maxQueueSize: 1000,
-      defaultTTL: 60000, // 1分钟
+      defaultTTL: 60000, // 1min
       retryAttempts: 3,
-      retryDelay: 1000, // 1秒
+      retryDelay: 1000, // 1s
       enableLogging: true,
       enableMetrics: true,
       ...config,
@@ -72,12 +72,12 @@ class DataBusService {
       averageProcessingTime: 0,
     };
 
-    // 启动事件处理器
+    // StartEventProcess器
     this.startEventProcessor();
   }
 
   /**
-   * 发布事件
+   * ReleaseEvent
    */
   async publish(event: Omit<DataEvent, 'timestamp'>): Promise<void> {
     const fullEvent: DataEvent = {
@@ -89,17 +89,17 @@ class DataBusService {
       },
     };
 
-    // 检查事件是否过期
+    // CheckEventwhether itexpired
     if (this.isEventExpired(fullEvent)) {
       if (this.config.enableLogging) {
-        logger.warn(`事件已过期，跳过发布: ${fullEvent.type}`);
+        logger.warn(`Eventalreadyexpired, 跳过Release: ${fullEvent.type}`);
       }
       return;
     }
 
-    // 添加到队列
+    // AddtoQueue
     if (this.eventQueue.length >= this.config.maxQueueSize) {
-      // 移除最旧的事件
+      // remove最Old'sEvent
       this.eventQueue.shift();
     }
 
@@ -108,12 +108,12 @@ class DataBusService {
     this.metrics.queueSize = this.eventQueue.length;
 
     if (this.config.enableLogging) {
-      logger.info(`📤 发布事件: ${fullEvent.type} (来源: ${fullEvent.source})`);
+      logger.info(`📤 ReleaseEvent: ${fullEvent.type} (来源: ${fullEvent.source})`);
     }
   }
 
   /**
-   * 订阅事件
+   * 订阅Event
    */
   subscribe(eventType: string, handler: EventHandler): Subscription {
     const handlerId = `handler-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -126,7 +126,7 @@ class DataBusService {
     this.metrics.activeSubscriptions++;
 
     if (this.config.enableLogging) {
-      logger.info(`📥 订阅事件: ${eventType} (处理器: ${handlerId})`);
+      logger.info(`📥 订阅Event: ${eventType} (Process器: ${handlerId})`);
     }
 
     return {
@@ -141,7 +141,7 @@ class DataBusService {
           }
 
           if (this.config.enableLogging) {
-            logger.info(`📭 取消订阅: ${eventType} (处理器: ${handlerId})`);
+            logger.info(`📭 Cancelled订阅: ${eventType} (Process器: ${handlerId})`);
           }
         }
       },
@@ -151,7 +151,7 @@ class DataBusService {
   }
 
   /**
-   * 请求-响应模式
+   * Request-Response模式
    */
   async request<T = any>(
     eventType: string,
@@ -164,18 +164,18 @@ class DataBusService {
   ): Promise<T> {
     const correlationId = options.correlationId || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const source = options.source || 'data-bus-client';
-    const timeout = options.timeout || 10000; // 默认10秒超时
+    const timeout = options.timeout || 10000; // Default10sTimeout
 
     return new Promise((resolve, reject) => {
       const responseEventType = `${eventType}:response:${correlationId}`;
       
-      // 设置超时
+      // SettingsTimeout
       const timeoutId = setTimeout(() => {
         subscription.unsubscribe();
-        reject(new Error(`请求超时: ${eventType}`));
+        reject(new Error(`RequestTimeout: ${eventType}`));
       }, timeout);
 
-      // 订阅响应事件
+      // 订阅ResponseEvent
       const subscription = this.subscribe(responseEventType, (responseEvent) => {
         clearTimeout(timeoutId);
         subscription.unsubscribe();
@@ -187,7 +187,7 @@ class DataBusService {
         }
       });
 
-      // 发布请求事件
+      // ReleaseRequestEvent
       this.publish({
         type: eventType,
         source,
@@ -201,7 +201,7 @@ class DataBusService {
   }
 
   /**
-   * 响应请求
+   * ResponseRequest
    */
   async respond(
     eventType: string,
@@ -211,7 +211,7 @@ class DataBusService {
       const correlationId = requestEvent.metadata?.correlationId;
       
       if (!correlationId) {
-        logger.warn(`请求事件缺少correlationId: ${eventType}`);
+        logger.warn(`RequestEventMissing correlationId: ${eventType}`);
         return;
       }
 
@@ -231,7 +231,7 @@ class DataBusService {
           type: `${eventType}:response:${correlationId}`,
           source: 'data-bus-service',
           data: {
-            error: error instanceof Error ? error.message : '未知错误',
+            error: error instanceof Error ? error.message : 'Unknown error',
           },
           metadata: {
             correlationId,
@@ -242,28 +242,28 @@ class DataBusService {
   }
 
   /**
-   * 获取指标数据
+   * Fetchmetricsdata
    */
   getMetrics(): DataBusMetrics {
     return { ...this.metrics };
   }
 
   /**
-   * 获取配置
+   * FetchConfiguration
    */
   getConfig(): DataBusConfig {
     return { ...this.config };
   }
 
   /**
-   * 更新配置
+   * UpdateConfiguration
    */
   updateConfig(newConfig: Partial<DataBusConfig>): void {
     this.config = { ...this.config, ...newConfig };
   }
 
   /**
-   * 清空队列
+   * ClearQueue
    */
   clearQueue(): void {
     this.eventQueue = [];
@@ -271,7 +271,7 @@ class DataBusService {
   }
 
   /**
-   * 获取活跃订阅
+   * FetchActive订阅
    */
   getActiveSubscriptions(): Array<{ eventType: string; count: number }> {
     const result: Array<{ eventType: string; count: number }> = [];
@@ -287,12 +287,12 @@ class DataBusService {
   }
 
   /**
-   * 私有方法：启动事件处理器
+   * Privatemethod: StartEventProcess器
    */
   private startEventProcessor(): void {
     this.processorIntervalId = setInterval(() => {
       this.processEventQueue();
-    }, 100); // 每100毫秒处理一次
+    }, 100); // 每100毫sProcess一 times
   }
 
   stopEventProcessor(): void {
@@ -303,7 +303,7 @@ class DataBusService {
   }
 
   /**
-   * 私有方法：处理事件队列
+   * Privatemethod: ProcessEventQueue
    */
   private async processEventQueue(): Promise<void> {
     if (this.eventQueue.length === 0) {
@@ -313,10 +313,10 @@ class DataBusService {
     const event = this.eventQueue.shift()!;
     this.metrics.queueSize = this.eventQueue.length;
 
-    // 检查事件是否过期
+    // CheckEventwhether itexpired
     if (this.isEventExpired(event)) {
       if (this.config.enableLogging) {
-        logger.warn(`跳过过期事件: ${event.type}`);
+        logger.warn(`跳过expiredEvent: ${event.type}`);
       }
       return;
     }
@@ -326,18 +326,18 @@ class DataBusService {
 
     if (!handlers || handlers.size === 0) {
       if (this.config.enableLogging) {
-        logger.warn(`没有处理器订阅事件: ${event.type}`);
+        logger.warn(`没AllProcess器订阅Event: ${event.type}`);
       }
       return;
     }
 
-    // 并行执行所有处理器
+    // and行Execute所AllProcess器
     const handlerPromises = Array.from(handlers.values()).map(async (handler, index) => {
       try {
         await handler(event);
         return { success: true, index };
       } catch (error) {
-        logger.error(`事件处理器错误 (${event.type}):`, error);
+        logger.error(`EventProcess器error (${event.type}):`, error);
         return { success: false, index, error };
       }
     });
@@ -346,7 +346,7 @@ class DataBusService {
     const endTime = Date.now();
     const processingTime = endTime - startTime;
 
-    // 更新指标
+    // Updatemetrics
     this.metrics.eventsProcessed++;
     this.metrics.averageProcessingTime = (
       (this.metrics.averageProcessingTime * (this.metrics.eventsProcessed - 1) + processingTime) / 
@@ -359,12 +359,12 @@ class DataBusService {
     }
 
     if (this.config.enableLogging) {
-      logger.info(`📨 处理事件: ${event.type} (${handlers.size}个处理器, ${processingTime}ms)`);
+      logger.info(`📨 ProcessEvent: ${event.type} (${handlers.size} Process器, ${processingTime}ms)`);
     }
   }
 
   /**
-   * 私有方法：检查事件是否过期
+   * Privatemethod: CheckEventwhether itexpired
    */
   private isEventExpired(event: DataEvent): boolean {
     const ttl = event.metadata?.ttl || this.config.defaultTTL;
@@ -375,57 +375,57 @@ class DataBusService {
   }
 }
 
-// 创建全局数据总线实例
-export const dataBusService = new DataBusService({
+// CreateGlobalData Bus实例
+export const dataBusservervice = new DataBusservervice({
   enableLogging: true,
   enableMetrics: true,
   maxQueueSize: 500,
-  defaultTTL: 30000, // 30秒
+  defaultTTL: 30000, // 30s
 });
 
-// 标准事件类型定义
+// standardEventType定义
 export const StandardEventTypes = {
-  // 系统事件
+  // SystemEvent
   SYSTEM_START: 'system:start',
   SYSTEM_STOP: 'system:stop',
   SYSTEM_HEALTH_CHECK: 'system:health-check',
   
-  // 项目事件
+  // ProjectEvent
   PROJECT_CREATED: 'project:created',
   PROJECT_UPDATED: 'project:updated',
   PROJECT_COMPLETED: 'project:completed',
   
-  // 开发事件
+  // DevelopmentEvent
   DEVELOPMENT_STARTED: 'development:started',
   CODE_GENERATED: 'code:generated',
   CODE_REVIEWED: 'code:reviewed',
   
-  // 测试事件
+  // TestEvent
   TEST_STARTED: 'test:started',
   TEST_COMPLETED: 'test:completed',
   TEST_FAILED: 'test:failed',
   
-  // 部署事件
+  // DeploymentEvent
   DEPLOYMENT_STARTED: 'deployment:started',
   DEPLOYMENT_COMPLETED: 'deployment:completed',
   DEPLOYMENT_FAILED: 'deployment:failed',
   
-  // 故障事件
+  // 故障Event
   FAULT_DETECTED: 'fault:detected',
   FAULT_REPAIRED: 'fault:repaired',
   ALERT_TRIGGERED: 'alert:triggered',
   
-  // 监控事件
+  // MonitoringEvent
   METRICS_UPDATED: 'metrics:updated',
   HEALTH_STATUS_CHANGED: 'health:status-changed',
   
-  // 工具事件
+  // ToolEvent
   TOOL_CONNECTED: 'tool:connected',
   TOOL_DISCONNECTED: 'tool:disconnected',
   TOOL_STATUS_CHANGED: 'tool:status-changed',
 };
 
-// 工具函数：创建标准事件
+// Toolfunction: CreatestandardEvent
 export function createStandardEvent(
   type: string,
   data: any,
@@ -448,7 +448,7 @@ export function createStandardEvent(
   };
 }
 
-// 工具函数：记录事件
+// Toolfunction: LogEvent
 export function logEvent(event: DataEvent, level: 'info' | 'warn' | 'error' = 'info'): void {
   const logLevels = {
     info: 'ℹ️',
@@ -456,15 +456,15 @@ export function logEvent(event: DataEvent, level: 'info' | 'warn' | 'error' = 'i
     error: '❌',
   };
   
-  logger.info(`${logLevels[level]} 事件日志: ${event.type}`);
+  logger.info(`${logLevels[level]} EventLogging: ${event.type}`);
   logger.info(`   来源: ${event.source}`);
-  logger.info(`   时间: ${event.timestamp}`);
+  logger.info(`   time: ${event.timestamp}`);
   
   if (event.metadata?.correlationId) {
-    logger.info(`   关联ID: ${event.metadata.correlationId}`);
+    logger.info(`   Off联ID: ${event.metadata.correlationId}`);
   }
   
   if (level === 'error' && event.data?.error) {
-    logger.info(`   错误: ${event.data.error}`);
+    logger.info(`   error: ${event.data.error}`);
   }
 }

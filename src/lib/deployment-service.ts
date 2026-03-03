@@ -1,4 +1,4 @@
-// 部署管理服务
+// Deployment管理servervice
 
 export interface DeploymentEnvironment {
   id: string;
@@ -20,7 +20,7 @@ export interface Deployment {
   status: 'pending' | 'building' | 'testing' | 'deploying' | 'active' | 'failed' | 'rolledback';
   startTime: string;
   endTime?: string;
-  duration?: number; // 毫秒
+  duration?: number; // 毫s
   logs: DeploymentLog[];
   artifacts: DeploymentArtifact[];
   rollbackVersion?: string;
@@ -54,7 +54,7 @@ export interface DeploymentStats {
   byProject: Record<string, number>;
 }
 
-export class DeploymentService {
+export class Deploymentservervice {
   private environments: Map<string, DeploymentEnvironment> = new Map();
   private deployments: Map<string, Deployment> = new Map();
   private stats: DeploymentStats = {
@@ -72,11 +72,11 @@ export class DeploymentService {
   }
   
   private initializeSampleData(): void {
-    // 初始化环境
+    // InitializeEnvironment
     const sampleEnvironments: DeploymentEnvironment[] = [
       {
         id: 'env-dev',
-        name: '开发环境',
+        name: 'dev environment',
         type: 'development',
         url: 'http://dev.mission-control.local',
         status: 'active',
@@ -90,7 +90,7 @@ export class DeploymentService {
       },
       {
         id: 'env-staging',
-        name: '预发布环境',
+        name: 'Pre-Release Environment',
         type: 'staging',
         url: 'http://staging.mission-control.app',
         status: 'active',
@@ -104,7 +104,7 @@ export class DeploymentService {
       },
       {
         id: 'env-prod',
-        name: '生产环境',
+        name: 'Production Environment',
         type: 'production',
         url: 'http://mission-control.app',
         status: 'active',
@@ -124,7 +124,7 @@ export class DeploymentService {
       this.environments.set(env.id, env);
     });
     
-    // 初始化部署记录
+    // InitializeDeploymentLog
     const sampleDeployments: Deployment[] = [
       {
         id: 'deploy-001',
@@ -133,32 +133,32 @@ export class DeploymentService {
         environmentId: 'env-prod',
         version: '2.0.0',
         status: 'active',
-        startTime: new Date(Date.now() - 86400000).toISOString(), // 1天前
+        startTime: new Date(Date.now() - 86400000).toISOString(), // 1d前
         endTime: new Date(Date.now() - 86350000).toISOString(),
         duration: 5000,
         logs: [
           {
             timestamp: new Date(Date.now() - 86400000).toISOString(),
             level: 'info',
-            message: '部署开始',
+            message: 'Deployment started',
             source: 'deployment-service'
           },
           {
             timestamp: new Date(Date.now() - 86390000).toISOString(),
             level: 'info',
-            message: '构建Docker镜像',
+            message: 'Building Docker image',
             source: 'docker-builder'
           },
           {
             timestamp: new Date(Date.now() - 86370000).toISOString(),
             level: 'info',
-            message: '运行测试',
+            message: 'Running tests',
             source: 'test-runner'
           },
           {
             timestamp: new Date(Date.now() - 86350000).toISOString(),
             level: 'info',
-            message: '部署完成',
+            message: 'DeploymentCompleted',
             source: 'deployment-service'
           }
         ],
@@ -187,13 +187,13 @@ export class DeploymentService {
           {
             timestamp: new Date().toISOString(),
             level: 'info',
-            message: '部署开始',
+            message: 'Deployment started',
             source: 'deployment-service'
           },
           {
             timestamp: new Date().toISOString(),
             level: 'info',
-            message: '拉取最新代码',
+            message: 'Pulling latest code',
             source: 'git-cloner'
           }
         ],
@@ -205,7 +205,7 @@ export class DeploymentService {
     sampleDeployments.forEach(deploy => {
       this.deployments.set(deploy.id, deploy);
       
-      // 更新统计
+      // UpdateStatistics
       this.stats.totalDeployments++;
       this.stats.byEnvironment[deploy.environmentId] = (this.stats.byEnvironment[deploy.environmentId] || 0) + 1;
       this.stats.byProject[deploy.projectId] = (this.stats.byProject[deploy.projectId] || 0) + 1;
@@ -223,17 +223,17 @@ export class DeploymentService {
     });
   }
   
-  // 获取所有环境
+  // Fetch所AllEnvironment
   async getEnvironments(): Promise<DeploymentEnvironment[]> {
     return Array.from(this.environments.values());
   }
   
-  // 获取环境详情
+  // FetchEnvironmentDetails
   async getEnvironment(id: string): Promise<DeploymentEnvironment | null> {
     return this.environments.get(id) || null;
   }
   
-  // 创建环境
+  // CreateEnvironment
   async createEnvironment(data: Omit<DeploymentEnvironment, 'id' | 'createdAt' | 'updatedAt'>): Promise<DeploymentEnvironment> {
     const id = `env_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
@@ -248,7 +248,7 @@ export class DeploymentService {
     return environment;
   }
   
-  // 获取所有部署
+  // Fetch所AllDeployment
   async getDeployments(filters?: {
     projectId?: string;
     environmentId?: string;
@@ -268,18 +268,18 @@ export class DeploymentService {
       deployments = deployments.filter(d => d.status === filters.status);
     }
     
-    // 按开始时间倒序排序
+    // byOn始time倒序Sort
     return deployments.sort((a, b) => 
       new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
   }
   
-  // 获取部署详情
+  // FetchDeploymentDetails
   async getDeployment(id: string): Promise<Deployment | null> {
     return this.deployments.get(id) || null;
   }
   
-  // 创建部署
+  // CreateDeployment
   async createDeployment(data: {
     projectId: string;
     projectName: string;
@@ -298,7 +298,7 @@ export class DeploymentService {
         {
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: '部署创建',
+          message: 'DeploymentCreate',
           source: 'deployment-service'
         }
       ],
@@ -307,26 +307,26 @@ export class DeploymentService {
     
     this.deployments.set(id, deployment);
     
-    // 更新统计
+    // UpdateStatistics
     this.stats.totalDeployments++;
     this.stats.activeDeployments++;
     this.stats.byEnvironment[data.environmentId] = (this.stats.byEnvironment[data.environmentId] || 0) + 1;
     this.stats.byProject[data.projectId] = (this.stats.byProject[data.projectId] || 0) + 1;
     
-    // 开始部署流程
+    // On始DeploymentProcess
     this.executeDeployment(deployment);
     
     return deployment;
   }
   
-  // 执行部署
+  // ExecuteDeployment
   private async executeDeployment(deployment: Deployment): Promise<void> {
-    // 更新状态为构建中
+    // UpdateStatusfor构建Center
     deployment.status = 'building';
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '开始构建',
+      message: 'Build started',
       source: 'build-system'
     });
     this.deployments.set(deployment.id, deployment);
@@ -334,29 +334,29 @@ export class DeploymentService {
     // 模拟构建过程
     await this.delay(1000);
     
-    // 构建完成
+    // 构建Completed
     deployment.status = 'testing';
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '构建完成，开始测试',
+      message: 'Build completed, starting tests',
       source: 'build-system'
     });
     this.deployments.set(deployment.id, deployment);
     
-    // 模拟测试过程
+    // 模拟Test过程
     await this.delay(1500);
     
-    // 测试完成
+    // TestCompleted
     deployment.status = 'deploying';
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '测试通过，开始部署',
+      message: 'Tests passed, starting deployment',
       source: 'test-runner'
     });
     
-    // 添加制品
+    // Add制品
     deployment.artifacts.push({
       id: `artifact_${Date.now()}`,
       name: `${deployment.projectId}-app`,
@@ -369,10 +369,10 @@ export class DeploymentService {
     
     this.deployments.set(deployment.id, deployment);
     
-    // 模拟部署过程
+    // 模拟Deployment过程
     await this.delay(2000);
     
-    // 部署成功
+    // Deploymentsuccess
     deployment.status = 'active';
     deployment.endTime = new Date().toISOString();
     deployment.duration = new Date(deployment.endTime).getTime() - new Date(deployment.startTime).getTime();
@@ -380,26 +380,26 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '部署成功',
+      message: 'Deploymentsuccess',
       source: 'deployment-service'
     });
     
     this.deployments.set(deployment.id, deployment);
     
-    // 更新统计
+    // UpdateStatistics
     this.stats.activeDeployments--;
     this.stats.successfulDeployments++;
     this.updateAverageDeploymentTime(deployment.duration);
   }
   
-  // 回滚部署
+  // RollbackDeployment
   async rollbackDeployment(deploymentId: string, rollbackVersion: string): Promise<boolean> {
     const deployment = this.deployments.get(deploymentId);
     if (!deployment || deployment.status !== 'active') {
       return false;
     }
     
-    // 创建回滚部署
+    // CreateRollbackDeployment
     const rollbackDeployment = await this.createDeployment({
       projectId: deployment.projectId,
       projectName: deployment.projectName,
@@ -408,13 +408,13 @@ export class DeploymentService {
       deployedBy: 'system-rollback'
     });
     
-    // 标记原部署为已回滚
+    // 标记原DeploymentforalreadyRollback
     deployment.status = 'rolledback';
     deployment.rollbackVersion = rollbackVersion;
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: `已回滚到版本 ${rollbackVersion}`,
+      message: `alreadyRollbacktoVersion ${rollbackVersion}`,
       source: 'deployment-service'
     });
     
@@ -423,7 +423,7 @@ export class DeploymentService {
     return true;
   }
   
-  // 添加部署日志
+  // AddDeploymentLogging
   async addDeploymentLog(deploymentId: string, log: Omit<DeploymentLog, 'timestamp'>): Promise<boolean> {
     const deployment = this.deployments.get(deploymentId);
     if (!deployment) return false;
@@ -437,12 +437,12 @@ export class DeploymentService {
     return true;
   }
   
-  // 获取部署统计
+  // FetchDeploymentStatistics
   async getDeploymentStats(): Promise<DeploymentStats> {
     return { ...this.stats };
   }
   
-  // 更新平均部署时间
+  // Update平均Deploymenttime
   private updateAverageDeploymentTime(newDuration: number): void {
     const totalCompleted = this.stats.successfulDeployments + this.stats.failedDeployments;
     this.stats.averageDeploymentTime = (
@@ -450,11 +450,11 @@ export class DeploymentService {
     );
   }
   
-  // 延迟函数
+  // latencyfunction
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 
-// 全局实例
-export const deploymentService = new DeploymentService();
+// Global实例
+export const deploymentservervice = new Deploymentservervice();

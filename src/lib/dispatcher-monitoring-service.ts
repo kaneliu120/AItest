@@ -1,4 +1,4 @@
-// 智能分发系统监控服务
+// 智canDispatchSystemMonitoringservervice
 
 import { TaskHistory } from './intelligent-task-dispatcher';
 
@@ -32,7 +32,7 @@ export interface Alert {
   resolvedAt?: string;
 }
 
-class DispatcherMonitoringService {
+class DispatcherMonitoringservervice {
   private metrics: MonitoringMetric[] = [];
   private maxMetrics = 1000;
   private alerts: Alert[] = [];
@@ -43,45 +43,45 @@ class DispatcherMonitoringService {
       id: 'high-error-rate',
       metric: 'error_rate',
       condition: 'gte',
-      threshold: 0.1, // 10%错误率
+      threshold: 0.1, // 10%error率
       severity: 'error',
-      message: '错误率超过10%，需要立即检查',
+      message: 'error率超过10%, need to立i.e.Check',
       enabled: true
     },
     {
       id: 'slow-response',
       metric: 'avg_response_time',
       condition: 'gte',
-      threshold: 3000, // 3秒
+      threshold: 3000, // 3s
       severity: 'warning',
-      message: '平均响应时间超过3秒，性能需要优化',
+      message: '平均Responsetime超过3s, Performanceneed tooptimize',
       enabled: true
     },
     {
       id: 'low-cache-hit',
       metric: 'cache_hit_rate',
       condition: 'lte',
-      threshold: 0.1, // 10%缓存命中率
+      threshold: 0.1, // 10%Cachehit rate
       severity: 'warning',
-      message: '缓存命中率低于10%，需要优化缓存策略',
+      message: 'Cachehit rateLow于10%, need tooptimizeCache策略',
       enabled: true
     },
     {
       id: 'system-overload',
       metric: 'requests_per_minute',
       condition: 'gte',
-      threshold: 100, // 每分钟100个请求
+      threshold: 100, // 每min100 Request
       severity: 'warning',
-      message: '系统负载过高，考虑扩容',
+      message: 'System负载过High, 考虑扩容',
       enabled: true
     }
   ];
 
-  // 记录任务执行
+  // LogTaskExecute
   recordTaskExecution(task: TaskHistory): void {
     const timestamp = new Date().toISOString();
     
-    // 记录响应时间
+    // LogResponsetime
     this.recordMetric({
       timestamp,
       metric: 'response_time',
@@ -94,7 +94,7 @@ class DispatcherMonitoringService {
       }
     });
     
-    // 记录成功率
+    // Logsuccess率
     this.recordMetric({
       timestamp,
       metric: 'task_success',
@@ -105,7 +105,7 @@ class DispatcherMonitoringService {
       }
     });
     
-    // 记录缓存状态
+    // LogCacheStatus
     this.recordMetric({
       timestamp,
       metric: 'cache_hit',
@@ -116,21 +116,21 @@ class DispatcherMonitoringService {
       }
     });
     
-    // 检查警报
+    // CheckAlert
     this.checkAlerts();
   }
 
-  // 记录指标
+  // Logmetrics
   private recordMetric(metric: MonitoringMetric): void {
     this.metrics.push(metric);
     
-    // 限制指标数量
+    // 限制metricsquantity
     if (this.metrics.length > this.maxMetrics) {
       this.metrics = this.metrics.slice(-this.maxMetrics);
     }
   }
 
-  // 获取系统性能指标
+  // FetchSystemPerformancemetrics
   getPerformanceMetrics(timeWindowMinutes = 60): {
     totalTasks: number;
     successfulTasks: number;
@@ -164,14 +164,14 @@ class DispatcherMonitoringService {
     
     const requestsPerMinute = totalTasks / timeWindowMinutes;
     
-    // 系统分布
+    // System分布
     const systemDistribution: Record<string, number> = {};
     recentTasks.forEach(metric => {
       const system = metric.tags.system;
       systemDistribution[system] = (systemDistribution[system] || 0) + 1;
     });
     
-    // 任务类型分布
+    // TaskType分布
     const taskTypeDistribution: Record<string, number> = {};
     recentTasks.forEach(metric => {
       const taskType = metric.tags.taskType;
@@ -190,9 +190,9 @@ class DispatcherMonitoringService {
     };
   }
 
-  // 检查警报
+  // CheckAlert
   private checkAlerts(): void {
-    const metrics = this.getPerformanceMetrics(5); // 最近5分钟
+    const metrics = this.getPerformanceMetrics(5); // 最近5min
     
     this.rules.forEach(rule => {
       if (!rule.enabled) return;
@@ -235,7 +235,7 @@ class DispatcherMonitoringService {
       }
       
       if (triggered) {
-        // 检查是否已有相同警报
+        // Checkwhether italreadyAll相同Alert
         const existingAlert = this.alerts.find(
           a => a.ruleId === rule.id && !a.resolved
         );
@@ -255,30 +255,30 @@ class DispatcherMonitoringService {
           
           this.alerts.unshift(alert);
           
-          // 限制警报数量
+          // 限制Alertquantity
           if (this.alerts.length > this.maxAlerts) {
             this.alerts = this.alerts.slice(0, this.maxAlerts);
           }
           
-          // 记录警报日志
-          console.log(`🚨 警报触发: ${rule.severity.toUpperCase()} - ${rule.message}`);
-          console.log(`   指标: ${rule.metric} = ${value}, 阈值: ${rule.threshold}`);
+          // LogAlertLogging
+          console.log(`🚨 AlertTrigger: ${rule.severity.toUpperCase()} - ${rule.message}`);
+          console.log(`   metrics: ${rule.metric} = ${value}, 阈值: ${rule.threshold}`);
         }
       }
     });
   }
 
-  // 获取活跃警报
+  // Get active alerts
   getActiveAlerts(): Alert[] {
     return this.alerts.filter(alert => !alert.resolved);
   }
 
-  // 获取所有警报
+  // Fetch所AllAlert
   getAllAlerts(limit = 50): Alert[] {
     return this.alerts.slice(0, limit);
   }
 
-  // 解决警报
+  // 解决Alert
   resolveAlert(alertId: string): boolean {
     const alert = this.alerts.find(a => a.id === alertId);
     if (alert && !alert.resolved) {
@@ -289,9 +289,9 @@ class DispatcherMonitoringService {
     return false;
   }
 
-  // 获取监控仪表板数据
+  // FetchMonitoringDashboarddata
   getDashboardData() {
-    const performance = this.getPerformanceMetrics(60); // 最近1小时
+    const performance = this.getPerformanceMetrics(60); // 最近1Small时
     const activeAlerts = this.getActiveAlerts();
     
     return {
@@ -314,12 +314,12 @@ class DispatcherMonitoringService {
     };
   }
 
-  // 清空所有数据（用于测试）
+  // Clear所Alldata(用于Test)
   clearAll(): void {
     this.metrics = [];
     this.alerts = [];
   }
 }
 
-// 导出单例实例
-export const dispatcherMonitoringService = new DispatcherMonitoringService();
+// Export单例实例
+export const dispatcherMonitoringservervice = new DispatcherMonitoringservervice();
