@@ -12,12 +12,14 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     const msg = error?.message || 'Unknown error';
-    if (msg.includes('does not exist') || msg.includes('relation')) {
+    if (msg.includes('does not exist') || msg.includes('relation') || msg.includes('ECONNREFUSED') || msg.includes('connect')) {
       return NextResponse.json({
         success: true,
         data: [],
         total: 0,
-        warning: 'Database tables not initialized. Run migrations.',
+        warning: msg.includes('ECONNREFUSED') || msg.includes('connect')
+          ? 'Database not reachable. Check DATABASE_URL.'
+          : 'Database tables not initialized. Run migrations.',
       });
     }
     return NextResponse.json(
