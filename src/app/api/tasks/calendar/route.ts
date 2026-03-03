@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     writeFileSync(tmpFile, script, 'utf-8');
 
     const { stdout, stderr } = await execAsync(`osascript "${tmpFile}"`);
-    try { unlinkSync(tmpFile); } catch {}
+    try { unlinkSync(tmpFile); } catch { /* cleanup best-effort */ }
 
     if (stderr && /error/i.test(stderr)) {
       return NextResponse.json({ success: false, error: stderr }, { status: 500 });

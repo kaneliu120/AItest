@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const cleanTitle = (x: string) => x
       .replace(/^[-*•]\s+/, '')
       .replace(/^#+\s+/, '')
-      .replace(/^\d+(?:\.\d+)*\s*[\.、]\s*/, '')
+      .replace(/^\d+(?:\.\d+)*\s*[.、]\s*/, '')
       .replace(/^、\s*/, '')
       .replace(/^总任务目标\s*[:：]\s*/i, '')
       .replace(/^任务目标\s*[:：]\s*/i, '')

@@ -12,7 +12,26 @@ env:
   RESOURCE_GROUP: mc-rg
 
 jobs:
+  # ── Quality gate (must pass before deploy) ──
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - name: Lint (0 errors)
+      run: npm run lint
+    - name: Build verification
+      run: npm run build
+      env:
+        NODE_ENV: production
+
+  # ── Build & Deploy (only after quality gate passes) ──
   build-and-deploy:
+    needs: quality-gate
     runs-on: ubuntu-latest
 
     steps:
@@ -81,10 +100,8 @@ jobs:
         URL="https://${{ env.WEBAPP_NAME }}.azurewebsites.net/api/health"
         STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
         echo "Health check status: $STATUS"
-        if [ "$STATUS" = "200" ] || [ "$STATUS" = "404" ]; then
-          echo "✅ Deployment successful!"
-          echo "🌐 URL: https://${{ env.WEBAPP_NAME }}.azurewebsites.net"
+        if [ "$STATUS" = "200" ]; then
+          echo "Deployment successful"
         else
-          echo "⚠️ App may still be starting (status: $STATUS)"
-          echo "🌐 URL: https://${{ env.WEBAPP_NAME }}.azurewebsites.net"
+          echo "App may still be starting (status: $STATUS)"
         fi

@@ -52,6 +52,7 @@ EXPOSE 3001
 # 设置环境变量
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
 # 启动应用
 CMD ["node", "server.js"]
