@@ -83,26 +83,26 @@ export default function SettingsPage() {
         refresh: 'Refresh',
       }
     : {
-        title: '设置',
-        subtitle: '应用偏好设置和系统信息',
-        appearance: '外观',
-        appearanceDesc: '自定义界面风格',
-        themeLabel: '主题',
-        light: '浅色',
-        dark: '深色',
-        languageLabel: '语言',
-        system: '系统信息',
-        systemDesc: '运行环境和健康状态',
-        version: '版本',
-        environment: '环境',
-        database: '数据库',
-        uptime: '运行时间',
+        title: 'Settings',
+        subtitle: 'Application preferences and system information',
+        appearance: 'Appearance',
+        appearanceDesc: 'Customize interface style',
+        themeLabel: 'Theme',
+        light: 'Light',
+        dark: 'Dark',
+        languageLabel: 'Language',
+        system: 'System Information',
+        systemDesc: 'Runtime environment and health status',
+        version: 'Version',
+        environment: 'Environment',
+        database: 'Database',
+        uptime: 'Uptime',
         cpu: 'CPU',
-        memory: '内存',
-        heap: '堆内存',
-        healthScore: '健康分数',
-        components: '组件',
-        refresh: '刷新',
+        memory: 'Memory',
+        heap: 'Heap',
+        healthScore: 'Health Score',
+        components: 'Components',
+        refresh: 'Refresh',
       };
 
   return (
@@ -149,7 +149,7 @@ export default function SettingsPage() {
                 onClick={() => switchLanguage('zh')}
                 className="gap-1"
               >
-                <Globe className="w-4 h-4" /> 中文
+                <Globe className="w-4 h-4" /> ZH
               </Button>
             </div>
           </div>

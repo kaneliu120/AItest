@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const text: string = body?.text || '';
-    if (!text.trim()) return NextResponse.json({ success: false, error: 'text 必填' }, { status: 400 });
+    if (!text.trim()) return NextResponse.json({ success: false, error: 'text is required' }, { status: 400 });
 
     const lines = text.split(/\r?\n/).map((l: string) => l.trim()).filter(Boolean);
     const draft: Array<{ level: 1 | 2 | 3; title: string; parentRef?: string }> = [];
@@ -36,6 +36,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: { draft, total: draft.length } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

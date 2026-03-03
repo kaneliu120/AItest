@@ -7,9 +7,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('任务调度器API错误:', error);
+    console.error('Task scheduler API error:', error);
     
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
     }
     
     if (action === 'simulate-task') {
-      // 模拟任务执行
+      // Simulate task execution
       const taskResult = {
         id: `task-${Date.now()}`,
-        name: body.name || '模拟任务',
+        name: body.name || 'Simulation Task',
         status: 'completed',
         result: 'success',
         duration: 0,  // actual duration tracked by task runner
@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: taskResult });
     }
     
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
   } catch (error) {
-    console.error('POST API错误:', error);
+    console.error('POST API error:', error);
     
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

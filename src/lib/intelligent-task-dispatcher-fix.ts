@@ -15,7 +15,7 @@ interface CacheStats {
 // 增强的智能分发器，修复缓存集成问题
 class EnhancedIntelligentTaskDispatcher {
   private cache: Map<string, { response: UnifiedResponse; timestamp: number }> = new Map();
-  private cacheTTL = 5 * 60 * 1000; // 5分钟缓存
+  private cacheTTL = 5 * 60 * 1000; // 5 minute cache
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -50,7 +50,7 @@ class EnhancedIntelligentTaskDispatcher {
             dispatchDecision: cached.response.data.dispatchDecision || {
               system: 'cached',
               strategy: 'cache',
-              reason: '缓存命中',
+              reason: 'Cache hit',
               confidence: 1.0,
               estimatedTime: Date.now() - startTime,
               estimatedCost: 0.1,
@@ -60,7 +60,7 @@ class EnhancedIntelligentTaskDispatcher {
           timestamp: new Date().toISOString()
         };
         
-        console.log(`🎯 缓存命中: ${cacheKey}`);
+        console.log(`🎯 Cache hit: ${cacheKey}`);
         return cachedResponse;
       }
       
@@ -78,7 +78,7 @@ class EnhancedIntelligentTaskDispatcher {
           ...response,
           data: {
             ...response.data,
-            cached: false // 原始响应不是缓存
+            cached: false // original response is not cached
           }
         };
         
@@ -100,7 +100,7 @@ class EnhancedIntelligentTaskDispatcher {
       return response;
       
     } catch (error) {
-      console.error('增强分发失败:', error);
+      console.error('Enhanced dispatch failed:', error);
       return await unifiedGatewayService.processRequest(request);
     }
   }
@@ -121,7 +121,7 @@ class EnhancedIntelligentTaskDispatcher {
     return keyParts.join('|');
   }
   
-  // 获取缓存统计
+  // Get cache statistics
   getCacheStats(): CacheStats {
     return {
       ...this.stats,

@@ -1,9 +1,9 @@
-// API监控服务
+// API monitoring service
 export interface ApiMetric {
   endpoint: string;
   method: string;
   timestamp: string;
-  responseTime: number; // 毫秒
+  responseTime: number; // ms
   statusCode: number;
   success: boolean;
   userId?: string;
@@ -25,8 +25,8 @@ export interface ApiStats {
     avgResponseTime: number;
     lastCalled: string;
   }>;
-  hourlyTraffic: Record<string, number>; // 小时 -> 请求数
-  dailyTraffic: Record<string, number>; // 日期 -> 请求数
+  hourlyTraffic: Record<string, number>; // hour -> request count
+  dailyTraffic: Record<string, number>; // date -> request count
 }
 
 export interface PerformanceAlert {
@@ -42,11 +42,11 @@ export interface PerformanceAlert {
 
 class ApiMonitoringService {
   private metrics: ApiMetric[] = [];
-  private maxMetrics = 10000; // 最多保存10000条记录
+  private maxMetrics = 10000; // max 10000 records
   private alerts: PerformanceAlert[] = [];
   private statsCache: ApiStats | null = null;
   private lastStatsUpdate = 0;
-  private statsCacheTTL = 60000; // 1分钟缓存
+  private statsCacheTTL = 60000; // 1 minute cache
 
   // 记录API调用
   recordMetric(metric: Omit<ApiMetric, 'timestamp'>): void {
@@ -69,7 +69,7 @@ class ApiMonitoringService {
     this.checkPerformance(fullMetric);
   }
 
-  // 获取API统计
+  // Get API statistics
   getStats(): ApiStats {
     const now = Date.now();
     
@@ -213,12 +213,12 @@ class ApiMonitoringService {
 
   private checkPerformance(metric: ApiMetric): void {
     // 检查慢响应
-    if (metric.responseTime > 1000) { // 超过1秒
+    if (metric.responseTime > 1000) { // exceeds 1 second
       this.createAlert({
         endpoint: metric.endpoint,
         type: 'slow_response',
         severity: metric.responseTime > 3000 ? 'high' : 'medium',
-        message: `API响应时间过长: ${metric.responseTime}ms (端点: ${metric.endpoint})`
+        message: `API response time too long: ${metric.responseTime}ms (endpoint: ${metric.endpoint})`
       });
     }
 
@@ -233,12 +233,12 @@ class ApiMonitoringService {
         const errorCount = endpointMetrics.filter(m => !m.success).length;
         const errorRate = errorCount / endpointMetrics.length;
         
-        if (errorRate > 0.1) { // 错误率超过10%
+        if (errorRate > 0.1) { // error rate exceeds 10%
           this.createAlert({
             endpoint: metric.endpoint,
             type: 'high_error_rate',
             severity: errorRate > 0.3 ? 'high' : 'medium',
-            message: `API错误率过高: ${(errorRate * 100).toFixed(1)}% (端点: ${metric.endpoint})`
+            message: `API error rate too high: ${(errorRate * 100).toFixed(1)}% (endpoint: ${metric.endpoint})`
           });
         }
       }

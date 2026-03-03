@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: '获取任务数据失败',
-        details: error instanceof Error ? error.message : '未知错误',
+        error: 'Failed to fetch task data',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -51,27 +51,27 @@ export async function POST(request: NextRequest) {
       const status = body?.status as TaskStatus;
 
       if (!id || typeof id !== 'string') {
-        return NextResponse.json({ success: false, error: '缺少有效任务ID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing valid task ID' }, { status: 400 });
       }
       if (!VALID_STATUS.includes(status)) {
-        return NextResponse.json({ success: false, error: '无效状态值' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Invalid status value' }, { status: 400 });
       }
 
       const updated = await postgresStore.updateTask(id, { status });
       if (!updated) {
-        return NextResponse.json({ success: false, error: '任务不存在或更新失败' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'Task not found or update failed' }, { status: 404 });
       }
 
       return NextResponse.json({
         success: true,
         data: updated,
-        message: '任务状态更新成功',
+        message: 'Task status updated successfully',
       });
     }
 
     // default: create
     if (!body.title) {
-      return NextResponse.json({ success: false, error: '任务标题不能为空' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Task title cannot be empty' }, { status: 400 });
     }
 
     const task = await postgresStore.createTask({
@@ -88,20 +88,20 @@ export async function POST(request: NextRequest) {
     });
 
     if (!task) {
-      return NextResponse.json({ success: false, error: '创建任务失败' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Task creation failed' }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
       data: task,
-      message: '任务创建成功',
+      message: 'Task created successfully',
     });
   } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        error: '创建/更新任务失败',
-        details: error instanceof Error ? error.message : '未知错误',
+        error: 'Task creation/update failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

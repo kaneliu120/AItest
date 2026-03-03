@@ -5,12 +5,12 @@ export interface DataMessage {
   id: string;
   type: string;
   source: string;
-  destination?: string; // 如果为空，广播给所有模块
+  destination?: string; // if empty, broadcast to all modules
   timestamp: string;
   payload: unknown;
   metadata?: {
     priority?: 'low' | 'normal' | 'high' | 'critical';
-    ttl?: number; // 生存时间（毫秒）
+    ttl?: number; // time-to-live (ms)
     retryCount?: number;
     correlationId?: string;
   };
@@ -19,7 +19,7 @@ export interface DataMessage {
 export interface DataChannel {
   name: string;
   description: string;
-  subscribers: string[]; // 模块ID数组
+  subscribers: string[]; // module ID array
   messageCount: number;
   lastMessage?: string;
 }
@@ -38,7 +38,7 @@ export class DataBus {
   private channels: Map<string, DataChannel>;
   private messages: Map<string, DataMessage>;
   private stats: DataBusStats;
-  private moduleConnections: Map<string, Set<string>>; // 模块ID -> 订阅的频道
+  private moduleConnections: Map<string, Set<string>>; // module ID -> subscribed channels
   
   constructor() {
     this.emitter = new EventEmitter();
@@ -56,10 +56,10 @@ export class DataBus {
     };
     
     // 创建默认频道
-    this.createChannel('system', '系统消息频道');
-    this.createChannel('module-events', '模块事件频道');
-    this.createChannel('task-events', '任务事件频道');
-    this.createChannel('error-events', '错误事件频道');
+    this.createChannel('system', 'System messages channel');
+    this.createChannel('module-events', 'Module events channel');
+    this.createChannel('task-events', 'Task events channel');
+    this.createChannel('error-events', 'Error events channel');
   }
   
   // 创建新频道
@@ -101,7 +101,7 @@ export class DataBus {
     
     // 检查是否已订阅
     if (channel.subscribers.includes(moduleId)) {
-      return true; // 已经订阅
+      return true; // already subscribed
     }
     
     // 添加订阅者
@@ -287,7 +287,7 @@ export class DataBus {
     
     let messages = Array.from(this.messages.values());
     
-    // 过滤
+ // filter
     if (type) {
       messages = messages.filter(msg => msg.type === type);
     }
@@ -331,13 +331,13 @@ export class DataBus {
     return channels ? Array.from(channels) : [];
   }
   
-  // 获取统计信息
+  // Get statistics信息
   getStats(): DataBusStats {
     // 计算平均延迟（模拟）
     const totalMessages = this.stats.totalMessages;
     if (totalMessages > 0) {
-      this.stats.averageLatency = 5 + Math.random() * 10; // 5-15ms 模拟延迟
-      this.stats.errorRate = 0.1 + Math.random() * 0.5; // 0.1-0.6% 错误率
+      this.stats.averageLatency = 5 + Math.random() * 10; // 5-15ms simulated latency
+      this.stats.errorRate = 0.1 + Math.random() * 0.5; // 0.1-0.6% error rate
     }
     
     return { ...this.stats };

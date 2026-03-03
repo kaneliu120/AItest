@@ -32,7 +32,7 @@ export interface SystemPerformance {
   averageResponseTime: number;
   successRate: number;
   lastUsed: string;
-  costPerRequest?: number; // 预估成本
+  costPerRequest?: number; // estimated cost
 }
 
 // 智能分发配置
@@ -57,8 +57,8 @@ export interface DispatchDecision {
   strategy: ExecutionStrategy;
   reason: string;
   confidence: number; // 0-1
-  estimatedTime: number; // 毫秒
-  estimatedCost: number; // 预估成本
+  estimatedTime: number; // ms
+  estimatedCost: number; // estimated cost
   alternatives: Array<{
     system: string;
     score: number;
@@ -103,7 +103,7 @@ class IntelligentTaskDispatcher {
           totalRequests: 0,
           successfulRequests: 0,
           averageResponseTime: 0,
-          successRate: 1.0, // 初始假设100%成功率
+          successRate: 1.0, // initial assumption: 100% success rate
           lastUsed: new Date().toISOString(),
           costPerRequest: this.estimateCost(system, taskType)
         });
@@ -115,9 +115,9 @@ class IntelligentTaskDispatcher {
   private estimateCost(system: string, taskType: string): number {
     // 基于系统类型和任务类型的成本预估
     const baseCosts: Record<string, number> = {
-      'mission-control': 0.5, // 中等成本
-      'okms': 0.3, // 较低成本 (本地RAG)
-      'openclaw': 0.8 // 较高成本 (可能调用外部API)
+      'mission-control': 0.5, // moderate cost
+      'okms': 0.3, // lower cost (local RAG)
+      'openclaw': 0.8 // higher cost (may call external APIs)
     };
     
     const taskMultipliers: Record<string, number> = {
@@ -187,7 +187,7 @@ class IntelligentTaskDispatcher {
       };
       
     } catch (error) {
-      console.error('智能任务分发失败:', error);
+      console.error('Intelligent task dispatch failed:', error);
       
       // 回退到基础统一网关
       return await unifiedGatewayService.processRequest(request);
@@ -229,7 +229,7 @@ class IntelligentTaskDispatcher {
     }
     
     // 预估Token数
-    const estimatedTokens = Math.ceil(queryLength * 1.5); // 简单估算
+    const estimatedTokens = Math.ceil(queryLength * 1.5); // simple estimate
     
     return {
       taskType,
@@ -250,8 +250,8 @@ class IntelligentTaskDispatcher {
       if (!performance) {
         return {
           system,
-          score: 0.5, // 默认分数
-          reason: '无历史性能数据'
+          score: 0.5, // default score
+          reason: 'No historical performance data'
         };
       }
       
@@ -283,7 +283,7 @@ class IntelligentTaskDispatcher {
       return {
         system,
         score,
-        reason: `性能:${performanceScore.toFixed(2)}, 可靠性:${reliabilityScore.toFixed(2)}, 成本:${costScore.toFixed(2)}`
+        reason: `perf:${performanceScore.toFixed(2)}, reliability:${reliabilityScore.toFixed(2)}, cost:${costScore.toFixed(2)}`
       };
     });
     
@@ -297,13 +297,13 @@ class IntelligentTaskDispatcher {
     
     if (analysis.urgency === 'high' || request.priority === 'critical') {
       strategy = 'parallel';
-      reason = '高优先级任务，使用并行执行';
+      reason = 'High-priority task, using parallel execution';
     } else if (analysis.complexity === 'high') {
       strategy = 'fallback';
-      reason = '复杂任务，使用回退策略';
+      reason = 'Complex task, using fallback strategy';
     } else if (bestSystem.score < 0.7 && systemScores[1] && systemScores[1].score > 0.6) {
       strategy = 'optimistic';
-      reason = '多个系统表现相近，使用乐观执行';
+      reason = 'Multiple systems perform similarly, using optimistic execution';
     }
     
     // 预估时间和成本
@@ -318,7 +318,7 @@ class IntelligentTaskDispatcher {
       confidence: bestSystem.score,
       estimatedTime,
       estimatedCost,
-      alternatives: systemScores.slice(1, 3) // 前3个备选
+      alternatives: systemScores.slice(1, 3) // top 3 alternatives
     };
   }
 
@@ -327,7 +327,7 @@ class IntelligentTaskDispatcher {
     if (responseTime <= 0) return 1.0;
     
     // 响应时间在1秒内得1分，超过5秒得0分，线性插值
-    const maxTime = 5000; // 5秒
+    const maxTime = 5000; // 5 seconds
     const score = Math.max(0, 1 - (responseTime / maxTime));
     return Math.min(1, score);
   }
@@ -339,7 +339,7 @@ class IntelligentTaskDispatcher {
       task => task.systemUsed === system && task.taskType === taskType
     );
     
-    if (relevantHistory.length === 0) return 0.5; // 默认
+    if (relevantHistory.length === 0) return 0.5; // default
     
     const cacheHits = relevantHistory.filter(task => task.cached).length;
     const cacheRate = cacheHits / relevantHistory.length;
@@ -353,12 +353,12 @@ class IntelligentTaskDispatcher {
     const now = Date.now();
     const recentTasks = this.taskHistory.filter(
       task => task.systemUsed === system && 
-      now - new Date(task.timestamp).getTime() < 60000 // 最近1分钟
+      now - new Date(task.timestamp).getTime() < 60000 // last 1 minute
     );
     
     // 任务越多，负载越高，得分越低
-    const loadFactor = Math.min(1, recentTasks.length / 10); // 最多10个任务/分钟
-    return 1 - (loadFactor * 0.3); // 最多降低30%得分
+    const loadFactor = Math.min(1, recentTasks.length / 10); // max 10 tasks/minute
+    return 1 - (loadFactor * 0.3); // reduce score by at most 30%
   }
 
   // 执行策略：乐观执行 (使用最佳系统)
@@ -388,12 +388,12 @@ class IntelligentTaskDispatcher {
           return response;
         }
       } catch (error) {
-        console.warn(`系统 ${system} 执行失败:`, error);
+        console.warn(`System ${system} execution failed:`, error);
         // 继续尝试下一个系统
       }
     }
     
-    throw new Error('所有系统执行失败');
+    throw new Error('All systems failed to execute');
   }
 
   // 执行策略：并行执行 (同时尝试多个系统，取最快成功结果)
@@ -412,7 +412,7 @@ class IntelligentTaskDispatcher {
       } catch (error) {
         return {
           success: false,
-          data: { error: error instanceof Error ? error.message : '未知错误' },
+          data: { error: error instanceof Error ? error.message : 'Unknown error' },
           source: system as UnifiedResponse['source'],
           taskType: 'mixed' as const,
           cached: false,
@@ -435,12 +435,12 @@ class IntelligentTaskDispatcher {
             hasSuccess = true;
             resolve(result);
           } else if (completed === promises.length && !hasSuccess) {
-            reject(new Error('所有并行执行都失败'));
+            reject(new Error('All parallel executions failed'));
           }
         }).catch(() => {
           completed++;
           if (completed === promises.length && !hasSuccess) {
-            reject(new Error('所有并行执行都失败'));
+            reject(new Error('All parallel executions failed'));
           }
         });
       });
@@ -462,7 +462,7 @@ class IntelligentTaskDispatcher {
         return primaryResponse;
       }
     } catch (error) {
-      console.warn(`主系统 ${decision.system} 执行失败:`, error);
+      console.warn(`Primary system ${decision.system} execution failed:`, error);
     }
     
     // 主系统失败，尝试第一个备选
@@ -476,7 +476,7 @@ class IntelligentTaskDispatcher {
       return await unifiedGatewayService.processRequest(fallbackRequest);
     }
     
-    throw new Error('主系统和备选系统都执行失败');
+    throw new Error('Both primary and fallback systems failed to execute');
   }
 
   // 记录任务历史
@@ -488,7 +488,7 @@ class IntelligentTaskDispatcher {
   ): Promise<void> {
     const history: TaskHistory = {
       taskId: request.id,
-      query: request.query.substring(0, 100), // 截断长查询
+      query: request.query.substring(0, 100), // truncate long query
       taskType: (response.taskType || (response.data as any)?.taskType || 'mixed') as string,
       priority: request.priority || 'medium',
       executionTime,
@@ -549,7 +549,7 @@ class IntelligentTaskDispatcher {
     current.successfulRequests += response.success ? 1 : 0;
     
     // 更新平均响应时间 (指数移动平均)
-    const alpha = 0.3; // 平滑因子
+    const alpha = 0.3; // smoothing factor
     current.averageResponseTime = alpha * executionTime + (1 - alpha) * current.averageResponseTime;
     
     // 更新成功率

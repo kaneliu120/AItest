@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       if (!userId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 参数'
+          error: 'Missing userId parameter'
         }, { status: 400 });
       }
       
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       if (!user) {
         return NextResponse.json({
           success: false,
-          error: '用户不存在'
+          error: 'User not found'
         }, { status: 404 });
       }
       
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       if (!teamId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 teamId 参数'
+          error: 'Missing teamId parameter'
         }, { status: 400 });
       }
       
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       if (!team) {
         return NextResponse.json({
           success: false,
-          error: '团队不存在'
+          error: 'Team not found'
         }, { status: 404 });
       }
       
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       if (!userId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 参数'
+          error: 'Missing userId parameter'
         }, { status: 400 });
       }
       
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       if (!userId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 参数'
+          error: 'Missing userId parameter'
         }, { status: 400 });
       }
       
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       if (!userId || !searchParams.get('action')) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 或 action 参数'
+          error: 'Missing userId or action parameter'
         }, { status: 400 });
       }
       
@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
     console.error('Team API Error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数'
+        error: 'Missing action parameter'
       }, { status: 400 });
     }
     
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
       if (!username || !email) {
         return NextResponse.json({
           success: false,
-          error: '缺少 username 或 email 参数'
+          error: 'Missing username or email parameter'
         }, { status: 400 });
       }
       
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: user,
-        message: '用户创建成功'
+        message: 'User created successfully'
       });
       
     } else if (action === 'update-user') {
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       if (!userId || !updates) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 或 updates 参数'
+          error: 'Missing userId or updates parameter'
         }, { status: 400 });
       }
       
@@ -226,14 +226,14 @@ export async function POST(request: NextRequest) {
       if (!updatedUser) {
         return NextResponse.json({
           success: false,
-          error: '用户不存在'
+          error: 'User not found'
         }, { status: 404 });
       }
       
       return NextResponse.json({
         success: true,
         data: updatedUser,
-        message: '用户更新成功'
+        message: 'User updated successfully'
       });
       
     } else if (action === 'create-team') {
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
       if (!name) {
         return NextResponse.json({
           success: false,
-          error: '缺少 name 参数'
+          error: 'Missing name parameter'
         }, { status: 400 });
       }
       
@@ -257,17 +257,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: team,
-        message: '团队创建成功'
+        message: 'Team created successfully'
       });
       
     } else if (action === 'add-team-member') {
-      // 添加团队成员
+      // Add team member
       const { teamId, userId } = params;
       
       if (!teamId || !userId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 teamId 或 userId 参数'
+          error: 'Missing teamId or userId parameter'
         }, { status: 400 });
       }
       
@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({
         success,
-        message: success ? '成员添加成功' : '添加失败或成员已存在'
+        message: success ? 'Member added' : 'Add failed or member already exists'
       });
       
     } else if (action === 'send-notification') {
@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
       if (!userId || !title || !message) {
         return NextResponse.json({
           success: false,
-          error: '缺少必要参数'
+          error: 'Missing required parameters'
         }, { status: 400 });
       }
       
@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: { notificationId },
-        message: '通知发送成功'
+        message: 'Notification sent'
       });
       
     } else if (action === 'mark-notification-read') {
@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
       if (!userId || !notificationId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 userId 或 notificationId 参数'
+          error: 'Missing userId or notificationId parameter'
         }, { status: 400 });
       }
       
@@ -317,7 +317,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({
         success,
-        message: success ? '通知标记为已读' : '通知不存在'
+        message: success ? 'Notification marked as read' : 'Notification not found'
       });
       
     } else if (action === 'create-session') {
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
       if (!projectId || !creatorId || !title || !type) {
         return NextResponse.json({
           success: false,
-          error: '缺少必要参数'
+          error: 'Missing required parameters'
         }, { status: 400 });
       }
       
@@ -340,7 +340,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: session,
-        message: '协作会话创建成功'
+        message: 'Collaboration session created'
       });
       
     } else if (action === 'export-team') {
@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
       if (!teamId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 teamId 参数'
+          error: 'Missing teamId parameter'
         }, { status: 400 });
       }
       
@@ -366,21 +366,21 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         return NextResponse.json({
           success: false,
-          error: error instanceof Error ? error.message : '导出失败'
+          error: error instanceof Error ? error.message : 'Export failed'
         }, { status: 404 });
       }
       
     } else {
       return NextResponse.json({
         success: false,
-        error: '未知的操作类型'
+        error: 'Unknown operation type'
       }, { status: 400 });
     }
   } catch (error) {
     console.error('Team API Error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

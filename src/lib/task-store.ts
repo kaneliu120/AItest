@@ -1,7 +1,7 @@
 /**
  * Task Store — PostgreSQL 持久化
  * 替代原来的 SQLite 存储
- * 数据库: mission_control (PostgreSQL)
+ * Database: mission_control (PostgreSQL)
  */
 
 import { Pool } from 'pg';
@@ -50,13 +50,13 @@ function getPool(): Pool {
 
     // 测试连接
     pool.query('SELECT 1')
-      .then(() => logger.info('PostgreSQL 连接成功', { module: 'task-store' }))
-      .catch(err => logger.error('PostgreSQL 连接失败', err, { module: 'task-store' }));
+      .then(() => logger.info('PostgreSQL connected', { module: 'task-store' }))
+      .catch(err => logger.error('PostgreSQL connection failed', err, { module: 'task-store' }));
   }
   return pool;
 }
 
-// 获取所有任务
+// Get all tasks
 export async function getAllTasks(): Promise<Task[]> {
   const query = `
     SELECT 
@@ -74,15 +74,15 @@ export async function getAllTasks(): Promise<Task[]> {
       ...row,
       tags: row.tags || [],
       source: row.source || 'manual',
-      type: 'general' // 默认类型
+      type: 'general' // default type
     }));
   } catch (error) {
-    logger.error('获取任务列表失败', error, { module: 'task-store' });
+    logger.error('Failed to fetch task list', error, { module: 'task-store' });
     return [];
   }
 }
 
-// 获取任务统计
+// Get task statistics
 export async function getTaskStats(): Promise<TaskStats> {
   const query = `
     SELECT 
@@ -113,7 +113,7 @@ export async function getTaskStats(): Promise<TaskStats> {
       total
     };
   } catch (error) {
-    logger.error('获取任务统计失败', error, { module: 'task-store' });
+    logger.error('Failed to fetch task stats', error, { module: 'task-store' });
     return {
       totalTasks: 0,
       pendingTasks: 0,
@@ -127,7 +127,7 @@ export async function getTaskStats(): Promise<TaskStats> {
   }
 }
 
-// 创建任务
+// Create task
 export async function createTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task | null> {
   const query = `
     INSERT INTO tasks (
@@ -158,7 +158,7 @@ export async function createTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedA
 
     return mapRowToTask(result.rows[0]);
   } catch (error) {
-    logger.error('创建任务失败', error, { module: 'task-store' });
+    logger.error('Task creation failed', error, { module: 'task-store' });
     return null;
   }
 }
@@ -199,7 +199,7 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<bo
     const result = await getPool().query(query, values);
     return (result.rowCount ?? 0) > 0;
   } catch (error) {
-    logger.error('更新任务失败', error, { module: 'task-store' });
+    logger.error('Task update failed', error, { module: 'task-store' });
     return false;
   }
 }
@@ -209,7 +209,7 @@ export async function deleteTask(id: string): Promise<boolean> {
     const result = await getPool().query('DELETE FROM tasks WHERE id = $1', [id]);
     return (result.rowCount ?? 0) > 0;
   } catch (error) {
-    logger.error('删除任务失败', error, { module: 'task-store' });
+    logger.error('Task deletion failed', error, { module: 'task-store' });
     return false;
   }
 }

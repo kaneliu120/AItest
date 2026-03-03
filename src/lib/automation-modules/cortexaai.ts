@@ -12,10 +12,10 @@ const TOOL_PATH = path.join(process.env.HOME || '/Users/kane', '.openclaw/worksp
 
 export const cortexaaiModule = {
   id: 'cortexaai-automation',
-  name: 'CortexaAI 自动化测试',
+  name: 'CortexaAI Automation Testing',
   version: '1.0.0',
-  description: '基于 CortexaAI 的自动化测试模块，支持 API 测试和性能测试',
-  author: '小A',
+  description: 'CortexaAI-based automation testing module supporting API and performance testing',
+  author: 'Copilot',
   enabled: true,
   category: 'testing' as const,
   dependencies: [] as string[],
@@ -25,103 +25,103 @@ export const cortexaaiModule = {
     apiEndpoint: {
       type: 'string',
       default: 'http://localhost:3000',
-      description: 'API 端点'
+      description: 'API endpoint'
     },
     authToken: {
       type: 'string',
       default: '',
-      description: '认证令牌'
+      description: 'Authentication token'
     },
     timeout: {
       type: 'number',
       default: 30000,
-      description: '超时时间（毫秒）'
+      description: 'Timeout (milliseconds)'
     },
     retryCount: {
       type: 'number',
       default: 3,
-      description: '重试次数'
+      description: 'Number of retries'
     }
   },
   
   // 可用动作
   actions: {
     'run-api-test': {
-      name: '运行 API 测试',
-      description: '运行 API 接口测试',
+      name: 'Run API Tests',
+      description: 'Run API interface tests',
       parameters: {
         endpoint: {
           type: 'string',
           required: true,
-          description: 'API 端点'
+          description: 'API endpoint'
         },
         method: {
           type: 'string',
           enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
           default: 'GET',
-          description: 'HTTP 方法'
+          description: 'HTTP method'
         },
         headers: {
           type: 'object',
           required: false,
-          description: '请求头'
+          description: 'Request headers'
         },
         body: {
           type: 'object',
           required: false,
-          description: '请求体'
+          description: 'Request body'
         },
         expectedStatus: {
           type: 'number',
           required: false,
-          description: '期望状态码'
+          description: 'Expected status code'
         }
       }
     },
     'run-performance-test': {
-      name: '运行性能测试',
-      description: '运行性能压力测试',
+      name: 'Run Performance Tests',
+      description: 'Run performance stress tests',
       parameters: {
         endpoint: {
           type: 'string',
           required: true,
-          description: '测试端点'
+          description: 'Test endpoint'
         },
         concurrentUsers: {
           type: 'number',
           default: 10,
-          description: '并发用户数'
+          description: 'Concurrent users'
         },
         duration: {
           type: 'number',
           default: 60,
-          description: '测试时长（秒）'
+          description: 'Test duration (seconds)'
         },
         rampUp: {
           type: 'number',
           default: 10,
-          description: '预热时间（秒）'
+          description: 'Warm-up time (seconds)'
         }
       }
     },
     'validate-response': {
-      name: '验证响应',
-      description: '验证 API 响应',
+      name: 'Verify Response',
+      description: 'Verify API response',
       parameters: {
         response: {
           type: 'object',
           required: true,
-          description: 'API 响应'
+          description: 'API response'
         },
         schema: {
           type: 'object',
           required: true,
-          description: '验证模式'
+          description: 'Validation mode'
         },
         rules: {
           type: 'array',
           required: false,
-          description: '验证规则'
+          description: 'Validation rules'
         }
       }
     }
@@ -132,11 +132,11 @@ export const cortexaaiModule = {
     try {
       const { stdout } = await execAsync(`node ${TOOL_PATH}`);
       if (stdout.includes('CortexaAI Tool')) {
-        return { status: 'healthy', message: 'CortexaAI 模块正常: ' + stdout.trim() };
+        return { status: 'healthy', message: 'CortexaAI module healthy: ' + stdout.trim() };
       }
-      return { status: 'warning', message: 'CortexaAI 响应异常' };
+      return { status: 'warning', message: 'CortexaAI response anomaly' };
     } catch (error: any) {
-      return { status: 'error', message: 'CortexaAI 模块异常: ' + error.message };
+      return { status: 'error', message: 'CortexaAI module error: ' + error.message };
     }
   },
   
@@ -150,7 +150,7 @@ export const cortexaaiModule = {
       case 'validate-response':
         return await validateResponse(parameters);
       default:
-        throw new Error(`未知动作: ${action}`);
+        throw new Error(`Unknown action: ${action}`);
     }
   }
 };

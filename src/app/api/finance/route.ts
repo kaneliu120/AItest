@@ -80,12 +80,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: summary });
     }
 
-    // action=stats 保留兼容旧调用
+    // action=stats kept for backward compatibility
     return NextResponse.json({ success: true, data: summary });
   } catch (error) {
-    console.error('财务API错误:', error);
+    console.error('Finance API error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -100,13 +100,13 @@ export async function POST(request: NextRequest) {
     if (action === 'budgets') {
       const { name, category, period, allocated } = body;
       if (!name || !allocated) {
-        return NextResponse.json({ success: false, error: '缺少必要参数: name, allocated' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing required params: name, allocated' }, { status: 400 });
       }
 
       const item: BudgetItem = {
         id: `bdg-${Date.now()}`,
         name,
-        category: category || '运营',
+        category: category || 'Operations',
         period: period || 'monthly',
         allocated: Number(allocated),
         spent: 0,
@@ -119,14 +119,14 @@ export async function POST(request: NextRequest) {
 
     const { type, amount, description, category, date, tags } = body;
     if (!type || !amount || !description) {
-      return NextResponse.json({ success: false, error: '缺少必要参数: type, amount, description' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Missing required params: type, amount, description' }, { status: 400 });
     }
 
     const transaction = await financeStore.addTransaction({
       type,
       amount: Number(amount),
       description,
-      category: category || '其他',
+      category: category || 'Other',
       date: date || new Date().toISOString().split('T')[0],
       currency: 'PHP',
       status: 'completed',
@@ -135,9 +135,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: transaction });
   } catch (error) {
-    console.error('财务API POST错误:', error);
+    console.error('Finance API POST error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

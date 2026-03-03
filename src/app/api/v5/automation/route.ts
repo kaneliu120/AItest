@@ -64,17 +64,17 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId,
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v5/automation', requestId, error);
-    logger.error('自动化效率API错误', error, { module: 'api/v5/automation', requestId });
+    logger.error('Automation efficiency API error', error, { module: 'api/v5/automation', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId,
     }, { status: 500 });
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数',
+        error: 'Missing action parameter',
         timestamp: new Date().toISOString(),
         requestId,
       }, { status: 400 });
@@ -107,14 +107,14 @@ export async function POST(request: NextRequest) {
           complexity = 'medium',
           description,
           estimatedTokenUsage = 1000,
-          estimatedTime = 30, // 分钟
+          estimatedTime = 30, // minutes
           automationLevel = 'assisted'
         } = body;
         
         if (!type) {
           return NextResponse.json({
             success: false,
-            error: '缺少 type 参数',
+            error: 'Missing type parameter',
             timestamp: new Date().toISOString(),
             requestId,
           }, { status: 400 });
@@ -153,13 +153,13 @@ export async function POST(request: NextRequest) {
         if (!Array.isArray(tasks) || tasks.length === 0) {
           return NextResponse.json({
             success: false,
-            error: '缺少有效的 tasks 数组',
+            error: 'Missing valid tasks array',
             timestamp: new Date().toISOString(),
             requestId,
           }, { status: 400 });
         }
         
-        // 限制批量大小
+        // Limit batch size
         const limitedTasks: Array<Omit<AutomationTask, 'id' | 'status'>> = tasks.slice(0, 10).map((t: Record<string, unknown>, index: number) => ({
           type: (t.type as AutomationTask['type']) || 'code-generation',
           priority: (t.priority as AutomationTask['priority']) || 'medium',
@@ -167,12 +167,12 @@ export async function POST(request: NextRequest) {
           estimatedTokenUsage: Number(t.estimatedTokenUsage ?? 1000),
           estimatedTime: Number(t.estimatedTime ?? 30),
           automationLevel: (t.automationLevel as AutomationTask['automationLevel']) || 'assisted',
-          data: { description: String(t.description ?? `批量任务 ${index + 1}`) }
+          data: { description: String(t.description ?? `Batch task ${index + 1}`) }
         }));
         
         const batchResults = await automationEfficiencyService.processBatchTasks(limitedTasks);
         
-        // 计算统计
+        // Calculate statistics
         const completed = batchResults.filter(r => r.status === 'completed').length;
         const totalTokenSavings = batchResults
           .filter(r => r.status === 'completed' && r.metrics)
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: {
-            message: '自动化效率优化服务初始化完成',
+            message: 'Automation efficiency service initialized',
             status: automationEfficiencyService.getServiceStatus()
           },
           timestamp: new Date().toISOString(),
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: {
-            message: '自动化效率优化服务已重置',
+            message: 'Automation efficiency service reset',
             status: automationEfficiencyService.getServiceStatus()
           },
           timestamp: new Date().toISOString(),
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
             type: 'code-generation',
             priority: 'medium',
             complexity: 'medium',
-            description: '创建一个用户登录表单组件',
+            description: 'Create a user login form component',
             estimatedTokenUsage: 1500,
             estimatedTime: 45,
             automationLevel: 'full'
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
             type: 'api-design',
             priority: 'high',
             complexity: 'medium',
-            description: '设计用户管理REST API',
+            description: 'Design a user management REST API',
             estimatedTokenUsage: 2000,
             estimatedTime: 60,
             automationLevel: 'assisted'
@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
             type: 'optimization',
             priority: 'medium',
             complexity: 'low',
-            description: '优化数据库查询性能',
+            description: 'Optimize database query performance',
             estimatedTokenUsage: 800,
             estimatedTime: 30,
             automationLevel: 'full'
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
           type: ['code-generation', 'api-design', 'testing', 'optimization'][i % 4] as AutomationTask['type'],
           priority: ['low', 'medium', 'high'][i % 3] as AutomationTask['priority'],
           complexity: ['low', 'medium', 'high'][i % 3] as AutomationTask['complexity'],
-          description: `模拟任务 ${i + 1}: ${['创建组件', '设计API', '编写测试', '性能优化'][i % 4]}`,
+          description: `Mock task ${i + 1}: ${['Create component', 'Design API', 'Write tests', 'Performance optimization'][i % 4]}`,
           estimatedTokenUsage: 1000 + (i * 200),  // deterministic estimate
           estimatedTime: 30 + (i * 10),  // deterministic estimate
           automationLevel: ['manual', 'assisted', 'full'][i % 3] as AutomationTask['automationLevel']
@@ -349,17 +349,17 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId,
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v5/automation', requestId, error);
-    logger.error('自动化效率API错误', error, { module: 'api/v5/automation', requestId });
+    logger.error('Automation efficiency API error', error, { module: 'api/v5/automation', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId,
     }, { status: 500 });

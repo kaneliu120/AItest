@@ -22,8 +22,8 @@ export interface AlertRule {
   condition: 'gt' | 'lt' | 'eq' | 'neq' | 'gte' | 'lte';
   threshold: number;
   severity: 'info' | 'warning' | 'critical';
-  duration?: number; // 持续时间(秒)
-  cooldown?: number; // 冷却时间(秒)
+  duration?: number; // duration (seconds)
+  cooldown?: number; // cooldown (seconds)
   enabled: boolean;
 }
 
@@ -60,9 +60,9 @@ export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
   metrics: MonitoringMetric[];
   lastCheck: Date;
-  uptime: number; // 秒
-  errorRate: number; // 百分比
-  responseTime: number; // 毫秒
+  uptime: number; // seconds
+  errorRate: number; // percentage
+  responseTime: number; // ms
 }
 
 // 统一监控服务类
@@ -78,12 +78,12 @@ export class UnifiedMonitoringService {
     // 知识增强开发系统告警规则
     {
       id: 'knowledge-query-time',
-      name: '知识查询响应时间过高',
-      description: '知识查询响应时间超过阈值',
+      name: 'High Knowledge Query Response Time',
+      description: 'Knowledge query response time exceeds threshold',
       system: 'knowledge-enhanced-development',
-      metric: '知识查询响应时间',
+      metric: 'Knowledge Query Response Time',
       condition: 'gt',
-      threshold: 1000, // 1秒
+      threshold: 1000, // 1 second
       severity: 'warning',
       duration: 60,
       cooldown: 300,
@@ -91,10 +91,10 @@ export class UnifiedMonitoringService {
     },
     {
       id: 'knowledge-query-success',
-      name: '知识查询成功率过低',
-      description: '知识查询成功率低于阈值',
+      name: 'Low Knowledge Query Success Rate',
+      description: 'Knowledge query success rate below threshold',
       system: 'knowledge-enhanced-development',
-      metric: '查询成功率',
+      metric: 'Query Success Rate',
       condition: 'lt',
       threshold: 95, // 95%
       severity: 'critical',
@@ -106,10 +106,10 @@ export class UnifiedMonitoringService {
     // 智能任务分发系统告警规则
     {
       id: 'dispatch-response-time',
-      name: '任务分发响应时间过高',
-      description: '任务分发响应时间超过阈值',
+      name: 'High Task Dispatch Response Time',
+      description: 'Task dispatch response time exceeds threshold',
       system: 'intelligent-task-dispatch',
-      metric: '任务分发响应时间',
+      metric: 'Task Dispatch Response Time',
       condition: 'gt',
       threshold: 500, // 500ms
       severity: 'warning',
@@ -119,10 +119,10 @@ export class UnifiedMonitoringService {
     },
     {
       id: 'dispatch-accuracy',
-      name: '分发准确率过低',
-      description: '分发准确率低于阈值',
+      name: 'Low Dispatch Accuracy',
+      description: 'Dispatch accuracy below threshold',
       system: 'intelligent-task-dispatch',
-      metric: '分发准确率',
+      metric: 'Dispatch Accuracy',
       condition: 'lt',
       threshold: 90, // 90%
       severity: 'critical',
@@ -134,10 +134,10 @@ export class UnifiedMonitoringService {
     // 上下文缓存系统告警规则
     {
       id: 'cache-hit-rate',
-      name: '缓存命中率过低',
-      description: '缓存命中率低于阈值',
+      name: 'Low Cache Hit Rate',
+      description: 'Cache hit rate below threshold',
       system: 'context-aware-cache',
-      metric: '缓存命中率',
+      metric: 'Cache Hit Rate',
       condition: 'lt',
       threshold: 60, // 60%
       severity: 'critical',
@@ -147,10 +147,10 @@ export class UnifiedMonitoringService {
     },
     {
       id: 'cache-memory-usage',
-      name: '缓存内存使用率过高',
-      description: '缓存内存使用率超过阈值',
+      name: 'High Cache Memory Usage',
+      description: 'Cache memory usage exceeds threshold',
       system: 'context-aware-cache',
-      metric: '内存使用率',
+      metric: 'Memory Usage Rate',
       condition: 'gt',
       threshold: 80, // 80%
       severity: 'critical',
@@ -162,10 +162,10 @@ export class UnifiedMonitoringService {
     // 统一网关系统告警规则
     {
       id: 'api-response-time',
-      name: 'API响应时间过高',
-      description: 'API响应时间超过阈值',
+      name: 'High API Response Time',
+      description: 'API response time exceeds threshold',
       system: 'unified-gateway',
-      metric: 'API响应时间',
+      metric: 'API Response Time',
       condition: 'gt',
       threshold: 200, // 200ms
       severity: 'warning',
@@ -175,10 +175,10 @@ export class UnifiedMonitoringService {
     },
     {
       id: 'api-success-rate',
-      name: 'API请求成功率过低',
-      description: 'API请求成功率低于阈值',
+      name: 'Low API Request Success Rate',
+      description: 'API request success rate below threshold',
       system: 'unified-gateway',
-      metric: '请求成功率',
+      metric: 'Request Success Rate',
       condition: 'lt',
       threshold: 99, // 99%
       severity: 'critical',
@@ -190,10 +190,10 @@ export class UnifiedMonitoringService {
     // 自动化效率优化系统告警规则
     {
       id: 'token-reduction',
-      name: 'Token减少百分比过低',
-      description: 'Token减少百分比低于阈值',
+      name: 'Low Token Reduction Percentage',
+      description: 'Token reduction percentage below threshold',
       system: 'automation-efficiency-optimization',
-      metric: 'Token减少百分比',
+      metric: 'Token Reduction Percentage',
       condition: 'lt',
       threshold: 50, // 50%
       severity: 'warning',
@@ -203,10 +203,10 @@ export class UnifiedMonitoringService {
     },
     {
       id: 'efficiency-gain',
-      name: '效率提升百分比过低',
-      description: '效率提升百分比低于阈值',
+      name: 'Low Efficiency Gain Percentage',
+      description: 'Efficiency gain percentage below threshold',
       system: 'automation-efficiency-optimization',
-      metric: '效率提升百分比',
+      metric: 'Efficiency Gain Percentage',
       condition: 'lt',
       threshold: 30, // 30%
       severity: 'warning',
@@ -217,7 +217,7 @@ export class UnifiedMonitoringService {
   ];
   
   constructor() {
-    console.log('🚀 初始化统一监控和告警服务...');
+    console.log('🚀 Initializing unified monitoring and alerting service...');
     this.initializeDefaultRules();
     this.initializeDefaultChannels();
   }
@@ -227,7 +227,7 @@ export class UnifiedMonitoringService {
     this.defaultRules.forEach(rule => {
       this.rules.set(rule.id, rule);
     });
-    console.log(`✅ 加载默认告警规则: ${this.defaultRules.length}个`);
+    console.log(`✅ Default alert rules loaded: ${this.defaultRules.length}`);
   }
   
   // 初始化默认通知渠道
@@ -235,7 +235,7 @@ export class UnifiedMonitoringService {
     const defaultChannels: NotificationChannel[] = [
       {
         id: 'discord-alerts',
-        name: 'Discord告警',
+        name: 'Discord Alert',
         type: 'discord',
         config: {
           webhookUrl: process.env.DISCORD_ALERT_WEBHOOK || '',
@@ -246,7 +246,7 @@ export class UnifiedMonitoringService {
       },
       {
         id: 'telegram-alerts',
-        name: 'Telegram告警',
+        name: 'Telegram Alert',
         type: 'telegram',
         config: {
           botToken: process.env.TELEGRAM_BOT_TOKEN || '',
@@ -260,10 +260,10 @@ export class UnifiedMonitoringService {
       this.channels.set(channel.id, channel);
     });
     
-    console.log(`✅ 初始化通知渠道: ${defaultChannels.length}个`);
+    console.log(`✅ Notification channels initialized: ${defaultChannels.length}`);
   }
   
-  // 收集监控指标
+  // Collect monitoring metrics
   async collectMetrics(system: string, metrics: MonitoringMetric[]): Promise<void> {
     const timestamp = new Date();
     
@@ -354,21 +354,21 @@ export class UnifiedMonitoringService {
     // 发送通知
     this.sendNotifications(alert);
     
-    console.log(`🚨 创建告警: ${alert.message}`);
+    console.log(`🚨 Alert created: ${alert.message}`);
   }
   
-  // 生成告警消息
+  // Generate alerts消息
   private generateAlertMessage(rule: AlertRule, currentValue: number): string {
     const conditionText = {
-      'gt': '超过',
-      'lt': '低于',
-      'eq': '等于',
-      'neq': '不等于',
-      'gte': '超过或等于',
-      'lte': '低于或等于'
-    }[rule.condition] || '超过';
+      'gt': 'exceeds',
+      'lt': 'below',
+      'eq': 'equals',
+      'neq': 'not equal to',
+      'gte': 'exceeds or equals',
+      'lte': 'below or equals'
+    }[rule.condition] || 'exceeds';
     
-    return `${rule.system} - ${rule.name}: ${rule.metric} ${conditionText}阈值 (当前: ${currentValue}, 阈值: ${rule.threshold})`;
+    return `${rule.system} - ${rule.name}: ${rule.metric} ${conditionText} threshold (current: ${currentValue}, threshold: ${rule.threshold})`;
   }
   
   // 发送通知
@@ -379,7 +379,7 @@ export class UnifiedMonitoringService {
       try {
         await this.sendNotificationToChannel(channel, alert);
       } catch (error) {
-        console.error(`❌ 发送通知到渠道 ${channel.name} 失败:`, error);
+        console.error(`❌ Failed to send notification to channel ${channel.name}:`, error);
       }
     }
   }
@@ -414,51 +414,51 @@ export class UnifiedMonitoringService {
     
     const time = alert.timestamp.toLocaleString('zh-CN');
     
-    return `${severityEmoji} **${alert.severity.toUpperCase()} 告警**\n` +
-           `**系统**: ${alert.system}\n` +
-           `**指标**: ${alert.metric}\n` +
-           `**当前值**: ${alert.currentValue}\n` +
-           `**阈值**: ${alert.threshold}\n` +
-           `**时间**: ${time}\n` +
-           `**消息**: ${alert.message}`;
+    return `${severityEmoji} **${alert.severity.toUpperCase()} ALERT**\n` +
+           `**System**: ${alert.system}\n` +
+           `**Metric**: ${alert.metric}\n` +
+           `**Current Value**: ${alert.currentValue}\n` +
+           `**Threshold**: ${alert.threshold}\n` +
+           `**Time**: ${time}\n` +
+           `**Message**: ${alert.message}`;
   }
   
   // 发送Discord通知（模拟）
   private async sendDiscordNotification(config: any, message: string, severity: string): Promise<void> {
-    console.log(`📢 Discord通知: ${message}`);
+    console.log(`📢 Discord notification: ${message}`);
     // 实际实现会调用Discord webhook
   }
   
   // 发送Telegram通知（模拟）
   private async sendTelegramNotification(config: any, message: string): Promise<void> {
-    console.log(`📢 Telegram通知: ${message}`);
+    console.log(`📢 Telegram notification: ${message}`);
     // 实际实现会调用Telegram Bot API
   }
   
   // 发送Email通知（模拟）
   private async sendEmailNotification(config: any, message: string, alert: Alert): Promise<void> {
-    console.log(`📧 Email通知: ${message}`);
+    console.log(`📧 Email notification: ${message}`);
     // 实际实现会发送邮件
   }
   
   // 发送Webhook通知（模拟）
   private async sendWebhookNotification(config: any, alert: Alert): Promise<void> {
-    console.log(`🌐 Webhook通知: ${alert.message}`);
+    console.log(`🌐 Webhook notification: ${alert.message}`);
     // 实际实现会调用webhook
   }
   
   // 更新系统健康状态
   private async updateSystemHealth(system: string, metrics: MonitoringMetric[]): Promise<void> {
-    const responseTimeMetric = metrics.find(m => m.name.includes('响应时间'));
-    const errorRateMetric = metrics.find(m => m.name.includes('错误率') || m.name.includes('成功率'));
+    const responseTimeMetric = metrics.find(m => m.name.includes('response_time') || m.name.includes('响应时间'));
+    const errorRateMetric = metrics.find(m => m.name.includes('error_rate') || m.name.includes('success_rate') || m.name.includes('错误率') || m.name.includes('成功率'));
     
     const health: SystemHealth = {
       system,
-      status: 'healthy', // 默认健康，实际会根据指标计算
+      status: 'healthy', // default healthy; will be computed from metrics
       metrics,
       lastCheck: new Date(),
-      uptime: 0, // 需要从系统获取
-      errorRate: errorRateMetric ? (errorRateMetric.name.includes('成功率') ? 100 - errorRateMetric.value : errorRateMetric.value) : 0,
+      uptime: 0, // obtain from system
+      errorRate: errorRateMetric ? (errorRateMetric.name.includes('success_rate') || errorRateMetric.name.includes('成功率') ? 100 - errorRateMetric.value : errorRateMetric.value) : 0,
       responseTime: responseTimeMetric?.value || 0
     };
     
@@ -483,7 +483,7 @@ export class UnifiedMonitoringService {
     
     this.metrics.forEach((metric, id) => {
       const age = now - metric.timestamp.getTime();
-      if (age > 24 * 60 * 60 * 1000) { // 24小时
+      if (age > 24 * 60 * 60 * 1000) { // 24 hours
         metricsToDelete.push(id);
       }
     });
@@ -493,7 +493,7 @@ export class UnifiedMonitoringService {
     });
     
     if (metricsToDelete.length > 0) {
-      console.log(`🧹 清理旧指标: ${metricsToDelete.length}个`);
+      console.log(`🧹 Cleaned up old metrics: ${metricsToDelete.length}`);
     }
   }
   
@@ -504,7 +504,7 @@ export class UnifiedMonitoringService {
     
     this.alerts.forEach((alert, id) => {
       const age = now - alert.timestamp.getTime();
-      if (age > 7 * 24 * 60 * 60 * 1000) { // 7天
+      if (age > 7 * 24 * 60 * 60 * 1000) { // 7 days
         alertsToDelete.push(id);
       }
     });
@@ -514,7 +514,7 @@ export class UnifiedMonitoringService {
     });
     
     if (alertsToDelete.length > 0) {
-      console.log(`🧹 清理旧告警: ${alertsToDelete.length}个`);
+      console.log(`🧹 Cleaned up old alerts: ${alertsToDelete.length}`);
     }
   }
   
@@ -631,14 +631,14 @@ export class UnifiedMonitoringService {
   // 添加或更新告警规则
   upsertAlertRule(rule: AlertRule): void {
     this.rules.set(rule.id, rule);
-    console.log(`📝 更新告警规则: ${rule.name} (${rule.id})`);
+    console.log(`📝 Alert rule updated: ${rule.name} (${rule.id})`);
   }
   
-  // 删除告警规则
+  // Delete alert rule
   deleteAlertRule(ruleId: string): boolean {
     const deleted = this.rules.delete(ruleId);
     if (deleted) {
-      console.log(`🗑️ 删除告警规则: ${ruleId}`);
+      console.log(`🗑️ Alert rule deleted: ${ruleId}`);
     }
     return deleted;
   }
@@ -652,11 +652,11 @@ export class UnifiedMonitoringService {
     alert.acknowledgedBy = acknowledgedBy;
     alert.acknowledgedAt = new Date();
     
-    console.log(`✅ 告警已确认: ${alertId} (${acknowledgedBy})`);
+    console.log(`✅ Alert acknowledged: ${alertId} (${acknowledgedBy})`);
     return true;
   }
   
-  // 解决告警
+  // Resolve alert
   resolveAlert(alertId: string): boolean {
     const alert = this.alerts.get(alertId);
     if (!alert) return false;
@@ -664,23 +664,23 @@ export class UnifiedMonitoringService {
     alert.resolved = true;
     alert.resolvedAt = new Date();
     
-    console.log(`✅ 告警已解决: ${alertId}`);
+    console.log(`✅ Alert resolved: ${alertId}`);
     return true;
   }
   
-  // 添加通知渠道
+  // Add notification channel
   addNotificationChannel(channel: NotificationChannel): void {
     this.channels.set(channel.id, channel);
-    console.log(`📢 添加通知渠道: ${channel.name} (${channel.type})`);
+    console.log(`📢 Notification channel added: ${channel.name} (${channel.type})`);
   }
   
-  // 启用/禁用通知渠道
+  // Enable/disable notification channel
   setChannelEnabled(channelId: string, enabled: boolean): boolean {
     const channel = this.channels.get(channelId);
     if (!channel) return false;
     
     channel.enabled = enabled;
-    console.log(`⚙️ ${enabled ? '启用' : '禁用'}通知渠道: ${channel.name}`);
+    console.log(`⚙️ ${enabled ? 'Enabled' : 'Disabled'} notification channel: ${channel.name}`);
     return true;
   }
   
@@ -825,8 +825,8 @@ export class UnifiedMonitoringService {
       recommendations.push({
         priority: alert.severity === 'critical' ? 'high' : 'medium',
         system: alert.system,
-        suggestion: `解决活跃告警: ${alert.message}`,
-        action: '检查系统状态并解决问题'
+        suggestion: `Resolve active alert: ${alert.message}`,
+        action: 'Check system status and resolve issues'
       });
     });
     
@@ -840,23 +840,23 @@ export class UnifiedMonitoringService {
   }
   
   async start(): Promise<void> {
-    console.log('🚀 启动统一监控和告警服务...');
+    console.log('🚀 Starting unified monitoring and alerting service...');
     
     this.cleanupIntervalId = setInterval(() => {
       this.cleanupOldMetrics();
       this.cleanupOldAlerts();
-    }, 60 * 60 * 1000); // 每小时清理一次
+    }, 60 * 60 * 1000); // cleanup every hour
     
-    console.log('✅ 统一监控和告警服务已启动');
+    console.log('✅ Unified monitoring and alerting service started');
   }
   
   async stop(): Promise<void> {
-    console.log('🛑 停止统一监控和告警服务...');
+    console.log('🛑 Stopping unified monitoring and alerting service...');
     if (this.cleanupIntervalId !== undefined) {
       clearInterval(this.cleanupIntervalId);
       this.cleanupIntervalId = undefined;
     }
-    console.log('✅ 统一监控和告警服务已停止');
+    console.log('✅ Unified monitoring and alerting service stopped');
   }
 }
 

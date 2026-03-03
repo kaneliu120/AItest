@@ -30,12 +30,12 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(url, { ...defaultOptions, ...options });
     
     if (!response.ok) {
-      throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('API请求错误:', error);
+    console.error('API request error:', error);
     throw error;
   }
 }

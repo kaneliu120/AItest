@@ -20,7 +20,7 @@ export async function GET() {
     const { stdout } = await execAsync(
       `osascript -e 'tell application "Calendar" to get name of calendars'`
     );
-    const exclude = new Set(['生日','菲律宾节假日','Philippines Holidays','Siri建议','kaneliu10@gmail.com']);
+    const exclude = new Set(['生日','菲律宾节假日','Philippines Holidays','Siri Suggestions','kaneliu10@gmail.com']);
     const calendars = stdout.trim().split(', ').filter(c => c && !exclude.has(c));
     return NextResponse.json({ success: true, data: { calendars } });
   } catch (err: any) {
@@ -31,10 +31,10 @@ export async function GET() {
 // ── 添加任务到 Apple Calendar ─────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
-    const { title, description = '', dueDate, calendarName = '工作' } = await request.json();
+    const { title, description = '', dueDate, calendarName = 'Work' } = await request.json();
 
     if (!title) {
-      return NextResponse.json({ success: false, error: '缺少任务标题' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Missing task title' }, { status: 400 });
     }
 
     // 解析目标日期
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // 清理文本（防止注入）
     const safeTitle = title.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, '').slice(0, 120);
-    const safeDesc  = (description + '\n\n来源: Mission Control 任务管理')
+    const safeDesc  = (description + '\n\nSource: Mission Control Task Manager')
                       .replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, '').slice(0, 500);
     const safeCal   = calendarName.replace(/'/g, '');
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        message:   `已添加到 Apple Calendar「${calendarName}」`,
+        message:   `Added to Apple Calendar '${calendarName}'`,
         title,
         calendar:  calendarName,
         date:      `${yr}-${String(d.getMonth()+1).padStart(2,'0')}-${String(dy).padStart(2,'0')}`,

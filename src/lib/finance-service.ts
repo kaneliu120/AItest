@@ -48,8 +48,8 @@ class FinanceService {
       id: 'txn-001',
       date: '2026-02-21',
       type: 'income',
-      category: 'AI外包项目',
-      description: 'My Skill Shop 开发项目',
+      category: 'AI Freelance',
+      description: 'My Skill Shop development project',
       amount: 50000,
       currency: 'PHP',
       status: 'completed',
@@ -59,8 +59,8 @@ class FinanceService {
       id: 'txn-002',
       date: '2026-02-20',
       type: 'expense',
-      category: '服务器费用',
-      description: 'Azure云服务器月费',
+      category: 'Server Costs',
+      description: 'Azure cloud server monthly fee',
       amount: 15000,
       currency: 'PHP',
       status: 'completed',
@@ -70,8 +70,8 @@ class FinanceService {
       id: 'txn-003',
       date: '2026-02-19',
       type: 'income',
-      category: '技能销售',
-      description: 'AI技能平台销售分成',
+      category: 'Skill Sales',
+      description: 'AI skills platform revenue share',
       amount: 25000,
       currency: 'PHP',
       status: 'completed',
@@ -81,8 +81,8 @@ class FinanceService {
       id: 'txn-004',
       date: '2026-02-18',
       type: 'expense',
-      category: '营销推广',
-      description: 'Google Ads 广告费用',
+      category: 'Marketing',
+      description: 'Google Ads advertising cost',
       amount: 8000,
       currency: 'PHP',
       status: 'completed',
@@ -92,8 +92,8 @@ class FinanceService {
       id: 'txn-005',
       date: '2026-02-17',
       type: 'expense',
-      category: '软件开发工具',
-      description: '开发工具和软件订阅',
+      category: 'Dev Tools',
+      description: 'Development tools and software subscriptions',
       amount: 5000,
       currency: 'PHP',
       status: 'completed',
@@ -104,8 +104,8 @@ class FinanceService {
   private budgets: Budget[] = [
     {
       id: 'budget-001',
-      name: '服务器费用预算',
-      category: '基础设施',
+      name: 'Server Cost Budget',
+      category: 'Infrastructure',
       allocated: 20000,
       spent: 15000,
       remaining: 5000,
@@ -114,8 +114,8 @@ class FinanceService {
     },
     {
       id: 'budget-002',
-      name: '营销推广预算',
-      category: '市场营销',
+      name: 'Marketing Budget',
+      category: 'Marketing',
       allocated: 10000,
       spent: 8000,
       remaining: 2000,
@@ -124,8 +124,8 @@ class FinanceService {
     },
     {
       id: 'budget-003',
-      name: '开发工具预算',
-      category: '工具软件',
+      name: 'Development Tools Budget',
+      category: 'Tools & Software',
       allocated: 6000,
       spent: 5000,
       remaining: 1000,
@@ -134,8 +134,8 @@ class FinanceService {
     },
     {
       id: 'budget-004',
-      name: 'AI模型训练预算',
-      category: '研发投入',
+      name: 'AI Model Training Budget',
+      category: 'R&D Investment',
       allocated: 30000,
       spent: 0,
       remaining: 30000,
@@ -144,7 +144,7 @@ class FinanceService {
     },
   ];
 
-  // 获取财务摘要
+  // Get finance summary
   async getFinancialSummary(): Promise<FinancialSummary> {
     const totalIncome = this.transactions
       .filter(t => t.type === 'income' && t.status === 'completed')
@@ -202,10 +202,10 @@ class FinanceService {
       filtered = filtered.filter(t => t.date <= filters.endDate!);
     }
 
-    // 排序
+ // sort
     filtered = filtered.sort((a, b) => b.date.localeCompare(a.date));
 
-    // 分页
+ // pagination
     const page = filters?.page || 1;
     const pageSize = filters?.pageSize || 20;
     const startIndex = (page - 1) * pageSize;
@@ -387,7 +387,7 @@ class FinanceService {
     return result.sort((a, b) => b.amount - a.amount).slice(0, 10);
   }
 
-  // 获取系统状态
+  // Fetch system status
   getSystemStatus() {
     const summary = this.calculateQuickSummary();
     

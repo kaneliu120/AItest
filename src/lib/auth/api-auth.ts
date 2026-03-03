@@ -22,5 +22,5 @@ export function isApiAuthorized(request: NextRequest): boolean {
 
 /** 未授权时返回标准 401 响应 */
 export function unauthorizedResponse(): NextResponse {
-  return NextResponse.json({ success: false, error: '未授权' }, { status: 401 });
+  return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 }

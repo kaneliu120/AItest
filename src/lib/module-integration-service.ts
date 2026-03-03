@@ -74,7 +74,7 @@ class ModuleIntegrationService {
       tasks: {
         enabled: true,
         dataPath: '~/Tasks/',
-        syncInterval: 300000, // 5分钟
+        syncInterval: 300000, // 5 minutes
         ...config.tasks,
       },
       automation: {
@@ -85,7 +85,7 @@ class ModuleIntegrationService {
       },
       monitoring: {
         enabled: true,
-        checkInterval: 60000, // 1分钟
+        checkInterval: 60000, // 1 minute
         alertThreshold: 3,
         ...config.monitoring,
       },
@@ -100,7 +100,7 @@ class ModuleIntegrationService {
     // 订阅集成事件
     this.subscribeToEvents();
     
-    logger.info('🚀 模块集成服务初始化完成');
+    logger.info('🚀 Module integration service initialized');
   }
 
   /**
@@ -189,8 +189,8 @@ class ModuleIntegrationService {
             module,
             status: 'error',
             lastCheck: new Date().toISOString(),
-            details: { error: '未知模块' },
-            issues: ['未知模块类型'],
+            details: { error: 'Unknown module' },
+            issues: ['Unknown module type'],
           };
       }
       
@@ -215,17 +215,17 @@ class ModuleIntegrationService {
       }
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       this.status.set(module, {
         module,
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       });
       
-      logger.error(`模块检查错误 (${module}):`, error);
+      logger.error(`Module check error (${module}):`, error);
     }
   }
 
@@ -239,7 +239,7 @@ class ModuleIntegrationService {
         status: 'disconnected',
         lastCheck: new Date().toISOString(),
         details: { enabled: false },
-        issues: ['模块已禁用'],
+        issues: ['Module is disabled'],
       };
     }
 
@@ -255,7 +255,7 @@ class ModuleIntegrationService {
           status: 'error',
           lastCheck: new Date().toISOString(),
           details: { path: dataPath, exists: false },
-          issues: ['财务数据目录不存在'],
+          issues: ['Finance data directory not found'],
         };
       }
       
@@ -272,18 +272,18 @@ class ModuleIntegrationService {
           fileCount: dataFiles.length,
           enabled: true,
         },
-        issues: dataFiles.length === 0 ? ['无数据文件'] : [],
+        issues: dataFiles.length === 0 ? ['No data files found'] : [],
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         module: 'finance',
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       };
     }
   }
@@ -298,7 +298,7 @@ class ModuleIntegrationService {
         status: 'disconnected',
         lastCheck: new Date().toISOString(),
         details: { enabled: false },
-        issues: ['模块已禁用'],
+        issues: ['Module is disabled'],
       };
     }
 
@@ -329,19 +329,19 @@ class ModuleIntegrationService {
           credentialsExist,
           enabled: true,
         },
-        issues: !credentialsExist ? ['凭证文件不存在'] : 
-                platformsConfigured.length === 0 ? ['无配置的平台'] : [],
+        issues: !credentialsExist ? ['Credentials file not found'] : 
+                platformsConfigured.length === 0 ? ['No platforms configured'] : [],
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         module: 'freelance',
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       };
     }
   }
@@ -356,7 +356,7 @@ class ModuleIntegrationService {
         status: 'disconnected',
         lastCheck: new Date().toISOString(),
         details: { enabled: false },
-        issues: ['模块已禁用'],
+        issues: ['Module is disabled'],
       };
     }
 
@@ -372,7 +372,7 @@ class ModuleIntegrationService {
           status: 'error',
           lastCheck: new Date().toISOString(),
           details: { path: dataPath, exists: false },
-          issues: ['任务数据目录不存在'],
+          issues: ['Task data directory not found'],
         };
       }
       
@@ -389,18 +389,18 @@ class ModuleIntegrationService {
           syncInterval: this.config.tasks.syncInterval,
           enabled: true,
         },
-        issues: taskFiles.length === 0 ? ['无任务文件'] : [],
+        issues: taskFiles.length === 0 ? ['No task files found'] : [],
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         module: 'tasks',
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       };
     }
   }
@@ -415,7 +415,7 @@ class ModuleIntegrationService {
         status: 'disconnected',
         lastCheck: new Date().toISOString(),
         details: { enabled: false },
-        issues: ['模块已禁用'],
+        issues: ['Module is disabled'],
       };
     }
 
@@ -431,7 +431,7 @@ class ModuleIntegrationService {
           status: 'error',
           lastCheck: new Date().toISOString(),
           details: { path: scriptsPath, exists: false },
-          issues: ['脚本目录不存在'],
+          issues: ['Scripts directory not found'],
         };
       }
       
@@ -450,18 +450,18 @@ class ModuleIntegrationService {
           maxConcurrent: this.config.automation.maxConcurrent,
           enabled: true,
         },
-        issues: scriptFiles.length === 0 ? ['无脚本文件'] : [],
+        issues: scriptFiles.length === 0 ? ['No script files found'] : [],
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         module: 'automation',
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       };
     }
   }
@@ -476,7 +476,7 @@ class ModuleIntegrationService {
         status: 'disconnected',
         lastCheck: new Date().toISOString(),
         details: { enabled: false },
-        issues: ['模块已禁用'],
+        issues: ['Module is disabled'],
       };
     }
 
@@ -504,18 +504,18 @@ class ModuleIntegrationService {
           configFiles: configFiles.length,
           enabled: true,
         },
-        issues: configFiles.length < 3 ? ['部分配置文件缺失'] : [],
+        issues: configFiles.length < 3 ? ['Some config files missing'] : [],
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         module: 'monitoring',
         status: 'error',
         lastCheck: new Date().toISOString(),
         details: { error: errorMessage },
-        issues: [`检查失败: ${errorMessage}`],
+        issues: [`Check failed: ${errorMessage}`],
       };
     }
   }
@@ -528,7 +528,7 @@ class ModuleIntegrationService {
     dataBusService.subscribe('workflow:step-executing', async (event) => {
       const { workflowId, instanceId, step } = event.data;
       
-      logger.info(`🔗 工作流步骤执行: ${workflowId} - ${step.name}`);
+      logger.info(`🔗 Workflow step executing: ${workflowId} - ${step.name}`);
       
       // 这里可以添加模块执行逻辑
       // 根据step.module和step.action调用相应的模块处理器
@@ -552,7 +552,7 @@ class ModuleIntegrationService {
           )
         );
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : '未知错误';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         
         await dataBusService.publish(
           createStandardEvent(
@@ -600,7 +600,7 @@ class ModuleIntegrationService {
           data = await this.executeMonitoringAction(action, parameters);
           break;
         default:
-          throw new Error(`未知模块: ${module}`);
+          throw new Error(`Unknown module: ${module}`);
       }
       
       const executionTime = Date.now() - startTime;
@@ -615,7 +615,7 @@ class ModuleIntegrationService {
       };
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const executionTime = Date.now() - startTime;
       
       return {
@@ -673,9 +673,9 @@ class ModuleIntegrationService {
             profitMargin: 46.7,
             cashFlow: 'positive',
             recommendations: [
-              '减少工具订阅费用',
-              '增加高价值项目比例',
-              '优化税务规划',
+              'Reduce tool subscription fees',
+              'Increase proportion of high-value projects',
+              'Optimize tax planning',
             ],
           },
           timestamp: new Date().toISOString(),
@@ -709,7 +709,7 @@ class ModuleIntegrationService {
         };
         
       default:
-        throw new Error(`不支持的财务动作: ${action}`);
+        throw new Error(`Unsupported finance action: ${action}`);
     }
   }
 
@@ -731,7 +731,7 @@ class ModuleIntegrationService {
             {
               id: 'proj-001',
               title: 'AI Chatbot Development for E-commerce',
-              description: '需要开发一个AI聊天机器人用于电商客服',
+              description: 'Need to develop an AI chatbot for e-commerce customer service',
               budget: 5000,
               platform: 'upwork',
               skills: ['AI', 'Python', 'ChatGPT', 'API'],
@@ -741,7 +741,7 @@ class ModuleIntegrationService {
             {
               id: 'proj-002',
               title: 'Next.js Website with AI Features',
-              description: '开发一个带有AI功能的Next.js网站',
+              description: 'Develop a Next.js website with AI features',
               budget: 3000,
               platform: 'freelancer',
               skills: ['Next.js', 'TypeScript', 'AI', 'Tailwind'],
@@ -751,7 +751,7 @@ class ModuleIntegrationService {
             {
               id: 'proj-003',
               title: 'Automation Script for Data Processing',
-              description: '需要自动化数据处理脚本',
+              description: 'Need automated data processing script',
               budget: 2000,
               platform: 'upwork',
               skills: ['Python', 'Automation', 'Data Processing', 'API'],
@@ -788,7 +788,7 @@ class ModuleIntegrationService {
             projectTitle: project.title,
             budget: project.budget,
             proposedAmount: Math.round(project.budget * 0.9), // 90% of budget
-            coverLetter: `基于我的AI开发经验，我可以高效完成${project.title}项目。`,
+            coverLetter: `Based on my AI development experience, I can efficiently complete the ${project.title} project.`,
             timeline: '2 weeks',
             submittedAt: new Date().toISOString(),
           })),
@@ -821,7 +821,7 @@ class ModuleIntegrationService {
         };
         
       default:
-        throw new Error(`不支持的外包动作: ${action}`);
+        throw new Error(`Unsupported freelance action: ${action}`);
     }
   }
 
@@ -836,23 +836,23 @@ class ModuleIntegrationService {
           reviewId: `review-${Date.now()}`,
           date: new Date().toISOString().split('T')[0],
           completedTasks: [
-            '外包项目搜索',
-            '提案创建',
-            '客户跟进',
-            '财务跟踪',
+            'Freelance project search',
+            'Proposal creation',
+            'Client follow-up',
+            'Finance tracking',
           ],
           pendingTasks: [
-            'My Skill Shop优化',
-            'AI智能体开发',
+            'My Skill Shop optimization',
+            'AI agent development',
           ],
           problems: [
-            '外包平台响应较慢',
-            '需要优化提案模板',
+            'Freelance platform responding slowly',
+            'Need to optimize proposal templates',
           ],
           nextDayPlan: [
-            '继续跟进现有提案',
-            '开始My Skill Shop优化',
-            '研究AI智能体市场',
+            'Continue following up on existing proposals',
+            'Start My Skill Shop optimization',
+            'Research AI agent market',
           ],
           metrics: {
             productivity: 85,
@@ -873,14 +873,14 @@ class ModuleIntegrationService {
             investment: 2000,
           },
           priorities: [
-            '完成高价值外包项目',
-            '优化My Skill Shop收入',
-            '控制工具订阅费用',
+            'Complete high-value freelance projects',
+            'Optimize My Skill Shop revenue',
+            'Control tool subscription costs',
           ],
           risks: [
-            '项目延迟风险',
-            '客户付款延迟',
-            '汇率波动',
+            'Project delay risk',
+            'Client payment delay',
+            'Exchange rate fluctuation',
           ],
           timestamp: new Date().toISOString(),
         };
@@ -888,7 +888,7 @@ class ModuleIntegrationService {
       case 'validate_idea':
         // 模拟想法验证
         return {
-          idea: parameters.idea || 'AI智能体产品',
+          idea: parameters.idea || 'AI Agent Product',
           validation: {
             demand: 85,
             competition: 70,
@@ -897,20 +897,20 @@ class ModuleIntegrationService {
             overall: 81.25,
           },
           recommendations: [
-            '进行MVP开发',
-            '寻找早期用户',
-            '制定营销策略',
+            'Conduct MVP development',
+            'Find early users',
+            'Develop marketing strategy',
           ],
           nextSteps: [
-            '开发原型',
-            '用户测试',
-            '迭代优化',
+            'Develop prototype',
+            'User testing',
+            'Iterative optimization',
           ],
           timestamp: new Date().toISOString(),
         };
         
       default:
-        throw new Error(`不支持的任务动作: ${action}`);
+        throw new Error(`Unsupported task action: ${action}`);
     }
   }
 
@@ -950,9 +950,9 @@ class ModuleIntegrationService {
             },
           ],
           insights: [
-            'AI智能体市场需求旺盛',
-            '竞争激烈但机会很多',
-            '垂直领域AI工具有市场',
+            'Strong demand for AI agent market',
+            'Highly competitive but with many opportunities',
+            'Vertical domain AI tools have market potential',
           ],
           timestamp: new Date().toISOString(),
         };
@@ -967,9 +967,9 @@ class ModuleIntegrationService {
           progress: 30,
           estimatedCompletion: '2026-03-01',
           challenges: [
-            'API集成复杂度',
-            '性能优化',
-            '用户体验设计',
+            'API integration complexity',
+            'Performance optimization',
+            'User experience design',
           ],
           timestamp: new Date().toISOString(),
         };
@@ -1015,7 +1015,7 @@ class ModuleIntegrationService {
         };
         
       default:
-        throw new Error(`不支持的自动化动作: ${action}`);
+        throw new Error(`Unsupported automation action: ${action}`);
     }
   }
 
@@ -1035,7 +1035,7 @@ class ModuleIntegrationService {
             weather: { status: 'ok', temperature: 25.7, condition: 'sunny' },
             system: { status: 'ok', services: 5, issues: 0 },
           },
-          summary: '系统正常，准备开始工作',
+          summary: 'System normal, ready to start work',
           timestamp: new Date().toISOString(),
         };
         
@@ -1066,22 +1066,22 @@ class ModuleIntegrationService {
         return {
           deployment: parameters.deploymentId || 'latest',
           checks: [
-            { check: 'API响应', status: 'passed', details: '所有端点正常' },
-            { check: '数据库连接', status: 'passed', details: '连接稳定' },
-            { check: '性能指标', status: 'passed', details: '响应时间<200ms' },
-            { check: '错误监控', status: 'passed', details: '无新错误' },
+            { check: 'API Response', status: 'passed', details: 'All endpoints normal' },
+            { check: 'Database Connection', status: 'passed', details: 'Connection stable' },
+            { check: 'Performance Metrics', status: 'passed', details: 'Response time <200ms' },
+            { check: 'Error Monitoring', status: 'passed', details: 'No new errors' },
           ],
           overall: 'success',
           recommendations: [
-            '监控24小时性能',
-            '设置告警阈值',
-            '准备回滚计划',
+            'Monitor 24-hour performance',
+            'Set alert thresholds',
+            'Prepare rollback plan',
           ],
           timestamp: new Date().toISOString(),
         };
         
       default:
-        throw new Error(`不支持的监控动作: ${action}`);
+        throw new Error(`Unsupported monitoring action: ${action}`);
     }
   }
 
@@ -1114,7 +1114,7 @@ class ModuleIntegrationService {
    */
   updateConfig(newConfig: Partial<IntegrationConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    logger.info('模块配置已更新');
+    logger.info('Module configuration updated');
   }
 
   /**
@@ -1157,5 +1157,5 @@ class ModuleIntegrationService {
 // 创建全局模块集成服务实例
 export const moduleIntegrationService = new ModuleIntegrationService();
 
-logger.info('🔗 模块集成服务已启动');
-logger.info('📋 已配置模块: finance, freelance, tasks, automation, monitoring');
+logger.info('🔗 Module integration service started');
+logger.info('📋 Configured modules: finance, freelance, tasks, automation, monitoring');

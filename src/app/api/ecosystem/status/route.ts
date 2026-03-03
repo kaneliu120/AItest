@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ecosystemService } from '@/lib/ecosystem-service';
 
-// GET: 获取生态系统状态
+// GET: Fetch ecosystem status
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const format = searchParams.get('format') || 'json';
     
-    // 获取生态系统数据
+    // Fetch ecosystem data
     const tools = await ecosystemService.getToolsStatus();
     const monitoringStats = await ecosystemService.getMonitoringStats();
     const schedulerStats = await ecosystemService.getSchedulerStats();
@@ -33,12 +33,12 @@ export async function GET(request: NextRequest) {
     if (format === 'json') {
       return NextResponse.json(data);
     } else {
-      // 返回HTML格式（用于直接浏览器访问）
+      // Return HTML format (for direct browser access)
       return new NextResponse(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Mission Control - 生态系统状态</title>
+          <title>Mission Control - Ecosystem Status</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <style>
@@ -64,39 +64,39 @@ export async function GET(request: NextRequest) {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Mission Control - 生态系统状态</h1>
-              <p>工具连接状态监控中心</p>
-              <p>更新时间: ${new Date().toLocaleString()}</p>
+              <h1>Mission Control - Ecosystem Status</h1>
+              <p>Tool Connection Status Monitoring Center</p>
+              <p>Updated: ${new Date().toLocaleString()}</p>
             </div>
             
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-label">总工具数</div>
+                <div class="stat-label">Total Tools</div>
                 <div class="stat-value">${tools.length}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">健康工具</div>
+                <div class="stat-label">Healthy</div>
                 <div class="stat-value healthy">${tools.filter(t => t.status === 'healthy').length}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">警告工具</div>
+                <div class="stat-label">Warning</div>
                 <div class="stat-value warning">${tools.filter(t => t.status === 'warning').length}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">错误工具</div>
+                <div class="stat-label">Error</div>
                 <div class="stat-value error">${tools.filter(t => t.status === 'error').length}</div>
               </div>
             </div>
             
-            <h2>工具列表</h2>
+            <h2>Tool List</h2>
             <table class="tools-table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>类别</th>
-                  <th>状态</th>
-                  <th>描述</th>
-                  <th>最后检查</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Description</th>
+                  <th>Last Check</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
                     <td>${tool.type}</td>
                     <td>
                       <span class="status-badge status-${tool.status}">
-                        ${tool.status === 'healthy' ? '✅ 健康' : tool.status === 'warning' ? '⚠️ 警告' : '❌ 错误'}
+                        ${tool.status === 'healthy' ? '✅ Healthy' : tool.status === 'warning' ? '⚠️ Warning' : '❌ Error'}
                       </span>
                     </td>
                     <td>${tool.details || tool.name}</td>
@@ -117,8 +117,8 @@ export async function GET(request: NextRequest) {
             </table>
             
             <div style="margin-top: 40px; padding: 20px; background: #f8fafc; border-radius: 8px;">
-              <h3>API 信息</h3>
-              <p>JSON 格式: <a href="/api/ecosystem/status?format=json">/api/ecosystem/status?format=json</a></p>
+              <h3>API Information</h3>
+              <p>JSON format: <a href="/api/ecosystem/status?format=json">/api/ecosystem/status?format=json</a></p>
               <pre style="background: white; padding: 15px; border-radius: 6px; overflow: auto;">
 ${JSON.stringify(data, null, 2)}
               </pre>
@@ -133,10 +133,10 @@ ${JSON.stringify(data, null, 2)}
       });
     }
   } catch (error) {
-    console.error('生态系统状态API错误:', error);
+    console.error('Ecosystem status API error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

@@ -1,5 +1,5 @@
 /**
- * API标准化中间件
+ * API standardization middleware
  * 确保所有API响应使用统一的格式
  */
 
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ApiResponse, successResponse, errorResponse } from '@/lib/api-response';
 
 /**
- * API标准化中间件
+ * API standardization middleware
  * 包装API处理函数，确保响应格式统一
  */
 export function withApiStandardizer<T = any>(
@@ -54,9 +54,9 @@ export function withApiStandardizer<T = any>(
       return NextResponse.json(standardized);
       
     } catch (error) {
-      console.error('API处理错误:', error);
+      console.error('API processing error:', error);
       
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const apiError = errorResponse(errorMessage, { statusCode: 500 });
       
       return NextResponse.json(apiError, { status: 500 });
@@ -65,8 +65,8 @@ export function withApiStandardizer<T = any>(
 }
 
 /**
- * 请求ID中间件
- * 为每个请求生成唯一ID
+ * Request ID middleware
+ * Generates a unique ID for each request
  */
 export function withRequestId(
   handler: (req: NextRequest, requestId: string) => Promise<ApiResponse | NextResponse>
@@ -97,9 +97,9 @@ export function withRequestId(
       return NextResponse.json(result);
       
     } catch (error) {
-      console.error(`请求 ${requestId} 处理错误:`, error);
+      console.error(`Request ${requestId} processing error:`, error);
       
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 
@@ -113,7 +113,7 @@ export function withRequestId(
 }
 
 /**
- * 处理时间中间件
+ * Processing time middleware
  * 记录API处理时间
  */
 export function withProcessingTime(
@@ -145,9 +145,9 @@ export function withProcessingTime(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API处理错误 (${processingTime}ms):`, error);
+      console.error(`API processing error (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const apiError = errorResponse(errorMessage, { statusCode: 500 });
       
       const response = NextResponse.json(apiError, { status: 500 });
@@ -158,7 +158,7 @@ export function withProcessingTime(
 }
 
 /**
- * 组合中间件
+ * Combined middleware
  */
 export function composeMiddleware<T = any>(
   handler: (req: NextRequest, ...args: any[]) => Promise<ApiResponse<T> | NextResponse>,
@@ -171,7 +171,7 @@ export function composeMiddleware<T = any>(
 }
 
 /**
- * 标准API处理函数包装器
+ * Standard API handler wrapper
  * 组合所有中间件
  */
 export function standardApiHandler<T = any>(
@@ -186,7 +186,7 @@ export function standardApiHandler<T = any>(
 }
 
 /**
- * 验证中间件
+ * Validation middleware
  * 验证请求参数
  */
 export function withValidation<T>(
@@ -200,7 +200,7 @@ export function withValidation<T>(
         const validatedData = schema.parse(data);
         return await handler(req, validatedData);
       } catch (error: any) {
-        // 验证错误
+        // Validation error
         const validationErrors: Record<string, string[]> = {};
         
         if (error.errors) {
@@ -215,7 +215,7 @@ export function withValidation<T>(
         
         const apiError = errorResponse({
           code: 'ERR_VALIDATION',
-          message: '请求参数验证失败',
+          message: 'Request parameter validation failed',
           details: validationErrors
         }, { statusCode: 400 });
         
@@ -226,7 +226,7 @@ export function withValidation<T>(
 }
 
 /**
- * 认证中间件
+ * Authentication middleware
  */
 export function withAuth(
   handler: (req: NextRequest, userId: string) => Promise<NextResponse>
@@ -239,7 +239,7 @@ export function withAuth(
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       const apiError = errorResponse({
         code: 'ERR_UNAUTHORIZED',
-        message: '需要认证'
+        message: 'Authentication required'
       }, { statusCode: 401 });
       
       return NextResponse.json(apiError, { status: 401 });
@@ -247,18 +247,18 @@ export function withAuth(
     
     // 模拟认证，实际应该验证token
     const token = authHeader.slice(7);
-    const userId = 'user-123'; // 模拟用户ID
+    const userId = 'user-123'; // mock user ID
     
     return await handler(req, userId);
   };
 }
 
 /**
- * 缓存中间件
+ * Cache middleware
  */
 export function withCache(
   getCacheKey: (req: NextRequest) => string,
-  ttl: number = 60 // 默认60秒
+  ttl: number = 60 // default 60 seconds
 ) {
   return (handler: (req: NextRequest) => Promise<ApiResponse | NextResponse>) => {
     const cache = new Map<string, { data: any; expiry: number }>();

@@ -12,10 +12,10 @@ const TOOL_PATH = path.join(process.env.HOME || '/Users/kane', '.openclaw/worksp
 
 export const aiAssistModule = {
   id: 'aiassist-automation',
-  name: 'AI Assist 自动化测试',
+  name: 'AI Assist Automation Testing',
   version: '1.0.0',
-  description: '基于 AI Assist 的自动化测试模块，支持 Web 自动化测试和 UI 测试',
-  author: '小A',
+  description: 'AI Assist-based automation testing module supporting web automation and UI testing',
+  author: 'Copilot',
   enabled: true,
   category: 'testing' as const,
   dependencies: [] as string[],
@@ -26,88 +26,88 @@ export const aiAssistModule = {
       type: 'string',
       enum: ['chrome', 'firefox', 'edge'],
       default: 'chrome',
-      description: '浏览器类型'
+      description: 'Browser type'
     },
     headless: {
       type: 'boolean',
       default: true,
-      description: '是否无头模式运行'
+      description: 'Run in headless mode'
     },
     timeout: {
       type: 'number',
       default: 30000,
-      description: '超时时间（毫秒）'
+      description: 'Timeout (milliseconds)'
     },
     screenshotOnFailure: {
       type: 'boolean',
       default: true,
-      description: '失败时截图'
+      description: 'Screenshot on failure'
     }
   },
   
   // 可用动作
   actions: {
     'run-web-test': {
-      name: '运行 Web 测试',
-      description: '运行指定的 Web 自动化测试',
+      name: 'Run Web Tests',
+      description: 'Run specified web automation tests',
       parameters: {
         url: {
           type: 'string',
           required: true,
-          description: '测试目标 URL'
+          description: 'Test target URL'
         },
         testScript: {
           type: 'string',
           required: true,
-          description: '测试脚本路径或内容'
+          description: 'Test script path or content'
         },
         waitForSelector: {
           type: 'string',
           required: false,
-          description: '等待选择器'
+          description: 'Wait selector'
         }
       }
     },
     'take-screenshot': {
-      name: '截图',
-      description: '对指定 URL 进行截图',
+      name: 'Screenshot',
+      description: 'Take a screenshot of the specified URL',
       parameters: {
         url: {
           type: 'string',
           required: true,
-          description: '截图目标 URL'
+          description: 'Screenshot target URL'
         },
         selector: {
           type: 'string',
           required: false,
-          description: '指定元素选择器'
+          description: 'Specific element selector'
         },
         fullPage: {
           type: 'boolean',
           default: false,
-          description: '是否全页截图'
+          description: 'Full page screenshot'
         }
       }
     },
     'extract-data': {
-      name: '提取数据',
-      description: '从网页提取结构化数据',
+      name: 'Extract Data',
+      description: 'Extract structured data from webpage',
       parameters: {
         url: {
           type: 'string',
           required: true,
-          description: '目标 URL'
+          description: 'Target URL'
         },
         selectors: {
           type: 'object',
           required: true,
-          description: '数据选择器映射'
+          description: 'Data selector map'
         },
         format: {
           type: 'string',
           enum: ['json', 'csv', 'html'],
           default: 'json',
-          description: '输出格式'
+          description: 'Output format'
         }
       }
     }
@@ -118,11 +118,11 @@ export const aiAssistModule = {
     try {
       const { stdout } = await execAsync(`node ${TOOL_PATH}`);
       if (stdout.includes('AI Assist Tool')) {
-        return { status: 'healthy', message: 'AI Assist 模块正常: ' + stdout.trim() };
+        return { status: 'healthy', message: 'AI Assist module healthy: ' + stdout.trim() };
       }
-      return { status: 'warning', message: 'AI Assist 响应异常' };
+      return { status: 'warning', message: 'AI Assist response anomaly' };
     } catch (error: any) {
-      return { status: 'error', message: 'AI Assist 模块异常: ' + error.message };
+      return { status: 'error', message: 'AI Assist module error: ' + error.message };
     }
   },
   
@@ -136,7 +136,7 @@ export const aiAssistModule = {
       case 'extract-data':
         return await extractData(parameters);
       default:
-        throw new Error(`未知动作: ${action}`);
+        throw new Error(`Unknown action: ${action}`);
     }
   }
 };

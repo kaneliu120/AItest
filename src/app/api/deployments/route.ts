@@ -41,23 +41,23 @@ export async function GET(request: NextRequest) {
     const environmentId = url.searchParams.get('environmentId');
     if (environmentId) {
       const environment = await deploymentService.getEnvironment(environmentId);
-      if (!environment) return NextResponse.json({ success: false, error: '环境未找到' }, { status: 404 });
+      if (!environment) return NextResponse.json({ success: false, error: 'Environment not found' }, { status: 404 });
       return NextResponse.json({ success: true, data: environment });
     }
 
     const deploymentId = url.searchParams.get('deploymentId');
     if (deploymentId) {
       const deployment = await deploymentService.getDeployment(deploymentId);
-      if (!deployment) return NextResponse.json({ success: false, error: '部署未找到' }, { status: 404 });
+      if (!deployment) return NextResponse.json({ success: false, error: 'Deployment not found' }, { status: 404 });
       return NextResponse.json({ success: true, data: deployment });
     }
 
     const stats = await deploymentService.getDeploymentStats();
     return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('部署API错误:', error);
+    console.error('Deployment API error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'create-environment') {
       const { name, type, url, configuration } = body;
-      if (!name || !type) return NextResponse.json({ success: false, error: '缺少 name 或 type' }, { status: 400 });
+      if (!name || !type) return NextResponse.json({ success: false, error: 'Missing name or type' }, { status: 400 });
       const env = await deploymentService.createEnvironment({ 
         name, type, url, configuration: configuration || {}, status: 'active' 
       });
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     if (action === 'create-deployment') {
       const { projectId, projectName, environmentId, version, deployedBy } = body;
       if (!projectId || !environmentId || !version) {
-        return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing required parameters' }, { status: 400 });
       }
       const deployment = await deploymentService.createDeployment({
         projectId, 
@@ -95,17 +95,17 @@ export async function POST(request: NextRequest) {
     if (action === 'rollback') {
       const { deploymentId, rollbackVersion } = body;
       if (!deploymentId || !rollbackVersion) {
-        return NextResponse.json({ success: false, error: '缺少 deploymentId 或 rollbackVersion' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing deploymentId or rollbackVersion' }, { status: 400 });
       }
       const result = await deploymentService.rollbackDeployment(deploymentId, rollbackVersion);
       return NextResponse.json({ success: true, data: { success: result } });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
   } catch (error) {
-    console.error('部署API POST错误:', error);
+    console.error('Deployment API POST error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : '未知错误' },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

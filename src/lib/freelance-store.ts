@@ -57,7 +57,7 @@ function rowToProject(r: any): Project {
     currency: r.currency || 'PHP',
     deadline: r.deadline || undefined,
     progress: Number(r.progress || 0),
-    category: r.category || '其他',
+    category: r.category || 'Other',
     automationStatus: r.automation_status || '',
     notes: r.notes || '',
     client: r.client_name || undefined,
@@ -73,7 +73,7 @@ export async function getAllProjects(): Promise<Project[]> {
     const rs = await db().query(`SELECT * FROM freelance_projects ORDER BY created_at DESC`);
     return rs.rows.map(rowToProject);
   } catch (e) {
-    logger.error('获取外包项目失败', e, { module: 'freelance-store' });
+    logger.error('Failed to fetch outsourcing projects', e, { module: 'freelance-store' });
     return [];
   }
 }
@@ -97,7 +97,7 @@ export async function addProject(project: Omit<Project, 'id'>) {
     [
       item.id, item.title, item.description || '', item.status || 'active', item.source || 'manual', item.businessSource || '',
       item.clientId || null, item.clientName || null, item.budget || 0, item.currency || 'PHP', item.deadline || null,
-      item.progress || 0, item.category || '其他', item.automationStatus || '', item.notes || ''
+      item.progress || 0, item.category || 'Other', item.automationStatus || '', item.notes || ''
     ]
   );
   return item;

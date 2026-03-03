@@ -33,7 +33,7 @@ export async function getDatabaseConnection(dbPath?: string): Promise<DatabaseCo
         const result = await pool!.query(sql, params);
         return { rows: result.rows, changes: result.rowCount };
       } catch (error) {
-        console.error('PostgreSQL查询错误:', error);
+        console.error('PostgreSQL query error:', error);
         throw error;
       }
     },
@@ -50,7 +50,7 @@ export async function getDatabaseConnection(dbPath?: string): Promise<DatabaseCo
 export async function backupDatabase(sourcePath: string, backupPath: string): Promise<void> {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
-    console.warn('⚠️  DATABASE_URL 未设置，跳过备份');
+    console.warn('⚠️  DATABASE_URL not set, skipping backup');
     return;
   }
 
@@ -65,12 +65,12 @@ export async function backupDatabase(sourcePath: string, backupPath: string): Pr
     ? backupPath
     : path.join(backupDir, `backup-${timestamp}.sql`);
 
-  console.log(`📋 开始 pg_dump 备份 -> ${outFile}`);
+  console.log(`📋 Starting pg_dump backup -> ${outFile}`);
   execSync(`pg_dump "${dbUrl}" -f "${outFile}" --no-password`, {
     stdio: 'pipe',
     timeout: 60000,
   });
-  console.log(`✅ 备份完成: ${outFile}`);
+  console.log(`✅ Backup complete: ${outFile}`);
 }
 
 export function getDatabaseStats() {

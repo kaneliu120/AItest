@@ -32,8 +32,8 @@ export class FaultDiagnosisEngine {
     const defaultRules: FaultDetectionRule[] = [
       {
         id: 'high-cpu-usage',
-        name: '高CPU使用率检测',
-        description: '检测CPU使用率超过80%的情况',
+        name: 'High CPU Usage Detection',
+        description: 'Detects CPU usage exceeding 80%',
         severity: 'medium',
         condition: async (context) => (((context.systemMetrics as Record<string, unknown> | undefined)?.cpuUsage as number | undefined) ?? 0) > 80,
         action: async (context) => ({
@@ -41,15 +41,15 @@ export class FaultDiagnosisEngine {
           ruleId: 'high-cpu-usage',
           timestamp: new Date(),
           severity: 'medium',
-          description: 'CPU使用率过高',
-          rootCause: '系统负载过高或资源不足',
-          suggestedActions: ['检查运行中的进程', '优化代码性能', '增加系统资源'],
+          description: 'CPU usage too high',
+          rootCause: 'System load too high or insufficient resources',
+          suggestedActions: ['Check running processes', 'Optimize code performance', 'Add system resources'],
           automaticRepairAvailable: true,
           repairSteps: [
             {
               id: 'analyze-processes',
-              description: '分析占用CPU的进程',
-              action: async () => ({ success: true, message: '进程分析完成' }),
+              description: 'Analyze CPU-consuming processes',
+              action: async () => ({ success: true, message: 'Process analysis complete' }),
               requiresConfirmation: false,
               estimatedTime: 5
             }
@@ -88,7 +88,7 @@ export class FaultDiagnosisEngine {
             results.push(result);
           }
         } catch (error) {
-          logger.error('规则执行失败', error, { module: 'FaultDiagnosisEngine', rule: rule.name });
+          logger.error('Rule execution failed', error, { module: 'FaultDiagnosisEngine', rule: rule.name });
         }
       }
     }

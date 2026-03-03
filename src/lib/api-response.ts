@@ -26,7 +26,7 @@ export interface ApiError {
   code: string;
   message: string;
   details?: any;
-  stack?: string; // 仅开发环境
+  stack?: string; // development environment only
 }
 
 export interface PaginationInfo {
@@ -154,7 +154,7 @@ export function paginatedResponse<T>(
  * 空响应（用于删除等操作）
  */
 export function emptyResponse(
-  message: string = '操作成功',
+  message: string = 'Operation successful',
   options: {
     requestId?: string;
   } = {}
@@ -173,7 +173,7 @@ export function emptyResponse(
  */
 export function validationErrorResponse(
   errors: Record<string, string[]>,
-  message: string = '验证失败'
+  message: string = 'Validation failed'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_VALIDATION',
@@ -186,7 +186,7 @@ export function validationErrorResponse(
  * 未授权响应
  */
 export function unauthorizedResponse(
-  message: string = '未授权访问'
+  message: string = 'Unauthorized access'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_UNAUTHORIZED',
@@ -198,7 +198,7 @@ export function unauthorizedResponse(
  * 未找到响应
  */
 export function notFoundResponse(
-  message: string = '资源未找到'
+  message: string = 'Resource not found'
 ): ApiResponse {
   return errorResponse({
     code: 'ERR_NOT_FOUND',
@@ -217,7 +217,7 @@ export function serverErrorResponse(
   
   return errorResponse({
     code: 'ERR_INTERNAL',
-    message: '服务器内部错误',
+    message: 'Internal server error',
     details: process.env.NODE_ENV === 'development' ? { originalError: message } : undefined,
   }, { 
     statusCode: 500,

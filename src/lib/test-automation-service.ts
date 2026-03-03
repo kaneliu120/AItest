@@ -6,7 +6,7 @@ export interface TestCase {
   description: string;
   type: 'unit' | 'integration' | 'e2e' | 'performance' | 'security';
   status: 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
-  duration?: number; // 毫秒
+  duration?: number; // ms
   result?: TestResult;
   createdAt: string;
   updatedAt: string;
@@ -100,8 +100,8 @@ export class TestAutomationService {
     const sampleTestCases: TestCase[] = [
       {
         id: 'test-001',
-        name: 'API响应格式验证',
-        description: '验证API返回标准化的响应格式',
+        name: 'API Response Format Validation',
+        description: 'Validate that API returns a standardized response format',
         type: 'integration',
         status: 'passed',
         duration: 150,
@@ -109,33 +109,33 @@ export class TestAutomationService {
           passed: true,
           assertions: [
             {
-              description: '响应包含success字段',
+              description: 'Response contains success field',
               passed: true,
               expected: true,
               actual: true
             },
             {
-              description: '响应包含timestamp字段',
+              description: 'Response contains timestamp field',
               passed: true,
               expected: true,
               actual: true
             },
             {
-              description: '响应包含requestId字段',
+              description: 'Response contains requestId field',
               passed: true,
               expected: true,
               actual: true
             }
           ],
-          logs: ['测试开始', '发送API请求', '验证响应格式', '测试通过']
+          logs: ['Test started', 'Send API request', 'Validate response format', 'Test passed']
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
       {
         id: 'test-002',
-        name: '数据库连接测试',
-        description: '测试数据库连接和基本操作',
+        name: 'Database Connection Test',
+        description: 'Test database connection and basic operations',
         type: 'integration',
         status: 'passed',
         duration: 200,
@@ -143,27 +143,27 @@ export class TestAutomationService {
           passed: true,
           assertions: [
             {
-              description: '数据库连接成功',
+              description: 'Database connection successful',
               passed: true
             },
             {
-              description: '可以执行查询操作',
+              description: 'Can execute query operations',
               passed: true
             },
             {
-              description: '可以执行插入操作',
+              description: 'Can execute insert operations',
               passed: true
             }
           ],
-          logs: ['连接数据库', '执行测试查询', '执行测试插入', '清理测试数据', '测试通过']
+          logs: ['Connect to database', 'Execute test query', 'Execute test insert', 'Clean up test data', 'Test passed']
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
       {
         id: 'test-003',
-        name: '移动端响应式测试',
-        description: '测试移动端布局响应式',
+        name: 'Mobile Responsive Test',
+        description: 'Test mobile layout responsiveness',
         type: 'e2e',
         status: 'running',
         createdAt: new Date().toISOString(),
@@ -171,8 +171,8 @@ export class TestAutomationService {
       },
       {
         id: 'test-004',
-        name: '性能压力测试',
-        description: '测试系统在高负载下的性能',
+        name: 'Performance Load Test',
+        description: 'Test system performance under high load',
         type: 'performance',
         status: 'pending',
         createdAt: new Date().toISOString(),
@@ -180,8 +180,8 @@ export class TestAutomationService {
       },
       {
         id: 'test-005',
-        name: '安全漏洞扫描',
-        description: '扫描系统安全漏洞',
+        name: 'Security Vulnerability Scan',
+        description: 'Scan system for security vulnerabilities',
         type: 'security',
         status: 'pending',
         createdAt: new Date().toISOString(),
@@ -196,8 +196,8 @@ export class TestAutomationService {
     // 添加示例测试套件
     const sampleTestSuite: TestSuite = {
       id: 'suite-001',
-      name: 'Mission Control核心功能测试套件',
-      description: '测试Mission Control所有核心功能',
+      name: 'Mission Control Core Functionality Test Suite',
+      description: 'Test all core functionality of Mission Control',
       testCases: ['test-001', 'test-002', 'test-003', 'test-004', 'test-005'],
       status: 'running',
       results: {
@@ -228,10 +228,10 @@ export class TestAutomationService {
         averageDuration: 175
       },
       logs: [
-        '测试执行开始',
-        '运行测试: API响应格式验证 - 通过',
-        '运行测试: 数据库连接测试 - 通过',
-        '运行测试: 移动端响应式测试 - 进行中'
+        'Test execution started',
+        'Running test: API Response Format Validation - Passed',
+        'Running test: Database Connection Test - Passed',
+        'Running test: Mobile Responsive Test - In Progress'
       ]
     };
     
@@ -295,7 +295,7 @@ export class TestAutomationService {
   async runTestCase(id: string): Promise<TestResult> {
     const testCase = this.testCases.get(id);
     if (!testCase) {
-      throw new Error(`测试用例不存在: ${id}`);
+      throw new Error(`Test case not found: ${id}`);
     }
     
     // 模拟测试执行
@@ -306,27 +306,27 @@ export class TestAutomationService {
     
     // 生成测试结果
     const result: TestResult = {
-      passed: Math.random() > 0.3, // 70%通过率
+      passed: Math.random() > 0.3, // 70% pass rate
       assertions: [
         {
-          description: '基本功能验证',
+          description: 'Basic functionality validation',
           passed: true
         },
         {
-          description: '错误处理验证',
+          description: 'Error handling validation',
           passed: Math.random() > 0.5
         },
         {
-          description: '性能验证',
+          description: 'Performance validation',
           passed: Math.random() > 0.7
         }
       ].filter(a => a.passed !== undefined),
       logs: [
-        '测试开始',
-        '初始化测试环境',
-        '执行测试逻辑',
-        '验证测试结果',
-        '测试完成'
+        'Test started',
+        'Initialize test environment',
+        'Execute test logic',
+        'Validate test results',
+        'Test completed'
       ],
       coverage: {
         lines: 85,
@@ -364,7 +364,7 @@ export class TestAutomationService {
   async runTestSuite(id: string): Promise<TestExecution> {
     const suite = this.testSuites.get(id);
     if (!suite) {
-      throw new Error(`测试套件不存在: ${id}`);
+      throw new Error(`Test suite not found: ${id}`);
     }
     
     const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -382,7 +382,7 @@ export class TestAutomationService {
         totalDuration: 0,
         averageDuration: 0
       },
-      logs: [`开始执行测试套件: ${suite.name}`]
+      logs: [`Starting test suite execution: ${suite.name}`]
     };
     
     this.executions.set(executionId, execution);
@@ -404,7 +404,7 @@ export class TestAutomationService {
     
     for (const testCaseId of suite.testCases) {
       try {
-        execution.logs.push(`运行测试用例: ${testCaseId}`);
+        execution.logs.push(`Running test case: ${testCaseId}`);
         
         const startTime = Date.now();
         const result = await this.runTestCase(testCaseId);
@@ -414,10 +414,10 @@ export class TestAutomationService {
         
         if (result.passed) {
           passedTests++;
-          execution.logs.push(`测试通过: ${testCaseId} (${duration}ms)`);
+          execution.logs.push(`Test passed: ${testCaseId} (${duration}ms)`);
         } else {
           failedTests++;
-          execution.logs.push(`测试失败: ${testCaseId} (${duration}ms)`);
+          execution.logs.push(`Test failed: ${testCaseId} (${duration}ms)`);
         }
         
         // 更新执行结果
@@ -433,7 +433,7 @@ export class TestAutomationService {
         this.executions.set(executionId, execution);
         
       } catch (error) {
-        execution.logs.push(`测试错误: ${testCaseId} - ${error}`);
+        execution.logs.push(`Test error: ${testCaseId} - ${error}`);
         failedTests++;
       }
     }
@@ -441,7 +441,7 @@ export class TestAutomationService {
     // 完成执行
     execution.status = 'completed';
     execution.endTime = new Date().toISOString();
-    execution.logs.push(`测试套件执行完成: ${passedTests}通过, ${failedTests}失败`);
+    execution.logs.push(`Test suite execution completed: ${passedTests} passed, ${failedTests} failed`);
     
     this.executions.set(executionId, execution);
     

@@ -9,21 +9,21 @@ export async function GET(request: NextRequest) {
     const rsFin = await pool.query(`SELECT COALESCE(sum(amount),0)::numeric as amt FROM finance_transactions WHERE tx_type='income' AND created_at >= now() - ($1 || ' days')::interval`, [String(days)]);
 
     const lines = [
-      `# Mission Control 周报 (${days}天)`,
+      `# Mission Control Weekly Report (${days} days)`,
       ``,
-      `- 新增任务数: ${rsTasks.rowCount || 0}`,
-      `- 收入合计: ₱${Number(rsFin.rows[0]?.amt || 0).toLocaleString()}`,
+      `- New tasks: ${rsTasks.rowCount || 0}`,
+      `- Total income: ₱${Number(rsFin.rows[0]?.amt || 0).toLocaleString()}`,
       ``,
-      `## 事件统计`,
+      `## Event Statistics`,
       ...((rsEvents.rows as any[]).map(e => `- ${e.event_type}: ${e.c}`)),
       ``,
-      `## 最近任务`,
+      `## Recent Tasks`,
       ...((rsTasks.rows as any[]).slice(0, 10).map(t => `- [${t.workflow_stage}] ${t.title} (${new Date(t.created_at).toLocaleString('zh-CN')})`)),
       ``,
     ];
 
     return NextResponse.json({ success: true, data: { markdown: lines.join('\n') } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

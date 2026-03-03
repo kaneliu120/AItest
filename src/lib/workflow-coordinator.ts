@@ -55,20 +55,20 @@ export interface WorkflowDefinition {
 export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
   EVENING_PROACTIVE: {
     id: 'evening-proactive',
-    name: '晚间主动性工作流',
-    description: '每晚20:00自动推进使命的一件事',
+    name: 'Evening Proactive Workflow',
+    description: 'Automatically advance one mission item every evening at 20:00',
     version: '1.0.0',
     triggers: [
       {
         type: 'schedule',
-        schedule: '0 20 * * *' // 每天20:00
+        schedule: '0 20 * * *' // daily at 20:00
       }
     ],
     steps: [
       {
         id: 'select-task',
-        name: '选择最高优先级任务',
-        description: '从任务库中选择最高优先级的任务',
+        name: 'Select Highest Priority Task',
+        description: 'Select the highest priority task from the task pool',
         module: 'tasks',
         action: 'select_priority_task',
         parameters: { priority: 'highest' },
@@ -78,8 +78,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'execute-action',
-        name: '执行推进行动',
-        description: '执行选定的任务行动',
+        name: 'Execute Advancement Action',
+        description: 'Execute the selected task action',
         module: 'automation',
         action: 'execute_task',
         parameters: {},
@@ -90,8 +90,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'record-progress',
-        name: '记录进展和问题',
-        description: '记录任务执行进展和遇到的问题',
+        name: 'Record Progress and Issues',
+        description: 'Record task execution progress and encountered issues',
         module: 'tasks',
         action: 'record_progress',
         parameters: {},
@@ -102,8 +102,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'generate-report',
-        name: '生成总结报告',
-        description: '生成任务执行总结报告',
+        name: 'Generate Summary Report',
+        description: 'Generate task execution summary report',
         module: 'reporting',
         action: 'generate_summary',
         parameters: {},
@@ -114,8 +114,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'notify-user',
-        name: '向用户汇报',
-        description: '向用户发送执行结果汇报',
+        name: 'Report to User',
+        description: 'Send execution result report to user',
         module: 'notification',
         action: 'send_report',
         parameters: {},
@@ -135,20 +135,20 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
 
   FINANCE_WEEKLY_REPORT: {
     id: 'finance-weekly-report',
-    name: '财务周报工作流',
-    description: '每周一生成财务周报',
+    name: 'Finance Weekly Report Workflow',
+    description: 'Generate finance weekly report every Monday',
     version: '1.0.0',
     triggers: [
       {
         type: 'schedule',
-        schedule: '0 9 * * 1' // 每周一9:00
+        schedule: '0 9 * * 1' // Monday at 9:00
       }
     ],
     steps: [
       {
         id: 'collect-data',
-        name: '收集财务数据',
-        description: '收集本周财务数据',
+        name: 'Collect Finance Data',
+        description: 'Collect this week\'s finance data',
         module: 'finance',
         action: 'collect_weekly_data',
         parameters: {},
@@ -158,8 +158,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'generate-report',
-        name: '生成周报',
-        description: '生成财务周报',
+        name: 'Generate Weekly Report',
+        description: 'Generate finance weekly report',
         module: 'reporting',
         action: 'generate_finance_report',
         parameters: {},
@@ -170,8 +170,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'send-notification',
-        name: '发送通知',
-        description: '发送周报完成通知',
+        name: 'Send Notification',
+        description: 'Send weekly report completion notification',
         module: 'notification',
         action: 'send_notification',
         parameters: {},
@@ -191,20 +191,20 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
 
   FREELANCE_PROJECT_SEARCH: {
     id: 'freelance-project-search',
-    name: '外包项目搜索工作流',
-    description: '每日搜索新的外包项目',
+    name: 'Freelance Project Search Workflow',
+    description: 'Search for new freelance projects daily',
     version: '1.0.0',
     triggers: [
       {
         type: 'schedule',
-        schedule: '0 10 * * *' // 每天10:00
+        schedule: '0 10 * * *' // daily at 10:00
       }
     ],
     steps: [
       {
         id: 'search-platforms',
-        name: '搜索平台',
-        description: '在外包平台搜索新项目',
+        name: 'Search Platforms',
+        description: 'Search for new projects on freelance platforms',
         module: 'freelance',
         action: 'search_projects',
         parameters: {},
@@ -214,8 +214,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'filter-projects',
-        name: '筛选项目',
-        description: '筛选符合要求的项目',
+        name: 'Filter Projects',
+        description: 'Filter projects that meet requirements',
         module: 'freelance',
         action: 'filter_projects',
         parameters: {},
@@ -226,8 +226,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'apply-projects',
-        name: '申请项目',
-        description: '申请筛选出的项目',
+        name: 'Apply to Projects',
+        description: 'Apply to the filtered projects',
         module: 'freelance',
         action: 'apply_to_projects',
         parameters: {},
@@ -247,20 +247,20 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
 
   SYSTEM_HEALTH_CHECK: {
     id: 'system-health-check',
-    name: '系统健康检查工作流',
-    description: '每小时检查系统健康状况',
+    name: 'System Health Check Workflow',
+    description: 'Check system health status every hour',
     version: '1.0.0',
     triggers: [
       {
         type: 'schedule',
-        schedule: '0 * * * *' // 每小时
+        schedule: '0 * * * *' // every hour
       }
     ],
     steps: [
       {
         id: 'check-services',
-        name: '检查服务',
-        description: '检查所有系统服务状态',
+        name: 'Check Services',
+        description: 'Check all system service statuses',
         module: 'health',
         action: 'check_services',
         parameters: {},
@@ -270,8 +270,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'check-database',
-        name: '检查数据库',
-        description: '检查数据库连接和性能',
+        name: 'Check Database',
+        description: 'Check database connection and performance',
         module: 'health',
         action: 'check_database',
         parameters: {},
@@ -282,8 +282,8 @@ export const PredefinedWorkflows: Record<string, WorkflowDefinition> = {
       },
       {
         id: 'generate-alert',
-        name: '生成告警',
-        description: '生成健康检查告警',
+        name: 'Generate Alerts',
+        description: 'Generate health check alerts',
         module: 'notification',
         action: 'generate_health_alert',
         parameters: {},
@@ -421,7 +421,7 @@ export class WorkflowCoordinator {
           message: job.message,
           type: 'info',
           action: {
-            label: '查看工作流',
+            label: 'View Workflows',
             url: '/workflows',
           },
         });
@@ -499,7 +499,7 @@ export class WorkflowCoordinator {
   // 注册工作流
   registerWorkflow(workflow: WorkflowDefinition): void {
     this.workflows.set(workflow.id, workflow);
-    logger.info(`✅ 工作流注册成功: ${workflow.name} (${workflow.id})`);
+    logger.info(`✅ Workflow registered: ${workflow.name} (${workflow.id})`);
   }
 
   // 获取工作流
@@ -507,7 +507,7 @@ export class WorkflowCoordinator {
     return this.workflows.get(id);
   }
 
-  // 获取所有工作流
+  // Fetch all workflows
   getAllWorkflows(): WorkflowDefinition[] {
     return Array.from(this.workflows.values());
   }
@@ -516,7 +516,7 @@ export class WorkflowCoordinator {
   async startWorkflow(workflowId: string, parameters?: Record<string, any>): Promise<string> {
     const workflow = this.getWorkflow(workflowId);
     if (!workflow) {
-      throw new Error(`工作流未找到: ${workflowId}`);
+      throw new Error(`Workflow not found: ${workflowId}`);
     }
 
     const instanceId = `workflow-${workflowId}-${Date.now()}`;
@@ -537,7 +537,7 @@ export class WorkflowCoordinator {
 
     this.instances.set(instanceId, instance);
     clearCache('metrics:');
-    logger.info(`🚀 启动工作流: ${workflow.name} (实例: ${instanceId})`);
+    logger.info(`🚀 Starting workflow: ${workflow.name} (instance: ${instanceId})`);
 
     persistExecutionStart({
       id: instance.id,
@@ -563,7 +563,7 @@ export class WorkflowCoordinator {
     const workflow = this.workflows.get(instance.workflowId);
     if (!workflow) {
       instance.status = 'failed';
-      instance.errors.push('工作流定义不存在');
+      instance.errors.push('Workflow definition not found');
       instance.completedAt = new Date().toISOString();
       persistExecutionStatus({ id: instance.id, status: instance.status, completedAt: instance.completedAt }).catch((e) => logger.error("[workflow-coordinator] persistExecutionStatus failed", e));
       return;
@@ -602,7 +602,7 @@ export class WorkflowCoordinator {
           completedAt: new Date().toISOString(),
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : '步骤执行失败';
+        const message = error instanceof Error ? error.message : 'Step execution failed';
         current.stepsStatus[step.id] = {
           ...current.stepsStatus[step.id],
           status: 'failed',
@@ -922,7 +922,7 @@ export class WorkflowCoordinator {
       averageExecutionTime: avgMs,
       successRate: totalFinished > 0 ? (completed / totalFinished) * 100 : 0,
       stepSuccessRate,
-      moduleUsage, // 兼容旧UI：Design usage
+      moduleUsage, // compat old UI: Design usage
       moduleUsageRuntime,
       moduleFailCount,
       moduleAvgDurationMs,
@@ -1161,7 +1161,7 @@ export class WorkflowCoordinator {
     });
   }
 
-  // 获取工作流状态
+  // Get workflow status
   async getWorkflowStatus(instanceId: string): Promise<any> {
     const instance = this.instances.get(instanceId);
     if (!instance) return null;
@@ -1193,4 +1193,4 @@ Object.values(PredefinedWorkflows).forEach(workflow => {
   workflowCoordinator.registerWorkflow(workflow);
 });
 
-logger.info('🚀 工作流协调器初始化完成');
+logger.info('🚀 Workflow coordinator initialized');

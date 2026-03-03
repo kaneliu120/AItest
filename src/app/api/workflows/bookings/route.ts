@@ -16,18 +16,18 @@ interface ScanState {
   isRunning:    boolean;
   error:        string | null;
   nextScanAt:   string | null;
-  interval:     number; // 分钟
+  interval:     number; // minutes
 }
 
 const scanState: ScanState = {
   lastScanAt:   null,
-  lastResult:   '尚未运行',
+  lastResult:   'Not yet run',
   totalScanned: 0,
   totalCreated: 0,
   isRunning:    false,
   error:        null,
   nextScanAt:   null,
-  interval:     30, // 默认 30 分钟扫描一次
+  interval:     30, // default: scan every 30 minutes
 };
 
 // 定时扫描 timer
@@ -63,20 +63,20 @@ async function fetchBookings(): Promise<BookingRecord[]> {
         if (Array.isArray(bookings)) return bookings;
       }
     }
-  } catch { /* 网络不可达，使用本地模拟数据 */ }
+  } catch { /* network unreachable, using local mock data */ }
 
   // 本地模拟预约数据（真实请求失败时的 fallback）
   const now = new Date();
   return [
     {
       id: `booking-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-001`,
-      customerName: '张先生',
+      customerName: 'Mr. Zhang',
       email: 'zhang@example.com',
       phone: '+63 912 345 6789',
       service: 'AI Installation Service - DeepSeek',
       scheduledAt: new Date(now.getTime() + 2 * 86400000).toISOString(),
       status: 'confirmed',
-      notes: '需要部署 DeepSeek 本地化方案，配置 NVIDIA GPU',
+      notes: 'Need to deploy DeepSeek localization solution, configure NVIDIA GPU',
       createdAt: new Date(now.getTime() - 3600000).toISOString(),
     },
     {
@@ -112,23 +112,23 @@ async function runScan(): Promise<{ scanned: number; created: number; skipped: n
 
       // 生成任务
       const task = await createTask({
-        title:       `[预约] ${b.customerName} - ${b.service}`,
+        title:       `[Booking] ${b.customerName} - ${b.service}`,
         description: [
-          `客户：${b.customerName}`,
-          `邮箱：${b.email}`,
-          `电话：${b.phone}`,
-          `服务：${b.service}`,
-          `预约时间：${new Date(b.scheduledAt).toLocaleString('zh-CN')}`,
-          `预约状态：${b.status}`,
-          b.notes ? `备注：${b.notes}` : '',
+          `Customer: ${b.customerName}`,
+          `Email: ${b.email}`,
+          `Phone: ${b.phone}`,
+          `Service: ${b.service}`,
+          `Scheduled: ${new Date(b.scheduledAt).toLocaleString()}`,
+          `Status: ${b.status}`,
+          b.notes ? `Notes: ${b.notes}` : '',
         ].filter(Boolean).join('\n'),
         priority:    b.status === 'confirmed' ? 'high' : 'medium',
         status:      'pending',
         source:      'booking',
-        type:        'service', // 服务类任务，不流转到自动化
+        type:        'service', // service-type task, not routed to automation
         dueDate:     b.scheduledAt,
-        assignedTo:  '凯哥',
-        tags:        ['AI安装服务', '客户预约', b.status],
+        assignedTo:  'Me',
+        tags:        ['AI Installation', 'Customer Booking', b.status],
         metadata: {
           bookingId:    b.id,
           customerName: b.customerName,
@@ -149,7 +149,7 @@ async function runScan(): Promise<{ scanned: number; created: number; skipped: n
       scanState.totalCreated++;
     }
 
-    const resultMsg = `扫描 ${bookings.length} 条记录，新建 ${created} 个任务，跳过 ${skipped} 个（已存在）`;
+    const resultMsg = `Scanned ${bookings.length} records, created ${created} tasks, skipped ${skipped} (already exists)`;
     scanState.lastScanAt   = new Date().toISOString();
     scanState.lastResult   = resultMsg;
     scanState.nextScanAt   = new Date(Date.now() + scanState.interval * 60000).toISOString();
@@ -157,7 +157,7 @@ async function runScan(): Promise<{ scanned: number; created: number; skipped: n
     return { scanned: bookings.length, created, skipped, tasks: createdTitles };
 
   } catch (e) {
-    scanState.error = e instanceof Error ? e.message : '未知错误';
+    scanState.error = e instanceof Error ? e.message : 'Unknown error';
     throw e;
   } finally {
     scanState.isRunning = false;
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return NextResponse.json({ success: false, error: '不支持的 action' }, { status: 400 });
+  return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
 }
 
 // ─── POST ────────────────────────────────────────────────────────────────────
@@ -225,29 +225,29 @@ export async function POST(request: NextRequest) {
     // ── 手动导入单条预约 ──
     if (action === 'import-booking') {
       const { booking } = body as { booking: BookingRecord };
-      if (!booking?.id) return NextResponse.json({ success: false, error: '缺少 booking 数据' }, { status: 400 });
+      if (!booking?.id) return NextResponse.json({ success: false, error: 'Missing booking data' }, { status: 400 });
 
       if (bookingTaskExists(booking.id)) {
-        return NextResponse.json({ success: false, error: '该预约已存在对应任务' }, { status: 409 });
+        return NextResponse.json({ success: false, error: 'A task already exists for this booking' }, { status: 409 });
       }
       const task = await createTask({
-        title:       `[预约] ${booking.customerName} - ${booking.service}`,
-        description: `客户：${booking.customerName}\n邮箱：${booking.email}\n电话：${booking.phone}\n服务：${booking.service}\n预约时间：${booking.scheduledAt}`,
+        title:       `[Booking] ${booking.customerName} - ${booking.service}`,
+        description: `Customer: ${booking.customerName}\nEmail: ${booking.email}\nPhone: ${booking.phone}\nService: ${booking.service}\nScheduled: ${booking.scheduledAt}`,
         priority:    'high',
         status:      'pending',
         source:      'booking',
         type:        'service',
         dueDate:     booking.scheduledAt,
-        assignedTo:  '凯哥',
-        tags:        ['AI安装服务', '客户预约'],
+        assignedTo:  'Me',
+        tags:        ['AI Installation', 'Customer Booking'],
         metadata: { ...booking, importedAt: new Date().toISOString() },
       });
-      return NextResponse.json({ success: true, data: { task }, message: '预约任务已创建' });
+      return NextResponse.json({ success: true, data: { task }, message: 'Booking task created' });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

@@ -25,52 +25,52 @@ export class SimpleFinanceService {
         {
           date: '2026-02-21',
           type: 'income',
-          category: 'AI外包项目',
-          description: '客户A的AI集成项目',
+          category: 'AI Freelance',
+          description: 'Client A AI integration project',
           amount: 50000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['外包', 'AI', '项目'],
+          tags: ['freelance', 'AI', 'project'],
         },
         {
           date: '2026-02-20',
           type: 'income',
-          category: '技能销售',
-          description: 'My Skill Shop平台销售',
+          category: 'Skill Sales',
+          description: 'My Skill Shop platform sales',
           amount: 25000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['平台', '销售', '数字产品'],
+          tags: ['platform', 'sales', 'digital-product'],
         },
         {
           date: '2026-02-19',
           type: 'expense',
-          category: '服务器费用',
-          description: 'Azure云服务器月费',
+          category: 'Server Costs',
+          description: 'Azure cloud server monthly fee',
           amount: 15000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['云服务', '基础设施'],
+          tags: ['cloud', 'infrastructure'],
         },
         {
           date: '2026-02-18',
           type: 'expense',
-          category: '营销推广',
-          description: 'Google Ads广告费用',
+          category: 'Marketing',
+          description: 'Google Ads advertising costs',
           amount: 8000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['营销', '广告', '获客'],
+          tags: ['marketing', 'ads', 'acquisition'],
         },
         {
           date: '2026-02-17',
           type: 'expense',
-          category: '软件开发工具',
-          description: '开发工具和软件订阅',
+          category: 'Dev Tools',
+          description: 'Development tools and software subscriptions',
           amount: 5000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['工具', '订阅', '开发'],
+          tags: ['tools', 'subscription', 'development'],
         },
       ];
 
@@ -85,8 +85,8 @@ export class SimpleFinanceService {
       // 添加测试预算数据
       const testBudgets: Omit<Budget, 'id'>[] = [
         {
-          name: '服务器预算',
-          category: '服务器费用',
+          name: 'Server Budget',
+          category: 'Server Costs',
           allocated: 20000,
           spent: 15000,
           remaining: 5000,
@@ -94,8 +94,8 @@ export class SimpleFinanceService {
           status: 'on-track',
         },
         {
-          name: '营销预算',
-          category: '营销推广',
+          name: 'Marketing Budget',
+          category: 'Marketing',
           allocated: 10000,
           spent: 8000,
           remaining: 2000,
@@ -103,8 +103,8 @@ export class SimpleFinanceService {
           status: 'on-track',
         },
         {
-          name: '工具预算',
-          category: '软件开发工具',
+          name: 'Tools Budget',
+          category: 'Dev Tools',
           allocated: 6000,
           spent: 5000,
           remaining: 1000,
@@ -147,7 +147,7 @@ export class SimpleFinanceService {
   }): Promise<{ transactions: Transaction[]; total: number }> {
     let allTransactions = simpleDb.query<Transaction>('transactions');
     
-    // 应用过滤器
+    // Apply filters
     if (filters?.type) {
       allTransactions = allTransactions.filter(t => t.type === filters.type);
     }
@@ -164,10 +164,10 @@ export class SimpleFinanceService {
       allTransactions = allTransactions.filter(t => t.date <= filters.endDate!);
     }
     
-    // 排序
+ // sort
     allTransactions = allTransactions.sort((a, b) => b.date.localeCompare(a.date));
     
-    // 分页
+ // pagination
     const page = filters?.page || 1;
     const pageSize = filters?.pageSize || 20;
     const startIndex = (page - 1) * pageSize;

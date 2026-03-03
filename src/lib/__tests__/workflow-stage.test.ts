@@ -111,7 +111,7 @@ describe('moveStage()', () => {
       .mockResolvedValueOnce(undefined) // BEGIN
       .mockResolvedValueOnce({ rows: [] }); // SELECT ... FOR UPDATE (no row)
 
-    await expect(moveStage('bad-id', 'accepted', 'test')).rejects.toThrow('任务不存在');
+    await expect(moveStage('bad-id', 'accepted', 'test')).rejects.toThrow('Task not found');
     expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
     expect(mockClient.release).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe('moveStage()', () => {
       .mockResolvedValueOnce(undefined) // BEGIN
       .mockResolvedValueOnce({ rows: [{ workflow_stage: 'draft' }] }); // SELECT
 
-    await expect(moveStage('task-1', 'analysis_done', 'skip')).rejects.toThrow('非法状态迁移');
+    await expect(moveStage('task-1', 'analysis_done', 'skip')).rejects.toThrow('Invalid state transition');
     expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
   });
 

@@ -1,5 +1,5 @@
 /**
- * 简化版API标准化中间件
+ * Simplified API standardization middleware
  * 避免复杂的响应体处理
  */
 
@@ -45,9 +45,9 @@ export function simpleApiHandler<T = any>(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API处理错误 (${processingTime}ms):`, error);
+      console.error(`API processing error (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 
@@ -101,9 +101,9 @@ export function basicApiHandler<T = any>(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API处理错误 (${processingTime}ms):`, error);
+      console.error(`API processing error (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 

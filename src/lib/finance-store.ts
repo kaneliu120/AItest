@@ -59,7 +59,7 @@ export async function getAllTransactions(): Promise<Transaction[]> {
     );
     return rs.rows.map(rowToTx);
   } catch (e) {
-    logger.error('获取财务交易失败', e, { module: 'finance-store' });
+    logger.error('Failed to fetch financial transactions', e, { module: 'finance-store' });
     return [];
   }
 }
@@ -85,7 +85,7 @@ export async function getFinanceSummary(): Promise<FinanceSummary> {
       balance: totalIncome - totalExpense,
     };
   } catch (e) {
-    logger.error('获取财务汇总失败', e, { module: 'finance-store' });
+    logger.error('Failed to fetch financial summary', e, { module: 'finance-store' });
     return { totalIncome: 0, totalExpense: 0, netIncome: 0, balance: 0 };
   }
 }

@@ -57,20 +57,20 @@ function buildHealthRecommendations(alerts: Array<{ level: 'info' | 'warning' | 
   const codes = new Set(alerts.map(a => a.code));
 
   if (codes.has('LOW_SUCCESS_RATE') || codes.has('SUCCESS_RATE_DROP')) {
-    recs.push('检查最近失败步骤与模块热点，优先处理失败Top1模块。');
+    recs.push('Check recently failed steps and module hotspots; prioritize the top-1 failing module.');
   }
   if (codes.has('DLQ_BACKLOG') || codes.has('DLQ_BACKLOG_HIGH')) {
-    recs.push('检查通知渠道配置并执行DLQ重放，必要时清理失效消息。');
+    recs.push('Check notification channel configuration and replay DLQ; clean up stale messages if necessary.');
   }
   if (codes.has('AVG_EXECUTION_SLOW')) {
-    recs.push('排查慢步骤（duration高的module/action），考虑异步化或限流。');
+    recs.push('Investigate slow steps (high-duration module/action); consider async execution or rate limiting.');
   }
   if (codes.has('MODULE_FAILURE_HOTSPOT')) {
-    recs.push('针对失败热点模块增加重试与诊断日志。');
+    recs.push('Add retries and diagnostic logging for high-failure modules.');
   }
 
   if (recs.length === 0) {
-    recs.push('当前无高优先级风险，保持例行监控。');
+    recs.push('No high-priority risks at present; maintain routine monitoring.');
   }
 
   return recs;
@@ -201,7 +201,7 @@ export async function GET(request: NextRequest) {
 
       case 'notification-dlq': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权访问通知DLQ', 403);
+          return errorResponse('Access to notification DLQ not authorized', 403);
         }
         const limit = Number(url.searchParams.get('limit') || 100);
         const items = workflowCoordinator.getNotificationDlq(limit);
@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
 
       case 'diagnostic-history': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权访问诊断历史', 403);
+          return errorResponse('Access to diagnostics history not authorized', 403);
         }
         const limit = Number(url.searchParams.get('limit') || 50);
         const items = readDiagHistory().slice(-limit).reverse();
@@ -219,11 +219,11 @@ export async function GET(request: NextRequest) {
       }
 
       default:
-        return errorResponse(`未知操作: ${action}`, 400);
+        return errorResponse(`Unknown action: ${action}`, 400);
     }
   } catch (error) {
-    console.error('工作流API错误:', error);
-    return errorResponse(error instanceof Error ? error.message : '未知错误');
+    console.error('Workflow API error:', error);
+    return errorResponse(error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
@@ -233,80 +233,80 @@ export async function POST(request: NextRequest) {
     const { action, workflowId, parameters, instanceId } = body;
 
     if (!action) {
-      return errorResponse('缺少 action 参数', 400);
+      return errorResponse('Missing action parameter', 400);
     }
 
     switch (action) {
       case 'start':
       case 'execute': {
         if (!workflowId) {
-          return errorResponse('缺少 workflowId 参数', 400);
+          return errorResponse('Missing workflowId parameter', 400);
         }
         const id = await workflowCoordinator.startWorkflow(workflowId, parameters || body.input || {});
         return successResponse({
           instanceId: id,
           status: 'running',
-          message: `工作流启动成功: ${workflowId}`,
+          message: `Workflow started: ${workflowId}`,
         });
       }
 
       case 'stop':
       case 'cancel': {
         if (!instanceId) {
-          return errorResponse('缺少 instanceId 参数', 400);
+          return errorResponse('Missing instanceId parameter', 400);
         }
         const stopped = await workflowCoordinator.stopWorkflow(instanceId);
-        return successResponse({ stopped, message: stopped ? '工作流停止成功' : '工作流停止失败' });
+        return successResponse({ stopped, message: stopped ? 'Workflow stopped' : 'Workflow stop failed' });
       }
 
       case 'pause': {
-        if (!instanceId) return errorResponse('缺少 instanceId 参数', 400);
+        if (!instanceId) return errorResponse('Missing instanceId parameter', 400);
         const ok = workflowCoordinator.pauseWorkflow(instanceId);
-        return successResponse({ paused: ok, message: ok ? '工作流已暂停' : '暂停失败' });
+        return successResponse({ paused: ok, message: ok ? 'Workflow paused' : 'Pause failed' });
       }
 
       case 'resume': {
-        if (!instanceId) return errorResponse('缺少 instanceId 参数', 400);
+        if (!instanceId) return errorResponse('Missing instanceId parameter', 400);
         const ok = workflowCoordinator.resumeWorkflow(instanceId);
-        return successResponse({ resumed: ok, message: ok ? '工作流已恢复' : '恢复失败' });
+        return successResponse({ resumed: ok, message: ok ? 'Workflow resumed' : 'Resume failed' });
       }
 
       case 'cleanup': {
         const maxAgeHours = Number(body.maxAgeHours || 24);
         const cleanedCount = workflowCoordinator.cleanup(maxAgeHours);
-        return successResponse({ cleanedCount, message: '清理完成' });
+        return successResponse({ cleanedCount, message: 'Cleanup complete' });
       }
 
       case 'register': {
         const { workflow } = body;
         if (!workflow || !workflow.id || !workflow.name) {
-          return errorResponse('缺少工作流定义', 400);
+          return errorResponse('Missing workflow definition', 400);
         }
         workflowCoordinator.registerWorkflow(workflow);
-        return successResponse({ workflowId: workflow.id, message: '工作流注册成功' });
+        return successResponse({ workflowId: workflow.id, message: 'Workflow registered' });
       }
 
       case 'replay-notification-dlq': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权重放通知DLQ', 403);
+          return errorResponse('DLQ replay not authorized', 403);
         }
         const { id, limit } = body;
         const result = workflowCoordinator.replayNotificationDlq({ id, limit });
-        return successResponse({ ...result, message: 'DLQ 重放已提交' });
+        return successResponse({ ...result, message: 'DLQ replay submitted' });
       }
 
       case 'clear-notification-dlq': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权清理通知DLQ', 403);
+          return errorResponse('Unauthorized to clear notification DLQ', 403);
         }
         const { ids, all } = body;
         const result = workflowCoordinator.clearNotificationDlq({ ids, all });
-        return successResponse({ ...result, message: 'DLQ 清理完成' });
+        return successResponse({ ...result, message: 'DLQ cleanup complete' });
       }
 
       case 'run-notification-diagnostic': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权执行诊断', 403);
+          return errorResponse('Unauthorized to run diagnostics', 403);
         }
         const kind = body.kind || 'generic-env';
         const result = await runDiagnostic(kind);
@@ -318,19 +318,19 @@ export async function POST(request: NextRequest) {
           createdAt: new Date().toISOString(),
         };
         appendDiagHistory(historyItem);
-        return successResponse({ ...result, kind, historyId: historyItem.id, message: '诊断执行完成' });
+        return successResponse({ ...result, kind, historyId: historyItem.id, message: 'Diagnostic run complete' });
       }
 
       case 'worker-notification-event': {
         if (!isWorkflowAdminAuthorized(request)) {
-          return errorResponse('无权写入worker通知事件', 403);
+          return errorResponse('Unauthorized to write worker notification event', 403);
         }
         const { executionId, workflowId, stepId, status, durationMs, errorMessage, payload } = body;
         if (!executionId || !workflowId || !stepId || !status) {
-          return errorResponse('缺少 executionId/workflowId/stepId/status', 400);
+          return errorResponse('Missing executionId/workflowId/stepId/status', 400);
         }
         if (!['completed', 'failed'].includes(status)) {
-          return errorResponse('status 仅支持 completed/failed', 400);
+          return errorResponse('status only supports completed/failed', 400);
         }
         await workflowCoordinator.recordExternalNotificationEvent({
           executionId,
@@ -341,14 +341,14 @@ export async function POST(request: NextRequest) {
           errorMessage,
           payload,
         });
-        return successResponse({ message: 'worker通知事件写入成功' });
+        return successResponse({ message: 'Worker notification event written successfully' });
       }
 
       default:
-        return errorResponse(`未知操作: ${action}`, 400);
+        return errorResponse(`Unknown action: ${action}`, 400);
     }
   } catch (error) {
-    console.error('工作流API错误:', error);
-    return errorResponse(error instanceof Error ? error.message : '未知错误');
+    console.error('Workflow API error:', error);
+    return errorResponse(error instanceof Error ? error.message : 'Unknown error');
   }
 }

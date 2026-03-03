@@ -230,7 +230,7 @@ export class DocumentParserService {
     // 如果没有检测到章节，创建单个章节
     if (sections.length === 0 && text.trim().length > 0) {
       sections.push({
-        title: '主要内容',
+        title: 'Main Content',
         content: text.trim(),
         level: 1,
       });

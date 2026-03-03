@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PerformanceTestManager, JMeterIntegration } from '@/lib/performance-testing';
 
-// GET: 获取性能测试工具和结果
+// GET: Fetch performance test tools and results
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
     
     if (action === 'tools') {
-      // 获取可用性能测试工具
+      // Get available performance test tools
       const tools = await PerformanceTestManager.getAvailableTools();
       
       return NextResponse.json({
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         data: tools
       });
     } else if (action === 'jmeter-status') {
-      // 检查JMeter状态
+      // Check JMeter status
       const status = await JMeterIntegration.checkJMeterAvailability();
       
       return NextResponse.json({
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         data: status
       });
     } else if (action === 'monitor-system') {
-      // 系统监控
+      // System monitoring
       const { PerformanceMonitoring } = await import('@/lib/performance-testing');
       const metrics = await PerformanceMonitoring.monitorSystem();
       
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         data: metrics
       });
     } else {
-      // 默认返回工具列表
+      // Default: return tool list
       const tools = await PerformanceTestManager.getAvailableTools();
       
       return NextResponse.json({
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     console.error('Performance API Error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数'
+        error: 'Missing action parameter'
       }, { status: 400 });
     }
     
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       if (!toolId || !target) {
         return NextResponse.json({
           success: false,
-          error: '缺少 toolId 或 target 参数'
+          error: 'Missing toolId or target parameter'
         }, { status: 400 });
       }
       
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: result.success,
         data: result,
-        message: result.success ? '性能测试完成' : '性能测试失败'
+        message: result.success ? 'Performance test completed' : 'Performance test failed'
       });
       
     } else if (action === 'create-test-plan') {
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       if (!target) {
         return NextResponse.json({
           success: false,
-          error: '缺少 target 参数'
+          error: 'Missing target parameter'
         }, { status: 400 });
       }
       
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       if (!toolId) {
         return NextResponse.json({
           success: false,
-          error: '缺少 toolId 参数'
+          error: 'Missing toolId parameter'
         }, { status: 400 });
       }
       
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       if (!testResults || !Array.isArray(testResults)) {
         return NextResponse.json({
           success: false,
-          error: '缺少 testResults 参数或格式错误'
+          error: 'Missing or invalid testResults parameter'
         }, { status: 400 });
       }
       
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       if (!target) {
         return NextResponse.json({
           success: false,
-          error: '缺少 target 参数'
+          error: 'Missing target parameter'
         }, { status: 400 });
       }
       
@@ -154,20 +154,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: metrics,
-        message: '应用监控数据获取成功'
+        message: 'Application monitoring data retrieved successfully'
       });
       
     } else {
       return NextResponse.json({
         success: false,
-        error: '未知的操作类型'
+        error: 'Unknown operation type'
       }, { status: 400 });
     }
   } catch (error) {
     console.error('Performance API Error:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

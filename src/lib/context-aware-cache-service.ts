@@ -13,9 +13,9 @@ export interface CacheItemMetadata {
   timestamp: number;
   accessCount: number;
   lastAccessed: number;
-  similarityScore?: number; // 上下文相似度得分
-  relevanceScore?: number; // 相关性得分
-  confidence?: number; // 置信度
+  similarityScore?: number; // context similarity score
+  relevanceScore?: number; // relevance score
+  confidence?: number; // confidence score
 }
 
 // 缓存项
@@ -23,39 +23,39 @@ export interface CacheItem {
   key: string;
   response: UnifiedResponse;
   metadata: CacheItemMetadata;
-  ttl: number; // 生存时间 (毫秒)
+  ttl: number; // time-to-live (ms)
 }
 
 // 上下文特征
 export interface ContextFeatures {
   keywords: string[];
-  entities: string[]; // 实体识别
-  intent: string; // 查询意图
-  domain: string; // 领域分类
-  complexity: number; // 复杂度评分 0-1
-  urgency: number; // 紧急度评分 0-1
+  entities: string[]; // entity recognition
+  intent: string; // query intent
+  domain: string; // domain category
+  complexity: number; // complexity score 0-1
+  urgency: number; // urgency score 0-1
 }
 
 // 相似度配置
 export interface SimilarityConfig {
-  semanticWeight: number; // 语义权重 0-1
-  keywordWeight: number; // 关键词权重 0-1
-  contextWeight: number; // 上下文权重 0-1
-  taskTypeWeight: number; // 任务类型权重 0-1
-  minSimilarity: number; // 最小相似度阈值
-  maxAlternatives: number; // 最大备选数量
+  semanticWeight: number; // semantic weight 0-1
+  keywordWeight: number; // keyword weight 0-1
+  contextWeight: number; // context weight 0-1
+  taskTypeWeight: number; // task type weight 0-1
+  minSimilarity: number; // minimum similarity threshold
+  maxAlternatives: number; // maximum number of alternatives
 }
 
 // 缓存策略
 export interface CacheStrategy {
   name: string;
-  ttl: number; // 生存时间
-  maxSize: number; // 最大缓存项数
+  ttl: number; // time-to-live
+  maxSize: number; // maximum cache entries
   evictionPolicy: 'lru' | 'lfu' | 'fifo' | 'random';
-  similarityThreshold: number; // 相似度阈值
-  enablePartialMatch: boolean; // 是否启用部分匹配
-  enableContextAware: boolean; // 是否启用上下文感知
-  maxAlternatives?: number; // 最大备选数量
+  similarityThreshold: number; // similarity threshold
+  enablePartialMatch: boolean; // whether to enable partial matching
+  enableContextAware: boolean; // whether to enable context awareness
+  maxAlternatives?: number; // maximum number of alternatives
 }
 
 class ContextAwareCacheService {
@@ -68,8 +68,8 @@ class ContextAwareCacheService {
   private stats = {
     hits: 0,
     misses: 0,
-    semanticHits: 0, // 语义匹配命中
-    partialHits: 0, // 部分匹配命中
+    semanticHits: 0, // semantic match hits
+    partialHits: 0, // partial match hits
     evictions: 0,
     totalSize: 0,
     averageResponseTime: 0
@@ -89,7 +89,7 @@ class ContextAwareCacheService {
     // 默认缓存策略
     this.defaultStrategy = {
       name: 'default',
-      ttl: 10 * 60 * 1000, // 10分钟
+      ttl: 10 * 60 * 1000, // 10 minutes
       maxSize: 1000,
       evictionPolicy: 'lru',
       similarityThreshold: 0.8,
@@ -101,7 +101,7 @@ class ContextAwareCacheService {
     this.strategies.set('default', this.defaultStrategy);
     this.strategies.set('short-term', {
       name: 'short-term',
-      ttl: 2 * 60 * 1000, // 2分钟
+      ttl: 2 * 60 * 1000, // 2 minutes
       maxSize: 500,
       evictionPolicy: 'lru',
       similarityThreshold: 0.9,
@@ -110,7 +110,7 @@ class ContextAwareCacheService {
     });
     this.strategies.set('long-term', {
       name: 'long-term',
-      ttl: 60 * 60 * 1000, // 1小时
+      ttl: 60 * 60 * 1000, // 1 hour
       maxSize: 2000,
       evictionPolicy: 'lfu',
       similarityThreshold: 0.7,
@@ -119,7 +119,7 @@ class ContextAwareCacheService {
     });
     this.strategies.set('critical', {
       name: 'critical',
-      ttl: 24 * 60 * 60 * 1000, // 24小时
+      ttl: 24 * 60 * 60 * 1000, // 24 hours
       maxSize: 100,
       evictionPolicy: 'lfu',
       similarityThreshold: 0.95,
@@ -208,7 +208,7 @@ class ContextAwareCacheService {
       };
 
     } catch (error) {
-      logger.error('上下文缓存获取失败', error, { module: 'context-aware-cache-service' });
+      logger.error('Context cache get failed', error, { module: 'context-aware-cache-service' });
       return {
         cached: false,
         matchType: 'none'
@@ -216,7 +216,7 @@ class ContextAwareCacheService {
     }
   }
 
-  // 设置缓存
+  // Set cache
   async setWithContext(request: UnifiedRequest, response: UnifiedResponse, strategyName = 'default'): Promise<void> {
     const strategy = this.strategies.get(strategyName) || this.defaultStrategy;
     
@@ -234,7 +234,7 @@ class ContextAwareCacheService {
           ...response,
           data: {
             ...response.data,
-            cached: false // 新缓存项不是缓存命中
+            cached: false // new cache entry is not a cache hit
           }
         },
         metadata: {
@@ -246,9 +246,9 @@ class ContextAwareCacheService {
           timestamp: Date.now(),
           accessCount: 0,
           lastAccessed: Date.now(),
-          similarityScore: 1.0, // 精确匹配
+          similarityScore: 1.0, // exact match
           relevanceScore: this.calculateRelevanceScore(request, response),
-          confidence: 0.9 // 初始置信度
+          confidence: 0.9 // initial confidence
         },
         ttl: strategy.ttl
       };
@@ -266,7 +266,7 @@ class ContextAwareCacheService {
       await this.recordCacheFeatures(key, contextFeatures);
 
     } catch (error) {
-      logger.error('上下文缓存设置失败', error, { module: 'context-aware-cache-service' });
+      logger.error('Context cache set failed', error, { module: 'context-aware-cache-service' });
     }
   }
 
@@ -324,7 +324,7 @@ class ContextAwareCacheService {
     const words = query.split(/[\s,，.。!！?？;；:：]+/);
     const keywords = words
       .filter(word => word.length > 1 && !stopWords.has(word))
-      .slice(0, 10); // 限制关键词数量
+      .slice(0, 10); // limit keyword count
     
     return keywords;
   }
@@ -407,7 +407,7 @@ class ContextAwareCacheService {
     else complexity += 0.2;
     
     // 检查是否包含复杂概念
-    const complexConcepts = ['微服务', '分布式', '并发', '异步', '性能优化', '架构设计'];
+    const complexConcepts = ['microservices', 'distributed', 'concurrent', 'async', 'performance optimization', 'architecture design', '微服务', '分布式', '并发', '异步', '架构设计'];
     complexConcepts.forEach(concept => {
       if (query.includes(concept)) complexity += 0.2;
     });
@@ -557,7 +557,7 @@ class ContextAwareCacheService {
       let similarity = keywordSimilarity;
       if (taskTypeMatch) similarity += 0.2;
       
-      if (similarity >= strategy.similarityThreshold * 0.8) { // 降低阈值
+      if (similarity >= strategy.similarityThreshold * 0.8) { // lowered threshold
         matches.push({ item, similarity });
       }
     }
@@ -590,14 +590,14 @@ class ContextAwareCacheService {
   private async recordCacheFeatures(key: string, features: ContextFeatures): Promise<void> {
     // 在实际实现中，这里应该将特征存储到特征库
     // 这里简化处理，只记录日志
-    console.log(`📝 记录缓存特征: ${key}`);
-    console.log(`   关键词: ${features.keywords.slice(0, 5).join(', ')}`);
-    console.log(`   意图: ${features.intent}, 领域: ${features.domain}`);
+    console.log(`📝 Recording cache features: ${key}`);
+    console.log(`   Keywords: ${features.keywords.slice(0, 5).join(', ')}`);
+    console.log(`   Intent: ${features.intent}, Domain: ${features.domain}`);
   }
 
   // 计算相关性得分
   private calculateRelevanceScore(request: UnifiedRequest, response: UnifiedResponse): number {
-    let score = 0.5; // 基础分
+    let score = 0.5; // base score
     
     // 响应成功加分
     if (response.success) score += 0.2;
@@ -625,16 +625,16 @@ class ContextAwareCacheService {
     const items = Array.from(this.cache.entries());
     
     switch (strategy.evictionPolicy) {
-      case 'lru': // 最近最少使用
+      case 'lru': // least recently used
         items.sort((a, b) => a[1].metadata.lastAccessed - b[1].metadata.lastAccessed);
         break;
-      case 'lfu': // 最不经常使用
+      case 'lfu': // least frequently used
         items.sort((a, b) => a[1].metadata.accessCount - b[1].metadata.accessCount);
         break;
-      case 'fifo': // 先进先出
+      case 'fifo': // first in, first out
         items.sort((a, b) => a[1].metadata.timestamp - b[1].metadata.timestamp);
         break;
-      case 'random': // 随机
+      case 'random': // random
         items.sort(() => Math.random() - 0.5);
         break;
     }
@@ -656,7 +656,7 @@ class ContextAwareCacheService {
       (this.stats.averageResponseTime * (totalRequests - 1) + responseTime) / totalRequests;
   }
 
-  // 获取缓存统计
+  // Get cache statistics
   getStats() {
     const totalRequests = this.stats.hits + this.stats.misses;
     const hitRate = totalRequests > 0 ? (this.stats.hits / totalRequests) * 100 : 0;
@@ -701,7 +701,7 @@ class ContextAwareCacheService {
         ttl: item.ttl,
         expired: this.isExpired(item)
       }))
-      .sort((a, b) => b.accessCount - a.accessCount) // 按访问次数排序
+      .sort((a, b) => b.accessCount - a.accessCount) // sort by access count
       .slice(0, limit);
     
     return items;

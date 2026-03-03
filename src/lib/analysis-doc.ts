@@ -4,39 +4,39 @@ import { getMissionTask, listMissionTasks, listResources } from '@/lib/mission-t
 
 export async function generateAnalysisDoc(taskId: string): Promise<{ filePath: string; downloadUrl: string }> {
   const task = await getMissionTask(taskId);
-  if (!task) throw new Error('任务不存在');
+  if (!task) throw new Error('Task not found');
 
   const all = await listMissionTasks();
   const subtasks = all.filter(t => t.parentId === taskId);
   const resources = await listResources(taskId);
 
   const md = [
-    `# 技术需求分析文档`,
+    `# Technical Requirements Analysis`,
     ``,
-    `- 任务ID: ${task.id}`,
-    `- 标题: ${task.title}`,
-    `- 层级: L${task.level}`,
-    `- 当前状态: ${task.status}`,
-    `- 流程阶段: ${task.workflowStage || 'draft'}`,
-    `- 目标价格: ${task.targetPrice ?? '—'} ${task.currency || 'PHP'}`,
-    `- 负责人: ${task.owner || '—'}`,
-    `- 生成时间: ${new Date().toISOString()}`,
+    `- Task ID: ${task.id}`,
+    `- Title: ${task.title}`,
+    `- Level: L${task.level}`,
+    `- Status: ${task.status}`,
+    `- Workflow Stage: ${task.workflowStage || 'draft'}`,
+    `- Target Price: ${task.targetPrice ?? '—'} ${task.currency || 'PHP'}`,
+    `- Owner: ${task.owner || '—'}`,
+    `- Generated: ${new Date().toISOString()}`,
     ``,
-    `## 任务描述`,
-    `${task.description || '（无）'}`,
+    `## Task Description`,
+    `${task.description || '(none)'}`,
     ``,
-    `## 子任务清单`,
-    ...(subtasks.length ? subtasks.map((s, i) => `${i + 1}. [${s.status}] ${s.title} (${s.progress}%)`) : ['- （无）']),
+    `## Subtasks`,
+    ...(subtasks.length ? subtasks.map((s, i) => `${i + 1}. [${s.status}] ${s.title} (${s.progress}%)`) : ['- (none)']),
     ``,
-    `## 资源清单`,
+    `## Resources`,
     ...(resources.length
       ? resources.map((r, i) => `${i + 1}. ${r.name} | ${r.resourceType} | ${r.url || r.filePath || '—'}`)
-      : ['- （无）']),
+      : ['- (none)']),
     ``,
-    `## 实施建议`,
-    `1. 明确验收标准与交付边界`,
-    `2. 按子任务逐项推进并记录证据`,
-    `3. 测试通过后再推进发布与财务入账`,
+    `## Implementation Recommendations`,
+    `1. Clarify acceptance criteria and delivery scope`,
+    `2. Progress through subtasks one by one and record evidence`,
+    `3. Ensure tests pass before proceeding to release and financial recording`,
     ``,
   ].join('\n');
 
@@ -50,6 +50,6 @@ export async function generateAnalysisDoc(taskId: string): Promise<{ filePath: s
 
 export function readAnalysisDoc(taskId: string): string {
   const filePath = path.join(process.cwd(), 'data', 'analysis-docs', `${taskId}.md`);
-  if (!fs.existsSync(filePath)) throw new Error('分析文档不存在');
+  if (!fs.existsSync(filePath)) throw new Error('Analysis document not found');
   return fs.readFileSync(filePath, 'utf-8');
 }

@@ -1,9 +1,9 @@
 /**
- * /api/missions — 任务中心聚合 API（全真实数据）
- * 数据来源：
- *   · 任务数据     → /api/tasks (SQLite)
- *   · 财务数据     → /api/finance (SQLite)
- *   · 外包项目数据 → /api/freelance (内置)
+ * /api/missions — Task center aggregation API (all real data)
+ * Data sources:
+ *   · Task data      → /api/tasks (SQLite)
+ *   · Finance data   → /api/finance (SQLite)
+ *   · Freelance data → /api/freelance (built-in)
  */
 import { NextResponse } from 'next/server';
 
@@ -43,7 +43,7 @@ export async function GET() {
                   : t.status === 'cancelled'   ? 0
                   : 0,
     deadline:    t.dueDate ? t.dueDate.split('T')[0] : '—',
-    assignedTo:  t.assignedTo ?? '未指定',
+    assignedTo:  t.assignedTo ?? 'Unassigned',
     tags:        t.tags ?? [],
     createdAt:   t.createdAt,
     updatedAt:   t.updatedAt,
@@ -92,7 +92,7 @@ export async function GET() {
 
   // ── 里程碑（任务截止日期 + 财务收入事件合并）─────────────────────────────
   const milestones = [
-    // 已完成任务作为里程碑
+    // Completed任务作为里程碑
     ...tasks
       .filter((t) => t.status === 'completed')
       .map((t) => ({
@@ -100,7 +100,7 @@ export async function GET() {
         date:   (t.dueDate ?? t.updatedAt ?? '').split('T')[0],
         title:  `✅ ${t.title}`,
         status: 'completed',
-        impact: t.priority === 'critical' ? '极高' : t.priority === 'high' ? '高' : t.priority === 'medium' ? '中' : '低',
+        impact: t.priority === 'critical' ? 'Critical' : t.priority === 'high' ? 'High' : t.priority === 'medium' ? 'Medium' : 'Low',
       })),
     // 待办任务截止日期
     ...tasks
@@ -110,7 +110,7 @@ export async function GET() {
         date:   t.dueDate.split('T')[0],
         title:  t.title,
         status: t.status === 'in-progress' ? 'in-progress' : 'pending',
-        impact: t.priority === 'critical' ? '极高' : t.priority === 'high' ? '高' : t.priority === 'medium' ? '中' : '低',
+        impact: t.priority === 'critical' ? 'Critical' : t.priority === 'high' ? 'High' : t.priority === 'medium' ? 'Medium' : 'Low',
       })),
     // 收入里程碑
     ...financeMilestones.map((m) => ({
@@ -118,7 +118,7 @@ export async function GET() {
       date:   m.date,
       title:  `💰 ${m.title}`,
       status: m.status,
-      impact: m.amount >= 50000 ? '极高' : m.amount >= 20000 ? '高' : '中',
+      impact: m.amount >= 50000 ? 'Critical' : m.amount >= 20000 ? 'High' : 'Medium',
     })),
   ]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

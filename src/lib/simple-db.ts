@@ -11,7 +11,7 @@ export class SimpleDatabase {
   createTable(tableName: string): void {
     if (!this.data[tableName]) {
       this.data[tableName] = [];
-      console.log(`表 ${tableName} 已创建`);
+      console.log(`Table ${tableName} created`);
     }
   }
 
@@ -45,7 +45,7 @@ export class SimpleDatabase {
     return results as T[];
   }
 
-  // 更新数据
+  // Update data
   update(tableName: string, data: Record<string, any>, where: Record<string, any>): number {
     if (!this.data[tableName]) {
       return 0;
@@ -70,7 +70,7 @@ export class SimpleDatabase {
     return updatedCount;
   }
 
-  // 删除数据
+  // Delete data
   delete(tableName: string, where: Record<string, any>): number {
     if (!this.data[tableName]) {
       return 0;
@@ -137,7 +137,7 @@ export const dbUtils = {
     try {
       return JSON.stringify(data);
     } catch (error) {
-      console.error('JSON序列化失败:', error);
+      console.error('JSON serialization failed:', error);
       return '{}';
     }
   },
@@ -146,7 +146,7 @@ export const dbUtils = {
     try {
       return JSON.parse(json);
     } catch (error) {
-      console.error('JSON反序列化失败:', error);
+      console.error('JSON deserialization failed:', error);
       return defaultValue;
     }
   },

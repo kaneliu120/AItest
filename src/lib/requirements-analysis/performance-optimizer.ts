@@ -36,12 +36,12 @@ const parseDate = (dateString: string): Date => {
 
 export interface PerformanceMetrics {
   timestamp: string;
-  responseTime: number; // 毫秒
+  responseTime: number; // ms
   memoryUsage: number; // MB
-  cpuUsage: number; // 百分比
+  cpuUsage: number; // percentage
   requestCount: number;
-  errorRate: number; // 百分比
-  cacheHitRate: number; // 百分比
+  errorRate: number; // percentage
+  cacheHitRate: number; // percentage
 }
 
 export interface OptimizationReport {
@@ -65,7 +65,7 @@ export interface PerformanceImprovement {
   area: string;
   before: number;
   after: number;
-  improvement: number; // 百分比
+  improvement: number; // percentage
   description: string;
 }
 
@@ -135,16 +135,16 @@ export class PerformanceOptimizer {
       recommendations.push({
         area: 'api',
         priority: 'high',
-        description: 'API响应时间超过1秒，需要优化',
-        expectedImpact: '响应时间减少50-80%',
+        description: 'API response time exceeds 1 second, optimization required',
+        expectedImpact: 'Response time reduced by 50-80%',
         implementationEffort: 'medium',
       });
     } else if (metrics.responseTime > 500) {
       recommendations.push({
         area: 'api',
         priority: 'medium',
-        description: 'API响应时间超过500毫秒，建议优化',
-        expectedImpact: '响应时间减少30-50%',
+        description: 'API response time exceeds 500ms, optimization recommended',
+        expectedImpact: 'Response time reduced by 30-50%',
         implementationEffort: 'low',
       });
     }
@@ -154,16 +154,16 @@ export class PerformanceOptimizer {
       recommendations.push({
         area: 'memory',
         priority: 'high',
-        description: '内存使用超过500MB，存在内存泄漏风险',
-        expectedImpact: '内存使用减少40-60%',
+        description: 'Memory usage exceeds 500MB, risk of memory leak',
+        expectedImpact: 'Memory usage reduced by 40-60%',
         implementationEffort: 'high',
       });
     } else if (metrics.memoryUsage > 200) {
       recommendations.push({
         area: 'memory',
         priority: 'medium',
-        description: '内存使用较高，建议优化',
-        expectedImpact: '内存使用减少20-30%',
+        description: 'Memory usage is high, optimization recommended',
+        expectedImpact: 'Memory usage reduced by 20-30%',
         implementationEffort: 'medium',
       });
     }
@@ -173,8 +173,8 @@ export class PerformanceOptimizer {
       recommendations.push({
         area: 'caching',
         priority: 'high',
-        description: '缓存命中率低于50%，缓存策略需要优化',
-        expectedImpact: '缓存命中率提升至70-90%',
+        description: 'Cache hit rate below 50%, cache strategy needs optimization',
+        expectedImpact: 'Cache hit rate improved to 70-90%',
         implementationEffort: 'medium',
       });
     }
@@ -184,8 +184,8 @@ export class PerformanceOptimizer {
       recommendations.push({
         area: 'api',
         priority: 'high',
-        description: '错误率超过5%，需要立即修复',
-        expectedImpact: '错误率降低至1%以下',
+        description: 'Error rate exceeds 5%, immediate fix required',
+        expectedImpact: 'Error rate reduced to below 1%',
         implementationEffort: 'high',
       });
     }
@@ -195,8 +195,8 @@ export class PerformanceOptimizer {
       recommendations.push({
         area: 'concurrency',
         priority: 'medium',
-        description: '高并发下响应时间增加，建议优化并发处理',
-        expectedImpact: '支持更高并发，响应时间稳定',
+        description: 'Response time increases under high concurrency, optimize concurrent processing',
+        expectedImpact: 'Support higher concurrency with stable response times',
         implementationEffort: 'high',
       });
     }
@@ -224,11 +224,11 @@ export class PerformanceOptimizer {
     if (firstMetrics.responseTime > 0 && latestMetrics.responseTime > 0) {
       const improvement = ((firstMetrics.responseTime - latestMetrics.responseTime) / firstMetrics.responseTime) * 100;
       improvements.push({
-        area: '响应时间',
+        area: 'Response Time',
         before: firstMetrics.responseTime,
         after: latestMetrics.responseTime,
         improvement: Math.round(improvement),
-        description: improvement > 0 ? '响应时间减少' : '响应时间增加',
+        description: improvement > 0 ? 'Response time decreased' : 'Response time increased',
       });
     }
 
@@ -236,11 +236,11 @@ export class PerformanceOptimizer {
     if (firstMetrics.memoryUsage > 0 && latestMetrics.memoryUsage > 0) {
       const improvement = ((firstMetrics.memoryUsage - latestMetrics.memoryUsage) / firstMetrics.memoryUsage) * 100;
       improvements.push({
-        area: '内存使用',
+        area: 'Memory Usage',
         before: firstMetrics.memoryUsage,
         after: latestMetrics.memoryUsage,
         improvement: Math.round(improvement),
-        description: improvement > 0 ? '内存使用减少' : '内存使用增加',
+        description: improvement > 0 ? 'Memory usage decreased' : 'Memory usage increased',
       });
     }
 
@@ -248,11 +248,11 @@ export class PerformanceOptimizer {
     if (firstMetrics.errorRate > 0 && latestMetrics.errorRate > 0) {
       const improvement = ((firstMetrics.errorRate - latestMetrics.errorRate) / firstMetrics.errorRate) * 100;
       improvements.push({
-        area: '错误率',
+        area: 'Error Rate',
         before: firstMetrics.errorRate,
         after: latestMetrics.errorRate,
         improvement: Math.round(improvement),
-        description: improvement > 0 ? '错误率降低' : '错误率升高',
+        description: improvement > 0 ? 'Error rate decreased' : 'Error rate increased',
       });
     }
 
@@ -269,24 +269,24 @@ export class PerformanceOptimizer {
     const mediumPriority = recommendations.filter(r => r.priority === 'medium');
 
     if (highPriority.length > 0) {
-      nextSteps.push('立即处理高优先级优化建议');
+      nextSteps.push('Address high-priority optimization recommendations immediately');
       highPriority.slice(0, 2).forEach(rec => {
-        nextSteps.push(`实施: ${rec.description}`);
+        nextSteps.push(`Implement: ${rec.description}`);
       });
     }
 
     if (mediumPriority.length > 0) {
-      nextSteps.push('计划处理中优先级优化建议');
+      nextSteps.push('Plan to address medium-priority optimization recommendations');
     }
 
     // 监控建议
-    nextSteps.push('持续监控性能指标');
-    nextSteps.push('定期生成性能报告');
-    nextSteps.push('建立性能基准线');
+    nextSteps.push('Continuously monitor performance metrics');
+    nextSteps.push('Generate performance reports regularly');
+    nextSteps.push('Establish performance baselines');
 
     // 技术债务管理
-    nextSteps.push('制定技术债务清理计划');
-    nextSteps.push('建立代码质量检查流程');
+    nextSteps.push('Create a technical debt reduction plan');
+    nextSteps.push('Establish code quality review process');
 
     return nextSteps;
   }
@@ -395,7 +395,7 @@ export class PerformanceOptimizer {
    * 模拟性能测试
    */
   async runPerformanceTest(): Promise<PerformanceMetrics> {
-    logger.debug('开始性能测试...');
+    logger.debug('Starting performance test...');
     
     const startTime = Date.now();
     
@@ -416,13 +416,13 @@ export class PerformanceOptimizer {
       memoryUsage: Math.round(memoryUsage),
       cpuUsage: Math.round(cpuUsage),
       requestCount: 1,
-      errorRate: Math.random() > 0.95 ? 5 : 0, // 5%错误率
-      cacheHitRate: Math.random() > 0.3 ? 70 : 30, // 70%缓存命中率
+      errorRate: Math.random() > 0.95 ? 5 : 0, // 5% error rate
+      cacheHitRate: Math.random() > 0.3 ? 70 : 30, // 70% cache hit rate
     };
     
     this.recordMetrics(metrics);
     
-    logger.debug('性能测试完成:', metrics);
+    logger.debug('Performance test complete:', metrics);
     return metrics;
   }
 }

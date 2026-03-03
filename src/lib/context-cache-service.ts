@@ -6,7 +6,7 @@
 export interface CacheItem {
   value: any;
   timestamp: number;
-  ttl?: number; // 生存时间（秒）
+  ttl?: number; // time to live (seconds)
   accessCount: number;
   lastAccessed: number;
 }
@@ -34,7 +34,7 @@ export class ContextCacheService {
     };
   }
 
-  // 设置缓存
+  // Set cache
   set(key: string, value: any, ttl?: number): void {
     // 检查是否需要淘汰
     if (this.cache.size >= this.maxSize && !this.cache.has(key)) {
@@ -76,7 +76,7 @@ export class ContextCacheService {
     return item.value;
   }
 
-  // 删除缓存
+  // Delete cache
   delete(key: string): boolean {
     const deleted = this.cache.delete(key);
     if (deleted) {
@@ -117,11 +117,11 @@ export class ContextCacheService {
       maxSize: this.maxSize,
       usage: Math.round((this.cache.size / this.maxSize) * 100),
       stats: this.stats,
-      items: items.slice(0, 50) // 只返回前50个
+      items: items.slice(0, 50) // return only first 50
     };
   }
 
-  // 获取缓存统计
+  // Get cache statistics
   getCacheStats(): any {
     const hitRate = this.stats.hits + this.stats.misses > 0 
       ? Math.round((this.stats.hits / (this.stats.hits + this.stats.misses)) * 100) 

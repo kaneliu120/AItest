@@ -373,7 +373,7 @@ export class FinanceDbService {
   // ===== 数据迁移 =====
 
   async migrateFromMemory(memoryTransactions: Transaction[], memoryBudgets: Budget[]): Promise<void> {
-    console.log('开始从内存数据迁移到数据库...');
+    console.log('Starting data migration from memory to database...');
 
     // 迁移交易数据
     if (memoryTransactions.length > 0) {
@@ -385,7 +385,7 @@ export class FinanceDbService {
       }));
 
       this.db.batchInsert('transactions', dbTransactions);
-      console.log(`迁移了 ${memoryTransactions.length} 条交易记录`);
+      console.log(`Migrated ${memoryTransactions.length} transaction records`);
     }
 
     // 迁移预算数据
@@ -397,10 +397,10 @@ export class FinanceDbService {
       }));
 
       this.db.batchInsert('budgets', dbBudgets);
-      console.log(`迁移了 ${memoryBudgets.length} 条预算记录`);
+      console.log(`Migrated ${memoryBudgets.length} budget records`);
     }
 
-    console.log('数据迁移完成');
+    console.log('Data migration complete');
   }
 
   // ===== 数据备份 =====
@@ -425,7 +425,7 @@ export class FinanceDbService {
       status: 'completed',
     });
 
-    console.log(`清理了 ${changes} 条超过 ${daysToKeep} 天的交易记录`);
+    console.log(`Cleaned up ${changes} transaction records older than ${daysToKeep} days`);
     return changes;
   }
 }

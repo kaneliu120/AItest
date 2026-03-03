@@ -1,12 +1,12 @@
 /**
- * Dashboard 聚合 API
- * 整合 finance / tasks / freelance / health 数据，统一提供给主页组件。
- * 所有子调用均有 graceful fallback，不会因单个服务失败而崩溃。
+ * Dashboard aggregation API
+ * Integrates finance / tasks / freelance / health data for the main dashboard.
+ * All sub-calls have graceful fallback so a single service failure doesn't crash the page.
  */
 
 import { NextResponse } from "next/server";
 
-// ─── 内部请求辅助 ────────────────────────────────────────────────────────────
+// ─── Internal request helper ───────────────────────────────────────────────
 async function safeGet(url: string, timeout = 3000) {
   try {
     const controller = new AbortController();
@@ -20,7 +20,7 @@ async function safeGet(url: string, timeout = 3000) {
   }
 }
 
-// ─── 类型 ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 export interface DashboardData {
   /** 财务统计 */
   finance: {
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
   const financeAvailable = !!(financeData?.success || financeData?.data);
   const fd = financeData?.data ?? financeData ?? null;
 
-  // 获取月度趋势
+  // Get monthly trend
   let monthlyTrend: DashboardData["finance"]["monthlyTrend"] = [];
   let currentMonthIncome = 0;
   let currentMonthExpenses = 0;
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
     currentMonthIncome = latest?.income ?? 0;
     currentMonthExpenses = latest?.expenses ?? 0;
     previousMonthIncome = sorted[1]?.income ?? 0;
-    monthlyTrend = sorted.slice(0, 6).reverse(); // 最近6个月，正序
+    monthlyTrend = sorted.slice(0, 6).reverse(); // last 6 months, ascending
     
     // 计算总计
     totalIncome = sorted.reduce((sum: number, item) => sum + (item.income || 0), 0);

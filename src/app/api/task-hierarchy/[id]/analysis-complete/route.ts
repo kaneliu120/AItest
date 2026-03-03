@@ -18,6 +18,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const res = await moveStage(id, 'analysis_done', 'analysis-complete', body?.actor, { ...(body?.payload || {}), analysis_doc_url: url });
     return NextResponse.json({ success: true, data: res });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 400 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 400 });
   }
 }

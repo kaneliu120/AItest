@@ -17,7 +17,7 @@ export interface RequirementAnalysis {
       description: string;
       priority: 'high' | 'medium' | 'low';
       complexity: 'simple' | 'medium' | 'complex';
-      estimatedEffort: number; // 小时
+      estimatedEffort: number; // hours
     }>;
     nonFunctional: Array<{
       id: string;
@@ -104,7 +104,7 @@ export interface RequirementAnalysis {
     };
     teamSize: number;
     timeline: {
-      optimistic: number; // 天
+      optimistic: number; // days
       realistic: number;
       pessimistic: number;
     };
@@ -205,26 +205,26 @@ export class RequirementsAnalyzerService {
       
       recommendations: {
         immediateActions: [
-          '明确项目范围和目标',
-          '确定关键利益相关者',
-          '建立沟通机制',
-          '制定详细的项目计划',
+          'Clarify project scope and objectives',
+          'Identify key stakeholders',
+          'Establish communication channels',
+          'Create a detailed project plan',
         ],
         technicalDecisions: [
-          '选择合适的技术栈',
-          '设计可扩展的架构',
-          '制定代码规范和开发流程',
+          'Select the appropriate tech stack',
+          'Design a scalable architecture',
+          'Define code standards and development processes',
         ],
         riskMitigations: [
-          '建立风险管理计划',
-          '定期进行风险评估',
-          '准备应急预案',
+          'Establish a risk management plan',
+          'Conduct regular risk assessments',
+          'Prepare contingency plans',
         ],
         successFactors: [
-          '明确的需求定义',
-          '有效的沟通协作',
-          '合理的资源分配',
-          '持续的质量保证',
+          'Clear requirements definition',
+          'Effective communication and collaboration',
+          'Reasonable resource allocation',
+          'Continuous quality assurance',
         ],
       },
     };
@@ -319,7 +319,7 @@ export class RequirementsAnalyzerService {
     const isWebApp = contentLower.includes('web') || contentLower.includes('网站') || contentLower.includes('应用');
     const isMobile = contentLower.includes('mobile') || contentLower.includes('手机') || contentLower.includes('app');
     const isApi = contentLower.includes('api') || contentLower.includes('接口') || contentLower.includes('服务');
-    const needsRealTime = contentLower.includes('实时') || contentLower.includes('即时') || contentLower.includes('聊天');
+    const needsRealTime = contentLower.includes('实时') || contentLower.includes('即时') || contentLower.includes('聊天') || contentLower.includes('realtime') || contentLower.includes('chat');
     const needsComplexUI = contentLower.includes('复杂') || contentLower.includes('交互') || contentLower.includes('动画');
     
     // 前端推荐
@@ -328,17 +328,17 @@ export class RequirementsAnalyzerService {
     if (isWebApp) {
       frontendRecommendations.push({
         framework: 'Next.js',
-        recommendation: '适用于需要SEO、服务端渲染的Web应用',
-        pros: ['优秀的SEO支持', '服务端渲染', '完整的React生态', 'TypeScript友好'],
-        cons: ['学习曲线较陡', '配置相对复杂'],
+        recommendation: 'Ideal for SEO and server-side rendering web apps',
+        pros: ['Excellent SEO support', 'Server-side rendering', 'Full React ecosystem', 'TypeScript-friendly'],
+        cons: ['Steeper learning curve', 'More complex configuration'],
         suitability: 90,
       });
       
       frontendRecommendations.push({
         framework: 'React + Vite',
-        recommendation: '适用于单页应用和快速原型开发',
-        pros: ['开发速度快', '热重载优秀', '生态系统丰富'],
-        cons: ['SEO需要额外配置', '首屏加载可能较慢'],
+        recommendation: 'Ideal for single-page apps and rapid prototyping',
+        pros: ['Fast development', 'Excellent hot reload', 'Rich ecosystem'],
+        cons: ['SEO requires extra configuration', 'First-screen load may be slower'],
         suitability: 85,
       });
     }
@@ -346,9 +346,9 @@ export class RequirementsAnalyzerService {
     if (isMobile) {
       frontendRecommendations.push({
         framework: 'React Native',
-        recommendation: '适用于需要跨平台移动应用',
-        pros: ['跨平台开发', 'React知识复用', '热重载'],
-        cons: ['性能不如原生', '某些原生功能需要桥接'],
+        recommendation: 'Ideal for cross-platform mobile applications',
+        pros: ['Cross-platform development', 'Reusable React knowledge', 'Hot reload'],
+        cons: ['Performance inferior to native', 'Some native features require bridging'],
         suitability: 80,
       });
     }
@@ -358,26 +358,26 @@ export class RequirementsAnalyzerService {
     
     backendRecommendations.push({
       framework: 'NestJS',
-      recommendation: '适用于企业级应用，需要严格架构',
-      pros: ['TypeScript原生支持', '模块化架构', '丰富的生态系统', '易于测试'],
-      cons: ['学习曲线较陡', '配置相对复杂'],
+      recommendation: 'Ideal for enterprise-grade apps requiring strict architecture',
+      pros: ['Native TypeScript support', 'Modular architecture', 'Rich ecosystem', 'Easy to test'],
+      cons: ['Steeper learning curve', 'More complex configuration'],
       suitability: 85,
     });
     
     backendRecommendations.push({
       framework: 'Express.js',
-      recommendation: '适用于快速原型和小型项目',
-      pros: ['简单易学', '轻量级', '中间件丰富', '社区活跃'],
-      cons: ['架构需要自行设计', 'TypeScript支持需要配置'],
+      recommendation: 'Ideal for rapid prototyping and small projects',
+      pros: ['Easy to learn', 'Lightweight', 'Rich middleware', 'Active community'],
+      cons: ['Architecture must be self-designed', 'TypeScript support requires configuration'],
       suitability: 75,
     });
     
     if (needsRealTime) {
       backendRecommendations.push({
         framework: 'Socket.io',
-        recommendation: '适用于实时通信需求',
-        pros: ['实时双向通信', '自动重连', '房间和命名空间'],
-        cons: ['需要WebSocket支持', '可能增加服务器负载'],
+        recommendation: 'Ideal for real-time communication requirements',
+        pros: ['Real-time bidirectional communication', 'Auto-reconnect', 'Rooms and namespaces'],
+        cons: ['Requires WebSocket support', 'May increase server load'],
         suitability: 95,
       });
     }
@@ -387,17 +387,17 @@ export class RequirementsAnalyzerService {
     
     databaseRecommendations.push({
       type: 'PostgreSQL',
-      recommendation: '适用于需要ACID事务和复杂查询的应用',
-      pros: ['ACID兼容', 'JSON支持', '强大的查询功能', '扩展性好'],
-      cons: ['配置相对复杂', '内存占用较高'],
+      recommendation: 'Ideal for apps requiring ACID transactions and complex queries',
+      pros: ['ACID compliant', 'JSON support', 'Powerful query capabilities', 'Good extensibility'],
+      cons: ['More complex configuration', 'Higher memory usage'],
       suitability: 90,
     });
     
     databaseRecommendations.push({
       type: 'MongoDB',
-      recommendation: '适用于文档型数据和快速迭代',
-      pros: ['灵活的模式', '水平扩展容易', 'JSON文档存储', '开发速度快'],
-      cons: ['不支持事务（旧版本）', '查询性能可能不如关系型'],
+      recommendation: 'Ideal for document data and rapid iteration',
+      pros: ['Flexible schema', 'Easy horizontal scaling', 'JSON document storage', 'Fast development'],
+      cons: ['No transaction support (older versions)', 'Query performance may be lower than relational'],
       suitability: 80,
     });
     
@@ -406,25 +406,25 @@ export class RequirementsAnalyzerService {
     
     deploymentRecommendations.push({
       platform: 'Azure App Service',
-      recommendation: '适用于.NET和Node.js应用，企业级支持',
-      pros: ['自动扩展', '集成监控', '.NET优化', '企业级安全'],
-      cons: ['成本相对较高', '配置相对复杂'],
+      recommendation: 'Ideal for .NET and Node.js apps, enterprise-grade support',
+      pros: ['Auto-scaling', 'Integrated monitoring', '.NET optimized', 'Enterprise security'],
+      cons: ['Relatively higher cost', 'More complex configuration'],
       suitability: 85,
     });
     
     deploymentRecommendations.push({
       platform: 'Vercel',
-      recommendation: '适用于Next.js前端应用',
-      pros: ['Next.js优化', '自动部署', 'CDN集成', '开发体验优秀'],
-      cons: ['后端支持有限', '成本随流量增长'],
+      recommendation: 'Ideal for Next.js frontend applications',
+      pros: ['Next.js optimized', 'Auto deployment', 'CDN integration', 'Excellent developer experience'],
+      cons: ['Limited backend support', 'Cost grows with traffic'],
       suitability: 95,
     });
     
     deploymentRecommendations.push({
       platform: 'AWS EC2/ECS',
-      recommendation: '适用于需要完全控制的基础设施',
-      pros: ['完全控制', '灵活配置', '丰富的服务集成'],
-      cons: ['运维复杂', '需要专业知识'],
+      recommendation: 'Ideal for infrastructure requiring full control',
+      pros: ['Full control', 'Flexible configuration', 'Rich service integrations'],
+      cons: ['Complex operations', 'Requires specialized knowledge'],
       suitability: 70,
     });
     
@@ -452,22 +452,22 @@ export class RequirementsAnalyzerService {
     
     // 技术复杂度
     const technicalFactors: string[] = [];
-    if (wordCount > 3000) technicalFactors.push('需求规模较大');
-    if (sections > 5) technicalFactors.push('功能模块较多');
+    if (wordCount > 3000) technicalFactors.push('Large requirement scope');
+    if (sections > 5) technicalFactors.push('Multiple functional modules');
     
     // 业务复杂度
     const businessFactors: string[] = [];
     if (document.content.includes('业务') || document.content.includes('business')) {
-      businessFactors.push('涉及复杂业务逻辑');
+      businessFactors.push('Contains complex business logic');
     }
     
     // 集成复杂度
     const integrationFactors: string[] = [];
     if (document.content.includes('集成') || document.content.includes('integration')) {
-      integrationFactors.push('需要系统集成');
+      integrationFactors.push('Requires system integration');
     }
     if (document.content.includes('API') || document.content.includes('接口')) {
-      integrationFactors.push('涉及API开发');
+      integrationFactors.push('Involves API development');
     }
     
     return {
@@ -498,10 +498,10 @@ export class RequirementsAnalyzerService {
     if (content.includes('待定') || content.includes('tbd') || content.includes('待确认')) {
       risks.push({
         id: 'R1',
-        description: '需求不明确，存在待定项',
+        description: 'Requirements unclear, pending items exist',
         probability: 'high',
         impact: 'high',
-        mitigation: '与客户确认需求细节，建立需求变更流程',
+        mitigation: 'Confirm requirement details with client, establish change management process',
       });
     }
     
@@ -509,10 +509,10 @@ export class RequirementsAnalyzerService {
     if (content.includes('复杂') || content.includes('complex') || content.includes('新技术')) {
       risks.push({
         id: 'R2',
-        description: '技术复杂度较高，可能存在技术挑战',
+        description: 'High technical complexity with potential technical challenges',
         probability: 'medium',
         impact: 'high',
-        mitigation: '进行技术验证，准备备用方案，增加技术调研时间',
+        mitigation: 'Conduct technical validation, prepare fallback plans, add research time',
       });
     }
     
@@ -520,10 +520,10 @@ export class RequirementsAnalyzerService {
     if (document.metadata.wordCount > 5000) {
       risks.push({
         id: 'R3',
-        description: '项目规模较大，可能存在时间压力',
+        description: 'Large project scale with potential time pressure',
         probability: 'medium',
         impact: 'medium',
-        mitigation: '制定详细的时间计划，设置里程碑，定期进度检查',
+        mitigation: 'Create detailed schedule, set milestones, perform regular progress reviews',
       });
     }
     
@@ -531,7 +531,7 @@ export class RequirementsAnalyzerService {
     if (content.includes('集成') || content.includes('integration') || content.includes('第三方')) {
       risks.push({
         id
-        id: `risk-${risks.length}`, title: '集成风险', description: '存在第三方集成风险', severity: 'medium', probability: 'medium', impact: 'medium', mitigation: '评估集成复杂度'
+        id: `risk-${risks.length}`, title: 'Integration Risk', description: 'Third-party integration risk exists', severity: 'medium', probability: 'medium', impact: 'medium', mitigation: 'Assess integration complexity'
       });
     }
     return risks;

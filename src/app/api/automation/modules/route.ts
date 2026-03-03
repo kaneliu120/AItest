@@ -3,8 +3,8 @@ import { AutomationService } from '@/lib/automation-framework/services/Automatio
 import { logger } from '@/lib/logger';
 import { makeRequestId, logApiStart, logApiEnd, logApiError } from '@/lib/observability';
 
-// 创建单例服务实例
-// 注意：在开发环境下，每次文件修改可能会重新创建实例
+// Create singleton service instance
+// Note: In dev mode each file edit may re-create the instance
 type GlobalWithAutomationService = typeof globalThis & { __automationService?: AutomationService };
 const g = globalThis as GlobalWithAutomationService;
 
@@ -14,11 +14,11 @@ if (!g.__automationService) {
 }
 automationService = g.__automationService;
 
-// 确保模块已初始化
+// Ensure module is initialized
 async function ensureInitialized() {
   const modules = automationService.getAllModules();
   if (modules.length === 0) {
-    logger.info('初始化自动化模块', { module: 'api/automation/modules' });
+    logger.info('Initializing automation module', { module: 'api/automation/modules' });
     await automationService.initializeModules();
   }
 }
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         if (!moduleId) {
           return NextResponse.json({
             success: false,
-            error: '缺少 moduleId 参数'
+            error: 'Missing moduleId parameter'
           }, { status: 400 });
         }
         
@@ -79,16 +79,16 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: false,
           requestId,
-          error: '未知的 action 参数'
+          error: 'Unknown action parameter'
         }, { status: 400 });
     }
   } catch (error: unknown) {
     logApiError('api/automation/modules', requestId, error, { method: 'GET' });
-    logger.error('模块管理API错误', error, { module: 'api/automation/modules', method: 'GET', requestId });
+    logger.error('Module management API error', error, { module: 'api/automation/modules', method: 'GET', requestId });
     return NextResponse.json({
       success: false,
       requestId,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         if (!moduleId || !moduleAction) {
           return NextResponse.json({
             success: false,
-            error: '缺少 moduleId 或 moduleAction 参数'
+            error: 'Missing moduleId or moduleAction parameter'
           }, { status: 400 });
         }
         
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         if (!moduleId) {
           return NextResponse.json({
             success: false,
-            error: '缺少 moduleId 参数'
+            error: 'Missing moduleId parameter'
           }, { status: 400 });
         }
         
@@ -146,16 +146,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: false,
           requestId,
-          error: '未知的 action 参数'
+          error: 'Unknown action parameter'
         }, { status: 400 });
     }
   } catch (error: unknown) {
     logApiError('api/automation/modules', requestId, error, { method: 'POST' });
-    logger.error('模块管理API错误', error, { module: 'api/automation/modules', method: 'POST', requestId });
+    logger.error('Module management API error', error, { module: 'api/automation/modules', method: 'POST', requestId });
     return NextResponse.json({
       success: false,
       requestId,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

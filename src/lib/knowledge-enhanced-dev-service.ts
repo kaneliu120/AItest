@@ -5,34 +5,34 @@ import { contextAwareCacheService } from './context-aware-cache-service';
 
 // 开发任务类型
 export type DevTaskType = 
-  | 'code-generation'      // 代码生成
-  | 'api-design'           // API设计
-  | 'database-design'      // 数据库设计
-  | 'architecture-design'  // 架构设计
-  | 'testing-strategy'     // 测试策略
-  | 'deployment-plan'      // 部署计划
-  | 'code-review'          // 代码审查
-  | 'bug-fix'              // Bug修复
-  | 'performance-optimization' // 性能优化
-  | 'security-audit';      // 安全审计
+  | 'code-generation' // code generation
+  | 'api-design'           // API design
+  | 'database-design' // database design
+  | 'architecture-design' // architecture design
+  | 'testing-strategy' // testing strategy
+  | 'deployment-plan' // deployment plan
+  | 'code-review' // code review
+  | 'bug-fix'              // bug fix
+  | 'performance-optimization' // performance optimization
+  | 'security-audit'; // security audit
 
-// 知识增强级别
+ // knowledge enhancement level
 export type KnowledgeEnhancementLevel = 
-  | 'basic'        // 基础 - 仅使用通用知识
-  | 'enhanced'     // 增强 - 使用相关领域知识
-  | 'expert'       // 专家 - 使用深度专业知识
-  | 'contextual';  // 上下文 - 使用项目特定知识
+  | 'basic' // basic - uses general knowledge only
+  | 'enhanced' // enhanced - uses domain-specific knowledge
+  | 'expert' // expert - uses deep specialized knowledge
+  | 'contextual'; // contextual - uses project-specific knowledge
 
 // 开发任务分析
 export interface DevTaskAnalysis {
   taskType: DevTaskType;
   complexity: 'low' | 'medium' | 'high';
-  knowledgeRequirements: string[]; // 所需知识领域
-  estimatedEffort: number; // 预估工作量 (小时)
+  knowledgeRequirements: string[]; // required knowledge domains
+  estimatedEffort: number; // estimated effort (hours)
   priority: 'low' | 'medium' | 'high' | 'critical';
-  relatedPatterns: string[]; // 相关设计模式
-  bestPractices: string[]; // 最佳实践
-  commonPitfalls: string[]; // 常见陷阱
+  relatedPatterns: string[]; // related design patterns
+  bestPractices: string[]; // best practices
+  commonPitfalls: string[]; // common pitfalls
 }
 
 // 知识增强结果
@@ -40,39 +40,39 @@ export interface KnowledgeEnhancedResult {
   originalResponse: UnifiedResponse;
   enhancedResponse: UnifiedResponse;
   knowledgeSources: Array<{
-    source: string; // 知识来源
-    relevance: number; // 相关性 0-1
-    content: string; // 知识内容摘要
-    confidence: number; // 置信度 0-1
+    source: string; // knowledge source
+    relevance: number; // relevance 0-1
+    content: string; // knowledge content summary
+    confidence: number; // confidence 0-1
   }>;
   enhancements: Array<{
     type: 'code-example' | 'best-practice' | 'pattern' | 'warning' | 'optimization';
     description: string;
     impact: 'low' | 'medium' | 'high';
-    implementation: string; // 实现建议
+    implementation: string; // implementation suggestion
   }>;
   qualityMetrics: {
-    completeness: number; // 完整性 0-1
-    accuracy: number; // 准确性 0-1
-    relevance: number; // 相关性 0-1
-    practicality: number; // 实用性 0-1
+    completeness: number; // completeness 0-1
+    accuracy: number; // accuracy 0-1
+    relevance: number; // relevance 0-1
+    practicality: number; // practicality 0-1
   };
   recommendations: Array<{
-    area: string; // 改进领域
-    suggestion: string; // 改进建议
+    area: string; // improvement area
+    suggestion: string; // improvement suggestion
     priority: 'low' | 'medium' | 'high';
   }>;
 }
 
 // 知识库查询配置
 export interface KnowledgeQueryConfig {
-  maxResults: number; // 最大结果数
-  minRelevance: number; // 最小相关性阈值
-  includeCodeExamples: boolean; // 是否包含代码示例
-  includeBestPractices: boolean; // 是否包含最佳实践
-  includePatterns: boolean; // 是否包含设计模式
-  includeWarnings: boolean; // 是否包含警告
-  sourceTypes: string[]; // 知识来源类型
+  maxResults: number; // max results
+  minRelevance: number; // minimum relevance threshold
+  includeCodeExamples: boolean; // include code examples
+  includeBestPractices: boolean; // include best practices
+  includePatterns: boolean; // include design patterns
+  includeWarnings: boolean; // include warnings
+  sourceTypes: string[]; // knowledge source types
 }
 
 class KnowledgeEnhancedDevService {
@@ -95,7 +95,7 @@ class KnowledgeEnhancedDevService {
     let taskType: DevTaskType = 'code-generation';
     
     // 优先级匹配顺序
-    if (lowerQuery.includes('性能') || lowerQuery.includes('performance') || lowerQuery.includes('优化') || lowerQuery.includes('optimization')) {
+    if (lowerQuery.includes('性能') || lowerQuery.includes('performance') || lowerQuery.includes('优化') || lowerQuery.includes('optimization') || lowerQuery.includes('perf')) {
       taskType = 'performance-optimization';
     } else if (lowerQuery.includes('数据库') || lowerQuery.includes('database') || lowerQuery.includes('表') || lowerQuery.includes('table') || lowerQuery.includes('索引') || lowerQuery.includes('index')) {
       taskType = 'database-design';
@@ -121,7 +121,7 @@ class KnowledgeEnhancedDevService {
     let complexity: 'low' | 'medium' | 'high' = 'medium';
     const wordCount = query.split(/\s+/).length;
     const hasTechnicalTerms = /(react|typescript|next\.js|nest\.js|postgresql|docker|kubernetes|aws|azure)/i.test(query);
-    const hasMultipleRequirements = /(包含|包括|支持|实现|设计).*?(和|以及|并且|同时)/i.test(query);
+    const hasMultipleRequirements = /(包含|包括|支持|实现|设计|contains|includes|support|implement|design).*?(和|以及|并且|同时|and|as well as)/i.test(query);
     
     if (wordCount < 15 && !hasTechnicalTerms && !hasMultipleRequirements) {
       complexity = 'low';
@@ -156,7 +156,7 @@ class KnowledgeEnhancedDevService {
     // 提取常见陷阱 - 确保总是有内容
     const commonPitfalls = this.extractCommonPitfalls(taskType);
     
-    console.log(`🔍 任务分析结果:`, {
+    console.log(`�� Task analysis result:`, {
       taskType,
       complexity,
       estimatedEffort,
@@ -215,7 +215,7 @@ class KnowledgeEnhancedDevService {
         break;
     }
     
-    return [...new Set(requirements)]; // 去重
+    return [...new Set(requirements)]; // deduplicate
   }
 
   // 预估工作量
@@ -290,28 +290,28 @@ class KnowledgeEnhancedDevService {
     
     switch (taskType) {
       case 'code-generation':
-        practices.push('遵循单一职责原则', '编写可测试的代码', '使用有意义的命名', '添加适当的注释');
+        practices.push('Follow single responsibility principle', 'Write testable code', 'Use meaningful names', 'Add appropriate comments');
         break;
       case 'api-design':
-        practices.push('使用RESTful约定', '版本化API', '适当的错误处理', '请求验证', '速率限制');
+        practices.push('Use RESTful conventions', 'Version your APIs', 'Proper error handling', 'Request validation', 'Rate limiting');
         break;
       case 'database-design':
-        practices.push('适当的索引策略', '规范化设计', '避免过度规范化', '考虑查询模式', '定期备份');
+        practices.push('Proper indexing strategy', 'Normalized design', 'Avoid over-normalization', 'Consider query patterns', 'Regular backups');
         break;
       case 'architecture-design':
-        practices.push('关注点分离', '松耦合设计', '高内聚模块', '可扩展性考虑', '容错设计');
+        practices.push('Separation of concerns', 'Loose coupling design', 'High cohesion modules', 'Scalability consideration', 'Fault-tolerant design');
         break;
       case 'testing-strategy':
-        practices.push('测试金字塔', '测试隔离', '可重复的测试', '有意义的断言', '适当的测试覆盖率');
+        practices.push('Testing pyramid', 'Test isolation', 'Repeatable tests', 'Meaningful assertions', 'Appropriate test coverage');
         break;
       case 'deployment-plan':
-        practices.push('基础设施即代码', '蓝绿部署', '金丝雀发布', '监控和告警', '灾难恢复计划');
+        practices.push('Infrastructure as code', 'Blue-green deployment', 'Canary releases', 'Monitoring and alerting', 'Disaster recovery plan');
         break;
       case 'security-audit':
-        practices.push('最小权限原则', '输入验证', '输出编码', '安全头设置', '定期安全扫描');
+        practices.push('Principle of least privilege', 'Input validation', 'Output encoding', 'Security headers', 'Regular security scans');
         break;
       default:
-        practices.push('遵循行业最佳实践', '保持代码简洁', '考虑可维护性', '文档化设计决策');
+        practices.push('Follow industry best practices', 'Keep code clean', 'Consider maintainability', 'Document design decisions');
     }
     
     return practices;
@@ -323,25 +323,25 @@ class KnowledgeEnhancedDevService {
     
     switch (taskType) {
       case 'code-generation':
-        pitfalls.push('过度工程化', '忽略错误处理', '硬编码配置', '缺乏文档');
+        pitfalls.push('Over-engineering', 'Ignoring error handling', 'Hardcoded configuration', 'Lack of documentation');
         break;
       case 'api-design':
-        pitfalls.push('过度设计端点', '忽略版本控制', '缺乏认证授权', '不充分的错误信息');
+        pitfalls.push('Over-designing endpoints', 'Ignoring versioning', 'Missing authentication/authorization', 'Insufficient error messages');
         break;
       case 'database-design':
-        pitfalls.push('过早优化', '忽略索引', 'N+1查询问题', '事务管理不当');
+        pitfalls.push('Premature optimization', 'Ignoring indexes', 'N+1 query problem', 'Improper transaction management');
         break;
       case 'architecture-design':
-        pitfalls.push('分布式单体', '过度微服务化', '忽略监控', '缺乏容错机制');
+        pitfalls.push('Distributed monolith', 'Over-microservicing', 'Ignoring monitoring', 'Lack of fault tolerance');
         break;
       case 'testing-strategy':
-        pitfalls.push('脆弱的测试', '测试覆盖质量差', '忽略集成测试', '测试环境不一致');
+        pitfalls.push('Brittle tests', 'Poor test coverage quality', 'Ignoring integration tests', 'Inconsistent test environments');
         break;
       case 'deployment-plan':
-        pitfalls.push('忽略回滚策略', '配置管理不当', '监控不足', '缺乏灾难恢复');
+        pitfalls.push('Ignoring rollback strategy', 'Poor configuration management', 'Insufficient monitoring', 'Lack of disaster recovery');
         break;
       default:
-        pitfalls.push('忽略用户体验', '不考虑可扩展性', '缺乏测试', '文档不足');
+        pitfalls.push('Ignoring user experience', 'Not considering scalability', 'Lack of tests', 'Insufficient documentation');
     }
     
     return pitfalls;
@@ -359,7 +359,7 @@ class KnowledgeEnhancedDevService {
         min_score: mergedConfig.minRelevance
       };
       
-      console.log(`🔍 查询知识库: ${query}, 配置:`, knowledgeQuery);
+      console.log(`🔍 Querying knowledge base: ${query}, config:`, knowledgeQuery);
       
       // 调用OKMS API
       const response = await fetch(`${this.okmsEndpoint}/search`, {
@@ -369,11 +369,11 @@ class KnowledgeEnhancedDevService {
       });
       
       if (!response.ok) {
-        throw new Error(`知识库查询失败: ${response.status} ${response.statusText}`);
+        throw new Error(`Knowledge base query failed: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`📚 知识库查询结果:`, Array.isArray(data) ? data.length : 0, '个结果');
+      console.log(`📚 Knowledge base query result:`, Array.isArray(data) ? data.length : 0, 'results');
       
       // 适配OKMS返回格式
       return {
@@ -382,8 +382,8 @@ class KnowledgeEnhancedDevService {
           query,
           results: Array.isArray(data) ? data.map((item: any, index: number) => ({
             id: `okms-${index}`,
-            title: item.title || item.content?.substring(0, 50) || '未知标题',
-            content: item.content || item.text || '无内容',
+            title: item.title || item.content?.substring(0, 50) || 'Unknown title',
+            content: item.content || item.text || 'No content',
             relevance: item.score || item.relevance || 0.7,
             source: 'okms-knowledge-base',
             metadata: {
@@ -396,7 +396,7 @@ class KnowledgeEnhancedDevService {
       };
       
     } catch (error) {
-      console.error('知识库查询错误:', error);
+      console.error('Knowledge base query error:', error);
       
       // 返回模拟数据作为回退
       return this.getFallbackKnowledgeData(query, mergedConfig);
@@ -415,8 +415,8 @@ class KnowledgeEnhancedDevService {
         results: [
           {
             id: 'mock-1',
-            title: 'React组件开发最佳实践',
-            content: 'React组件应该遵循单一职责原则，使用函数组件和Hooks，保持组件小而专注。',
+            title: 'React Component Development Best Practices',
+            content: 'React components should follow the single responsibility principle, use functional components and Hooks, and stay small and focused.',
             relevance: 0.85,
             source: 'best-practice',
             metadata: {
@@ -427,8 +427,8 @@ class KnowledgeEnhancedDevService {
           },
           {
             id: 'mock-2',
-            title: 'TypeScript类型安全指南',
-            content: '使用严格的TypeScript配置，避免使用any类型，定义清晰的接口和类型。',
+            title: 'TypeScript Type Safety Guide',
+            content: 'Use strict TypeScript configuration, avoid using the any type, and define clear interfaces and types.',
             relevance: 0.78,
             source: 'documentation',
             metadata: {
@@ -438,8 +438,8 @@ class KnowledgeEnhancedDevService {
           },
           {
             id: 'mock-3',
-            title: 'API设计模式',
-            content: 'RESTful API应该使用合适的HTTP方法，版本化端点，提供清晰的错误响应。',
+            title: 'API Design Patterns',
+            content: 'RESTful APIs should use appropriate HTTP methods, version endpoints, and provide clear error responses.',
             relevance: 0.72,
             source: 'pattern',
             metadata: {
@@ -449,8 +449,8 @@ class KnowledgeEnhancedDevService {
           },
           {
             id: 'mock-4',
-            title: '数据库优化警告',
-            content: '避免N+1查询问题，合理使用索引，定期分析查询性能。',
+            title: 'Database Optimization Warnings',
+            content: 'Avoid N+1 query problems, use indexes appropriately, and regularly analyze query performance.',
             relevance: 0.68,
             source: 'warning',
             metadata: {
@@ -464,7 +464,7 @@ class KnowledgeEnhancedDevService {
           if (lowerQuery.includes('typescript') && item.title.includes('TypeScript')) return true;
           if (lowerQuery.includes('api') && item.title.includes('API')) return true;
           if (lowerQuery.includes('数据库') && item.title.includes('数据库')) return true;
-          return Math.random() > 0.5; // 随机保留一些
+          return Math.random() > 0.5; // randomly keep some
         }).slice(0, config.maxResults)
       }
     };
@@ -509,7 +509,7 @@ class KnowledgeEnhancedDevService {
       const recommendations = this.generateRecommendations(taskAnalysis, qualityMetrics);
       
       const processingTime = Date.now() - startTime;
-      console.log(`🧠 知识增强完成: ${processingTime}ms, 增强: ${enhancements.length}项, 知识源: ${knowledgeSources.length}个`);
+      console.log(`🧠 Knowledge enhancement complete: ${processingTime}ms, enhancements: ${enhancements.length}, sources: ${knowledgeSources.length}`);
       
       return {
         originalResponse,
@@ -521,7 +521,7 @@ class KnowledgeEnhancedDevService {
       };
       
     } catch (error) {
-      console.error('知识增强失败:', error);
+      console.error('Knowledge enhancement failed:', error);
       
       // 返回原始响应作为回退
       return {
@@ -575,7 +575,7 @@ class KnowledgeEnhancedDevService {
         sources.push({
           source: result.source || 'unknown',
           relevance: Math.min(1, relevance),
-          content: result.content?.substring(0, 200) || '无内容',
+          content: result.content?.substring(0, 200) || 'No content',
           confidence: result.confidence || 0.7
         });
       });
@@ -584,7 +584,7 @@ class KnowledgeEnhancedDevService {
     // 按相关性排序
     sources.sort((a, b) => b.relevance - a.relevance);
     
-    return sources.slice(0, 5); // 返回前5个最相关的
+    return sources.slice(0, 5); // return top 5 most relevant
   }
 
   // 生成增强内容 - 修复版本：确保总是有内容
@@ -611,7 +611,7 @@ class KnowledgeEnhancedDevService {
         type: 'best-practice',
         description: practice,
         impact: index === 0 ? 'high' : 'medium',
-        implementation: `在实现中遵循: ${practice}`
+        implementation: `Follow in implementation: ${practice}`
       });
     });
     
@@ -620,18 +620,18 @@ class KnowledgeEnhancedDevService {
       taskAnalysis.relatedPatterns.slice(0, 2).forEach((pattern, index) => {
         enhancements.push({
           type: 'pattern',
-          description: `考虑使用 ${pattern} 设计模式`,
+          description: `Consider using the ${pattern} design pattern`,
           impact: 'medium',
-          implementation: `研究并应用 ${pattern} 模式到当前场景`
+          implementation: `Research and apply the ${pattern} pattern to the current context`
         });
       });
     } else {
       // 默认模式
       enhancements.push({
         type: 'pattern',
-        description: '考虑使用模块化设计模式',
+        description: 'Consider using a modular design pattern',
         impact: 'medium',
-        implementation: '将系统分解为独立的、可重用的模块'
+        implementation: 'Decompose the system into independent, reusable modules'
       });
     }
     
@@ -640,18 +640,18 @@ class KnowledgeEnhancedDevService {
       taskAnalysis.commonPitfalls.slice(0, 2).forEach((pitfall, index) => {
         enhancements.push({
           type: 'warning',
-          description: `注意避免: ${pitfall}`,
+          description: `Be careful to avoid: ${pitfall}`,
           impact: 'high',
-          implementation: `在设计和实现中特别留意此问题`
+          implementation: `Pay special attention to this in design and implementation`
         });
       });
     } else {
       // 默认警告
       enhancements.push({
         type: 'warning',
-        description: '注意避免过度工程化',
+        description: 'Be careful to avoid over-engineering',
         impact: 'medium',
-        implementation: '保持解决方案简洁，只实现当前需要的功能'
+        implementation: 'Keep solutions simple, only implement what is currently needed'
       });
     }
     
@@ -661,7 +661,7 @@ class KnowledgeEnhancedDevService {
         if (source.relevance > 0.7) {
           enhancements.push({
             type: 'optimization',
-            description: `基于知识库的优化建议`,
+            description: `Knowledge-base optimization suggestion`,
             impact: 'medium',
             implementation: source.content.substring(0, 100)
           });
@@ -673,9 +673,9 @@ class KnowledgeEnhancedDevService {
     if (taskAnalysis.taskType === 'code-generation' || taskAnalysis.taskType === 'api-design') {
       enhancements.push({
         type: 'code-example',
-        description: '参考代码结构和实现方式',
+        description: 'Reference code structure and implementation approach',
         impact: 'medium',
-        implementation: '查看相关代码库或文档中的示例实现'
+        implementation: 'Review example implementations in related codebases or documentation'
       });
     }
     
@@ -683,9 +683,9 @@ class KnowledgeEnhancedDevService {
     while (enhancements.length < 3) {
       enhancements.push({
         type: 'best-practice',
-        description: '保持代码简洁和可维护',
+        description: 'Keep code clean and maintainable',
         impact: 'medium',
-        implementation: '编写清晰、自解释的代码，添加必要的注释'
+        implementation: 'Write clear, self-documenting code with necessary comments'
       });
     }
     
@@ -739,10 +739,10 @@ class KnowledgeEnhancedDevService {
     relevance: number;
     practicality: number;
   } {
-    let completeness = 0.7; // 基础完整性
-    let accuracy = 0.8; // 基础准确性
-    let relevance = 0.6; // 基础相关性
-    let practicality = 0.7; // 基础实用性
+    let completeness = 0.7; // base completeness
+    let accuracy = 0.8; // base accuracy
+    let relevance = 0.6; // base relevance
+    let practicality = 0.7; // base practicality
     
     // 基于增强内容调整指标
     if (enhancements.length > 0) {
@@ -790,32 +790,32 @@ class KnowledgeEnhancedDevService {
     // 基于质量指标的建议
     if (qualityMetrics.completeness < 0.7) {
       recommendations.push({
-        area: '完整性',
-        suggestion: '需要更多相关知识来完善解决方案',
+        area: 'Completeness',
+        suggestion: 'Need more relevant knowledge to complete the solution',
         priority: 'medium'
       });
     }
     
     if (qualityMetrics.accuracy < 0.8) {
       recommendations.push({
-        area: '准确性',
-        suggestion: '验证知识来源的准确性和时效性',
+        area: 'Accuracy',
+        suggestion: 'Verify the accuracy and timeliness of knowledge sources',
         priority: 'high'
       });
     }
     
     if (qualityMetrics.relevance < 0.7) {
       recommendations.push({
-        area: '相关性',
-        suggestion: '寻找更相关的知识来源和案例',
+        area: 'Relevance',
+        suggestion: 'Find more relevant knowledge sources and examples',
         priority: 'medium'
       });
     }
     
     if (qualityMetrics.practicality < 0.7) {
       recommendations.push({
-        area: '实用性',
-        suggestion: '提供更多具体的实现步骤和代码示例',
+        area: 'Practicality',
+        suggestion: 'Provide more specific implementation steps and code examples',
         priority: 'high'
       });
     }
@@ -823,8 +823,8 @@ class KnowledgeEnhancedDevService {
     // 基于任务复杂度的建议
     if (taskAnalysis.complexity === 'high') {
       recommendations.push({
-        area: '任务复杂度',
-        suggestion: '考虑将复杂任务分解为多个子任务',
+        area: 'Task Complexity',
+        suggestion: 'Consider decomposing complex tasks into multiple subtasks',
         priority: 'high'
       });
     }
@@ -832,8 +832,8 @@ class KnowledgeEnhancedDevService {
     // 基于预估工作量的建议
     if (taskAnalysis.estimatedEffort > 8) {
       recommendations.push({
-        area: '工作量',
-        suggestion: '此任务工作量较大，建议分阶段实施',
+        area: 'Workload',
+        suggestion: 'This task has significant workload; consider phased implementation',
         priority: 'medium'
       });
     }
@@ -889,12 +889,12 @@ class KnowledgeEnhancedDevService {
       }
       
       const processingTime = Date.now() - startTime;
-      console.log(`🧠 知识增强处理完成: ${processingTime}ms, 增强级别: ${enhancementLevel}`);
+      console.log(`🧠 Knowledge enhancement complete: ${processingTime}ms, enhancement level: ${enhancementLevel}`);
       
       return enhancedResult;
       
     } catch (error) {
-      console.error('知识增强请求处理失败:', error);
+      console.error('Knowledge enhancement request processing failed:', error);
       
       // 回退到原始统一网关
       const fallbackResponse = await unifiedGatewayService.processRequest(request);
@@ -912,8 +912,8 @@ class KnowledgeEnhancedDevService {
         },
         recommendations: [
           {
-            area: '系统错误',
-            suggestion: '知识增强系统暂时不可用，使用基础响应',
+            area: 'System Error',
+            suggestion: 'Knowledge enhancement system temporarily unavailable, using basic response',
             priority: 'high'
           }
         ]

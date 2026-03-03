@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const draft = Array.isArray(body?.draft) ? body.draft : [];
-    if (!draft.length) return NextResponse.json({ success: false, error: 'draft 不能为空' }, { status: 400 });
+    if (!draft.length) return NextResponse.json({ success: false, error: 'draft cannot be empty' }, { status: 400 });
 
     let lastL1: string | null = null;
     let lastL2: string | null = null;
@@ -40,6 +40,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: { createdCount: created.length, created } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

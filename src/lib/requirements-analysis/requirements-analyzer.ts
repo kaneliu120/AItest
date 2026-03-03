@@ -145,26 +145,26 @@ export class RequirementsAnalyzer {
       
       recommendations: {
         immediateActions: [
-          '明确项目范围和目标',
-          '确定关键利益相关者',
-          '建立沟通机制',
-          '制定详细的项目计划',
+          'Clarify project scope and objectives',
+          'Identify key stakeholders',
+          'Establish communication channels',
+          'Create a detailed project plan',
         ],
         technicalDecisions: [
-          '选择合适的技术栈',
-          '设计可扩展的架构',
-          '制定代码规范和开发流程',
+          'Select the appropriate tech stack',
+          'Design a scalable architecture',
+          'Define code standards and development processes',
         ],
         riskMitigations: [
-          '建立风险管理计划',
-          '定期进行风险评估',
-          '准备应急预案',
+          'Establish a risk management plan',
+          'Conduct regular risk assessments',
+          'Prepare contingency plans',
         ],
         successFactors: [
-          '明确的需求定义',
-          '有效的沟通协作',
-          '合理的资源分配',
-          '持续的质量保证',
+          'Clear requirements definition',
+          'Effective communication and collaboration',
+          'Reasonable resource allocation',
+          'Continuous quality assurance',
         ],
       },
     };
@@ -222,8 +222,8 @@ export class RequirementsAnalyzer {
       requirements.push({
         id: 'NFR1',
         type: 'performance',
-        description: '系统性能要求',
-        requirements: ['响应时间 < 2秒', '支持100并发用户', '99.9%可用性'],
+        description: 'System performance requirements',
+        requirements: ['Response time < 2s', 'Support 100 concurrent users', '99.9% availability'],
       });
     }
     
@@ -232,8 +232,8 @@ export class RequirementsAnalyzer {
       requirements.push({
         id: 'NFR2',
         type: 'security',
-        description: '系统安全要求',
-        requirements: ['用户认证和授权', '数据加密', '防止SQL注入'],
+        description: 'System security requirements',
+        requirements: ['User authentication and authorization', 'Data encryption', 'Prevent SQL injection'],
       });
     }
     
@@ -247,9 +247,9 @@ export class RequirementsAnalyzer {
     if (contentLower.includes('业务') || contentLower.includes('business')) {
       requirements.push({
         id: 'BR1',
-        description: '业务目标和价值',
+        description: 'Business goals and value',
         businessValue: 'high',
-        stakeholders: ['客户', '用户', '管理团队'],
+        stakeholders: ['Clients', 'Users', 'Management team'],
       });
     }
     
@@ -265,48 +265,48 @@ export class RequirementsAnalyzer {
       frontend: [
         {
           framework: 'Next.js',
-          recommendation: '适用于需要SEO、服务端渲染的Web应用',
+          recommendation: 'Ideal for SEO and server-side rendering web apps',
           suitability: isWebApp ? 90 : 70,
         },
         {
           framework: 'React + Vite',
-          recommendation: '适用于单页应用和快速原型开发',
+          recommendation: 'Ideal for single-page apps and rapid prototyping',
           suitability: isWebApp ? 85 : 75,
         },
       ],
       backend: [
         {
           framework: 'NestJS',
-          recommendation: '适用于企业级应用，需要严格架构',
+          recommendation: 'Ideal for enterprise-grade apps requiring strict architecture',
           suitability: 85,
         },
         {
           framework: 'Express.js',
-          recommendation: '适用于快速原型和小型项目',
+          recommendation: 'Ideal for rapid prototyping and small projects',
           suitability: 75,
         },
       ],
       database: [
         {
           type: 'PostgreSQL',
-          recommendation: '适用于需要ACID事务和复杂查询的应用',
+          recommendation: 'Ideal for apps requiring ACID transactions and complex queries',
           suitability: 90,
         },
         {
           type: 'MongoDB',
-          recommendation: '适用于文档型数据和快速迭代',
+          recommendation: 'Ideal for document data and rapid iteration',
           suitability: 80,
         },
       ],
       deployment: [
         {
           platform: 'Azure App Service',
-          recommendation: '适用于.NET和Node.js应用，企业级支持',
+          recommendation: 'Ideal for .NET and Node.js apps, enterprise-grade support',
           suitability: 85,
         },
         {
           platform: 'Vercel',
-          recommendation: '适用于Next.js前端应用',
+          recommendation: 'Ideal for Next.js frontend applications',
           suitability: 95,
         },
       ],
@@ -321,13 +321,13 @@ export class RequirementsAnalyzer {
     if (wordCount > 10000) overall += 1;
     
     const technicalFactors: string[] = [];
-    if (wordCount > 3000) technicalFactors.push('需求规模较大');
+    if (wordCount > 3000) technicalFactors.push('Large requirement scope');
     
     const businessFactors: string[] = [];
     if (document.content.includes('业务')) businessFactors.push('涉及业务逻辑');
     
     const integrationFactors: string[] = [];
-    if (document.content.includes('集成')) integrationFactors.push('需要系统集成');
+    if (document.content.includes('集成')) integrationFactors.push('Requires system integration');
     
     return {
       overall: Math.min(10, Math.max(1, overall)),
@@ -344,30 +344,30 @@ export class RequirementsAnalyzer {
     if (content.includes('待定') || content.includes('tbd')) {
       risks.push({
         id: 'R1',
-        description: '需求不明确，存在待定项',
+        description: 'Requirements unclear, pending items exist',
         probability: 'high',
         impact: 'high',
-        mitigation: '与客户确认需求细节',
+        mitigation: 'Confirm requirements details with the client',
       });
     }
     
     if (content.includes('复杂') || content.includes('complex')) {
       risks.push({
         id: 'R2',
-        description: '技术复杂度较高',
+        description: 'High technical complexity',
         probability: 'medium',
         impact: 'high',
-        mitigation: '进行技术验证，准备备用方案',
+        mitigation: 'Conduct technical validation and prepare fallback plans',
       });
     }
     
     if (document.metadata.wordCount > 5000) {
       risks.push({
         id: 'R3',
-        description: '项目规模较大，时间压力',
+        description: 'Large project scope, time pressure',
         probability: 'medium',
         impact: 'medium',
-        mitigation: '制定详细时间计划，设置里程碑',
+        mitigation: 'Create detailed schedule and set milestones',
       });
     }
     

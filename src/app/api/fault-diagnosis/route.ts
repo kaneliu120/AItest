@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// 简化的故障诊断API
+// Simplified fault diagnosis API
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
           success: true,
           data: {
             status: 'running',
-            uptime: Date.now() - 3600000, // 1小时前
+            uptime: Date.now() - 3600000, // 1 hour ago
             config: {
               enabled: true,
               checkInterval: 30000,
@@ -40,16 +40,16 @@ export async function GET(request: NextRequest) {
             rules: [
               {
                 id: 'high-cpu-usage',
-                name: '高CPU使用率检测',
-                description: '检测CPU使用率超过80%的情况',
+                name: 'High CPU Usage Detection',
+                description: 'Detects CPU usage exceeding 80%',
                 severity: 'medium',
                 enabled: true,
                 tags: ['performance', 'cpu']
               },
               {
                 id: 'memory-leak',
-                name: '内存泄漏检测',
-                description: '检测内存使用持续增长的情况',
+                name: 'Memory Leak Detection',
+                description: 'Detect sustained memory usage growth',
                 severity: 'high',
                 enabled: true,
                 tags: ['performance', 'memory']
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: {
-            message: '故障诊断API运行正常',
+            message: 'Fault diagnosis API running normally',
             supportedActions: ['status', 'rules']
           },
           timestamp: new Date().toISOString()
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: {
-            message: '规则添加成功',
+            message: 'Rule added successfully',
             ruleId: `rule-${Date.now()}`
           },
           timestamp: new Date().toISOString()
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: {
-            message: '规则移除成功'
+            message: 'Rule removed successfully'
           },
           timestamp: new Date().toISOString()
         });
@@ -106,14 +106,14 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           supportedActions: ['add-rule', 'remove-rule']
         }, { status: 400 });
     }
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

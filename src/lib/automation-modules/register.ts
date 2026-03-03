@@ -11,7 +11,7 @@ export async function registerAutomationModules() {
     cortexaaiModule
   ];
   
-  console.log(`注册 ${modules.length} 个自动化模块:`);
+  console.log(`Registering ${modules.length} automation modules:`);
   
   for (const module of modules) {
     console.log(`  • ${module.name} (${module.id})`);
@@ -21,9 +21,9 @@ export async function registerAutomationModules() {
     try {
       // 模拟注册
       await new Promise(resolve => setTimeout(resolve, 100));
-      console.log(`    ✅ ${module.name} 注册成功`);
+      console.log(`    ✅ ${module.name} registered`);
     } catch (error) {
-      logger.error('模块注册失败', error, { moduleId: module.id, moduleName: module.name });
+      logger.error('Module registration failed', error, { moduleId: module.id, moduleName: module.name });
     }
   }
   
@@ -54,12 +54,12 @@ export function getModuleById(moduleId: string) {
 export async function executeModuleAction(moduleId: string, action: string, parameters: Record<string, unknown>) {
   const module = getModuleById(moduleId);
   if (!module) {
-    throw new Error(`模块未找到: ${moduleId}`);
+    throw new Error(`Module not found: ${moduleId}`);
   }
   
   const moduleActions = module.actions as Record<string, unknown>;
   if (!moduleActions[action]) {
-    throw new Error(`动作未找到: ${action}`);
+    throw new Error(`Action not found: ${action}`);
   }
   
   return await module.execute(action, parameters);

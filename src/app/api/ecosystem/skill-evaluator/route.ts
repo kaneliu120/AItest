@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (action === 'skill-trend') {
       const skillName = url.searchParams.get('skillName');
-      if (!skillName) return NextResponse.json({ success: false, error: '缺少 skillName' }, { status: 400 });
+      if (!skillName) return NextResponse.json({ success: false, error: 'Missing skillName' }, { status: 400 });
       const limit = Math.min(200, Math.max(1, Number(url.searchParams.get('limit') || 50)));
       const points = await skillEvaluatorService.getSkillTrend(skillName, limit);
       return NextResponse.json({ success: true, data: { skillName, points, total: points.length } });
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     if (action === 'export') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限导出报告' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Insufficient permissions to export report' }, { status: 403 });
       }
       const limit = Math.min(500, Math.max(1, Number(url.searchParams.get('limit') || 100)));
       const reports = await skillEvaluatorService.getEvaluationReports(limit);
@@ -50,12 +50,12 @@ export async function GET(request: NextRequest) {
 
     if (action === 'run-status') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限访问运行状态' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Insufficient permissions to access run status' }, { status: 403 });
       }
       const runId = url.searchParams.get('runId');
-      if (!runId) return NextResponse.json({ success: false, error: '缺少 runId' }, { status: 400 });
+      if (!runId) return NextResponse.json({ success: false, error: 'Missing runId' }, { status: 400 });
       const run = await skillEvaluatorService.getRunStatus(runId);
-      if (!run) return NextResponse.json({ success: false, error: '运行记录不存在' }, { status: 404 });
+      if (!run) return NextResponse.json({ success: false, error: 'Run record not found' }, { status: 404 });
       return NextResponse.json({ success: true, data: run });
     }
     
@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data });
     }
     
-    // 默认返回统计
+    // Default: return statistics
     const stats = await skillEvaluatorService.getEvaluationStats();
     return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('技能评估API错误:', error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    console.error('Skill evaluation API error:', error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -89,12 +89,12 @@ export async function POST(request: NextRequest) {
     
     if (action === 'evaluate') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限发起评估' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Insufficient permissions to initiate evaluation' }, { status: 403 });
       }
       const { skillPath, skillName } = body;
       
       if (!skillPath) {
-        return NextResponse.json({ success: false, error: '缺少技能路径参数' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing skill path parameter' }, { status: 400 });
       }
       
       const run = await skillEvaluatorService.createEvaluationRun(skillPath, skillName);
@@ -105,13 +105,13 @@ export async function POST(request: NextRequest) {
       const { reportId } = body;
       
       if (!reportId) {
-        return NextResponse.json({ success: false, error: '缺少报告ID参数' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing report ID parameter' }, { status: 400 });
       }
       
       const report = await skillEvaluatorService.getReportDetails(reportId);
       
       if (!report) {
-        return NextResponse.json({ success: false, error: '报告不存在' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'Report not found' }, { status: 404 });
       }
       
       return NextResponse.json({ success: true, data: report });
@@ -119,12 +119,12 @@ export async function POST(request: NextRequest) {
     
     if (action === 'delete-report') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限删除报告' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Unauthorized to delete report' }, { status: 403 });
       }
       const { reportId } = body;
       
       if (!reportId) {
-        return NextResponse.json({ success: false, error: '缺少报告ID参数' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing report ID parameter' }, { status: 400 });
       }
       
       const deleted = await skillEvaluatorService.deleteReport(reportId);
@@ -133,11 +133,11 @@ export async function POST(request: NextRequest) {
 
     if (action === 'create-skill') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限新增技能' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Unauthorized to add skill' }, { status: 403 });
       }
       const { skillName, relativePath, template, evaluateNow } = body;
       if (!skillName) {
-        return NextResponse.json({ success: false, error: '缺少 skillName' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing skillName' }, { status: 400 });
       }
       const out = await skillEvaluatorService.createSkill({ skillName, relativePath, template, evaluateNow });
       return NextResponse.json({ success: true, data: out });
@@ -145,11 +145,11 @@ export async function POST(request: NextRequest) {
 
     if (action === 'delete-skill') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限删除技能' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Unauthorized to delete skill' }, { status: 403 });
       }
       const { skillPath, hardDelete } = body;
       if (!skillPath) {
-        return NextResponse.json({ success: false, error: '缺少 skillPath' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing skillPath' }, { status: 400 });
       }
       const out = await skillEvaluatorService.deleteSkill({ skillPath, hardDelete });
       return NextResponse.json({ success: true, data: out });
@@ -157,22 +157,22 @@ export async function POST(request: NextRequest) {
 
     if (action === 'merge-skills') {
       if (!isWorkflowAdminAuthorized(request)) {
-        return NextResponse.json({ success: false, error: '无权限合并技能' }, { status: 403 });
+        return NextResponse.json({ success: false, error: 'Unauthorized to merge skills' }, { status: 403 });
       }
       const { sourceSkillPaths, targetSkillPath } = body;
       if (!Array.isArray(sourceSkillPaths) || sourceSkillPaths.length === 0) {
-        return NextResponse.json({ success: false, error: '缺少 sourceSkillPaths' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing sourceSkillPaths' }, { status: 400 });
       }
       if (!targetSkillPath || typeof targetSkillPath !== 'string') {
-        return NextResponse.json({ success: false, error: '缺少 targetSkillPath' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing targetSkillPath' }, { status: 400 });
       }
       const out = await skillEvaluatorService.mergeSkills({ sourceSkillPaths, targetSkillPath });
       return NextResponse.json({ success: true, data: out });
     }
     
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
   } catch (error) {
-    console.error('技能评估API POST错误:', error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    console.error('Skill evaluation API POST error:', error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

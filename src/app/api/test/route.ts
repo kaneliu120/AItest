@@ -45,7 +45,7 @@ async function checkApiEndpoint(name: string, path: string): Promise<TestResult>
     const duration = Date.now() - start;
     return addResult({
       name, category: 'api', status: 'error', duration,
-      output: `连接失败: ${e instanceof Error ? e.message : '未知错误'}`,
+      output: `Connection failed: ${e instanceof Error ? e.message : 'Unknown error'}`,
       timestamp: new Date().toISOString(),
       toolId: 'api-check',
     });
@@ -54,24 +54,24 @@ async function checkApiEndpoint(name: string, path: string): Promise<TestResult>
 
 async function runHealthCheck(): Promise<TestResult[]> {
   const endpoints = [
-    ['主页面',         '/'],
-    ['健康API',        '/api/health'],
-    ['任务统计',       '/api/tasks?action=stats'],
-    ['财务摘要',       '/api/finance?action=summary'],
-    ['生态状态',       '/api/ecosystem/status'],
-    ['自动化状态',     '/api/automation?action=status'],
-    ['外包列表',       '/api/freelance'],
-    ['分析数据',       '/api/analytics'],
+    ['Home',              '/'],
+    ['Health API',        '/api/health'],
+    ['Task Stats',        '/api/tasks?action=stats'],
+    ['Finance Summary',   '/api/finance?action=summary'],
+    ['Ecosystem Status',  '/api/ecosystem/status'],
+    ['Automation Status', '/api/automation?action=status'],
+    ['Freelance List',    '/api/freelance'],
+    ['Analytics',         '/api/analytics'],
   ];
   return Promise.all(endpoints.map(([name, path]) => checkApiEndpoint(name, path)));
 }
 
 async function runPerformanceTest(): Promise<TestResult[]> {
   const endpoints = [
-    ['/api/health',              '健康检查'],
-    ['/api/tasks?action=stats',  '任务统计'],
-    ['/api/analytics',           '数据分析'],
-    ['/api/automation?action=status', '自动化状态'],
+    ['/api/health',              'Health check'],
+    ['/api/tasks?action=stats',  'Task stats'],
+    ['/api/analytics',           'Analytics'],
+    ['/api/automation?action=status', 'Automation status'],
   ];
   const results: TestResult[] = [];
   for (const [path, name] of endpoints) {
@@ -87,8 +87,8 @@ async function runPerformanceTest(): Promise<TestResult[]> {
     const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
     const status = avg < 200 ? 'passed' : avg < 1000 ? 'passed' : 'failed';
     results.push(addResult({
-      name: `性能: ${name}`, category: 'performance', status, duration: avg,
-      output: `平均 ${avg}ms (${times.map(t => t + 'ms').join(' / ')}) · ${avg < 200 ? '✅ 优秀' : avg < 500 ? '⚠️ 一般' : '❌ 较慢'}`,
+      name: `Perf: ${name}`, category: 'performance', status, duration: avg,
+      output: `Avg ${avg}ms (${times.map(t => t + 'ms').join(' / ')}) · ${avg < 200 ? '✅ Excellent' : avg < 500 ? '⚠️ OK' : '❌ Slow'}`,
       timestamp: new Date().toISOString(), toolId: 'performance',
     }));
   }
@@ -103,11 +103,11 @@ async function runSecurityScan(): Promise<TestResult[]> {
     const res = await fetch(`${MC_BASE}/api/health`, { cache: 'no-store' });
     const cors = res.headers.get('access-control-allow-origin');
     results.push(addResult({
-      name: '安全: CORS 配置',
+      name: 'Security: CORS Config',
       category: 'security',
       status: cors === null ? 'passed' : cors === '*' ? 'failed' : 'passed',
       duration: 0,
-      output: cors === null ? '✅ 无宽松 CORS 头' : cors === '*' ? '❌ CORS 设为 * (过于宽松)' : `✅ CORS: ${cors}`,
+      output: cors === null ? '✅ No permissive CORS header' : cors === '*' ? '❌ CORS set to * (too permissive)' : `✅ CORS: ${cors}`,
       timestamp: new Date().toISOString(), toolId: 'security',
     }));
   } catch { /**/ }
@@ -118,17 +118,17 @@ async function runSecurityScan(): Promise<TestResult[]> {
     try {
       const res = await fetch(`${MC_BASE}${route}`, { cache: 'no-store', signal: AbortSignal.timeout(3000) });
       results.push(addResult({
-        name: `安全: 敏感路由 ${route}`,
+        name: `Security: Sensitive route ${route}`,
         category: 'security',
         status: res.status === 404 || res.status === 405 ? 'passed' : 'failed',
         duration: 0,
-        output: res.status === 404 ? `✅ 正确返回 404` : `⚠️ 返回 ${res.status}`,
+        output: res.status === 404 ? `✅ Correctly returns 404` : `⚠️ Returns ${res.status}`,
         timestamp: new Date().toISOString(), toolId: 'security',
       }));
     } catch {
       results.push(addResult({
-        name: `安全: 敏感路由 ${route}`, category: 'security', status: 'passed', duration: 0,
-        output: '✅ 连接拒绝（路由不存在）', timestamp: new Date().toISOString(), toolId: 'security',
+        name: `Security: Sensitive route ${route}`, category: 'security', status: 'passed', duration: 0,
+        output: '✅ Connection refused (route not found)', timestamp: new Date().toISOString(), toolId: 'security',
       }));
     }
   }
@@ -138,11 +138,11 @@ async function runSecurityScan(): Promise<TestResult[]> {
     const res = await fetch(`${MC_BASE}/`, { cache: 'no-store' });
     const xframe = res.headers.get('x-frame-options');
     results.push(addResult({
-      name: '安全: X-Frame-Options',
+      name: 'Security: X-Frame-Options',
       category: 'security',
-      status: 'passed', // Next.js 默认安全
+      status: 'passed', // Next.js defaults are secure
       duration: 0,
-      output: xframe ? `✅ 已设置: ${xframe}` : 'ℹ️ 未设置 (本地开发环境可接受)',
+      output: xframe ? `✅ Set: ${xframe}` : 'ℹ️ Not set (acceptable for local dev)',
       timestamp: new Date().toISOString(), toolId: 'security',
     }));
   } catch { /**/ }
@@ -157,16 +157,16 @@ async function runSystemDiagnostic(): Promise<TestResult[]> {
   try {
     const { stdout } = await execAsync("top -l 1 -n 0 2>/dev/null | grep 'CPU\\|PhysMem' | head -3");
     results.push(addResult({
-      name: '诊断: 系统资源',
+      name: 'Diagnostics: System Resources',
       category: 'health',
       status: 'passed', duration: 0,
-      output: stdout.trim() || '获取成功',
+      output: stdout.trim() || 'Retrieved successfully',
       timestamp: new Date().toISOString(), toolId: 'diagnostic',
     }));
   } catch {
     results.push(addResult({
-      name: '诊断: 系统资源', category: 'health', status: 'passed', duration: 0,
-      output: `Node 进程内存: ${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB RSS`,
+      name: 'Diagnostics: System Resources', category: 'health', status: 'passed', duration: 0,
+      output: `Node process memory: ${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB RSS`,
       timestamp: new Date().toISOString(), toolId: 'diagnostic',
     }));
   }
@@ -174,11 +174,11 @@ async function runSystemDiagnostic(): Promise<TestResult[]> {
   // Node 进程信息
   const mem = process.memoryUsage();
   results.push(addResult({
-    name: '诊断: Node 进程',
+    name: 'Diagnostics: Node Process',
     category: 'health',
     status: mem.rss < 500 * 1024 * 1024 ? 'passed' : 'failed',
     duration: 0,
-    output: `RSS: ${Math.round(mem.rss/1024/1024)}MB · Heap: ${Math.round(mem.heapUsed/1024/1024)}/${Math.round(mem.heapTotal/1024/1024)}MB · 运行: ${Math.round(process.uptime())}s`,
+    output: `RSS: ${Math.round(mem.rss/1024/1024)}MB · Heap: ${Math.round(mem.heapUsed/1024/1024)}/${Math.round(mem.heapTotal/1024/1024)}MB · Uptime: ${Math.round(process.uptime())}s`,
     timestamp: new Date().toISOString(), toolId: 'diagnostic',
   }));
 
@@ -186,11 +186,11 @@ async function runSystemDiagnostic(): Promise<TestResult[]> {
   try {
     const { stdout } = await execAsync('lsof -i :3001 -sTCP:LISTEN 2>/dev/null | tail -1');
     results.push(addResult({
-      name: '诊断: 端口 3001',
+      name: 'Diagnostics: Port 3001',
       category: 'health',
       status: stdout.trim() ? 'passed' : 'failed',
       duration: 0,
-      output: stdout.trim() ? `✅ 端口 3001 监听中` : '❌ 端口未监听',
+      output: stdout.trim() ? `✅ Port 3001 listening` : '❌ Port not listening',
       timestamp: new Date().toISOString(), toolId: 'diagnostic',
     }));
   } catch { /**/ }
@@ -223,19 +223,19 @@ export async function GET(request: NextRequest) {
             .filter(e => !combined.find(r => r.id === `auto-${e.id}`))
             .map(e => ({
               id:        `auto-${e.id}`,
-              name:      `[自动化] ${e.module}: ${e.action}`,
+              name:      `[Automation] ${e.module}: ${e.action}`,
               category:  'custom' as const,
               status:    e.status === 'success' ? 'passed' as const
                        : e.status === 'running'  ? 'running' as const
                        : e.status === 'error'    ? 'error' as const : 'passed' as const,
               duration:  parseInt(e.duration) || 0,
-              output:    `自动化模块执行 · ${e.module} · ${e.duration}`,
+              output:    `Automation module execution · ${e.module} · ${e.duration}`,
               timestamp: e.timestamp,
               toolId:    'automation',
             }));
           combined = [...combined, ...autoResults]
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        } catch { /* 忽略，降级为仅本地结果 */ }
+        } catch { /* ignore, fall back to local-only results */ }
       }
 
       let results = category ? combined.filter(r => r.category === category) : combined;
@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
             uptime:      d.data?.uptime                  ?? 0,
           };
         }
-      } catch { /* 降级 */ }
+      } catch { /* fallback */ }
 
       return NextResponse.json({
         success: true,
@@ -348,7 +348,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -381,7 +381,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'run-test') {
       const { toolId } = body;
-      if (!toolId) return NextResponse.json({ success: false, error: '缺少 toolId' }, { status: 400 });
+      if (!toolId) return NextResponse.json({ success: false, error: 'Missing toolId' }, { status: 400 });
 
       let results: TestResult[] = [];
       if (toolId === 'aiassist' || toolId === 'cortexaai') {
@@ -394,20 +394,20 @@ export async function POST(request: NextRequest) {
         results = await runSystemDiagnostic();
       } else {
         // 单个 API 检查
-        results = [await checkApiEndpoint(`测试: ${toolId}`, `/api/${toolId}`)];
+        results = [await checkApiEndpoint(`Test: ${toolId}`, `/api/${toolId}`)];
       }
       return NextResponse.json({ success: true, data: { results, triggered: true, toolId } });
     }
 
     if (action === 'run-custom') {
       const { url } = body;
-      if (!url) return NextResponse.json({ success: false, error: '缺少 url' }, { status: 400 });
+      if (!url) return NextResponse.json({ success: false, error: 'Missing url' }, { status: 400 });
       const start = Date.now();
       try {
         const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
         const dur = Date.now() - start;
         const result = addResult({
-          name: `自定义: ${url}`, category: 'custom',
+          name: `Custom: ${url}`, category: 'custom',
           status: res.ok ? 'passed' : 'failed', duration: dur,
           output: `HTTP ${res.status} · ${dur}ms · Content-Type: ${res.headers.get('content-type') ?? 'unknown'}`,
           timestamp: new Date().toISOString(), toolId: 'custom',
@@ -415,8 +415,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, data: { result } });
       } catch (e) {
         const result = addResult({
-          name: `自定义: ${url}`, category: 'custom', status: 'error', duration: Date.now() - start,
-          output: `错误: ${e instanceof Error ? e.message : '连接失败'}`,
+          name: `Custom: ${url}`, category: 'custom', status: 'error', duration: Date.now() - start,
+          output: `Error: ${e instanceof Error ? e.message : 'Connection failed'}`,
           timestamp: new Date().toISOString(), toolId: 'custom',
         });
         return NextResponse.json({ success: true, data: { result } });
@@ -425,12 +425,12 @@ export async function POST(request: NextRequest) {
 
     if (action === 'clear-results') {
       testResultStore.length = 0;
-      return NextResponse.json({ success: true, message: '测试记录已清除' });
+      return NextResponse.json({ success: true, message: 'Test records cleared' });
     }
 
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

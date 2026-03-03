@@ -39,7 +39,7 @@ export class JMeterIntegration {
       if (!jmeterAvailable.available) {
         return {
           success: false,
-          result: `JMeter不可用: ${jmeterAvailable.message}`,
+          result: `JMeter unavailable: ${jmeterAvailable.message}`,
           metrics: {
             totalRequests: 0,
             averageResponseTime: 0,
@@ -56,11 +56,11 @@ export class JMeterIntegration {
       const totalRequests = users * duration;
       const averageResponseTime = 150 + Math.random() * 100; // 150-250ms
       const throughput = totalRequests / duration;
-      const errorRate = Math.random() * 0.05; // 0-5%错误率
+      const errorRate = Math.random() * 0.05; // 0-5% error rate
       
       return {
         success: true,
-        result: `JMeter负载测试完成: ${url} (${users}用户, ${duration}秒)`,
+        result: `JMeter load test completed: ${url} (${users} users, ${duration}s)`,
         testId: `jmeter_${Date.now()}`,
         metrics: {
           totalRequests,
@@ -76,7 +76,7 @@ export class JMeterIntegration {
     } catch (error) {
       return {
         success: false,
-        result: `JMeter测试失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        result: `JMeter test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         metrics: {
           totalRequests: 0,
           averageResponseTime: 0,
@@ -104,12 +104,12 @@ export class JMeterIntegration {
       if (stdout.includes('not-found')) {
         return {
           available: false,
-          message: 'Apache JMeter未安装。安装方法: brew install jmeter 或下载 from https://jmeter.apache.org/download_jmeter.cgi'
+          message: 'Apache JMeter not installed. Install with: brew install jmeter or download from https://jmeter.apache.org/download_jmeter.cgi'
         };
       }
       
       // 尝试获取版本
-      let version = '未知版本';
+      let version = 'Unknown version';
       try {
         const versionOutput = await execAsync('jmeter --version 2>&1 | head -1');
         version = versionOutput.stdout.trim();
@@ -119,14 +119,14 @@ export class JMeterIntegration {
       
       return {
         available: true,
-        message: 'Apache JMeter可用',
+        message: 'Apache JMeter is available',
         version
       };
       
     } catch (error) {
       return {
         available: false,
-        message: `检查失败: ${error instanceof Error ? error.message : '未知错误'}`
+        message: `Check failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -149,15 +149,15 @@ export class JMeterIntegration {
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="线程组" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="循环控制器" enabled="true">
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">${config.loops || 1}</stringProp>
         </elementProp>
@@ -168,8 +168,8 @@ export class JMeterIntegration {
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP请求" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
           <stringProp name="HTTPSampler.domain">${new URL(url).hostname}</stringProp>
@@ -187,7 +187,7 @@ export class JMeterIntegration {
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="响应断言" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
             </collectionProp>
@@ -234,13 +234,13 @@ export class GatlingIntegration {
       const { users = 50, duration = 30 } = config;
       
       // 模拟Gatling压力测试结果
-      const requests = users * duration * 2; // 假设每个用户每秒2个请求
-      const ok = Math.floor(requests * (0.95 + Math.random() * 0.04)); // 95-99%成功
+      const requests = users * duration * 2; // assume 2 requests per user per second
+      const ok = Math.floor(requests * (0.95 + Math.random() * 0.04)); // 95-99% success
       const ko = requests - ok;
       
       return {
         success: true,
-        result: `Gatling压力测试完成: ${url} (${users}用户, ${duration}秒)`,
+        result: `Gatling stress test completed: ${url} (${users} users, ${duration}s)`,
         reportUrl: `/reports/gatling-${Date.now()}`,
         statistics: {
           requests,
@@ -262,7 +262,7 @@ export class GatlingIntegration {
     } catch (error) {
       return {
         success: false,
-        result: `Gatling测试失败: ${error instanceof Error ? error.message : '未知错误'}`
+        result: `Gatling test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -304,7 +304,7 @@ export class PerformanceMonitoring {
       // 模拟系统监控数据
       return {
         success: true,
-        result: '系统监控数据获取成功',
+        result: 'System monitoring data retrieved successfully',
         metrics: {
           cpu: {
             usage: 25 + Math.random() * 30, // 25-55%
@@ -334,7 +334,7 @@ export class PerformanceMonitoring {
     } catch (error) {
       return {
         success: false,
-        result: error instanceof Error ? error.message : '系统监控失败',
+        result: error instanceof Error ? error.message : 'System monitoring failed',
         metrics: {
           cpu: { usage: 0, load: [0, 0, 0], processes: 0 },
           memory: { total: 0, used: 0, free: 0, usage: 0 },
@@ -360,7 +360,7 @@ export class PerformanceMonitoring {
       // 模拟应用监控数据
       return {
         success: true,
-        result: `应用监控数据获取成功: ${url}`,
+        result: `Application monitoring data retrieved: ${url}`,
         metrics: {
           responseTime: 150 + Math.random() * 100, // 150-250ms
           status: 200,
@@ -372,7 +372,7 @@ export class PerformanceMonitoring {
     } catch (error) {
       return {
         success: false,
-        result: error instanceof Error ? error.message : '应用监控失败',
+        result: error instanceof Error ? error.message : 'Application monitoring failed',
         metrics: {
           responseTime: 0,
           status: 0,
@@ -399,7 +399,7 @@ export class PerformanceTestManager {
       {
         id: 'jmeter',
         name: 'Apache JMeter',
-        description: '负载测试和性能测量',
+        description: 'Load testing and performance measurement',
         type: 'load' as const,
         installed: await this.checkToolInstallation('jmeter'),
         health: 'healthy' as const
@@ -407,7 +407,7 @@ export class PerformanceTestManager {
       {
         id: 'gatling',
         name: 'Gatling',
-        description: '高并发压力测试',
+        description: 'High-concurrency stress testing',
         type: 'stress' as const,
         installed: await this.checkToolInstallation('gatling'),
         health: 'healthy' as const
@@ -415,7 +415,7 @@ export class PerformanceTestManager {
       {
         id: 'k6',
         name: 'k6',
-        description: '现代负载测试工具',
+        description: 'Modern load testing tool',
         type: 'load' as const,
         installed: await this.checkToolInstallation('k6'),
         health: 'healthy' as const
@@ -423,15 +423,15 @@ export class PerformanceTestManager {
       {
         id: 'wrk',
         name: 'wrk',
-        description: 'HTTP基准测试工具',
+        description: 'HTTP benchmarking tool',
         type: 'load' as const,
         installed: await this.checkToolInstallation('wrk'),
         health: 'healthy' as const
       },
       {
         id: 'monitoring',
-        name: '系统监控',
-        description: '实时系统性能监控',
+        name: 'System Monitoring',
+        description: 'Real-time system performance monitoring',
         type: 'monitoring' as const,
         installed: true,
         health: 'healthy' as const
@@ -478,7 +478,7 @@ export class PerformanceTestManager {
       default:
         return {
           success: false,
-          result: `不支持的性能测试工具: ${toolId}`
+          result: `Unsupported performance testing tool: ${toolId}`
         };
     }
   }
@@ -494,12 +494,12 @@ export class PerformanceTestManager {
       },
       detailedResults: testResults,
       recommendations: [
-        '优化数据库查询和索引',
-        '实施缓存策略(Redis, Memcached)',
-        '使用CDN加速静态资源',
-        '实施负载均衡',
-        '监控和优化内存使用',
-        '定期进行性能测试和优化'
+        'Optimize database queries and indexes',
+        'Implement caching strategies (Redis, Memcached)',
+        'Use CDN to accelerate static assets',
+        'Implement load balancing',
+        'Monitor and optimize memory usage',
+        'Perform regular performance testing and optimization'
       ]
     };
     
@@ -513,29 +513,29 @@ export class PerformanceTestManager {
   }> {
     const installCommands: Record<string, string[]> = {
       jmeter: [
-        '# 安装Apache JMeter (macOS)',
+        '# Install Apache JMeter (macOS)',
         'brew install jmeter',
-        '# 或下载',
+        '# Or download',
         'curl -L https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.2.tgz -o /tmp/jmeter.tgz',
         'tar -xzf /tmp/jmeter.tgz -C /opt/',
         'ln -s /opt/apache-jmeter-5.6.2/bin/jmeter /usr/local/bin/jmeter'
       ],
       gatling: [
-        '# 安装Gatling (macOS)',
+        '# Install Gatling (macOS)',
         'brew install gatling',
-        '# 或下载',
+        '# Or download',
         'curl -L https://repo1.maven.org/maven2/io/gatling/highcharts/gatling-charts-highcharts-bundle/3.9.5/gatling-charts-highcharts-bundle-3.9.5-bundle.zip -o /tmp/gatling.zip',
         'unzip /tmp/gatling.zip -d /opt/',
         'ln -s /opt/gatling-charts-highcharts-bundle-3.9.5/bin/gatling.sh /usr/local/bin/gatling'
       ],
       k6: [
-        '# 安装k6',
+        '# Install k6',
         'brew install k6',
-        '# 或使用脚本',
+        '# Or use script',
         'curl https://dl.k6.io/install.sh | sudo bash'
       ],
       wrk: [
-        '# 安装wrk',
+        '# Install wrk',
         'brew install wrk'
       ]
     };
@@ -543,13 +543,13 @@ export class PerformanceTestManager {
     if (!installCommands[toolId]) {
       return {
         success: false,
-        message: `不支持安装工具: ${toolId}`
+        message: `Tool installation not supported: ${toolId}`
       };
     }
     
     return {
       success: false,
-      message: `请手动安装 ${toolId}。安装命令已记录。`,
+      message: `Please install ${toolId} manually. Installation command has been logged.`,
       commands: installCommands[toolId]
     };
   }

@@ -37,7 +37,7 @@ export class FaultDiagnosisService {
     this.engine = new FaultDiagnosisEngine();
     this.config = {
       enabled: true,
-      checkInterval: 30000, // 30秒
+      checkInterval: 30000, // 30 seconds
       autoRepair: false,
       notificationEnabled: true,
       severityThreshold: 'medium',
@@ -117,7 +117,7 @@ export class FaultDiagnosisService {
       }
     } catch (error) {
       this.status.lastError = error instanceof Error ? error.message : String(error);
-      logger.error('故障检查失败', error, { module: 'FaultDiagnosisService' });
+      logger.error('Fault check failed', error, { module: 'FaultDiagnosisService' });
     }
   }
 
@@ -138,7 +138,7 @@ export class FaultDiagnosisService {
 
   // 处理故障
   private async handleFault(fault: Record<string, unknown>): Promise<void> {
-    console.log(`检测到故障: ${fault.description} (严重性: ${fault.severity})`);
+    console.log(`Fault detected: ${fault.description} (severity: ${fault.severity})`);
     
     if (this.config.autoRepair && fault.automaticRepairAvailable) {
       try {
@@ -146,7 +146,7 @@ export class FaultDiagnosisService {
         await this.performAutoRepair(fault);
         this.status.stats.autoRepaired++;
       } catch (error) {
-        logger.error('自动修复失败', error, { module: 'FaultDiagnosisService' });
+        logger.error('Auto-repair failed', error, { module: 'FaultDiagnosisService' });
       }
     }
   }
@@ -156,7 +156,7 @@ export class FaultDiagnosisService {
     const steps = fault.repairSteps;
     if (Array.isArray(steps)) {
       for (const step of steps as Array<{ description?: string; action?: () => Promise<unknown> }>) {
-        console.log(`执行修复步骤: ${step.description || '未知步骤'}`);
+        console.log(`Executing repair step: ${step.description || 'Unknown step'}`);
         if (typeof step.action === 'function') {
           await step.action();
         }

@@ -13,6 +13,6 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     );
     return NextResponse.json({ success: true, data: rs.rows });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
   }
 }

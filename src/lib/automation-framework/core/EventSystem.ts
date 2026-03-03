@@ -21,7 +21,7 @@ export interface EventHandler {
   eventType: string;
   moduleId: string;
   handler: (event: AutomationEvent) => void | Promise<void>;
-  priority: number; // 1-10, 1为最高优先级
+  priority: number; // 1-10, 1 is highest priority
   enabled: boolean;
   metadata: {
     registeredAt: string;
@@ -96,12 +96,12 @@ export class EventSystem {
   private registerBuiltInHandlers(): void {
     // 事件日志处理器
     this.registerHandler({
-      eventType: '*', // 监听所有事件
+      eventType: '*', // listen to all events
       moduleId: 'system',
       handler: (event) => {
         logger.info('Event fired', { module: 'EventSystem', type: event.type, source: event.source });
       },
-      priority: 10, // 最低优先级
+      priority: 10, // lowest priority
       enabled: true
     });
     
@@ -112,7 +112,7 @@ export class EventSystem {
       handler: (event) => {
         logger.error('Error event', event.data, { module: 'EventSystem' });
       },
-      priority: 1, // 最高优先级
+      priority: 1, // highest priority
       enabled: true
     });
   }
@@ -423,7 +423,7 @@ export class EventSystem {
     
     let events = Array.from(this.events.values());
     
-    // 过滤
+ // filter
     if (type) {
       events = events.filter(evt => evt.type === type);
     }
@@ -479,7 +479,7 @@ export class EventSystem {
     return true;
   }
   
-  // 获取统计信息
+  // Get statistics信息
   getStats(): EventSystemStats {
     // 计算处理器成功率
     let totalFires = 0;

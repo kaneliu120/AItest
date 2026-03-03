@@ -20,7 +20,7 @@ export interface Deployment {
   status: 'pending' | 'building' | 'testing' | 'deploying' | 'active' | 'failed' | 'rolledback';
   startTime: string;
   endTime?: string;
-  duration?: number; // 毫秒
+  duration?: number; // ms
   logs: DeploymentLog[];
   artifacts: DeploymentArtifact[];
   rollbackVersion?: string;
@@ -76,7 +76,7 @@ export class DeploymentService {
     const sampleEnvironments: DeploymentEnvironment[] = [
       {
         id: 'env-dev',
-        name: '开发环境',
+        name: 'Development',
         type: 'development',
         url: 'http://dev.mission-control.local',
         status: 'active',
@@ -90,7 +90,7 @@ export class DeploymentService {
       },
       {
         id: 'env-staging',
-        name: '预发布环境',
+        name: 'Staging',
         type: 'staging',
         url: 'http://staging.mission-control.app',
         status: 'active',
@@ -104,7 +104,7 @@ export class DeploymentService {
       },
       {
         id: 'env-prod',
-        name: '生产环境',
+        name: 'Production',
         type: 'production',
         url: 'http://mission-control.app',
         status: 'active',
@@ -133,32 +133,32 @@ export class DeploymentService {
         environmentId: 'env-prod',
         version: '2.0.0',
         status: 'active',
-        startTime: new Date(Date.now() - 86400000).toISOString(), // 1天前
+        startTime: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
         endTime: new Date(Date.now() - 86350000).toISOString(),
         duration: 5000,
         logs: [
           {
             timestamp: new Date(Date.now() - 86400000).toISOString(),
             level: 'info',
-            message: '部署开始',
+            message: 'Deployment started',
             source: 'deployment-service'
           },
           {
             timestamp: new Date(Date.now() - 86390000).toISOString(),
             level: 'info',
-            message: '构建Docker镜像',
+            message: 'Building Docker image',
             source: 'docker-builder'
           },
           {
             timestamp: new Date(Date.now() - 86370000).toISOString(),
             level: 'info',
-            message: '运行测试',
+            message: 'Running tests',
             source: 'test-runner'
           },
           {
             timestamp: new Date(Date.now() - 86350000).toISOString(),
             level: 'info',
-            message: '部署完成',
+            message: 'Deployment complete',
             source: 'deployment-service'
           }
         ],
@@ -187,13 +187,13 @@ export class DeploymentService {
           {
             timestamp: new Date().toISOString(),
             level: 'info',
-            message: '部署开始',
+            message: 'Deployment started',
             source: 'deployment-service'
           },
           {
             timestamp: new Date().toISOString(),
             level: 'info',
-            message: '拉取最新代码',
+            message: 'Pulling latest code',
             source: 'git-cloner'
           }
         ],
@@ -248,7 +248,7 @@ export class DeploymentService {
     return environment;
   }
   
-  // 获取所有部署
+  // Fetch all deployments
   async getDeployments(filters?: {
     projectId?: string;
     environmentId?: string;
@@ -298,7 +298,7 @@ export class DeploymentService {
         {
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: '部署创建',
+          message: 'Deployment created',
           source: 'deployment-service'
         }
       ],
@@ -326,7 +326,7 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '开始构建',
+      message: 'Build started',
       source: 'build-system'
     });
     this.deployments.set(deployment.id, deployment);
@@ -339,7 +339,7 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '构建完成，开始测试',
+      message: 'Build complete, starting tests',
       source: 'build-system'
     });
     this.deployments.set(deployment.id, deployment);
@@ -352,7 +352,7 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '测试通过，开始部署',
+      message: 'Tests passed, starting deployment',
       source: 'test-runner'
     });
     
@@ -380,7 +380,7 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: '部署成功',
+      message: 'Deployment successful',
       source: 'deployment-service'
     });
     
@@ -392,7 +392,7 @@ export class DeploymentService {
     this.updateAverageDeploymentTime(deployment.duration);
   }
   
-  // 回滚部署
+  // Rollback deployment
   async rollbackDeployment(deploymentId: string, rollbackVersion: string): Promise<boolean> {
     const deployment = this.deployments.get(deploymentId);
     if (!deployment || deployment.status !== 'active') {
@@ -414,7 +414,7 @@ export class DeploymentService {
     deployment.logs.push({
       timestamp: new Date().toISOString(),
       level: 'info',
-      message: `已回滚到版本 ${rollbackVersion}`,
+      message: `Rolled back to version ${rollbackVersion}`,
       source: 'deployment-service'
     });
     

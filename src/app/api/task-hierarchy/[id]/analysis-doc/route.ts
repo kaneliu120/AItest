@@ -13,6 +13,6 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       },
     });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 404 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 404 });
   }
 }

@@ -12,7 +12,7 @@ if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
-// 初始化数据库文件
+// Initialize database文件
 if (!fs.existsSync(USERS_FILE)) {
   fs.writeFileSync(USERS_FILE, JSON.stringify({
     users: [
@@ -35,8 +35,8 @@ if (!fs.existsSync(TEAMS_FILE)) {
     teams: [
       {
         id: 'team_1',
-        name: '核心开发团队',
-        description: '主要产品开发和维护团队',
+        name: 'Core Development Team',
+        description: 'Main product development and maintenance team',
         members: ['user_1'],
         projects: ['mission-control', 'my-skill-store'],
         createdAt: new Date().toISOString()
@@ -107,7 +107,7 @@ export interface Team {
   id: string;
   name: string;
   description: string;
-  members: string[]; // 用户ID数组
+  members: string[]; // user ID array
   projects: string[];
   createdAt: string;
   updatedAt?: string;

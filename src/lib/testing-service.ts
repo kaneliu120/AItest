@@ -41,40 +41,40 @@ class TestingService {
   private testCases: TestCase[] = [
     {
       id: 'test-1',
-      name: 'API健康检查',
-      description: '检查所有API端点是否响应正常',
+      name: 'API Health Check',
+      description: 'Check all API endpoints for normal responses',
       status: 'passed',
       duration: 1200,
       lastRun: new Date().toISOString(),
     },
     {
       id: 'test-2',
-      name: '数据库连接测试',
-      description: '测试数据库连接和查询功能',
+      name: 'Database Connection Test',
+      description: 'Test database connection and query functionality',
       status: 'passed',
       duration: 800,
       lastRun: new Date().toISOString(),
     },
     {
       id: 'test-3',
-      name: 'UI组件测试',
-      description: '测试所有UI组件的渲染和交互',
+      name: 'UI Component Testing',
+      description: 'Test rendering and interaction of all UI components',
       status: 'passed',
       duration: 2500,
       lastRun: new Date().toISOString(),
     },
     {
       id: 'test-4',
-      name: '性能测试',
-      description: '测试系统性能和响应时间',
+      name: 'Performance Testing',
+      description: 'Test system performance and response time',
       status: 'failed',
       duration: 5000,
       lastRun: new Date().toISOString(),
     },
     {
       id: 'test-5',
-      name: '安全测试',
-      description: '测试系统安全性和漏洞',
+      name: 'Security Testing',
+      description: 'Test system security and vulnerabilities',
       status: 'passed',
       duration: 3200,
       lastRun: new Date().toISOString(),
@@ -106,7 +106,7 @@ class TestingService {
     
     const testCase = this.testCases.find(tc => tc.id === testId);
     if (!testCase) {
-      throw new Error(`测试用例 ${testId} 不存在`);
+      throw new Error(`Test case ${testId} not found`);
     }
 
     // 模拟测试执行
@@ -115,7 +115,7 @@ class TestingService {
       testId,
       status: Math.random() > 0.2 ? 'passed' : 'failed',
       duration: Math.floor(Math.random() * 3000) + 500,
-      output: `测试 ${testCase.name} 执行完成`,
+      output: `Test ${testCase.name} executed successfully`,
       timestamp: new Date().toISOString(),
     };
 

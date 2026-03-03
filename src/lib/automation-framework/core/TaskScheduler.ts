@@ -24,7 +24,7 @@ export interface ScheduledTask {
   };
   retryPolicy?: {
     maxRetries: number;
-    retryDelay: number; // 毫秒
+    retryDelay: number; // ms
     backoffMultiplier: number;
   };
 }
@@ -83,7 +83,7 @@ export class TaskScheduler {
     return task;
   }
   
-  // 获取所有任务
+  // Get all tasks
   getAllTasks(): ScheduledTask[] {
     const tasks: ScheduledTask[] = [];
     
@@ -142,7 +142,7 @@ export class TaskScheduler {
     }
   }
   
-  // 更新任务下次运行时间
+  // Update task下次运行时间
   updateTaskNextRun(taskId: string): boolean {
     const tasks = this.getAllTasks();
     const task = tasks.find(t => t.id === taskId);
@@ -299,7 +299,7 @@ export class TaskScheduler {
     fs.writeFileSync(executionFile, JSON.stringify(execution, null, 2));
   }
   
-  // 更新任务统计
+  // Update task统计
   private updateTaskStats(taskId: string, success: boolean): void {
     const tasks = this.getAllTasks();
     const task = tasks.find(t => t.id === taskId);
@@ -320,7 +320,7 @@ export class TaskScheduler {
     this.saveTask(task);
   }
   
-  // 获取任务统计
+  // Get task statistics
   getTaskStats(taskId: string): {
     totalRuns: number;
     successRate: number;
@@ -396,7 +396,7 @@ export class TaskScheduler {
         }
       } catch (error) {
         logger.error('Error processing execution file', error, { module: 'TaskScheduler', file });
-        kept++; // 出错时保留文件
+        kept++; // keep file on error
       }
     }
     

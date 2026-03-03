@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     
     if (!file && !textContent) {
       return NextResponse.json(
-        { error: '请提供文件或文本内容' },
+        { error: 'Please provide a file or text content' },
         { status: 400 }
       );
     }
@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
     let parsedDocument: ParsedDocument;
     
     if (file) {
-      // 处理文件上传
+      // Handle file upload
       const buffer = Buffer.from(await file.arrayBuffer());
       parsedDocument = await documentParser.parseFile(buffer, file.name);
     } else {
-      // 处理文本内容
+      // Handle text content
       parsedDocument = await documentParser.parseFile(
         Buffer.from(textContent),
         'text-input.txt',
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 分析需求
+    // Analyze requirements
     const analysis = await requirementsAnalyzer.analyzeDocument(parsedDocument);
     
-    // 生成技术文档（如果请求）
+    // Generate technical document (if requested)
     let documents: Record<string, TechnicalDocument> = {};
     if (generateDocs) {
       documents = documentGenerator.generateAllDocuments(analysis);
@@ -74,11 +74,11 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('需求分析错误:', error);
+    console.error('Requirements analysis error:', error);
     return NextResponse.json(
       { 
-        error: '需求分析失败',
-        details: error instanceof Error ? error.message : '未知错误'
+        error: 'Requirements analysis failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
@@ -105,12 +105,12 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
     data: {
-      message: '需求分析API',
+      message: 'Requirements Analysis API',
       endpoints: {
-        POST: '/api/requirements-analysis - 分析需求文档',
-        GET: '/api/requirements-analysis?action=status - 获取服务状态',
+        POST: '/api/requirements-analysis - Analyze requirements documents',
+        GET: '/api/requirements-analysis?action=status - Get service status',
       },
-      usage: '上传文件或提供文本内容进行需求分析',
+      usage: 'Upload a file or provide text content for requirements analysis',
     },
   });
 }

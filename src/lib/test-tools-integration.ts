@@ -24,7 +24,7 @@ export class AIAssistIntegration {
       if (!fs.existsSync(aiassistPath)) {
         return {
           success: false,
-          result: 'AI Assist 未安装，请先安装: cd ~/.openclaw/workspace/skills && git clone https://github.com/llaoj/aiassist'
+          result: 'AI Assist not installed. Install: cd ~/.openclaw/workspace/skills && git clone https://github.com/llaoj/aiassist'
         };
       }
       
@@ -42,35 +42,35 @@ export class AIAssistIntegration {
       // 根据问题类型返回不同的诊断建议
       let suggestions: string[] = [];
       
-      if (issue.includes('docker') || issue.includes('容器')) {
+      if (issue.includes('docker') || issue.includes('container')) {
         suggestions = [
-          '检查Docker服务状态: systemctl status docker',
-          '重启Docker服务: sudo systemctl restart docker',
-          '检查容器日志: docker logs [容器名]'
+          'Check Docker service status: systemctl status docker',
+          'Restart Docker service: sudo systemctl restart docker',
+          'Check container logs: docker logs [container-name]'
         ];
-      } else if (issue.includes('端口') || issue.includes('3000')) {
+      } else if (issue.includes('端口') || issue.includes('port') || issue.includes('3000')) {
         suggestions = [
-          '检查端口占用: netstat -tulpn | grep :3000',
-          '杀死占用进程: kill -9 [PID]',
-          '使用其他端口: 修改next.config.js中的端口配置'
+          'Check port usage: netstat -tulpn | grep :3000',
+          'Kill occupying process: kill -9 [PID]',
+          'Use a different port: modify port configuration in next.config.js'
         ];
-      } else if (issue.includes('内存') || issue.includes('磁盘')) {
+      } else if (issue.includes('内存') || issue.includes('memory') || issue.includes('磁盘') || issue.includes('disk')) {
         suggestions = [
-          '检查磁盘空间: df -h',
-          '检查内存使用: free -h',
-          '清理Docker缓存: docker system prune -a'
+          'Check disk space: df -h',
+          'Check memory usage: free -h',
+          'Clean Docker cache: docker system prune -a'
         ];
       } else {
         suggestions = [
-          '检查系统日志: journalctl -xe',
-          '重启相关服务',
-          '查看应用程序日志'
+          'Check system logs: journalctl -xe',
+          'Restart related services',
+          'View application logs'
         ];
       }
       
       return {
         success: true,
-        result: `AI Assist 诊断完成: ${issue}`,
+        result: `AI Assist diagnosis completed: ${issue}`,
         commands: diagnosticCommands,
         suggestions
       };
@@ -78,8 +78,8 @@ export class AIAssistIntegration {
     } catch (error) {
       return {
         success: false,
-        result: `AI Assist 诊断失败: ${error instanceof Error ? error.message : '未知错误'}`,
-        suggestions: ['检查AI Assist安装', '查看错误日志']
+        result: `AI Assist diagnosis failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        suggestions: ['Check AI Assist installation', 'View error logs']
       };
     }
   }
@@ -91,7 +91,7 @@ export class AIAssistIntegration {
   }> {
     try {
       const { stdout, stderr } = await execAsync(command, {
-        timeout: 30000, // 30秒超时
+        timeout: 30000, // 30 second timeout
         cwd: process.cwd()
       });
       
@@ -104,7 +104,7 @@ export class AIAssistIntegration {
       return {
         success: false,
         output: '',
-        error: error instanceof Error ? error.message : '命令执行失败'
+        error: error instanceof Error ? error.message : 'Command execution failed'
       };
     }
   }
@@ -133,7 +133,7 @@ export class CortexaAIIntegration {
       if (!fs.existsSync(cortexaaiPath)) {
         return {
           success: false,
-          result: 'CortexaAI 未安装，请先安装: cd ~/.openclaw/workspace/skills && git clone https://github.com/mytechnotalent/CortexaAI'
+          result: 'CortexaAI not installed. To install: cd ~/.openclaw/workspace/skills && git clone https://github.com/mytechnotalent/CortexaAI'
         };
       }
       
@@ -145,7 +145,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-# 设置Chrome选项
+# Set Chrome options
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
 options.add_argument('--no-sandbox')
@@ -154,25 +154,25 @@ options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=options)
 
 try:
-    # 访问目标网站
+    # Visit target website
     start_time = time.time()
     driver.get("${url}")
     
-    # 等待页面加载
+    # Wait for page load
     wait = WebDriverWait(driver, 10)
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     
     load_time = time.time() - start_time
     
-    # 基本元素检查
+    # Basic element check
     elements_found = len(driver.find_elements(By.XPATH, "//*"))
     
-    # 根据测试类型执行不同的检查
+    # Perform different checks based on test type
     tests_passed = 0
     tests_failed = 0
     
     if "${testType}" == "basic":
-        # 基本测试：检查标题、链接、图片
+        # Basic test: check title, links, images
         if driver.title:
             tests_passed += 1
         else:
@@ -190,10 +190,10 @@ try:
         else:
             tests_failed += 1
     
-    print(f"页面加载时间: {load_time:.2f}秒")
-    print(f"找到元素数量: {elements_found}")
-    print(f"测试通过: {tests_passed}")
-    print(f"测试失败: {tests_failed}")
+    print(f"Page load time: {load_time:.2f}s")
+    print(f"Elements found: {elements_found}")
+    print(f"Tests passed: {tests_passed}")
+    print(f"Tests failed: {tests_failed}")
     
 finally:
     driver.quit()
@@ -201,14 +201,14 @@ finally:
       
       // 在实际集成中，这里会执行真实的Python脚本
       // 暂时返回模拟结果
-      const loadTime = Math.random() * 3 + 1; // 1-4秒
-      const elementsFound = Math.floor(Math.random() * 500) + 100; // 100-600个元素
+      const loadTime = Math.random() * 3 + 1; // 1-4 seconds
+      const elementsFound = Math.floor(Math.random() * 500) + 100; // 100-600 elements
       const testsPassed = testType === 'basic' ? 3 : 5;
       const testsFailed = Math.random() > 0.8 ? 1 : 0;
       
       return {
         success: testsFailed === 0,
-        result: `CortexaAI Web测试完成: ${url}`,
+        result: `CortexaAI web test completed: ${url}`,
         metrics: {
           loadTime: parseFloat(loadTime.toFixed(2)),
           elementsFound,
@@ -220,7 +220,7 @@ finally:
     } catch (error) {
       return {
         success: false,
-        result: `CortexaAI 测试失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        result: `CortexaAI test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         metrics: {
           loadTime: 0,
           elementsFound: 0,
@@ -257,7 +257,7 @@ finally:
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : '截图失败'
+        error: error instanceof Error ? error.message : 'Screenshot failed'
       };
     }
   }
@@ -277,7 +277,7 @@ export class TestToolManager {
       {
         id: 'aiassist',
         name: 'AI Assist',
-        description: 'AI驱动的运维故障排查和命令指导',
+        description: 'AI-driven ops troubleshooting and command guidance',
         installed: fs.existsSync(path.join(
           process.env.HOME || '/Users/kane',
           '.openclaw/workspace/skills/automated-testing/aiassist'
@@ -288,7 +288,7 @@ export class TestToolManager {
       {
         id: 'cortexaai',
         name: 'CortexaAI',
-        description: 'Selenium Web自动化测试框架',
+        description: 'Selenium web automation testing framework',
         installed: fs.existsSync(path.join(
           process.env.HOME || '/Users/kane',
           '.openclaw/workspace/skills/automated-testing/CortexaAI'
@@ -299,22 +299,22 @@ export class TestToolManager {
       {
         id: 'selenium',
         name: 'Selenium',
-        description: 'Web浏览器自动化工具',
-        installed: true, // 通过Python包管理检查
+        description: 'Web browser automation tool',
+        installed: true, // checked via Python package manager
         health: 'healthy' as const,
         version: '4.36.0'
       },
       {
         id: 'puppeteer',
         name: 'Puppeteer',
-        description: 'Chrome浏览器自动化',
+        description: 'Chrome browser automation',
         installed: false,
         health: 'unknown' as const
       },
       {
         id: 'playwright',
         name: 'Playwright',
-        description: '跨浏览器自动化测试',
+        description: 'Cross-browser automation testing',
         installed: false,
         health: 'unknown' as const
       }
@@ -339,8 +339,8 @@ export class TestToolManager {
           if (!fs.existsSync(aiassistPath)) {
             return {
               healthy: false,
-              issues: ['AI Assist未安装'],
-              suggestions: ['运行: git clone https://github.com/llaoj/aiassist ~/.openclaw/workspace/skills/automated-testing/aiassist']
+              issues: ['AI Assist not installed'],
+              suggestions: ['Run: git clone https://github.com/llaoj/aiassist ~/.openclaw/workspace/skills/automated-testing/aiassist']
             };
           }
           
@@ -352,8 +352,8 @@ export class TestToolManager {
           if (!hasReadme || !hasScripts) {
             return {
               healthy: false,
-              issues: ['AI Assist目录结构不完整'],
-              suggestions: ['重新克隆仓库', '检查文件权限']
+              issues: ['AI Assist directory structure incomplete'],
+              suggestions: ['Re-clone the repository', 'Check file permissions']
             };
           }
           
@@ -361,8 +361,8 @@ export class TestToolManager {
         } catch (error) {
           return {
             healthy: false,
-            issues: [`检查失败: ${error instanceof Error ? error.message : '未知错误'}`],
-            suggestions: ['检查文件权限', '验证目录路径']
+            issues: [`Check failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
+            suggestions: ['Check file permissions', 'Verify directory path']
           };
         }
         
@@ -376,8 +376,8 @@ export class TestToolManager {
           if (!fs.existsSync(cortexaaiPath)) {
             return {
               healthy: false,
-              issues: ['CortexaAI未安装'],
-              suggestions: ['运行: git clone https://github.com/mytechnotalent/CortexaAI ~/.openclaw/workspace/skills/automated-testing/CortexaAI']
+              issues: ['CortexaAI not installed'],
+              suggestions: ['Run: git clone https://github.com/mytechnotalent/CortexaAI ~/.openclaw/workspace/skills/automated-testing/CortexaAI']
             };
           }
           
@@ -387,8 +387,8 @@ export class TestToolManager {
           } catch {
             return {
               healthy: false,
-              issues: ['缺少Selenium依赖'],
-              suggestions: ['运行: pip install selenium webdriver-manager']
+              issues: ['Missing Selenium dependencies'],
+              suggestions: ['Run: pip install selenium webdriver-manager']
             };
           }
           
@@ -396,16 +396,16 @@ export class TestToolManager {
         } catch (error) {
           return {
             healthy: false,
-            issues: [`检查失败: ${error instanceof Error ? error.message : '未知错误'}`],
-            suggestions: ['检查Python环境', '验证依赖安装']
+            issues: [`Check failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
+            suggestions: ['Check Python environment', 'Verify dependency installation']
           };
         }
         
       default:
         return {
           healthy: false,
-          issues: [`未知工具: ${toolId}`],
-          suggestions: ['检查工具ID', '查看可用工具列表']
+          issues: [`Unknown tool: ${toolId}`],
+          suggestions: ['Check tool ID', 'View available tools list']
         };
     }
   }
@@ -426,26 +426,26 @@ export class TestToolManager {
     if (!installScripts[toolId]) {
       return {
         success: false,
-        message: `不支持安装工具: ${toolId}`
+        message: `Tool installation not supported: ${toolId}`
       };
     }
     
     try {
       const { stdout, stderr } = await execAsync(installScripts[toolId], {
-        timeout: 300000, // 5分钟超时
+        timeout: 300000, // 5 minute timeout
         cwd: process.cwd()
       });
       
       return {
         success: !stderr,
-        message: stderr ? `安装完成但有警告: ${stderr}` : '安装成功',
+        message: stderr ? `Installation completed with warnings: ${stderr}` : 'Installation successful',
         logs: [stdout, stderr].filter(Boolean)
       };
     } catch (error) {
       return {
         success: false,
-        message: `安装失败: ${error instanceof Error ? error.message : '未知错误'}`,
-        logs: [error instanceof Error ? error.message : '安装过程出错']
+        message: `Installation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        logs: [error instanceof Error ? error.message : 'Error during installation']
       };
     }
   }

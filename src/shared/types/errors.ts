@@ -1,4 +1,4 @@
-// 错误类型定义
+// Error type definitions
 
 export interface AppError extends Error {
   code: ErrorCode;
@@ -8,14 +8,14 @@ export interface AppError extends Error {
 }
 
 export type ErrorCode = 
-  // 认证错误 (1000-1099)
+  // Authentication error (1000-1099)
   | 'AUTH_INVALID_CREDENTIALS'
   | 'AUTH_TOKEN_EXPIRED'
   | 'AUTH_TOKEN_INVALID'
   | 'AUTH_INSUFFICIENT_PERMISSIONS'
   | 'AUTH_USER_NOT_FOUND'
   
-  // 验证错误 (1100-1199)
+  // Validation error (1100-1199)
   | 'VALIDATION_FAILED'
   | 'VALIDATION_REQUIRED_FIELD'
   | 'VALIDATION_INVALID_FORMAT'
@@ -62,14 +62,14 @@ export type HttpStatusCode =
 
 // 错误代码映射到HTTP状态码
 export const ERROR_CODE_TO_STATUS: Record<ErrorCode, HttpStatusCode> = {
-  // 认证错误
+  // Authentication error
   'AUTH_INVALID_CREDENTIALS': 401,
   'AUTH_TOKEN_EXPIRED': 401,
   'AUTH_TOKEN_INVALID': 401,
   'AUTH_INSUFFICIENT_PERMISSIONS': 403,
   'AUTH_USER_NOT_FOUND': 404,
   
-  // 验证错误
+  // Validation error
   'VALIDATION_FAILED': 400,
   'VALIDATION_REQUIRED_FIELD': 400,
   'VALIDATION_INVALID_FORMAT': 400,
@@ -104,14 +104,14 @@ export const ERROR_CODE_TO_STATUS: Record<ErrorCode, HttpStatusCode> = {
 
 // 错误消息映射
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
-  // 认证错误
+  // Authentication error
   'AUTH_INVALID_CREDENTIALS': 'Invalid credentials provided',
   'AUTH_TOKEN_EXPIRED': 'Authentication token has expired',
   'AUTH_TOKEN_INVALID': 'Invalid authentication token',
   'AUTH_INSUFFICIENT_PERMISSIONS': 'Insufficient permissions to perform this action',
   'AUTH_USER_NOT_FOUND': 'User not found',
   
-  // 验证错误
+  // Validation error
   'VALIDATION_FAILED': 'Validation failed for one or more fields',
   'VALIDATION_REQUIRED_FIELD': 'This field is required',
   'VALIDATION_INVALID_FORMAT': 'Invalid format for this field',

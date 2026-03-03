@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'PostgreSQL连接测试成功',
+      message: 'PostgreSQL connection test successful',
       data: {
         taskCount: parseInt(taskCount),
         database: 'postgresql',
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: 'PostgreSQL连接失败',
+      error: 'PostgreSQL connection failed',
       details: error.message,
       timestamp: new Date().toISOString()
     }, { status: 500 });

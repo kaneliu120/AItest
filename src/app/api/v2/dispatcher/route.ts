@@ -158,17 +158,17 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v2/dispatcher', requestId, error);
-    logger.error('智能分发API错误', error, { module: 'api/v2/dispatcher', requestId });
+    logger.error('Intelligent dispatch API error', error, { module: 'api/v2/dispatcher', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId
     }, { status: 500 });
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数',
+        error: 'Missing action parameter',
         timestamp: new Date().toISOString(),
         requestId
       }, { status: 400 });
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'dispatch':
-        // 分发任务
+        // Dispatch task
         const query = typeof body.query === 'string' ? body.query : '';
         const system = body.system;
         const priority = body.priority;
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少 query 参数',
+            error: 'Missing query parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -252,7 +252,7 @@ export async function POST(request: NextRequest) {
         if (!config) {
           return NextResponse.json({
             success: false,
-            error: '缺少 config 参数',
+            error: 'Missing config parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: intelligentTaskDispatcher.getConfig(),
-          message: '配置更新成功',
+          message: 'Configuration updated',
           timestamp: new Date().toISOString(),
           requestId
         });
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
         intelligentTaskDispatcher.clearHistory();
         return NextResponse.json({
           success: true,
-          message: '历史记录已清空',
+          message: 'History cleared',
           timestamp: new Date().toISOString(),
           requestId
         });
@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
         enhancedIntelligentDispatcher.clearCache();
         return NextResponse.json({
           success: true,
-          message: '缓存已清空',
+          message: 'Cache cleared',
           timestamp: new Date().toISOString(),
           requestId
         });
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
         if (!alertId) {
           return NextResponse.json({
             success: false,
-            error: '缺少 alertId 参数',
+            error: 'Missing alertId parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
         const resolved = dispatcherMonitoringService.resolveAlert(alertId);
         return NextResponse.json({
           success: resolved,
-          message: resolved ? '警报已解决' : '警报未找到或已解决',
+          message: resolved ? 'Alert resolved' : 'Alert not found or already resolved',
           timestamp: new Date().toISOString(),
           requestId
         });
@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
         dispatcherMonitoringService.clearAll();
         return NextResponse.json({
           success: true,
-          message: '监控数据已清空',
+          message: 'Monitoring data cleared',
           timestamp: new Date().toISOString(),
           requestId
         });
@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
         if (!compareQuery) {
           return NextResponse.json({
             success: false,
-            error: '缺少 compareQuery 参数',
+            error: 'Missing compareQuery parameter',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
@@ -363,7 +363,7 @@ export async function POST(request: NextRequest) {
             },
             improvement: {
               timeImprovement: `${((basicResult.data.responseTime - intelligentResult.data.responseTime) / basicResult.data.responseTime * 100).toFixed(1)}%`,
-              systemMatch: intelligentResult.data.source === 'auto' ? '智能选择' : '指定系统'
+              systemMatch: intelligentResult.data.source === 'auto' ? 'Auto-selected' : 'Specified system'
             }
           },
           timestamp: new Date().toISOString(),
@@ -377,13 +377,13 @@ export async function POST(request: NextRequest) {
         if (!Array.isArray(queries) || queries.length === 0) {
           return NextResponse.json({
             success: false,
-            error: '缺少有效的 queries 数组',
+            error: 'Missing valid queries array',
             timestamp: new Date().toISOString(),
             requestId
           }, { status: 400 });
         }
         
-        // 限制批量大小
+        // Limit batch size
         const limitedQueries = queries.slice(0, 10);
         
         const batchResults = await Promise.all(
@@ -401,7 +401,7 @@ export async function POST(request: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : '未知错误',
+                error: error instanceof Error ? error.message : 'Unknown error',
                 query: q
               };
             }
@@ -432,17 +432,17 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId
         }, { status: 400 });
     }
   } catch (error) {
     logApiError('api/v2/dispatcher', requestId, error);
-    logger.error('智能分发API错误', error, { module: 'api/v2/dispatcher', requestId });
+    logger.error('Intelligent dispatch API error', error, { module: 'api/v2/dispatcher', requestId });
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId
     }, { status: 500 });

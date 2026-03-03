@@ -43,36 +43,36 @@ class DispatcherMonitoringService {
       id: 'high-error-rate',
       metric: 'error_rate',
       condition: 'gte',
-      threshold: 0.1, // 10%错误率
+      threshold: 0.1, // 10% error rate
       severity: 'error',
-      message: '错误率超过10%，需要立即检查',
+      message: 'Error rate exceeded 10%, immediate inspection required',
       enabled: true
     },
     {
       id: 'slow-response',
       metric: 'avg_response_time',
       condition: 'gte',
-      threshold: 3000, // 3秒
+      threshold: 3000, // 3 seconds
       severity: 'warning',
-      message: '平均响应时间超过3秒，性能需要优化',
+      message: 'Average response time exceeds 3 seconds, performance optimization needed',
       enabled: true
     },
     {
       id: 'low-cache-hit',
       metric: 'cache_hit_rate',
       condition: 'lte',
-      threshold: 0.1, // 10%缓存命中率
+      threshold: 0.1, // 10% cache hit rate
       severity: 'warning',
-      message: '缓存命中率低于10%，需要优化缓存策略',
+      message: 'Cache hit rate below 10%, cache strategy optimization needed',
       enabled: true
     },
     {
       id: 'system-overload',
       metric: 'requests_per_minute',
       condition: 'gte',
-      threshold: 100, // 每分钟100个请求
+      threshold: 100, // 100 requests per minute
       severity: 'warning',
-      message: '系统负载过高，考虑扩容',
+      message: 'System load too high, consider scaling up',
       enabled: true
     }
   ];
@@ -192,7 +192,7 @@ class DispatcherMonitoringService {
 
   // 检查警报
   private checkAlerts(): void {
-    const metrics = this.getPerformanceMetrics(5); // 最近5分钟
+    const metrics = this.getPerformanceMetrics(5); // last 5 minutes
     
     this.rules.forEach(rule => {
       if (!rule.enabled) return;
@@ -261,8 +261,8 @@ class DispatcherMonitoringService {
           }
           
           // 记录警报日志
-          console.log(`🚨 警报触发: ${rule.severity.toUpperCase()} - ${rule.message}`);
-          console.log(`   指标: ${rule.metric} = ${value}, 阈值: ${rule.threshold}`);
+          console.log(`🚨 Alert triggered: ${rule.severity.toUpperCase()} - ${rule.message}`);
+          console.log(`   Metric: ${rule.metric} = ${value}, Threshold: ${rule.threshold}`);
         }
       }
     });
@@ -291,7 +291,7 @@ class DispatcherMonitoringService {
 
   // 获取监控仪表板数据
   getDashboardData() {
-    const performance = this.getPerformanceMetrics(60); // 最近1小时
+    const performance = this.getPerformanceMetrics(60); // last 1 hour
     const activeAlerts = this.getActiveAlerts();
     
     return {

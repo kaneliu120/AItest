@@ -16,12 +16,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { testCases } });
     }
     
-    // 默认返回统计
+    // Default: return statistics
     const stats = await testingService.getTestStats();
     return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('测试API错误:', error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    console.error('Test API error:', error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -34,16 +34,16 @@ export async function POST(request: NextRequest) {
       const { testId } = body;
       
       if (!testId) {
-        return NextResponse.json({ success: false, error: '缺少测试ID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Missing test ID' }, { status: 400 });
       }
       
       const result = await testingService.runTest(testId);
       return NextResponse.json({ success: true, data: result });
     }
     
-    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
   } catch (error) {
-    console.error('测试API POST错误:', error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
+    console.error('Testing API POST error:', error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

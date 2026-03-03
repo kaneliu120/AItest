@@ -1,4 +1,4 @@
-// 生态系统服务 - 深度集成到Mission Control
+// Ecosystem service - 深度集成到Mission Control
 
 export interface ToolStatus {
   name: string;
@@ -48,79 +48,79 @@ class EcosystemService {
       type: 'dashboard',
       version: '2.0.0',
       lastChecked: new Date().toISOString(),
-      details: '主控制系统 - 统一管理所有子系统',
+      details: 'Main control system - unified management of all subsystems',
     },
     {
-      name: '工具生态系统',
+      name: 'Tool Ecosystem',
       status: 'healthy',
       type: 'monitoring',
       version: '2.0.0',
       lastChecked: new Date().toISOString(),
-      details: '工具监控和管理 - 42/62工具已连接',
+      details: 'Tool monitoring and management - 42/62 tools connected',
     },
     {
-      name: '技能评估系统',
+      name: 'Skill Evaluation System',
       status: 'healthy',
       type: 'evaluation',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '技能质量评估 - 评分: 76/100',
+      details: 'Skill quality evaluation - score: 76/100',
     },
     {
-      name: '健康监控系统',
+      name: 'Health Monitoring System',
       status: 'healthy',
       type: 'health',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '系统健康监控 - 健康度: 95%',
+      details: 'System health monitoring - health: 95%',
     },
     {
-      name: '财务系统',
+      name: 'Finance System',
       status: 'healthy',
       type: 'finance',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '财务管理和跟踪 - 自动化20%',
+      details: 'Finance management and tracking - 20% automated',
     },
     {
-      name: '外包系统',
+      name: 'Freelance System',
       status: 'warning',
       type: 'freelance',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '外包项目管理 - 需平台注册',
+      details: 'Freelance project management - platform registration required',
     },
     {
-      name: '任务系统',
+      name: 'Task System',
       status: 'healthy',
       type: 'task',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '日常任务管理 - 自动化70%',
+      details: 'Daily task management - 70% automated',
     },
     {
-      name: 'AI助手',
+      name: 'AI Assistant',
       status: 'healthy',
       type: 'ai',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AI智能助手 - 深度集成',
+      details: 'AI intelligent assistant - deep integration',
     },
     {
-      name: '自动化系统',
+      name: 'Automation System',
       status: 'healthy',
       type: 'automation',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '工作流自动化 - 40%自动化',
+      details: 'Workflow automation - 40% automated',
     },
     {
-      name: '知识管理系统',
+      name: 'Knowledge Management System',
       status: 'healthy',
       type: 'knowledge',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'RAG知识库 - 100%完成',
+      details: 'RAG knowledge base - 100% complete',
     },
     {
       name: 'Google Analytics',
@@ -128,7 +128,7 @@ class EcosystemService {
       type: 'analytics',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'GA4集成 - 524777065',
+      details: 'GA4 integration - 524777065',
     },
     {
       name: 'Google Ads',
@@ -136,7 +136,7 @@ class EcosystemService {
       type: 'ads',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Ads API - 需要OAuth配置',
+      details: 'Ads API - OAuth configuration required',
     },
     {
       name: 'Facebook API',
@@ -144,7 +144,7 @@ class EcosystemService {
       type: 'social',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Facebook Graph API集成',
+      details: 'Facebook Graph API integration',
     },
     {
       name: 'LinkedIn API',
@@ -152,7 +152,7 @@ class EcosystemService {
       type: 'social',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'LinkedIn API集成 - 已配置',
+      details: 'LinkedIn API integration - configured',
     },
     {
       name: 'GitHub Actions',
@@ -160,7 +160,7 @@ class EcosystemService {
       type: 'ci-cd',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'CI/CD自动化 - 已配置',
+      details: 'CI/CD automation - configured',
     },
     {
       name: 'Docker',
@@ -168,15 +168,15 @@ class EcosystemService {
       type: 'container',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '容器管理 - 需要安装',
+      details: 'Container management - installation required',
     },
     {
-      name: 'Azure云',
+      name: 'Azure Cloud',
       status: 'healthy',
       type: 'cloud',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Azure部署 - myskillstore.dev',
+      details: 'Azure deployment - myskillstore.dev',
     },
     {
       name: 'OpenClaw',
@@ -184,7 +184,7 @@ class EcosystemService {
       type: 'framework',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AI代理框架 - 深度集成',
+      details: 'AI agent framework - deep integration',
     },
     {
       name: 'Antigravity',
@@ -192,7 +192,7 @@ class EcosystemService {
       type: 'skill',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: '技能开发框架 - 90%完成',
+      details: 'Skill development framework - 90% complete',
     },
     {
       name: 'My Skill Shop',
@@ -200,7 +200,7 @@ class EcosystemService {
       type: 'product',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AI技能平台 - 生产环境运行',
+      details: 'AI skill platform - running in production',
     },
   ];
 
@@ -213,33 +213,33 @@ class EcosystemService {
     recentAlerts: [
       {
         level: 'error',
-        message: 'Docker未安装，容器管理功能不可用',
+        message: 'Docker not installed, container management unavailable',
         timestamp: new Date().toISOString(),
         tool: 'Docker',
       },
       {
         level: 'warning',
-        message: 'Google Ads API需要OAuth配置',
+        message: 'Google Ads API requires OAuth configuration',
         timestamp: new Date().toISOString(),
         tool: 'Google Ads',
       },
       {
         level: 'warning',
-        message: '外包系统需要平台注册',
+        message: 'Freelance system requires platform registration',
         timestamp: new Date().toISOString(),
-        tool: '外包系统',
+        tool: 'Freelance System',
       },
       {
         level: 'info',
-        message: '知识管理系统100%完成，生产就绪',
+        message: 'Knowledge management system 100% complete, production ready',
         timestamp: new Date().toISOString(),
-        tool: '知识管理系统',
+        tool: 'Knowledge Management System',
       },
       {
         level: 'info',
-        message: '工具生态系统连接率68%',
+        message: 'Tool ecosystem connection rate 68%',
         timestamp: new Date().toISOString(),
-        tool: '工具生态系统',
+        tool: 'Tool Ecosystem',
       },
     ],
   };
@@ -255,7 +255,7 @@ class EcosystemService {
     lastUpdate: new Date().toISOString(),
   };
 
-  // 获取生态系统数据
+  // Fetch ecosystem data
   async getEcosystemData(): Promise<EcosystemData> {
     // 模拟数据更新
     this.updateMockData();
@@ -299,7 +299,7 @@ class EcosystemService {
     
     return {
       success: true,
-      message: `健康检查完成: ${healthyCount}/${totalCount} 个工具健康 (${healthPercentage}%)`,
+      message: `Health check completed: ${healthyCount}/${totalCount} tools healthy (${healthPercentage}%)`,
       timestamp: new Date().toISOString(),
     };
   }

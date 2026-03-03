@@ -12,9 +12,9 @@ export type TaskType = 'code' | 'knowledge' | 'skill' | 'mixed';
 export interface UnifiedRequest {
   id: string;
   query: string;
-  system?: SystemType; // 指定系统或自动选择
+  system?: SystemType; // specify system or auto-select
   priority?: 'low' | 'medium' | 'high' | 'critical';
-  context?: Record<string, any>; // 上下文信息
+  context?: Record<string, any>; // context information
   userId?: string;
   sessionId?: string;
   metadata?: Record<string, any>;
@@ -34,7 +34,7 @@ export interface UnifiedResponse {
     total: number;
   };
   timestamp: string;
-  suggestions?: string[]; // 后续建议
+  suggestions?: string[]; // follow-up suggestions
 }
 
 // 缓存项接口
@@ -118,7 +118,7 @@ class TaskClassifier {
       case 'skill':
         return 'openclaw';
       case 'mixed':
-        return 'auto'; // 自动分发
+        return 'auto'; // auto-dispatch
       default:
         return 'mission-control';
     }
@@ -130,7 +130,7 @@ export class UnifiedGatewayService {
   private redis: Redis;
   private classifier: TaskClassifier;
   private cacheEnabled = true;
-  private cacheTTL = 3600; // 1小时缓存
+  private cacheTTL = 3600; // 1-hour cache
   
   // 缓存统计
   cacheHits: number;
@@ -155,16 +155,16 @@ export class UnifiedGatewayService {
 
     // 监听Redis连接状态
     this.redis.on('connect', () => {
-      console.log('✅ Redis连接成功 - 统一API网关缓存启用');
+      console.log('✅ Redis connected - unified API gateway cache enabled');
     });
 
     this.redis.on('error', (error) => {
-      console.error('❌ Redis连接错误:', error);
+      console.error('❌ Redis connection error:', error);
       this.cacheEnabled = false;
     });
   }
 
-  // 处理统一请求
+  // Process unified request
   async processRequest(request: UnifiedRequest): Promise<UnifiedResponse> {
     const startTime = Date.now();
     
@@ -216,12 +216,12 @@ export class UnifiedGatewayService {
       return response;
 
     } catch (error) {
-      console.error('统一网关处理错误:', error);
+      console.error('Unified gateway processing error:', error);
       
       return {
         success: false,
         data: {
-          error: error instanceof Error ? error.message : '未知错误',
+          error: error instanceof Error ? error.message : 'Unknown error',
           requestId: request.id
         },
         source: request.system || 'mission-control',
@@ -261,7 +261,7 @@ export class UnifiedGatewayService {
     }
 
     // 如果都失败，返回错误
-    throw new Error('所有系统调用失败');
+    throw new Error('All system calls failed');
   }
 
   // 分发到指定系统
@@ -274,7 +274,7 @@ export class UnifiedGatewayService {
       case 'openclaw':
         return await this.callOpenClaw(request);
       default:
-        throw new Error(`未知系统: ${system}`);
+        throw new Error(`Unknown system: ${system}`);
     }
   }
 
@@ -284,7 +284,7 @@ export class UnifiedGatewayService {
       // 调用Mission Control生态系统API
       const response = await fetch('http://localhost:3001/api/ecosystem/status?format=json');
       if (!response.ok) {
-        throw new Error(`Mission Control API错误: ${response.status}`);
+        throw new Error(`Mission Control API error: ${response.status}`);
       }
       
       const data = await response.json();
@@ -297,13 +297,13 @@ export class UnifiedGatewayService {
         source: 'real-api'
       };
     } catch (error) {
-      console.error('调用Mission Control失败:', error);
+      console.error('Mission Control call failed:', error);
       // 回退到模拟数据
       return {
         system: 'mission-control',
         action: 'processed',
         query: request.query,
-        result: 'Mission Control处理完成 (模拟)',
+        result: 'Mission Control processing complete (simulated)',
         timestamp: new Date().toISOString(),
         source: 'fallback'
       };
@@ -316,7 +316,7 @@ export class UnifiedGatewayService {
       // 调用OKMS搜索API
       const response = await fetch('http://localhost:8000/api/v1/search?q=' + encodeURIComponent(request.query));
       if (!response.ok) {
-        throw new Error(`OKMS API错误: ${response.status}`);
+        throw new Error(`OKMS API error: ${response.status}`);
       }
       
       const data = await response.json();
@@ -329,13 +329,13 @@ export class UnifiedGatewayService {
         source: 'real-api'
       };
     } catch (error) {
-      console.error('调用OKMS失败:', error);
+      console.error('OKMS call failed:', error);
       // 回退到模拟数据
       return {
         system: 'okms',
         action: 'knowledge-retrieved',
         query: request.query,
-        knowledge: '相关知识点检索完成 (模拟)',
+        knowledge: 'Related knowledge retrieval complete (simulated)',
         timestamp: new Date().toISOString(),
         source: 'fallback'
       };
@@ -352,18 +352,18 @@ export class UnifiedGatewayService {
         system: 'openclaw',
         action: 'skill-executed',
         query: request.query,
-        result: 'OpenClaw技能执行完成 (需要配置API)',
+        result: 'OpenClaw skill execution complete (API configuration required)',
         timestamp: new Date().toISOString(),
         source: 'simulated',
-        note: '需要配置OpenClaw API端点'
+        note: 'OpenClaw API endpoint configuration required'
       };
     } catch (error) {
-      console.error('调用OpenClaw失败:', error);
+      console.error('OpenClaw call failed:', error);
       return {
         system: 'openclaw',
         action: 'error',
         query: request.query,
-        error: error instanceof Error ? error.message : '未知错误',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
         source: 'error'
       };
@@ -383,7 +383,7 @@ export class UnifiedGatewayService {
         
         // 检查缓存是否过期（基于使用频率）
         const cacheAge = Date.now() - new Date(parsed.timestamp).getTime();
-        const maxAge = this.cacheTTL * 1000; // 转换为毫秒
+        const maxAge = this.cacheTTL * 1000; // convert to ms
         
         if (cacheAge < maxAge) {
           // 更新最后使用时间
@@ -399,7 +399,7 @@ export class UnifiedGatewayService {
         this.cacheMisses++;
       }
     } catch (error) {
-      console.warn('缓存读取失败:', error);
+      console.warn('Cache read failed:', error);
     }
 
     return null;
@@ -414,7 +414,7 @@ export class UnifiedGatewayService {
       
       await this.redis.setex(cacheKey, this.cacheTTL, cacheValue);
     } catch (error) {
-      console.warn('缓存写入失败:', error);
+      console.warn('Cache write failed:', error);
     }
   }
 
@@ -430,10 +430,10 @@ export class UnifiedGatewayService {
     });
   }
 
-  // 获取缓存统计
+  // Get cache statistics
   async getCacheStats(): Promise<any> {
     if (!this.cacheEnabled) {
-      return { enabled: false, message: '缓存未启用' };
+      return { enabled: false, message: 'Cache not enabled' };
     }
 
     try {
@@ -468,7 +468,7 @@ export class UnifiedGatewayService {
           : '0%'
       };
     } catch (error) {
-      return { enabled: false, error: error instanceof Error ? error.message : '未知错误' };
+      return { enabled: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -483,7 +483,7 @@ export class UnifiedGatewayService {
       }
       return true;
     } catch (error) {
-      console.error('清空缓存失败:', error);
+      console.error('Cache flush failed:', error);
       return false;
     }
   }

@@ -11,7 +11,7 @@ export async function GET() {
     success: true,
     data: {
       api: 'tasks-batch',
-      description: '任务批量操作API',
+      description: 'Task batch operation API',
       methods: ['POST'],
       supportedActions: ['complete', 'delete', 'status'],
       example: {
@@ -19,7 +19,7 @@ export async function GET() {
         body: {
           action: 'complete',
           ids: ['task-1', 'task-2'],
-          status: 'completed' // 仅当action='status'时需要
+          status: 'completed' // only required when action='status'
         }
       }
     }
@@ -29,24 +29,24 @@ export async function GET() {
 type BatchAction = 'complete' | 'delete' | 'status';
 
 function validateBatchPayload(input: unknown): { ok: true; data: { action: BatchAction; ids: string[]; status?: 'pending' | 'in-progress' | 'completed' | 'cancelled' } } | { ok: false; error: string } {
-  if (!input || typeof input !== 'object') return { ok: false, error: '请求体必须是对象' };
+  if (!input || typeof input !== 'object') return { ok: false, error: 'Request body must be an object' };
   const body = input as Record<string, unknown>;
   const action = body.action;
   const ids = body.ids;
   const status = body.status;
 
   if (action !== 'complete' && action !== 'delete' && action !== 'status') {
-    return { ok: false, error: 'action 必须是 complete | delete | status' };
+    return { ok: false, error: 'action must be complete | delete | status' };
   }
   if (!Array.isArray(ids) || ids.length === 0 || ids.some((v) => typeof v !== 'string' || !v.trim())) {
-    return { ok: false, error: 'ids 必须是非空字符串数组' };
+    return { ok: false, error: 'ids must be a non-empty string array' };
   }
   if (action === 'status') {
     if (typeof status !== 'string' || !status.trim()) {
-      return { ok: false, error: 'action=status 时必须提供 status' };
+      return { ok: false, error: 'status must be provided when action=status' };
     }
     if (!['pending','in-progress','completed','cancelled'].includes(status)) {
-      return { ok: false, error: 'status 非法' };
+      return { ok: false, error: 'Invalid status value' };
     }
   }
 
@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: { affected, action: 'status', status } });
     }
 
-    return NextResponse.json({ success: false, error: '未知操作' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
   } catch (err: unknown) {
-    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : '未知错误' }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }

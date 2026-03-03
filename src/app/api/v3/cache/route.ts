@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     switch (action) {
       case 'stats':
-        // 获取缓存统计
+        // Get cache statistics
         const stats = contextAwareCacheService.getStats();
         return NextResponse.json({
           success: true,
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少查询参数 q',
+            error: 'Missing query parameter q',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
             keywords,
             length: query.length,
             wordCount: query.split(/\s+/).length,
-            analysis: '上下文特征分析需要完整请求对象'
+            analysis: 'Context feature analysis requires a complete request object'
           },
           timestamp: new Date().toISOString(),
         });
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId,
         }, { status: 400 });
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
     logApiError('api/v3/cache', requestId, error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId,
     }, { status: 500 });
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: '缺少 action 参数',
+        error: 'Missing action parameter',
         timestamp: new Date().toISOString(),
         requestId,
       }, { status: 400 });
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         if (!query) {
           return NextResponse.json({
             success: false,
-            error: '缺少 query 参数',
+            error: 'Missing query parameter',
             timestamp: new Date().toISOString(),
             requestId,
           }, { status: 400 });
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
         const cacheResult = await contextAwareCacheService.getWithContext(cacheRequest, strategy);
         
         if (cacheResult.cached && cacheResult.response) {
-          // 缓存命中
+ // cache hit
           return NextResponse.json({
             success: true,
             data: {
@@ -244,19 +244,19 @@ export async function POST(request: NextRequest) {
         if (!strategyName || !strategyConfig) {
           return NextResponse.json({
             success: false,
-            error: '缺少 strategyName 或 strategyConfig 参数',
+            error: 'Missing strategyName or strategyConfig parameter',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
         
         if (typeof strategyConfig !== 'object' || strategyConfig === null) {
-          return NextResponse.json({ success: false, error: 'strategyConfig 必须是对象', code: 'VALIDATION_ERROR' }, { status: 400 });
+          return NextResponse.json({ success: false, error: 'strategyConfig must be an object', code: 'VALIDATION_ERROR' }, { status: 400 });
         }
         contextAwareCacheService.addStrategy(strategyName, strategyConfig as CacheStrategy);
         return NextResponse.json({
           success: true,
           data: contextAwareCacheService.getStrategy(strategyName),
-          message: '缓存策略添加成功',
+          message: 'Cache strategy added',
           timestamp: new Date().toISOString(),
         });
         
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
         if (!similarityConfig) {
           return NextResponse.json({
             success: false,
-            error: '缺少 similarityConfig 参数',
+            error: 'Missing similarityConfig parameter',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
         contextAwareCacheService.updateSimilarityConfig(similarityConfig);
         return NextResponse.json({
           success: true,
-          message: '相似度配置更新成功',
+          message: 'Similarity configuration updated',
           timestamp: new Date().toISOString(),
         });
         
@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
         contextAwareCacheService.clearCache();
         return NextResponse.json({
           success: true,
-          message: '上下文缓存已清空',
+          message: 'Context cache cleared',
           timestamp: new Date().toISOString(),
         });
         
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
         if (!removeStrategyName) {
           return NextResponse.json({
             success: false,
-            error: '缺少 removeStrategyName 参数',
+            error: 'Missing removeStrategyName parameter',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
         const removed = contextAwareCacheService.removeStrategy(removeStrategyName);
         return NextResponse.json({
           success: removed,
-          message: removed ? '缓存策略移除成功' : '缓存策略未找到',
+          message: removed ? 'Cache strategy removed' : 'Cache strategy not found',
           timestamp: new Date().toISOString(),
         });
         
@@ -313,7 +313,7 @@ export async function POST(request: NextRequest) {
         if (!query1 || !query2) {
           return NextResponse.json({
             success: false,
-            error: '缺少 query1 或 query2 参数',
+            error: 'Missing query1 or query2 parameter',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
@@ -353,7 +353,7 @@ export async function POST(request: NextRequest) {
             intersection,
             unionSize: union.length,
             jaccardSimilarity: jaccardSimilarity.toFixed(3),
-            analysis: '基于关键词的Jaccard相似度计算'
+            analysis: 'Jaccard similarity calculation based on keywords'
           },
           timestamp: new Date().toISOString(),
         });
@@ -365,12 +365,12 @@ export async function POST(request: NextRequest) {
         if (!Array.isArray(queries) || queries.length === 0) {
           return NextResponse.json({
             success: false,
-            error: '缺少有效的 queries 数组',
+            error: 'Missing valid queries array',
             timestamp: new Date().toISOString()
           }, { status: 400 });
         }
         
-        // 限制批量大小
+        // Limit batch size
         const limitedQueries = queries.slice(0, 10);
         
         const batchResults = await Promise.all(
@@ -417,7 +417,7 @@ export async function POST(request: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : '未知错误',
+                error: error instanceof Error ? error.message : 'Unknown error',
                 cacheHit: false,
                 query: q
               };
@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
           })
         );
         
-        // 计算统计
+        // Calculate statistics
         const successful = batchResults.filter(r => r.success).length;
         const cacheHits = batchResults.filter(r => r.cacheHit).length;
         
@@ -445,7 +445,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: `未知操作: ${action}`,
+          error: `Unknown action: ${action}`,
           timestamp: new Date().toISOString(),
           requestId,
         }, { status: 400 });
@@ -454,7 +454,7 @@ export async function POST(request: NextRequest) {
     logApiError('api/v3/cache', requestId, error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
       requestId,
     }, { status: 500 });

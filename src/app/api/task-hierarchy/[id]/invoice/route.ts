@@ -12,13 +12,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // 自动创建财务草稿（避免重复）
     const exists = await pool.query(
-      "SELECT 1 FROM finance_transactions WHERE task_id=$1 AND category='任务回款' LIMIT 1",
+      "SELECT 1 FROM finance_transactions WHERE task_id=$1 AND category='Task Payment' LIMIT 1",
       [id]
     );
 
     if ((exists.rowCount || 0) === 0) {
       const t = await pool.query('SELECT title, target_price, currency FROM mission_tasks WHERE id=$1 LIMIT 1', [id]);
-      const title = t.rows[0]?.title || `任务 ${id}`;
+      const title = t.rows[0]?.title || `Task ${id}`;
       const amount = Number(t.rows[0]?.target_price || 0);
       const currency = t.rows[0]?.currency || 'PHP';
       const txId = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -31,8 +31,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           txId,
           new Date().toISOString().slice(0, 10),
           amount,
-          '任务回款',
-          `发票草稿: ${title}`,
+          'Task Payment',
+          `Invoice Draft: ${title}`,
           'income',
           currency,
           'pending',
@@ -45,6 +45,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ success: true, data: { ...res, financeDraftCreated: true } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 400 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 400 });
   }
 }
