@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-// 简化'sFault Diagnosis引擎 - 避免Typeerror
+// 简化的故障诊断引擎 - 避免类型错误
 export interface FaultDetectionRule {
   id: string;
   name: string;
@@ -23,17 +23,17 @@ export class FaultDiagnosisEngine {
   private rules: Map<string, FaultDetectionRule> = new Map();
 
   constructor() {
-    // InitializeDefault规then
+    // 初始化默认规则
     this.initializeDefaultRules();
   }
 
   private initializeDefaultRules(): void {
-    // 简化'sDefault规then
+    // 简化的默认规则
     const defaultRules: FaultDetectionRule[] = [
       {
         id: 'high-cpu-usage',
-        name: 'HighCPUusage rate检测',
-        description: '检测CPUusage rate超过80%'s情况',
+        name: '高CPU使用率检测',
+        description: '检测CPU使用率超过80%的情况',
         severity: 'medium',
         condition: async (context) => (((context.systemMetrics as Record<string, unknown> | undefined)?.cpuUsage as number | undefined) ?? 0) > 80,
         action: async (context) => ({
@@ -41,15 +41,15 @@ export class FaultDiagnosisEngine {
           ruleId: 'high-cpu-usage',
           timestamp: new Date(),
           severity: 'medium',
-          description: 'CPUusage rate过High',
-          rootCause: 'System负载过Highorresource不足',
-          suggestedActions: ['CheckRunning's进程', 'optimizecodePerformance', 'increaseSystemresource'],
+          description: 'CPU使用率过高',
+          rootCause: '系统负载过高或资源不足',
+          suggestedActions: ['检查运行中的进程', '优化代码性能', '增加系统资源'],
           automaticRepairAvailable: true,
           repairSteps: [
             {
               id: 'analyze-processes',
-              description: 'Analytics占用CPU's进程',
-              action: async () => ({ success: true, message: '进程AnalyticsCompleted' }),
+              description: '分析占用CPU的进程',
+              action: async () => ({ success: true, message: '进程分析完成' }),
               requiresConfirmation: false,
               estimatedTime: 5
             }
@@ -65,12 +65,12 @@ export class FaultDiagnosisEngine {
     defaultRules.forEach(rule => this.addRule(rule));
   }
 
-  // Add检测规then
+  // 添加检测规则
   addRule(rule: FaultDetectionRule): void {
     this.rules.set(rule.id, rule);
   }
 
-  // remove检测规then
+  // 移除检测规则
   removeRule(ruleId: string): boolean {
     return this.rules.delete(ruleId);
   }
@@ -88,7 +88,7 @@ export class FaultDiagnosisEngine {
             results.push(result);
           }
         } catch (error) {
-          logger.error('规thenExecutefailed', error, { module: 'FaultDiagnosisEngine', rule: rule.name });
+          logger.error('规则执行失败', error, { module: 'FaultDiagnosisEngine', rule: rule.name });
         }
       }
     }
@@ -96,12 +96,12 @@ export class FaultDiagnosisEngine {
     return results;
   }
 
-  // Fetch所All规then
+  // 获取所有规则
   getAllRules(): FaultDetectionRule[] {
     return Array.from(this.rules.values());
   }
 
-  // enabled/disabled规then
+  // 启用/禁用规则
   setRuleEnabled(ruleId: string, enabled: boolean): boolean {
     const rule = this.rules.get(ruleId);
     if (rule) {

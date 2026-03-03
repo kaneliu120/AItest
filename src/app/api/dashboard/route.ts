@@ -1,12 +1,12 @@
 /**
- * Dashboard aggregation API
- * 整合 finance / tasks / freelance / health data, 统一提供给主页Component. 
- * 所All子调用均All graceful fallback, 不will因单 servervicefailed而崩溃. 
+ * Dashboard 聚合 API
+ * 整合 finance / tasks / freelance / health 数据，统一提供给主页组件。
+ * 所有子调用均有 graceful fallback，不会因单个服务失败而崩溃。
  */
 
 import { NextResponse } from "next/server";
 
-// ─── InternalRequest辅助 ────────────────────────────────────────────────────────────
+// ─── 内部请求辅助 ────────────────────────────────────────────────────────────
 async function safeGet(url: string, timeout = 3000) {
   try {
     const controller = new AbortController();
@@ -20,9 +20,9 @@ async function safeGet(url: string, timeout = 3000) {
   }
 }
 
-// ─── Type ────────────────────────────────────────────────────────────────────
+// ─── 类型 ────────────────────────────────────────────────────────────────────
 export interface DashboardData {
-  /** FinanceStatistics */
+  /** 财务统计 */
   finance: {
     totalIncome: number;
     totalExpense: number;
@@ -35,7 +35,7 @@ export interface DashboardData {
     monthlyTrend: { month: string; income: number; expenses: number; profit: number }[];
     available: boolean;
   };
-  /** OutsourceProject */
+  /** 外包项目 */
   freelance: {
     activeProjects: number;
     pendingProposals: number;
@@ -43,7 +43,7 @@ export interface DashboardData {
     totalBudget: number;
     available: boolean;
   };
-  /** TaskStatistics */
+  /** 任务统计 */
   tasks: {
     completedTasks: number;
     totalTasks: number;
@@ -53,7 +53,7 @@ export interface DashboardData {
     overdueTasks: number;
     available: boolean;
   };
-  /** SystemHealth */
+  /** 系统健康 */
   health: {
     overallHealth: number;
     healthyTools: number;
@@ -65,7 +65,7 @@ export interface DashboardData {
     responseTime: number;
     available: boolean;
   };
-  /** AutomationSystem */
+  /** 自动化系统 */
   automation: {
     activeModules: number;
     totalModules: number;
@@ -73,14 +73,14 @@ export interface DashboardData {
     lastExecution: string;
     available: boolean;
   };
-  /** dataAnalytics */
+  /** 数据分析 */
   analytics: {
     totalDataSources: number;
     realTimeData: boolean;
     lastUpdated: string;
     available: boolean;
   };
-  /** Generatetime */
+  /** 生成时间 */
   generatedAt: string;
 }
 
@@ -88,7 +88,7 @@ export interface DashboardData {
 export async function GET(request: Request) {
   const base = new URL(request.url).origin;
 
-  // and行拉取所Alldata源
+  // 并行拉取所有数据源
   const [financeData, freelanceData, tasksData, systemMonitoringData, automationData, analyticsData] = await Promise.all([
     safeGet(`${base}/api/finance?action=summary`),
     safeGet(`${base}/api/freelance`),
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
   const financeAvailable = !!(financeData?.success || financeData?.data);
   const fd = financeData?.data ?? financeData ?? null;
 
-  // Fetch月度趋势
+  // 获取月度趋势
   let monthlyTrend: DashboardData["finance"]["monthlyTrend"] = [];
   let currentMonthIncome = 0;
   let currentMonthExpenses = 0;
@@ -113,7 +113,7 @@ export async function GET(request: Request) {
   let profitMargin = 0;
 
   if (fd?.monthlyTrend?.length) {
-    // databy最New月份倒序
+    // 数据按最新月份倒序
     const sorted = [...fd.monthlyTrend].sort((a, b) =>
       b.month.localeCompare(a.month)
     );
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
     currentMonthIncome = latest?.income ?? 0;
     currentMonthExpenses = latest?.expenses ?? 0;
     previousMonthIncome = sorted[1]?.income ?? 0;
-    monthlyTrend = sorted.slice(0, 6).reverse(); // 最近6 月, 正序
+    monthlyTrend = sorted.slice(0, 6).reverse(); // 最近6个月，正序
     
     // 计算总计
     totalIncome = sorted.reduce((sum: number, item) => sum + (item.income || 0), 0);
@@ -129,13 +129,13 @@ export async function GET(request: Request) {
     netProfit = totalIncome - totalExpense;
     profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
   }
-  // currentMonth Field(来自 summary action)
+  // currentMonth 字段（来自 summary action）
   if (fd?.currentMonth) {
     currentMonthIncome = fd.currentMonth.income ?? currentMonthIncome;
     currentMonthExpenses = fd.currentMonth.expenses ?? currentMonthExpenses;
   }
 
-  // FromsummaryFetch总计data
+  // 从summary获取总计数据
   if (fd?.totalIncome !== undefined) totalIncome = fd.totalIncome;
   if (fd?.totalExpense !== undefined) totalExpense = fd.totalExpense;
   if (fd?.netProfit !== undefined) netProfit = fd.netProfit;
@@ -177,7 +177,7 @@ export async function GET(request: Request) {
   const memoryUsage = smd?.metrics?.memory?.usage ?? 0;
   const responseTime = smd?.metrics?.network?.latency ?? 0;
 
-  // ── 组装result ──────────────────────────────────────────────────────────────
+  // ── 组装结果 ──────────────────────────────────────────────────────────────
   const result: DashboardData = {
     finance: {
       totalIncome,

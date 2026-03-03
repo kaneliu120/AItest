@@ -112,7 +112,7 @@ function AutoProgress({ tasks, onDone }: { tasks: Task[]; onDone: () => void }) 
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
       <div className="flex items-center gap-2 mb-2">
         <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-        <p className="font-semibold text-slate-800 text-sm">Assigning tasks to Automation Queue...</p>
+        <p className="font-semibold text-slate-800 text-sm">Assigning tasks to Automation Queue…</p>
       </div>
       {tasks.map((t, i) => (
         <div key={t.id} className={`flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-300
@@ -265,7 +265,7 @@ export default function RequirementsAnalysisPage() {
               className="text-sm text-slate-500 hover:text-blue-600 flex items-center gap-1.5 transition-colors"
             >
               <FileText className="w-3.5 h-3.5" />
-              {showText ? 'Collapse text input' : 'or enter requirements text directly(Markdown)'}
+              {showText ? 'Collapse text input' : 'or enter requirements text directly（Markdown）'}
               <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showText ? 'rotate-90' : ''}`} />
             </button>
             {showText && (
@@ -291,7 +291,7 @@ export default function RequirementsAnalysisPage() {
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold flex items-center justify-center gap-2.5 hover:from-blue-700 hover:to-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-200"
             >
               {isLoading
-                ? <><Loader2 className="w-5 h-5 animate-spin" />AI Analyzing, Please wait...</>
+                ? <><Loader2 className="w-5 h-5 animate-spin" />AI Analyzing，Please wait…</>
                 : <><Brain className="w-5 h-5" />Generate Technical Document<ArrowRight className="w-4 h-4 ml-1" /></>}
             </button>
           </div>
@@ -380,12 +380,12 @@ export default function RequirementsAnalysisPage() {
                   </div>
                 ))}
                 {tasks.length > 4 && (
-                  <p className="text-xs text-slate-400 text-center pt-1">and {tasks.length - 4}  tasks...</p>
+                  <p className="text-xs text-slate-400 text-center pt-1">and {tasks.length - 4}  tasks…</p>
                 )}
               </div>
             </div>
 
-            {/* 🚀 START PROJECT - primary CTA */}
+            {/* 🚀 START PROJECT — primary CTA */}
             <button
               onClick={handleStartProject}
               className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-base flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:scale-[1.01] active:scale-100"
@@ -415,7 +415,7 @@ export default function RequirementsAnalysisPage() {
                   <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200">
                     <Rocket className="w-9 h-9 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">Project started! </h3>
+                  <h3 className="text-xl font-bold text-slate-900 mb-1">Project started！</h3>
                   <p className="text-sm text-slate-500 mb-1">
                     Assigned <strong className="text-slate-700">{tasks.length}</strong>  tasks automatically assigned to queue
                   </p>

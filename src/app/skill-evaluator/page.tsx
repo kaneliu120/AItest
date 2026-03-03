@@ -258,9 +258,9 @@ export default function SkillEvaluatorPage() {
 
       const successCount = selected.length - failed.length;
       if (failed.length === 0) {
-        setSuccess(`Batch assessment submitted(${successCount}/${selected.length})`);
+        setSuccess(`Batch assessment submitted（${successCount}/${selected.length}）`);
       } else {
-        setError(`Batch assessment partially failed: Success ${successCount}, Failed ${failed.length}`);
+        setError(`Batch assessment partially failed：Success ${successCount}，Failed ${failed.length}`);
       }
 
       await loadData();
@@ -303,7 +303,7 @@ export default function SkillEvaluatorPage() {
       await navigator.clipboard.writeText(payload);
       setSuccess('Failure details copied to clipboard');
     } catch {
-      setError('Copy failed, Please copy details manually');
+      setError('Copy failed，Please copy details manually');
     } finally {
       setCopyingFailed(false);
     }
@@ -402,11 +402,11 @@ export default function SkillEvaluatorPage() {
   }, [skills, mergeType]);
 
   const trendSummary = useMemo(() => {
-    if (trend.length < 2) return 'Insufficient samples, Unable to determine trend';
+    if (trend.length < 2) return 'Insufficient samples，Unable to determine trend';
     const latest = trend[0];
     const prev = trend[1];
     const diff = latest.score - prev.score;
-    if (Math.abs(diff) < 1) return `Last two scores roughly equal(${latest.score} vs ${prev.score})`;
+    if (Math.abs(diff) < 1) return `Last two scores roughly equal（${latest.score} vs ${prev.score}）`;
     return diff > 0
       ? `Latest score improved from last ${diff.toFixed(1)} points`
       : `Latest score decreased from last ${Math.abs(diff).toFixed(1)} points`;
@@ -433,7 +433,7 @@ export default function SkillEvaluatorPage() {
             <h1 className="text-3xl tracking-tight font-bold text-slate-900 flex items-center gap-2">
               <CheckSquare className="h-7 w-7 text-blue-600" /> Skill Management
             </h1>
-            <p className="text-slate-500 mt-1">Add Skill, Delete, Assessment, Integrated trend analysis</p>
+            <p className="text-slate-500 mt-1">Add Skill、Delete、Assessment、Integrated trend analysis</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button onClick={() => setShowCreateModal(true)} className="rounded-lg bg-blue-600 hover:bg-blue-700">Add Skill</Button>
@@ -559,7 +559,7 @@ export default function SkillEvaluatorPage() {
                 ))}
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-sm text-slate-600">
-                  <div>Page {skillsPage}/{skillsTotalPages}  · Total {skillsTotal} items(Per page30)</div>
+                  <div>Page {skillsPage}/{skillsTotalPages}  · Total {skillsTotal} items（Per page30）</div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" className="rounded-lg" disabled={skillsPage <= 1} onClick={() => loadData({ page: skillsPage - 1 })}>Previous</Button>
                     <Button size="sm" variant="outline" className="rounded-lg" disabled={skillsPage >= skillsTotalPages} onClick={() => loadData({ page: skillsPage + 1 })}>Next</Button>
@@ -623,7 +623,7 @@ export default function SkillEvaluatorPage() {
             <div className="w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 space-y-4">
               <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Start Skill Assessment</h3>
               <input value={skillPath} onChange={(e) => setSkillPath(e.target.value)} placeholder="Skill Path (absolute path)" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
-              <input value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="Skill Name(Optional)" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+              <input value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="Skill Name（Optional）" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
               <div className="flex justify-end gap-2">
                 <Button variant="outline" className="rounded-lg" onClick={() => setShowEvaluateModal(false)}>Cancel</Button>
                 <Button className="rounded-lg bg-blue-600 hover:bg-blue-700" onClick={async () => { await startEvaluation(); setShowEvaluateModal(false); }} disabled={submitting}>{submitting ? 'Submitting...' : 'Submit'}</Button>
@@ -696,7 +696,7 @@ export default function SkillEvaluatorPage() {
               <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Batch Assessment Results</h3>
               <div className="text-sm text-slate-700">
                 Total <span className="font-semibold">{batchEvalProgress.total}</span>,
-                Success <span className="font-semibold text-emerald-700">{batchEvalProgress.total - batchEvalFailedItems.length}</span>, 
+                Success <span className="font-semibold text-emerald-700">{batchEvalProgress.total - batchEvalFailedItems.length}</span>，
                 Failed <span className="font-semibold text-red-700">{batchEvalFailedItems.length}</span>
               </div>
 
@@ -704,7 +704,7 @@ export default function SkillEvaluatorPage() {
                 <div className="max-h-64 overflow-auto rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
                   {batchEvalFailedItems.map((item, idx) => (
                     <div key={`${item.skillPath}-${idx}`} className="text-xs text-red-700">
-                      <span className="font-semibold">{item.skillName}</span>: {item.reason}
+                      <span className="font-semibold">{item.skillName}</span>：{item.reason}
                       <div className="text-[11px] text-red-600/80 break-all">{item.skillPath}</div>
                     </div>
                   ))}

@@ -1,4 +1,4 @@
-// TestAutomationservervice
+// 测试自动化服务
 
 export interface TestCase {
   id: string;
@@ -6,7 +6,7 @@ export interface TestCase {
   description: string;
   type: 'unit' | 'integration' | 'e2e' | 'performance' | 'security';
   status: 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
-  duration?: number; // 毫s
+  duration?: number; // 毫秒
   result?: TestResult;
   createdAt: string;
   updatedAt: string;
@@ -86,7 +86,7 @@ export interface TestExecutionResult {
   averageDuration: number;
 }
 
-export class TestAutomationservervice {
+export class TestAutomationService {
   private testCases: Map<string, TestCase> = new Map();
   private testSuites: Map<string, TestSuite> = new Map();
   private executions: Map<string, TestExecution> = new Map();
@@ -96,12 +96,12 @@ export class TestAutomationservervice {
   }
   
   private initializeSampleData(): void {
-    // AddExampleTest用例
+    // 添加示例测试用例
     const sampleTestCases: TestCase[] = [
       {
         id: 'test-001',
-        name: 'APIResponseFormatValidate',
-        description: 'ValidateAPI返回standard化'sResponseFormat',
+        name: 'API响应格式验证',
+        description: '验证API返回标准化的响应格式',
         type: 'integration',
         status: 'passed',
         duration: 150,
@@ -109,33 +109,33 @@ export class TestAutomationservervice {
           passed: true,
           assertions: [
             {
-              description: 'ResponsecontainssuccessField',
+              description: '响应包含success字段',
               passed: true,
               expected: true,
               actual: true
             },
             {
-              description: 'ResponsecontainstimestampField',
+              description: '响应包含timestamp字段',
               passed: true,
               expected: true,
               actual: true
             },
             {
-              description: 'ResponsecontainsrequestIdField',
+              description: '响应包含requestId字段',
               passed: true,
               expected: true,
               actual: true
             }
           ],
-          logs: ['TestOn始', 'SendAPIRequest', 'ValidateResponseFormat', 'Testthrough']
+          logs: ['测试开始', '发送API请求', '验证响应格式', '测试通过']
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
       {
         id: 'test-002',
-        name: 'data库ConnectTest',
-        description: 'Testdata库Connect和基本操作',
+        name: '数据库连接测试',
+        description: '测试数据库连接和基本操作',
         type: 'integration',
         status: 'passed',
         duration: 200,
@@ -143,27 +143,27 @@ export class TestAutomationservervice {
           passed: true,
           assertions: [
             {
-              description: 'data库Connectsuccess',
+              description: '数据库连接成功',
               passed: true
             },
             {
-              description: 'canExecute查询操作',
+              description: '可以执行查询操作',
               passed: true
             },
             {
-              description: 'canExecuteinsert操作',
+              description: '可以执行插入操作',
               passed: true
             }
           ],
-          logs: ['Connectdata库', 'ExecuteTest查询', 'ExecuteTestinsert', '清理Testdata', 'Testthrough']
+          logs: ['连接数据库', '执行测试查询', '执行测试插入', '清理测试数据', '测试通过']
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
       {
         id: 'test-003',
-        name: 'move端Response式Test',
-        description: 'Testmove端布局Response式',
+        name: '移动端响应式测试',
+        description: '测试移动端布局响应式',
         type: 'e2e',
         status: 'running',
         createdAt: new Date().toISOString(),
@@ -171,8 +171,8 @@ export class TestAutomationservervice {
       },
       {
         id: 'test-004',
-        name: 'Performance压力Test',
-        description: 'TestSysteminHigh负载下'sPerformance',
+        name: '性能压力测试',
+        description: '测试系统在高负载下的性能',
         type: 'performance',
         status: 'pending',
         createdAt: new Date().toISOString(),
@@ -180,8 +180,8 @@ export class TestAutomationservervice {
       },
       {
         id: 'test-005',
-        name: 'Security漏洞Scan',
-        description: 'ScanSystemSecurity漏洞',
+        name: '安全漏洞扫描',
+        description: '扫描系统安全漏洞',
         type: 'security',
         status: 'pending',
         createdAt: new Date().toISOString(),
@@ -193,11 +193,11 @@ export class TestAutomationservervice {
       this.testCases.set(testCase.id, testCase);
     });
     
-    // AddExampleTest套件
+    // 添加示例测试套件
     const sampleTestSuite: TestSuite = {
       id: 'suite-001',
-      name: 'Mission Control核心功canTest套件',
-      description: 'TestMission Control所All核心功can',
+      name: 'Mission Control核心功能测试套件',
+      description: '测试Mission Control所有核心功能',
       testCases: ['test-001', 'test-002', 'test-003', 'test-004', 'test-005'],
       status: 'running',
       results: {
@@ -213,7 +213,7 @@ export class TestAutomationservervice {
     
     this.testSuites.set(sampleTestSuite.id, sampleTestSuite);
     
-    // AddExampleExecuteLog
+    // 添加示例执行记录
     const sampleExecution: TestExecution = {
       id: 'exec-001',
       suiteId: 'suite-001',
@@ -228,17 +228,17 @@ export class TestAutomationservervice {
         averageDuration: 175
       },
       logs: [
-        'TestExecuteOn始',
-        '运行Test: APIResponseFormatValidate - through',
-        '运行Test: data库ConnectTest - through',
-        '运行Test: move端Response式Test - In Progress'
+        '测试执行开始',
+        '运行测试: API响应格式验证 - 通过',
+        '运行测试: 数据库连接测试 - 通过',
+        '运行测试: 移动端响应式测试 - 进行中'
       ]
     };
     
     this.executions.set(sampleExecution.id, sampleExecution);
   }
   
-  // Fetch所AllTest用例
+  // 获取所有测试用例
   async getTestCases(filters?: {
     type?: TestCase['type'];
     status?: TestCase['status'];
@@ -256,12 +256,12 @@ export class TestAutomationservervice {
     return testCases;
   }
   
-  // FetchTest用例Details
+  // 获取测试用例详情
   async getTestCase(id: string): Promise<TestCase | null> {
     return this.testCases.get(id) || null;
   }
   
-  // CreateTest用例
+  // 创建测试用例
   async createTestCase(data: Omit<TestCase, 'id' | 'createdAt' | 'updatedAt'>): Promise<TestCase> {
     const id = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
@@ -276,7 +276,7 @@ export class TestAutomationservervice {
     return testCase;
   }
   
-  // UpdateTest用例
+  // 更新测试用例
   async updateTestCase(id: string, updates: Partial<TestCase>): Promise<TestCase | null> {
     const testCase = this.testCases.get(id);
     if (!testCase) return null;
@@ -291,42 +291,42 @@ export class TestAutomationservervice {
     return updatedTestCase;
   }
   
-  // 运行Test用例
+  // 运行测试用例
   async runTestCase(id: string): Promise<TestResult> {
     const testCase = this.testCases.get(id);
     if (!testCase) {
-      throw new Error(`Test用例does not exist: ${id}`);
+      throw new Error(`测试用例不存在: ${id}`);
     }
     
-    // 模拟TestExecute
+    // 模拟测试执行
     await this.updateTestCase(id, { status: 'running' });
     
-    // 模拟latency
+    // 模拟延迟
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // GenerateTestresult
+    // 生成测试结果
     const result: TestResult = {
-      passed: Math.random() > 0.3, // 70%through率
+      passed: Math.random() > 0.3, // 70%通过率
       assertions: [
         {
-          description: '基本功canValidate',
+          description: '基本功能验证',
           passed: true
         },
         {
-          description: 'errorProcessValidate',
+          description: '错误处理验证',
           passed: Math.random() > 0.5
         },
         {
-          description: 'PerformanceValidate',
+          description: '性能验证',
           passed: Math.random() > 0.7
         }
       ].filter(a => a.passed !== undefined),
       logs: [
-        'TestOn始',
-        'InitializeTestEnvironment',
-        'ExecuteTest逻辑',
-        'ValidateTestresult',
-        'TestCompleted'
+        '测试开始',
+        '初始化测试环境',
+        '执行测试逻辑',
+        '验证测试结果',
+        '测试完成'
       ],
       coverage: {
         lines: 85,
@@ -350,21 +350,21 @@ export class TestAutomationservervice {
     return result;
   }
   
-  // Fetch所AllTest套件
+  // 获取所有测试套件
   async getTestSuites(): Promise<TestSuite[]> {
     return Array.from(this.testSuites.values());
   }
   
-  // FetchTest套件Details
+  // 获取测试套件详情
   async getTestSuite(id: string): Promise<TestSuite | null> {
     return this.testSuites.get(id) || null;
   }
   
-  // 运行Test套件
+  // 运行测试套件
   async runTestSuite(id: string): Promise<TestExecution> {
     const suite = this.testSuites.get(id);
     if (!suite) {
-      throw new Error(`Test套件does not exist: ${id}`);
+      throw new Error(`测试套件不存在: ${id}`);
     }
     
     const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -382,18 +382,18 @@ export class TestAutomationservervice {
         totalDuration: 0,
         averageDuration: 0
       },
-      logs: [`On始ExecuteTest套件: ${suite.name}`]
+      logs: [`开始执行测试套件: ${suite.name}`]
     };
     
     this.executions.set(executionId, execution);
     
-    // asyncExecuteTest
+    // 异步执行测试
     this.executeTestSuite(suite, executionId);
     
     return execution;
   }
   
-  // ExecuteTest套件
+  // 执行测试套件
   private async executeTestSuite(suite: TestSuite, executionId: string): Promise<void> {
     const execution = this.executions.get(executionId);
     if (!execution) return;
@@ -404,7 +404,7 @@ export class TestAutomationservervice {
     
     for (const testCaseId of suite.testCases) {
       try {
-        execution.logs.push(`运行Test用例: ${testCaseId}`);
+        execution.logs.push(`运行测试用例: ${testCaseId}`);
         
         const startTime = Date.now();
         const result = await this.runTestCase(testCaseId);
@@ -414,13 +414,13 @@ export class TestAutomationservervice {
         
         if (result.passed) {
           passedTests++;
-          execution.logs.push(`Testthrough: ${testCaseId} (${duration}ms)`);
+          execution.logs.push(`测试通过: ${testCaseId} (${duration}ms)`);
         } else {
           failedTests++;
-          execution.logs.push(`Testfailed: ${testCaseId} (${duration}ms)`);
+          execution.logs.push(`测试失败: ${testCaseId} (${duration}ms)`);
         }
         
-        // UpdateExecuteresult
+        // 更新执行结果
         execution.results = {
           totalTests: suite.testCases.length,
           passedTests,
@@ -433,19 +433,19 @@ export class TestAutomationservervice {
         this.executions.set(executionId, execution);
         
       } catch (error) {
-        execution.logs.push(`Testerror: ${testCaseId} - ${error}`);
+        execution.logs.push(`测试错误: ${testCaseId} - ${error}`);
         failedTests++;
       }
     }
     
-    // CompletedExecute
+    // 完成执行
     execution.status = 'completed';
     execution.endTime = new Date().toISOString();
-    execution.logs.push(`Test套件ExecuteCompleted: ${passedTests}through, ${failedTests}failed`);
+    execution.logs.push(`测试套件执行完成: ${passedTests}通过, ${failedTests}失败`);
     
     this.executions.set(executionId, execution);
     
-    // Update套件Status
+    // 更新套件状态
     const updatedSuite: TestSuite = {
       ...suite,
       status: 'completed',
@@ -462,17 +462,17 @@ export class TestAutomationservervice {
     this.testSuites.set(suite.id, updatedSuite);
   }
   
-  // FetchTestExecuteLog
+  // 获取测试执行记录
   async getTestExecutions(): Promise<TestExecution[]> {
     return Array.from(this.executions.values());
   }
   
-  // FetchTestExecuteDetails
+  // 获取测试执行详情
   async getTestExecution(id: string): Promise<TestExecution | null> {
     return this.executions.get(id) || null;
   }
   
-  // FetchTestStatistics
+  // 获取测试统计
   async getTestStats(): Promise<{
     totalTestCases: number;
     totalTestSuites: number;
@@ -518,5 +518,5 @@ export class TestAutomationservervice {
   }
 }
 
-// Global实例
-export const testAutomationservervice = new TestAutomationservervice();
+// 全局实例
+export const testAutomationService = new TestAutomationService();

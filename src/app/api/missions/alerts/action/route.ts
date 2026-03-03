@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const taskId = String(body?.taskId || '').trim();
     const action = String(body?.action || '').trim();
-    if (!taskId || !action) return NextResponse.json({ success: false, error: 'taskId/action Required' }, { status: 400 });
+    if (!taskId || !action) return NextResponse.json({ success: false, error: 'taskId/action 必填' }, { status: 400 });
 
     const call = async (endpoint: string, payload: any = {}) => {
       const res = await fetch(`http://localhost:3001/api/task-hierarchy/${taskId}/${endpoint}`, {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         cache: 'no-store',
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json?.success) throw new Error(json?.error || `${endpoint} failed`);
+      if (!res.ok || !json?.success) throw new Error(json?.error || `${endpoint} 失败`);
       return json;
     };
 
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: out.data });
     }
 
-    return NextResponse.json({ success: false, error: 'Unsupported action' }, { status: 400 });
+    return NextResponse.json({ success: false, error: '不支持的 action' }, { status: 400 });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 400 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 400 });
   }
 }

@@ -1,6 +1,6 @@
 /**
- * AI Assist AutomationTestModule
- * 集成 AI Assist AutomationTestTool
+ * AI Assist 自动化测试模块
+ * 集成 AI Assist 自动化测试工具
  */
 
 import { exec } from 'child_process';
@@ -12,54 +12,54 @@ const TOOL_PATH = path.join(process.env.HOME || '/Users/kane', '.openclaw/worksp
 
 export const aiAssistModule = {
   id: 'aiassist-automation',
-  name: 'AI Assist AutomationTest',
+  name: 'AI Assist 自动化测试',
   version: '1.0.0',
-  description: '基于 AI Assist 'sAutomationTestModule, 支持 Web AutomationTest和 UI Test',
-  author: 'SmallA',
+  description: '基于 AI Assist 的自动化测试模块，支持 Web 自动化测试和 UI 测试',
+  author: '小A',
   enabled: true,
   category: 'testing' as const,
   dependencies: [] as string[],
   
-  // ConfigurationParameters
+  // 配置参数
   configSchema: {
     browserType: {
       type: 'string',
       enum: ['chrome', 'firefox', 'edge'],
       default: 'chrome',
-      description: '浏览器Type'
+      description: '浏览器类型'
     },
     headless: {
       type: 'boolean',
       default: true,
-      description: 'whether itNone头模式运行'
+      description: '是否无头模式运行'
     },
     timeout: {
       type: 'number',
       default: 30000,
-      description: 'Timeouttime(毫s)'
+      description: '超时时间（毫秒）'
     },
     screenshotOnFailure: {
       type: 'boolean',
       default: true,
-      description: 'failed时截Graph'
+      description: '失败时截图'
     }
   },
   
-  // available动作
+  // 可用动作
   actions: {
     'run-web-test': {
-      name: '运行 Web Test',
-      description: '运行指定's Web AutomationTest',
+      name: '运行 Web 测试',
+      description: '运行指定的 Web 自动化测试',
       parameters: {
         url: {
           type: 'string',
           required: true,
-          description: 'Test目标 URL'
+          description: '测试目标 URL'
         },
         testScript: {
           type: 'string',
           required: true,
-          description: 'TestScriptpathorcontent'
+          description: '测试脚本路径或内容'
         },
         waitForSelector: {
           type: 'string',
@@ -69,13 +69,13 @@ export const aiAssistModule = {
       }
     },
     'take-screenshot': {
-      name: '截Graph',
-      description: 'for指定 URL In Progress截Graph',
+      name: '截图',
+      description: '对指定 URL 进行截图',
       parameters: {
         url: {
           type: 'string',
           required: true,
-          description: '截Graph目标 URL'
+          description: '截图目标 URL'
         },
         selector: {
           type: 'string',
@@ -85,13 +85,13 @@ export const aiAssistModule = {
         fullPage: {
           type: 'boolean',
           default: false,
-          description: 'whether itAll页截Graph'
+          description: '是否全页截图'
         }
       }
     },
     'extract-data': {
-      name: '提取data',
-      description: 'From网页提取结构化data',
+      name: '提取数据',
+      description: '从网页提取结构化数据',
       parameters: {
         url: {
           type: 'string',
@@ -101,32 +101,32 @@ export const aiAssistModule = {
         selectors: {
           type: 'object',
           required: true,
-          description: 'data选择器映射'
+          description: '数据选择器映射'
         },
         format: {
           type: 'string',
           enum: ['json', 'csv', 'html'],
           default: 'json',
-          description: '输出Format'
+          description: '输出格式'
         }
       }
     }
   },
   
-  // HealthCheck
+  // 健康检查
   healthCheck: async () => {
     try {
       const { stdout } = await execAsync(`node ${TOOL_PATH}`);
       if (stdout.includes('AI Assist Tool')) {
-        return { status: 'healthy', message: 'AI Assist ModuleNormal: ' + stdout.trim() };
+        return { status: 'healthy', message: 'AI Assist 模块正常: ' + stdout.trim() };
       }
-      return { status: 'warning', message: 'AI Assist ResponseAbnormal' };
+      return { status: 'warning', message: 'AI Assist 响应异常' };
     } catch (error: any) {
-      return { status: 'error', message: 'AI Assist ModuleAbnormal: ' + error.message };
+      return { status: 'error', message: 'AI Assist 模块异常: ' + error.message };
     }
   },
   
-  // Execute动作
+  // 执行动作
   execute: async (action: string, parameters: any) => {
     switch (action) {
       case 'run-web-test':
@@ -136,12 +136,12 @@ export const aiAssistModule = {
       case 'extract-data':
         return await extractData(parameters);
       default:
-        throw new Error(`Unknown动作: ${action}`);
+        throw new Error(`未知动作: ${action}`);
     }
   }
 };
 
-// Web Test实现 - 调用true实Tool
+// Web 测试实现 - 调用真实工具
 async function runWebTest(parameters: any) {
   const { url, testScript, waitForSelector } = parameters;
   
@@ -157,7 +157,7 @@ async function runWebTest(parameters: any) {
         status: 'completed',
         output: stdout,
         error: stderr,
-        // 模拟Detailedresult, 实际应Parse stdout
+        // 模拟详细结果，实际应解析 stdout
         steps: 5,
         passed: 5,
         failed: 0,
@@ -177,7 +177,7 @@ async function runWebTest(parameters: any) {
   }
 }
 
-// 截Graph实现 - 调用true实Tool
+// 截图实现 - 调用真实工具
 async function takeScreenshot(parameters: any) {
   const { url, selector, fullPage } = parameters;
   
@@ -206,7 +206,7 @@ async function takeScreenshot(parameters: any) {
   }
 }
 
-// data提取实现 - 调用true实Tool
+// 数据提取实现 - 调用真实工具
 async function extractData(parameters: any) {
   const { url, selectors, format } = parameters;
   

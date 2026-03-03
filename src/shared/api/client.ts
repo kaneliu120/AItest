@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { ApiResponse, ApiError, ApplicationError, getErrorMessage, getHttpStatus } from '../types';
 
-// APIclient端Configuration
+// API客户端配置
 export interface ApiClientConfig {
   baseURL: string;
   timeout?: number;
@@ -9,16 +9,16 @@ export interface ApiClientConfig {
   withCredentials?: boolean;
 }
 
-// Request拦截器
+// 请求拦截器
 export type RequestInterceptor = (config: AxiosRequestConfig) => AxiosRequestConfig | Promise<AxiosRequestConfig>;
 
-// Response拦截器
+// 响应拦截器
 export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>;
 
-// error拦截器
+// 错误拦截器
 export type ErrorInterceptor = (error: AxiosError) => Promise<never>;
 
-// APIclient端class
+// API客户端类
 export class ApiClient {
   private client: AxiosInstance;
   private requestInterceptors: RequestInterceptor[] = [];
@@ -36,13 +36,13 @@ export class ApiClient {
       withCredentials: config.withCredentials || false,
     });
 
-    // SettingsDefault拦截器
+    // 设置默认拦截器
     this.setupDefaultInterceptors();
   }
 
-  // SettingsDefault拦截器
+  // 设置默认拦截器
   private setupDefaultInterceptors(): void {
-    // Request拦截器 - AddAuthToken
+    // 请求拦截器 - 添加认证令牌
     this.client.interceptors.request.use(
       (config) => {
         const token = this.getAuthToken();
@@ -55,10 +55,10 @@ export class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response拦截器 - 统一ProcessResponseFormat
+    // 响应拦截器 - 统一处理响应格式
     this.client.interceptors.response.use(
       (response) => {
-        // 统一ResponseFormat
+        // 统一响应格式
         if (response.data) {
           response.data = this.normalizeResponse(response.data);
         }
@@ -68,7 +68,7 @@ export class ApiClient {
     );
   }
 
-  // FetchAuthToken
+  // 获取认证令牌
   private getAuthToken(): string | null {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
@@ -76,14 +76,14 @@ export class ApiClient {
     return null;
   }
 
-  // standard化Response
+  // 标准化响应
   private normalizeResponse(data: any): ApiResponse {
-    // ifalready经YesstandardFormat, 直接返回
+    // 如果已经是标准格式，直接返回
     if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
       return data as ApiResponse;
     }
 
-    // convertforstandardFormat
+    // 转换为标准格式
     return {
       data,
       success: true,
@@ -91,9 +91,9 @@ export class ApiClient {
     };
   }
 
-  // Processerror
+  // 处理错误
   private async handleError(error: AxiosError): Promise<never> {
-    // Applicationerror拦截器
+    // 应用错误拦截器
     for (const interceptor of this.errorInterceptors) {
       try {
         await interceptor(error);
@@ -102,15 +102,15 @@ export class ApiClient {
       }
     }
 
-    // 构建Applicationerror
+    // 构建应用错误
     let appError: ApplicationError;
 
     if (error.response) {
-      // servervice器Response了errorStatus码
+      // 服务器响应了错误状态码
       const { status, data } = error.response;
       
       if (data && typeof data === 'object' && 'code' in data && 'message' in data) {
-        // servervice器返回了standarderrorFormat
+        // 服务器返回了标准错误格式
         const apiError = data as ApiError;
         appError = new ApplicationError(
           apiError.code as any,
@@ -119,7 +119,7 @@ export class ApiClient {
           status
         );
       } else {
-        // servervice器返回了非standarderror
+        // 服务器返回了非标准错误
         appError = new ApplicationError(
           'INTERNAL_SERVER_ERROR',
           getErrorMessage(error),
@@ -128,7 +128,7 @@ export class ApiClient {
         );
       }
     } else if (error.request) {
-      // RequestalreadySend但没All收toResponse
+      // 请求已发送但没有收到响应
       appError = new ApplicationError(
         'NETWORK_ERROR',
         'Network error occurred. Please check your connection.',
@@ -136,7 +136,7 @@ export class ApiClient {
         503
       );
     } else {
-      // RequestConfiguration出错
+      // 请求配置出错
       appError = new ApplicationError(
         'INTERNAL_SERVER_ERROR',
         getErrorMessage(error),
@@ -145,13 +145,13 @@ export class ApiClient {
       );
     }
 
-    // Logerror
+    // 记录错误
     this.logError(appError, error);
 
     throw appError;
   }
 
-  // Logerror
+  // 记录错误
   private logError(appError: ApplicationError, originalError: AxiosError): void {
     if (process.env.NODE_ENV === 'development') {
       console.error('API Error:', {
@@ -164,28 +164,28 @@ export class ApiClient {
       });
     }
 
-    // TODO: SenderrortoMonitoringservervice
+    // TODO: 发送错误到监控服务
     // this.sendErrorToMonitoring(appError);
   }
 
-  // AddRequest拦截器
+  // 添加请求拦截器
   public addRequestInterceptor(interceptor: RequestInterceptor): void {
     this.requestInterceptors.push(interceptor);
     this.client.interceptors.request.use(interceptor);
   }
 
-  // AddResponse拦截器
+  // 添加响应拦截器
   public addResponseInterceptor(interceptor: ResponseInterceptor): void {
     this.responseInterceptors.push(interceptor);
     this.client.interceptors.response.use(interceptor);
   }
 
-  // Adderror拦截器
+  // 添加错误拦截器
   public addErrorInterceptor(interceptor: ErrorInterceptor): void {
     this.errorInterceptors.push(interceptor);
   }
 
-  // HTTPmethod
+  // HTTP方法
   public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.get<ApiResponse<T>>(url, config);
     return response.data.data;
@@ -211,7 +211,7 @@ export class ApiClient {
     return response.data.data;
   }
 
-  // Pagination查询
+  // 分页查询
   public async paginate<T = any>(
     url: string,
     page: number = 1,
@@ -226,7 +226,7 @@ export class ApiClient {
     return response.data.data;
   }
 
-  // fileUpload
+  // 文件上传
   public async upload<T = any>(
     url: string,
     file: File,
@@ -253,7 +253,7 @@ export class ApiClient {
     return response.data.data;
   }
 
-  // SettingsAuthToken
+  // 设置认证令牌
   public setAuthToken(token: string, persist: boolean = true): void {
     if (typeof window !== 'undefined') {
       if (persist) {
@@ -264,7 +264,7 @@ export class ApiClient {
     }
   }
 
-  // ClearAuthToken
+  // 清除认证令牌
   public clearAuthToken(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
@@ -272,13 +272,13 @@ export class ApiClient {
     }
   }
 
-  // Fetchclient端实例(High级用法)
+  // 获取客户端实例（高级用法）
   public getClient(): AxiosInstance {
     return this.client;
   }
 }
 
-// DefaultAPIclient端实例
+// 默认API客户端实例
 const defaultConfig: ApiClientConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   timeout: 30000,
@@ -286,7 +286,7 @@ const defaultConfig: ApiClientConfig = {
 
 export const apiClient = new ApiClient(defaultConfig);
 
-// ExportToolfunction
+// 导出工具函数
 export function createApiClient(config: ApiClientConfig): ApiClient {
   return new ApiClient(config);
 }
@@ -295,5 +295,5 @@ export function isApiClientError(error: unknown): error is ApplicationError {
   return error instanceof ApplicationError;
 }
 
-// ExportDefault实例
+// 导出默认实例
 export default apiClient;

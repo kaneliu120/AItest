@@ -1,13 +1,13 @@
 /**
- * Simplified API standardization middleware
- * Avoids complex response body handling
+ * 简化版API标准化中间件
+ * 避免复杂的响应体处理
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiResponse, successResponse, errorResponse } from '@/lib/api-response';
 
 /**
- * Simplified standard API handler
+ * 简化版标准API处理器
  */
 export function simpleApiHandler<T = any>(
   handler: (req: NextRequest, requestId: string) => Promise<ApiResponse<T>>
@@ -20,7 +20,7 @@ export function simpleApiHandler<T = any>(
       const result = await handler(req, requestId);
       const processingTime = Date.now() - startTime;
       
-      // Ensure response format is correct
+      // 确保响应格式正确
       const apiResponse: ApiResponse = {
         ...result,
         timestamp: result.timestamp || new Date().toISOString(),
@@ -28,16 +28,16 @@ export function simpleApiHandler<T = any>(
         requestId: result.requestId || requestId,
       };
       
-      // Determine status code
+      // 确定状态码
       const status = apiResponse.success ? 200 : 
                     apiResponse.error?.code === 'ERR_UNAUTHORIZED' ? 401 :
                     apiResponse.error?.code === 'ERR_NOT_FOUND' ? 404 :
                     apiResponse.error?.code === 'ERR_VALIDATION' ? 400 : 500;
       
-      // Create response
+      // 创建响应
       const response = NextResponse.json(apiResponse, { status });
       
-      // Add header information
+      // 添加头信息
       response.headers.set('X-Request-ID', requestId);
       response.headers.set('X-Processing-Time', processingTime.toString());
       
@@ -45,9 +45,9 @@ export function simpleApiHandler<T = any>(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API processing error (${processingTime}ms):`, error);
+      console.error(`API处理错误 (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 
@@ -63,7 +63,7 @@ export function simpleApiHandler<T = any>(
 }
 
 /**
- * Basic API handler (without middleware chain)
+ * 基础API处理器（不使用中间件链）
  */
 export function basicApiHandler<T = any>(
   handler: (req: NextRequest) => Promise<ApiResponse<T>>
@@ -76,7 +76,7 @@ export function basicApiHandler<T = any>(
       const result = await handler(req);
       const processingTime = Date.now() - startTime;
       
-      // Ensure response format is correct
+      // 确保响应格式正确
       const apiResponse: ApiResponse = {
         ...result,
         timestamp: result.timestamp || new Date().toISOString(),
@@ -84,16 +84,16 @@ export function basicApiHandler<T = any>(
         requestId: result.requestId || requestId,
       };
       
-      // Determine status code
+      // 确定状态码
       const status = apiResponse.success ? 200 : 
                     apiResponse.error?.code === 'ERR_UNAUTHORIZED' ? 401 :
                     apiResponse.error?.code === 'ERR_NOT_FOUND' ? 404 :
                     apiResponse.error?.code === 'ERR_VALIDATION' ? 400 : 500;
       
-      // Create response
+      // 创建响应
       const response = NextResponse.json(apiResponse, { status });
       
-      // Add header information
+      // 添加头信息
       response.headers.set('X-Request-ID', requestId);
       response.headers.set('X-Processing-Time', processingTime.toString());
       
@@ -101,9 +101,9 @@ export function basicApiHandler<T = any>(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API processing error (${processingTime}ms):`, error);
+      console.error(`API处理错误 (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 

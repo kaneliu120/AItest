@@ -1,6 +1,6 @@
 /**
- * External APIsMonitoringAPI
- * 功can: 管理External APIsConfiguration, StatusCheck和Monitoring
+ * 外部API监控API
+ * 功能: 管理外部API配置、状态检查和监控
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,7 +20,7 @@ import {
   ApiCheckResult
 } from '@/lib/external-api-store';
 
-// ─── APICheck器 ────────────────────────────────────────────────────────────────
+// ─── API检查器 ────────────────────────────────────────────────────────────────
 async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
@@ -31,29 +31,29 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
     let error = '';
     let data: Record<string, unknown> = {};
     
-    // 根据APITypeExecute不同'sCheck
+    // 根据API类型执行不同的检查
     switch (api.provider) {
       case 'google':
-        // Google APICheck
+        // Google API检查
         if (api.name.includes('Analytics')) {
-          // 模拟GA4Check
-          success = Math.random() > 0.2; // 80%success率
+          // 模拟GA4检查
+          success = Math.random() > 0.2; // 80%成功率
           statusCode = success ? 200 : 500;
           data = { 
             propertyId: '524777065',
             activeUsers: success ? Math.floor(Math.random() * 100) : 0 
           };
         } else if (api.name.includes('Ads')) {
-          // Google AdsCheck
+          // Google Ads检查
           success = api.status === 'active';
           statusCode = success ? 200 : 401;
-          error = success ? '' : 'need toOAuthAuth';
+          error = success ? '' : '需要OAuth认证';
         }
         break;
         
       case 'openai':
-        // OpenAI APICheck
-        success = Math.random() > 0.1; // 90%success率
+        // OpenAI API检查
+        success = Math.random() > 0.1; // 90%成功率
         statusCode = success ? 200 : 429;
         data = { 
           model: 'gpt-4',
@@ -62,15 +62,15 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
         break;
         
       case 'anthropic':
-        // Anthropic APICheck
-        success = true; // false设总Yessuccess
+        // Anthropic API检查
+        success = true; // 假设总是成功
         statusCode = 200;
         data = { model: 'claude-sonnet-4-6' };
         break;
         
       case 'github':
-        // GitHub APICheck
-        success = Math.random() > 0.05; // 95%success率
+        // GitHub API检查
+        success = Math.random() > 0.05; // 95%成功率
         statusCode = success ? 200 : 403;
         data = { 
           rateLimit: success ? 5000 : 0,
@@ -79,7 +79,7 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
         break;
         
       case 'azure':
-        // Azure APICheck
+        // Azure API检查
         success = true;
         statusCode = 200;
         data = { 
@@ -89,8 +89,8 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
         break;
         
       default:
-        // 通用APICheck
-        success = Math.random() > 0.3; // 70%success率
+        // 通用API检查
+        success = Math.random() > 0.3; // 70%成功率
         statusCode = success ? 200 : 500;
         data = { checked: true };
     }
@@ -103,20 +103,20 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
       responseTime,
       statusCode,
       success,
-      error: error || (success ? '' : 'APICheckfailed'),
+      error: error || (success ? '' : 'API检查失败'),
       data
     };
     
-    // LogCheckresult
+    // 记录检查结果
     const recorded = recordApiCheck(result);
     
-    // ifCheckfailed, CreateAlert
+    // 如果检查失败，创建告警
     if (!success) {
       createAlert({
         apiId: api.id,
         type: 'error',
         severity: responseTime > 5000 ? 'critical' : 'high',
-        message: `${api.name} Checkfailed: ${error || 'Unknown error'}`,
+        message: `${api.name} 检查失败: ${error || '未知错误'}`,
         details: { statusCode, responseTime, error },
         resolved: false
       });
@@ -133,18 +133,18 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
       responseTime,
       statusCode: 0,
       success: false,
-      error: err.message || 'Abnormal condition occurred during check',
+      error: err.message || '检查过程中发生异常',
       data: { exception: true }
     };
     
     const recorded = recordApiCheck(result);
     
-    // CreateAbnormalAlert
+    // 创建异常告警
     createAlert({
       apiId: api.id,
       type: 'error',
       severity: 'critical',
-      message: `${api.name} CheckAbnormal: ${err.message}`,
+      message: `${api.name} 检查异常: ${err.message}`,
       details: { exception: err.message, responseTime },
       resolved: false
     });
@@ -153,7 +153,7 @@ async function checkApiStatus(api: ExternalApi): Promise<ApiCheckResult> {
   }
 }
 
-// ─── batchCheck所AllAPI ──────────────────────────────────────────────────────────
+// ─── 批量检查所有API ──────────────────────────────────────────────────────────
 async function checkAllApis() {
   const apis = getAllApis();
   const results = [];
@@ -163,7 +163,7 @@ async function checkAllApis() {
       const result = await checkApiStatus(api);
       results.push(result);
       
-      // 避免过快Request
+      // 避免过快请求
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
@@ -171,7 +171,7 @@ async function checkAllApis() {
   return results;
 }
 
-// ─── APIrouteProcess ──────────────────────────────────────────────────────────────
+// ─── API路由处理 ──────────────────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
     const status = url.searchParams.get('status');
     const limit = url.searchParams.get('limit');
     
-    // ── FetchAPIList ──
+    // ── 获取API列表 ──
     if (action === 'list') {
       const filters: any = {};
       if (provider) filters.provider = provider;
@@ -194,22 +194,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { apis } });
     }
     
-    // ── Fetch单 API ──
+    // ── 获取单个API ──
     if (action === 'get' && id) {
       const api = getApiById(id);
       if (!api) {
-        return NextResponse.json({ success: false, error: 'APINot found' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'API未找到' }, { status: 404 });
       }
       return NextResponse.json({ success: true, data: { api } });
     }
     
-    // ── FetchStatisticsinformation ──
+    // ── 获取统计信息 ──
     if (action === 'stats') {
       const stats = getApiStats();
       return NextResponse.json({ success: true, data: stats });
     }
     
-    // ── FetchCheckresult ──
+    // ── 获取检查结果 ──
     if (action === 'check-results') {
       const apiId = url.searchParams.get('apiId');
       const success = url.searchParams.get('success');
@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { results } });
     }
     
-    // ── FetchAlert ──
+    // ── 获取告警 ──
     if (action === 'alerts') {
       const apiId = url.searchParams.get('apiId');
       const resolved = url.searchParams.get('resolved');
@@ -241,32 +241,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { alerts } });
     }
     
-    // ── CheckAPIStatus ──
+    // ── 检查API状态 ──
     if (action === 'check') {
       if (id) {
-        // Check单 API
+        // 检查单个API
         const api = getApiById(id);
         if (!api) {
-          return NextResponse.json({ success: false, error: 'APINot found' }, { status: 404 });
+          return NextResponse.json({ success: false, error: 'API未找到' }, { status: 404 });
         }
         
         const result = await checkApiStatus(api);
         return NextResponse.json({ success: true, data: { result } });
       } else {
-        // Check所AllAPI
+        // 检查所有API
         const results = await checkAllApis();
         return NextResponse.json({ success: true, data: { results } });
       }
     }
     
-    // ── Default返回List ──
+    // ── 默认返回列表 ──
     const apis = getAllApis();
     return NextResponse.json({ success: true, data: { apis } });
     
   } catch (error) {
-    console.error('External APIs APIerror:', error);
+    console.error('外部API API错误:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: error instanceof Error ? error.message : '未知错误' },
       { status: 500 }
     );
   }
@@ -277,14 +277,14 @@ export async function POST(request: NextRequest) {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'create';
     
-    // ── CreateNewAPI ──
+    // ── 创建新API ──
     if (action === 'create') {
       const body = await request.json();
       const { name, provider, category, description, authType, apiKey, ...rest } = body;
       
       if (!name || !provider || !category) {
         return NextResponse.json(
-          { success: false, error: 'Missing required parameters: name, provider, category' },
+          { success: false, error: '缺少必要参数: name, provider, category' },
           { status: 400 }
         );
       }
@@ -311,70 +311,70 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: { api } });
     }
     
-    // ── UpdateAPI ──
+    // ── 更新API ──
     if (action === 'update') {
       const body = await request.json();
       const { id, ...updates } = body;
       
       if (!id) {
-        return NextResponse.json({ success: false, error: 'Missing API ID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: '缺少API ID' }, { status: 400 });
       }
       
       const success = updateApi(id, updates);
       if (!success) {
-        return NextResponse.json({ success: false, error: 'Update failed, APINot found' }, { status: 404 });
+        return NextResponse.json({ success: false, error: '更新失败，API未找到' }, { status: 404 });
       }
       
       const api = getApiById(id);
       return NextResponse.json({ success: true, data: { api } });
     }
     
-    // ── 解决Alert ──
+    // ── 解决告警 ──
     if (action === 'resolve-alert') {
       const body = await request.json();
       const { id, resolvedBy = 'system' } = body;
       
       if (!id) {
-        return NextResponse.json({ success: false, error: 'Missing AlertID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: '缺少告警ID' }, { status: 400 });
       }
       
       const success = resolveAlert(id);
       return NextResponse.json({ success, data: { resolved: success } });
     }
     
-    // ── TestAPIConnect ──
+    // ── 测试API连接 ──
     if (action === 'test-connection') {
       const body = await request.json();
       const { id } = body;
       
       if (!id) {
-        return NextResponse.json({ success: false, error: 'Missing API ID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: '缺少API ID' }, { status: 400 });
       }
       
       const api = getApiById(id);
       if (!api) {
-        return NextResponse.json({ success: false, error: 'APINot found' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'API未找到' }, { status: 404 });
       }
       
       const result = await checkApiStatus(api);
       return NextResponse.json({ success: true, data: { result } });
     }
     
-    // ── re-Auth ──
+    // ── 重新认证 ──
     if (action === 'reauth') {
       const body = await request.json();
       const { id, apiKey, clientId, clientSecret, refreshToken, serviceAccount } = body;
       
       if (!id) {
-        return NextResponse.json({ success: false, error: 'Missing API ID' }, { status: 400 });
+        return NextResponse.json({ success: false, error: '缺少API ID' }, { status: 400 });
       }
       
       const api = getApiById(id);
       if (!api) {
-        return NextResponse.json({ success: false, error: 'APINot found' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'API未找到' }, { status: 404 });
       }
       
-      // UpdateAuthinformation
+      // 更新认证信息
       const updates: any = {};
       if (apiKey !== undefined) updates.apiKey = apiKey;
       if (clientId !== undefined) updates.clientId = clientId;
@@ -382,16 +382,16 @@ export async function POST(request: NextRequest) {
       if (refreshToken !== undefined) updates.refreshToken = refreshToken;
       if (serviceAccount !== undefined) updates.serviceAccount = serviceAccount;
       
-      // UpdateStatusforneed toCheck
+      // 更新状态为需要检查
       updates.status = 'active';
       updates.lastChecked = new Date().toISOString();
       
       const success = updateApi(id, updates as Partial<ExternalApi>);
       if (!success) {
-        return NextResponse.json({ success: false, error: 'Re-authentication failed' }, { status: 500 });
+        return NextResponse.json({ success: false, error: '重新认证失败' }, { status: 500 });
       }
       
-      // TestNew凭证
+      // 测试新凭证
       const updatedApi = getApiById(id);
       if (updatedApi) {
         const result = await checkApiStatus(updatedApi);
@@ -407,12 +407,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: { api: updatedApi } });
     }
     
-    return NextResponse.json({ success: false, error: 'Unknown operation' }, { status: 400 });
+    return NextResponse.json({ success: false, error: '未知操作' }, { status: 400 });
     
   } catch (error) {
-    console.error('External APIs POSTerror:', error);
+    console.error('外部API POST错误:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: error instanceof Error ? error.message : '未知错误' },
       { status: 500 }
     );
   }
@@ -424,16 +424,16 @@ export async function DELETE(request: NextRequest) {
     const id = url.searchParams.get('id');
     
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Missing API ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少API ID' }, { status: 400 });
     }
     
     const success = deleteApi(id);
     return NextResponse.json({ success, data: { deleted: success } });
     
   } catch (error) {
-    console.error('External APIs DELETEerror:', error);
+    console.error('外部API DELETE错误:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: error instanceof Error ? error.message : '未知错误' },
       { status: 500 }
     );
   }

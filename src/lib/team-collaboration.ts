@@ -1,4 +1,4 @@
-// Team Collaboration - MoreUser和Permission管理
+// 团队协作 - 多用户和权限管理
 import fs from 'fs';
 import path from 'path';
 
@@ -7,12 +7,12 @@ const USERS_FILE = path.join(DB_DIR, 'users.json');
 const TEAMS_FILE = path.join(DB_DIR, 'teams.json');
 const PERMISSIONS_FILE = path.join(DB_DIR, 'permissions.json');
 
-// 确保data目录存in
+// 确保数据目录存在
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
-// Initializedata库file
+// 初始化数据库文件
 if (!fs.existsSync(USERS_FILE)) {
   fs.writeFileSync(USERS_FILE, JSON.stringify({
     users: [
@@ -35,8 +35,8 @@ if (!fs.existsSync(TEAMS_FILE)) {
     teams: [
       {
         id: 'team_1',
-        name: '核心DevelopmentTeam',
-        description: '主need toProductDevelopment和maintenanceTeam',
+        name: '核心开发团队',
+        description: '主要产品开发和维护团队',
         members: ['user_1'],
         projects: ['mission-control', 'my-skill-store'],
         createdAt: new Date().toISOString()
@@ -86,7 +86,7 @@ if (!fs.existsSync(PERMISSIONS_FILE)) {
   }, null, 2));
 }
 
-// UserInterface
+// 用户接口
 export interface User {
   id: string;
   username: string;
@@ -102,18 +102,18 @@ export interface User {
   };
 }
 
-// TeamInterface
+// 团队接口
 export interface Team {
   id: string;
   name: string;
   description: string;
-  members: string[]; // UserIDArray
+  members: string[]; // 用户ID数组
   projects: string[];
   createdAt: string;
   updatedAt?: string;
 }
 
-// PermissionInterface
+// 权限接口
 export interface PermissionSet {
   canViewAll: boolean;
   canEditAll: boolean;
@@ -125,9 +125,9 @@ export interface PermissionSet {
   canDeleteOwn: boolean;
 }
 
-// Team Collaboration管理器
+// 团队协作管理器
 export class TeamCollaborationManager {
-  // User管理
+  // 用户管理
   static getUsers(): User[] {
     try {
       const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
@@ -192,7 +192,7 @@ export class TeamCollaborationManager {
     return true;
   }
   
-  // Team管理
+  // 团队管理
   static getTeams(): Team[] {
     try {
       const data = JSON.parse(fs.readFileSync(TEAMS_FILE, 'utf-8'));
@@ -273,7 +273,7 @@ export class TeamCollaborationManager {
     return false;
   }
   
-  // Permission管理
+  // 权限管理
   static getPermissions(): Record<string, PermissionSet> {
     try {
       const data = JSON.parse(fs.readFileSync(PERMISSIONS_FILE, 'utf-8'));
@@ -297,7 +297,7 @@ export class TeamCollaborationManager {
     return permissions[action] || false;
   }
   
-  // Projectcollaboration
+  // 项目协作
   static assignProjectToTeam(projectId: string, teamId: string): boolean {
     const team = this.getTeam(teamId);
     if (!team) return false;
@@ -321,7 +321,7 @@ export class TeamCollaborationManager {
     return teams.filter(team => team.members.includes(userId));
   }
   
-  // collaboration功can
+  // 协作功能
   static createCollaborationSession(
     projectId: string,
     creatorId: string,
@@ -351,7 +351,7 @@ export class TeamCollaborationManager {
       status: 'active' as const
     };
     
-    // Savewill话tofile
+    // 保存会话到文件
     const sessionsFile = path.join(DB_DIR, `collaboration-${projectId}.json`);
     let sessions = [];
     
@@ -360,7 +360,7 @@ export class TeamCollaborationManager {
         sessions = JSON.parse(fs.readFileSync(sessionsFile, 'utf-8')).sessions || [];
       }
     } catch {
-      // iffile损坏, CreateNew's
+      // 如果文件损坏，创建新的
     }
     
     sessions.push(session);
@@ -373,7 +373,7 @@ export class TeamCollaborationManager {
     return session;
   }
   
-  // Notification System
+  // 通知系统
   static sendNotification(
     userId: string,
     notification: {
@@ -396,7 +396,7 @@ export class TeamCollaborationManager {
         notifications = JSON.parse(fs.readFileSync(notificationsFile, 'utf-8')).notifications || [];
       }
     } catch {
-      // iffile损坏, CreateNew's
+      // 如果文件损坏，创建新的
     }
     
     notifications.push({
@@ -406,7 +406,7 @@ export class TeamCollaborationManager {
       createdAt: new Date().toISOString()
     });
     
-    // 只保留最近's100 Notification
+    // 只保留最近的100条通知
     const limitedNotifications = notifications.slice(-100);
     
     fs.writeFileSync(notificationsFile, JSON.stringify({
@@ -460,7 +460,7 @@ export class TeamCollaborationManager {
     return true;
   }
   
-  // ExportTeamdata
+  // 导出团队数据
   static exportTeamData(teamId: string): string {
     const team = this.getTeam(teamId);
     if (!team) throw new Error('Team not found');

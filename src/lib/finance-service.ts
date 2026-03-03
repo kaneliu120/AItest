@@ -1,4 +1,4 @@
-// FinanceSystemservervice - 深度集成toMission Control
+// 财务系统服务 - 深度集成到Mission Control
 
 export interface Transaction {
   id: string;
@@ -42,14 +42,14 @@ export interface Budget {
   status: 'on-track' | 'over-budget' | 'under-budget';
 }
 
-class Financeservervice {
+class FinanceService {
   private transactions: Transaction[] = [
     {
       id: 'txn-001',
       date: '2026-02-21',
       type: 'income',
-      category: 'AIOutsourceProject',
-      description: 'My Skill Shop DevelopmentProject',
+      category: 'AI外包项目',
+      description: 'My Skill Shop 开发项目',
       amount: 50000,
       currency: 'PHP',
       status: 'completed',
@@ -59,8 +59,8 @@ class Financeservervice {
       id: 'txn-002',
       date: '2026-02-20',
       type: 'expense',
-      category: 'Server Costs',
-      description: 'Azure Cloud server monthly fee',
+      category: '服务器费用',
+      description: 'Azure云服务器月费',
       amount: 15000,
       currency: 'PHP',
       status: 'completed',
@@ -70,8 +70,8 @@ class Financeservervice {
       id: 'txn-003',
       date: '2026-02-19',
       type: 'income',
-      category: 'Skill Sales',
-      description: 'AI Skill Platform sales commission',
+      category: '技能销售',
+      description: 'AI技能平台销售分成',
       amount: 25000,
       currency: 'PHP',
       status: 'completed',
@@ -81,8 +81,8 @@ class Financeservervice {
       id: 'txn-004',
       date: '2026-02-18',
       type: 'expense',
-      category: 'Marketing & Promotion',
-      description: 'Google Ads advertising cost',
+      category: '营销推广',
+      description: 'Google Ads 广告费用',
       amount: 8000,
       currency: 'PHP',
       status: 'completed',
@@ -92,8 +92,8 @@ class Financeservervice {
       id: 'txn-005',
       date: '2026-02-17',
       type: 'expense',
-      category: 'Software Development Tools',
-      description: 'Development tools and software subscriptions',
+      category: '软件开发工具',
+      description: '开发工具和软件订阅',
       amount: 5000,
       currency: 'PHP',
       status: 'completed',
@@ -104,8 +104,8 @@ class Financeservervice {
   private budgets: Budget[] = [
     {
       id: 'budget-001',
-      name: 'Server Cost Budget',
-      category: 'Infrastructure',
+      name: '服务器费用预算',
+      category: '基础设施',
       allocated: 20000,
       spent: 15000,
       remaining: 5000,
@@ -114,7 +114,7 @@ class Financeservervice {
     },
     {
       id: 'budget-002',
-      name: 'Marketing Budget',
+      name: '营销推广预算',
       category: '市场营销',
       allocated: 10000,
       spent: 8000,
@@ -124,8 +124,8 @@ class Financeservervice {
     },
     {
       id: 'budget-003',
-      name: 'DevelopmentToolbudget',
-      category: 'Tool软件',
+      name: '开发工具预算',
+      category: '工具软件',
       allocated: 6000,
       spent: 5000,
       remaining: 1000,
@@ -134,7 +134,7 @@ class Financeservervice {
     },
     {
       id: 'budget-004',
-      name: 'AI模型训练budget',
+      name: 'AI模型训练预算',
       category: '研发投入',
       allocated: 30000,
       spent: 0,
@@ -144,7 +144,7 @@ class Financeservervice {
     },
   ];
 
-  // FetchFinanceSummary
+  // 获取财务摘要
   async getFinancialSummary(): Promise<FinancialSummary> {
     const totalIncome = this.transactions
       .filter(t => t.type === 'income' && t.status === 'completed')
@@ -157,10 +157,10 @@ class Financeservervice {
     const netProfit = totalIncome - totalExpenses;
     const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
 
-    // 月度趋势data
+    // 月度趋势数据
     const monthlyTrend = this.generateMonthlyTrend();
 
-    // CategoryStatistics
+    // 分类统计
     const topCategories = this.getTopCategories();
 
     return {
@@ -173,7 +173,7 @@ class Financeservervice {
     };
   }
 
-  // Fetch交易Log
+  // 获取交易记录
   async getTransactions(
     filters?: {
       type?: 'income' | 'expense';
@@ -202,10 +202,10 @@ class Financeservervice {
       filtered = filtered.filter(t => t.date <= filters.endDate!);
     }
 
-    // Sort
+    // 排序
     filtered = filtered.sort((a, b) => b.date.localeCompare(a.date));
 
-    // Pagination
+    // 分页
     const page = filters?.page || 1;
     const pageSize = filters?.pageSize || 20;
     const startIndex = (page - 1) * pageSize;
@@ -219,12 +219,12 @@ class Financeservervice {
     };
   }
 
-  // Fetchbudgetinformation
+  // 获取预算信息
   async getBudgets(): Promise<Budget[]> {
     return this.budgets;
   }
 
-  // FetchFinanceStatistics
+  // 获取财务统计
   async getFinancialStats(): Promise<any> {
     const totalIncome = this.transactions
       .filter(t => t.type === 'income' && t.status === 'completed')
@@ -249,12 +249,12 @@ class Financeservervice {
     };
   }
 
-  // Fetch最近交易
+  // 获取最近交易
   async getRecentTransactions(): Promise<Transaction[]> {
     return this.transactions.slice(0, 10);
   }
 
-  // Add交易
+  // 添加交易
   async addTransaction(transaction: Omit<Transaction, 'id'>): Promise<Transaction> {
     const newTransaction: Transaction = {
       ...transaction,
@@ -265,7 +265,7 @@ class Financeservervice {
     return newTransaction;
   }
 
-  // Update交易
+  // 更新交易
   async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction | null> {
     const index = this.transactions.findIndex(t => t.id === id);
     
@@ -281,14 +281,14 @@ class Financeservervice {
     return this.transactions[index];
   }
 
-  // Delete交易
+  // 删除交易
   async deleteTransaction(id: string): Promise<boolean> {
     const initialLength = this.transactions.length;
     this.transactions = this.transactions.filter(t => t.id !== id);
     return this.transactions.length < initialLength;
   }
 
-  // Addbudget
+  // 添加预算
   async addBudget(budget: Omit<Budget, 'id'>): Promise<Budget> {
     const newBudget: Budget = {
       ...budget,
@@ -299,7 +299,7 @@ class Financeservervice {
     return newBudget;
   }
 
-  // Updatebudget
+  // 更新预算
   async updateBudget(id: string, updates: Partial<Budget>): Promise<Budget | null> {
     const index = this.budgets.findIndex(b => b.id === id);
     
@@ -315,7 +315,7 @@ class Financeservervice {
     return this.budgets[index];
   }
 
-  // Generate月度趋势data
+  // 生成月度趋势数据
   private generateMonthlyTrend() {
     const months = ['2026-01', '2026-02'];
     
@@ -339,9 +339,9 @@ class Financeservervice {
     });
   }
 
-  // FetchCategoryStatistics
+  // 获取分类统计
   private getTopCategories() {
-    // 单 timestraverse同时计算Category汇总和总额, 避免额外's filter/reduce
+    // 单次遍历同时计算分类汇总和总额，避免额外的 filter/reduce
     const categories = new Map<string, { income: number; expense: number }>();
     let totalIncome = 0;
     let totalExpenses = 0;
@@ -387,7 +387,7 @@ class Financeservervice {
     return result.sort((a, b) => b.amount - a.amount).slice(0, 10);
   }
 
-  // FetchSystemStatus
+  // 获取系统状态
   getSystemStatus() {
     const summary = this.calculateQuickSummary();
     
@@ -402,7 +402,7 @@ class Financeservervice {
     };
   }
 
-  // FetchCategoryList
+  // 获取分类列表
   async getCategories(): Promise<{ income: string[]; expense: string[] }> {
     const incomeCategories = [...new Set(
       this.transactions
@@ -422,12 +422,12 @@ class Financeservervice {
     };
   }
 
-  // FetchAnalyticsdata
+  // 获取分析数据
   async getAnalytics() {
     const transactions = this.transactions;
     const budgets = this.budgets;
 
-    // 月度趋势Analytics
+    // 月度趋势分析
     const monthlyData: Record<string, { income: number; expense: number; profit: number }> = {};
     
     transactions.forEach(t => {
@@ -453,7 +453,7 @@ class Financeservervice {
       }))
       .sort((a, b) => b.month.localeCompare(a.month));
 
-    // CategoryAnalytics
+    // 分类分析
     const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
     
     transactions.forEach(t => {
@@ -475,7 +475,7 @@ class Financeservervice {
       netProfit: data.income - data.expense,
     }));
 
-    // budgetExecute情况
+    // 预算执行情况
     const budgetPerformance = budgets.map(budget => {
       const actualSpent = transactions
         .filter(t => t.type === 'expense' && t.category === budget.category)
@@ -509,7 +509,7 @@ class Financeservervice {
     };
   }
 
-  // 快速计算Summary
+  // 快速计算摘要
   private calculateQuickSummary() {
     const totalIncome = this.transactions
       .filter(t => t.type === 'income')
@@ -526,4 +526,4 @@ class Financeservervice {
   }
 }
 
-export const financeservervice = new Financeservervice();
+export const financeService = new FinanceService();

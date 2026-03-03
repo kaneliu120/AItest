@@ -1,17 +1,17 @@
 import { logger } from '@/lib/logger';
 /**
- * ExampleAutomationTestTask
+ * 示例自动化测试任务
  */
 
 export const sampleTasks = [
   {
     id: 'test-aiassist-web',
-    name: 'AI Assist Web Test',
-    description: 'using AI Assist Test网站功can',
+    name: 'AI Assist Web 测试',
+    description: '使用 AI Assist 测试网站功能',
     moduleId: 'aiassist-automation',
     action: 'run-web-test',
     schedule: {
-      cron: '0 9 * * *', // 每d上午9点
+      cron: '0 9 * * *', // 每天上午9点
       enabled: true
     },
     parameters: {
@@ -26,12 +26,12 @@ export const sampleTasks = [
   },
   {
     id: 'test-cortexaai-api',
-    name: 'CortexaAI API Test',
-    description: 'using CortexaAI Test API Interface',
+    name: 'CortexaAI API 测试',
+    description: '使用 CortexaAI 测试 API 接口',
     moduleId: 'cortexaai-automation',
     action: 'run-api-test',
     schedule: {
-      cron: '*/30 * * * *', // 每30min
+      cron: '*/30 * * * *', // 每30分钟
       enabled: true
     },
     parameters: {
@@ -46,12 +46,12 @@ export const sampleTasks = [
   },
   {
     id: 'daily-screenshot',
-    name: '每日网站截Graph',
-    description: '每dforOff键页面In Progress截Graph',
+    name: '每日网站截图',
+    description: '每天对关键页面进行截图',
     moduleId: 'aiassist-automation',
     action: 'take-screenshot',
     schedule: {
-      cron: '0 18 * * *', // 每d下午6点
+      cron: '0 18 * * *', // 每天下午6点
       enabled: true
     },
     parameters: {
@@ -61,12 +61,12 @@ export const sampleTasks = [
   },
   {
     id: 'performance-monitor',
-    name: 'PerformanceMonitoring',
-    description: 'Monitoring网站Performance',
+    name: '性能监控',
+    description: '监控网站性能',
     moduleId: 'cortexaai-automation',
     action: 'run-performance-test',
     schedule: {
-      cron: '0 */6 * * *', // 每6Small时
+      cron: '0 */6 * * *', // 每6小时
       enabled: true
     },
     parameters: {
@@ -79,22 +79,22 @@ export const sampleTasks = [
 ];
 
 /**
- * RegisterExampleTask
+ * 注册示例任务
  */
 export async function registerSampleTasks(taskScheduler: { createTask?: (task: unknown) => unknown }) {
-  console.log('RegisterExampleAutomationTestTask...');
+  console.log('注册示例自动化测试任务...');
   
   for (const task of sampleTasks) {
     try {
-      // 这里should调用TaskScheduling器'sRegistermethod
+      // 这里应该调用任务调度器的注册方法
       console.log(`  • ${task.name} (${task.id})`);
       await new Promise(resolve => setTimeout(resolve, 50));
     } catch (error) {
-      logger.error('ExampleTaskRegisterfailed', error, { taskId: task.id, taskName: task.name });
+      logger.error('示例任务注册失败', error, { taskId: task.id, taskName: task.name });
     }
   }
   
-  console.log(`ExampleTaskRegisterCompleted, 共 ${sampleTasks.length}  Task`);
+  console.log(`示例任务注册完成，共 ${sampleTasks.length} 个任务`);
   return sampleTasks;
 }
 

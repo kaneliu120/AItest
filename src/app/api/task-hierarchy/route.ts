@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     if (!body?.title || !body?.level) {
-      return NextResponse.json({ success: false, error: 'title and level are required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'title 和 level 必填' }, { status: 400 });
     }
     const task = await createMissionTask({
       parentId: body.parentId || null,
@@ -51,6 +51,6 @@ export async function POST(request: NextRequest) {
     } as any);
     return NextResponse.json({ success: true, data: task });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
   }
 }

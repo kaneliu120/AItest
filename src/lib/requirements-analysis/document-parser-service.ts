@@ -1,10 +1,10 @@
 /**
- * MoreFormatdocumentParseservervice
+ * 多格式文档解析服务
  * 支持: TXT, MD, HTML, DOCX, PDF
  */
 
 /**
- * SecurityParsedateString
+ * 安全解析日期字符串
  */
 const parseDate = (dateString: string): Date => {
   const timestamp = Date.parse(dateString);
@@ -18,14 +18,14 @@ const parseDate = (dateString: string): Date => {
 
 import fs from 'fs/promises';
 import path from 'path';
-import { createAllh } from 'crypto';
+import { createHash } from 'crypto';
 
-// 动态Import以避免构建时问题
+// 动态导入以避免构建时问题
 let mammoth: any;
 let pdfParse: any;
 let JSDOM: any;
 
-// 懒Load依赖
+// 懒加载依赖
 const loadDependencies = async () => {
   if (!mammoth) {
     mammoth = (await import('mammoth')).default;
@@ -59,7 +59,7 @@ export interface ParsedDocument {
   rawText: string;
 }
 
-export class DocumentParserservervice {
+export class DocumentParserService {
   private uploadDir: string;
 
   constructor() {
@@ -76,12 +76,12 @@ export class DocumentParserservervice {
   }
 
   /**
-   * ParseUpload'sfile
+   * 解析上传的文件
    */
   async parseFile(fileBuffer: Buffer, filename: string, originalContent?: string): Promise<ParsedDocument> {
     const fileType = this.getFileType(filename);
     const fileSize = fileBuffer.length;
-    const fileId = createAllh('md5').update(fileBuffer).digest('hex');
+    const fileId = createHash('md5').update(fileBuffer).digest('hex');
 
     let content = '';
     let sections: Array<{ title: string; content: string; level: number }> = [];
@@ -119,11 +119,11 @@ export class DocumentParserservervice {
       }
     } catch (error) {
       console.error(`Error parsing file ${filename}:`, error);
-      // ifParsefailed, using原始文本
+      // 如果解析失败，使用原始文本
       content = fileBuffer.toString('utf-8').substring(0, 10000);
     }
 
-    // 计算documentStatisticsinformation
+    // 计算文档统计信息
     const wordCount = this.countWords(content);
     const characters = content.length;
 
@@ -144,7 +144,7 @@ export class DocumentParserservervice {
   }
 
   /**
-   * ParseHTMLfile
+   * 解析HTML文件
    */
   private async parseHtml(buffer: Buffer): Promise<string> {
     await loadDependencies();
@@ -152,17 +152,17 @@ export class DocumentParserservervice {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
-    // removeScript和样式Tag
+    // 移除脚本和样式标签
     const scripts = document.querySelectorAll('script, style');
     scripts.forEach((el: Element) => el.remove());
 
-    // 提取主need tocontent
+    // 提取主要内容
     const body = document.body || document.documentElement;
     return body.textContent?.trim() || '';
   }
 
   /**
-   * ParseDOCXfile
+   * 解析DOCX文件
    */
   private async parseDocx(buffer: Buffer): Promise<string> {
     await loadDependencies();
@@ -176,7 +176,7 @@ export class DocumentParserservervice {
   }
 
   /**
-   * ParsePDFfile
+   * 解析PDF文件
    */
   private async parsePdf(buffer: Buffer): Promise<string> {
     await loadDependencies();
@@ -190,7 +190,7 @@ export class DocumentParserservervice {
   }
 
   /**
-   * From文本Center提取章节
+   * 从文本中提取章节
    */
   private extractSectionsFromText(text: string): Array<{ title: string; content: string; level: number }> {
     const sections: Array<{ title: string; content: string; level: number }> = [];
@@ -202,10 +202,10 @@ export class DocumentParserservervice {
     for (const line of lines) {
       const trimmedLine = line.trim();
       
-      // 检测title (以#On头)
+      // 检测标题 (以#开头)
       const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
       if (headingMatch) {
-        // Save前一 章节
+        // 保存前一个章节
         if (currentSection) {
           currentSection.content = contentBuffer.join('\n').trim();
           sections.push(currentSection);
@@ -221,16 +221,16 @@ export class DocumentParserservervice {
       }
     }
 
-    // Save最后一 章节
+    // 保存最后一个章节
     if (currentSection && contentBuffer.length > 0) {
       currentSection.content = contentBuffer.join('\n').trim();
       sections.push(currentSection);
     }
 
-    // if没All检测to章节, Create单 章节
+    // 如果没有检测到章节，创建单个章节
     if (sections.length === 0 && text.trim().length > 0) {
       sections.push({
-        title: '主need tocontent',
+        title: '主要内容',
         content: text.trim(),
         level: 1,
       });
@@ -240,15 +240,15 @@ export class DocumentParserservervice {
   }
 
   /**
-   * FromHTMLCenter提取章节
+   * 从HTML中提取章节
    */
   private extractSectionsFromHtml(html: string): Array<{ title: string; content: string; level: number }> {
-    // 简化实现: using文本章节提取
+    // 简化实现：使用文本章节提取
     return this.extractSectionsFromText(html);
   }
 
   /**
-   * FetchfileType
+   * 获取文件类型
    */
   private getFileType(filename: string): ParsedDocument['fileType'] {
     const ext = path.extname(filename).toLowerCase();
@@ -267,13 +267,13 @@ export class DocumentParserservervice {
       case '.pdf':
         return 'pdf';
       default:
-        // if没Allextend名orUnknownextend名, 尝试基于content判断
+        // 如果没有扩展名或未知扩展名，尝试基于内容判断
         return 'text';
     }
   }
 
   /**
-   * Statistics单词数
+   * 统计单词数
    */
   private countWords(text: string): number {
     return text
@@ -284,7 +284,7 @@ export class DocumentParserservervice {
   }
 
   /**
-   * SaveUpload'sfile
+   * 保存上传的文件
    */
   async saveUploadedFile(buffer: Buffer, filename: string): Promise<string> {
     const filePath = path.join(this.uploadDir, filename);
@@ -293,7 +293,7 @@ export class DocumentParserservervice {
   }
 
   /**
-   * 清理temporaryfile
+   * 清理临时文件
    */
   async cleanupFile(filePath: string): Promise<void> {
     try {

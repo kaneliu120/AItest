@@ -52,7 +52,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   terminal: <Terminal className="w-5 h-5" />,
 };
 function fmtTime(iso: string | null) {
-  if (!iso) return '-';
+  if (!iso) return '—';
   try {
     const d = new Date(iso), now = Date.now(), diff = now - d.getTime();
     if (diff < 60000)    return 'just now';
@@ -106,14 +106,14 @@ export default function TroubleshootingPage() {
 
   // ── Full System Scan ──
   const fullScan = async () => {
-    setScanning(true); setScanPct(0); setScanMsg('Starting scan...');
-    // Simulated progress(Real scan approx. 10-20s)
+    setScanning(true); setScanPct(0); setScanMsg('Starting scan…');
+    // Simulated progress（Real scan approx. 10-20s）
     const steps = [
-      [10, 'Detection API Healthy...'],
-      [30, 'Run Performance Test...'],
-      [55, 'Run Security Scan...'],
-      [75, 'System Diagnostics running...'],
-      [90, 'Summary analysis results...'],
+      [10, 'Detection API Healthy…'],
+      [30, 'Run Performance Test…'],
+      [55, 'Run Security Scan…'],
+      [75, 'System Diagnostics running…'],
+      [90, 'Summary analysis results…'],
     ];
     let i = 0;
     const timer = setInterval(() => {
@@ -140,7 +140,7 @@ export default function TroubleshootingPage() {
     } catch {
       clearInterval(timer);
       setScanning(false);
-      toast('err', 'Scan failed, Please try again later');
+      toast('err', 'Scan failed，Please try again later');
     }
   };
 
@@ -155,7 +155,7 @@ export default function TroubleshootingPage() {
       const data = await res.json();
       if (data.success) {
         await fetchData();
-        toast('ok', `${tool.name} Execution complete, Issue list updated`);
+        toast('ok', `${tool.name} Execution complete，Issue list updated`);
       } else { toast('err', data.message ?? 'Execution failed'); }
     } catch { toast('err', 'Request failed'); }
     finally { setRunningTool(null); }
@@ -172,7 +172,7 @@ export default function TroubleshootingPage() {
       const data = await res.json();
       if (data.success) {
         await fetchData();
-        toast('ok', `"${issue.component}"Marked as resolved`);
+        toast('ok', `「${issue.component}」Marked as resolved`);
       } else { toast('err', data.message ?? 'Operation failed'); }
     } catch { toast('err', 'Request failed'); }
     finally { setFixingId(null); }
@@ -228,7 +228,7 @@ export default function TroubleshootingPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
-        <span className="text-slate-500">Loading fault data...</span>
+        <span className="text-slate-500">Loading fault data…</span>
       </div>
     );
   }
@@ -253,11 +253,11 @@ export default function TroubleshootingPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Troubleshooting Center</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Data Source: Testing center real-time results ·
+            Data Source：Testing center real-time results ·
             <span className="ml-1 text-blue-500">
               {summary?.total ?? 0}  issues
               {(summary?.active ?? 0) > 0
-                ? <span className="text-red-500 ml-1">({summary?.active}  Active)</span>
+                ? <span className="text-red-500 ml-1">（{summary?.active}  Active）</span>
                 : <span className="text-green-500 ml-1">(System healthy)</span>
               }
             </span>
@@ -270,7 +270,7 @@ export default function TroubleshootingPage() {
           <Button size="sm" onClick={fullScan} disabled={scanning}
             className="bg-blue-600 hover:bg-blue-700 text-white">
             {scanning
-              ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Scanning...</>
+              ? <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Scanning…</>
               : <><Search    className="w-3.5 h-3.5 mr-1" />Full System Scan</>
             }
           </Button>
@@ -412,7 +412,7 @@ export default function TroubleshootingPage() {
                           disabled={fixingId === issue.id + '_fix'}
                           onClick={() => applyFix(issue)}>
                           {fixingId === issue.id + '_fix'
-                            ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Fixing...</>
+                            ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Fixing…</>
                             : <><Zap className="w-3 h-3 mr-1" />Apply Fix</>
                           }
                         </Button>
@@ -430,7 +430,7 @@ export default function TroubleshootingPage() {
                 <div className="flex items-start gap-2">
                   <ChevronRight className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
                   <div>
-                    <span className="text-xs text-slate-400 mr-1">Suggested Fixes: </span>
+                    <span className="text-xs text-slate-400 mr-1">Suggested Fixes：</span>
                     <span className="text-xs text-slate-600">{issue.solution}</span>
                   </div>
                 </div>
@@ -482,7 +482,7 @@ export default function TroubleshootingPage() {
                       disabled={!!runningTool}
                       onClick={() => runTool(tool)}>
                       {runningTool === tool.id
-                        ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Executing...</>
+                        ? <><RefreshCw className="w-3 h-3 animate-spin mr-1" />Executing…</>
                         : <><Play className="w-3 h-3 mr-1" />Execute</>
                       }
                     </Button>
@@ -508,7 +508,7 @@ export default function TroubleshootingPage() {
                 <Button onClick={fullScan} disabled={scanning}
                   className="bg-blue-600 hover:bg-blue-700 text-white">
                   {scanning
-                    ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Scanning...</>
+                    ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Scanning…</>
                     : <><Play       className="w-4 h-4 mr-2" />One-Click Full Scan</>
                   }
                 </Button>
@@ -594,7 +594,7 @@ export default function TroubleshootingPage() {
                       <div className="text-red-600">Failed</div>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400">Recent Run: {fmtTime(snapshot.testing.lastRun)}</p>
+                  <p className="text-xs text-slate-400">Recent Run：{fmtTime(snapshot.testing.lastRun)}</p>
                   <a href="/testing" className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700">
                     <ExternalLink className="w-3 h-3" /> Go to Testing Center
                   </a>

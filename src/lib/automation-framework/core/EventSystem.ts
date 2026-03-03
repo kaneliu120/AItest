@@ -1,4 +1,4 @@
-// EventSystem - Module间Event通信
+// 事件系统 - 模块间事件通信
 import { EventEmitter } from 'events';
 import { logger } from '@/lib/logger';
 
@@ -21,7 +21,7 @@ export interface EventHandler {
   eventType: string;
   moduleId: string;
   handler: (event: AutomationEvent) => void | Promise<void>;
-  priority: number; // 1-10, 1for最HighPriority
+  priority: number; // 1-10, 1为最高优先级
   enabled: boolean;
   metadata: {
     registeredAt: string;
@@ -88,36 +88,36 @@ export class EventSystem {
       ruleTriggerRate: 0
     };
     
-    // Registerbuilt-inEventProcess器
+    // 注册内置事件处理器
     this.registerBuiltInHandlers();
   }
   
-  // Registerbuilt-inEventProcess器
+  // 注册内置事件处理器
   private registerBuiltInHandlers(): void {
-    // EventLoggingProcess器
+    // 事件日志处理器
     this.registerHandler({
-      eventType: '*', // 监听所AllEvent
+      eventType: '*', // 监听所有事件
       moduleId: 'system',
       handler: (event) => {
         logger.info('Event fired', { module: 'EventSystem', type: event.type, source: event.source });
       },
-      priority: 10, // 最LowPriority
+      priority: 10, // 最低优先级
       enabled: true
     });
     
-    // errorEventProcess器
+    // 错误事件处理器
     this.registerHandler({
       eventType: 'error',
       moduleId: 'system',
       handler: (event) => {
         logger.error('Error event', event.data, { module: 'EventSystem' });
       },
-      priority: 1, // 最HighPriority
+      priority: 1, // 最高优先级
       enabled: true
     });
   }
   
-  // TriggerEvent
+  // 触发事件
   emit(eventData: Omit<AutomationEvent, 'id' | 'timestamp'>): string {
     const event: AutomationEvent = {
       ...eventData,
@@ -125,25 +125,25 @@ export class EventSystem {
       timestamp: new Date().toISOString()
     };
     
-    // 存储Event
+    // 存储事件
     this.events.set(event.id, event);
     
-    // UpdateStatistics
+    // 更新统计
     this.stats.totalEvents++;
     this.stats.eventsByType[event.type] = 
       (this.stats.eventsByType[event.type] || 0) + 1;
     
-    // TriggerEvent
+    // 触发事件
     this.emitter.emit('event', event);
     this.emitter.emit(`event:${event.type}`, event);
     
-    // ProcessEvent规then
+    // 处理事件规则
     this.processEventRules(event);
     
     return event.id;
   }
   
-  // RegisterEventProcess器
+  // 注册事件处理器
   registerHandler(handlerData: Omit<EventHandler, 'id' | 'metadata'>): string {
     const handler: EventHandler = {
       ...handlerData,
@@ -155,30 +155,30 @@ export class EventSystem {
       }
     };
     
-    // 存储Process器
+    // 存储处理器
     this.handlers.set(handler.id, handler);
     
-    // RegistertoEvent发射器
+    // 注册到事件发射器
     const eventListener = async (event: AutomationEvent) => {
       if (!handler.enabled) return;
       
-      // CheckEventType匹配
+      // 检查事件类型匹配
       if (handler.eventType !== '*' && handler.eventType !== event.type) {
         return;
       }
       
-      // UpdateProcess器Statistics
+      // 更新处理器统计
       handler.metadata.lastFired = new Date().toISOString();
       handler.metadata.fireCount++;
       
       try {
-        // ExecuteProcess器
+        // 执行处理器
         await handler.handler(event);
         handler.metadata.successCount++;
       } catch (error) {
         logger.error('Handler failed', error, { module: 'EventSystem', handlerId: handler.id });
         
-        // TriggererrorEvent
+        // 触发错误事件
         this.emit({
           type: 'handler-error',
           source: 'event-system',
@@ -195,27 +195,27 @@ export class EventSystem {
       }
     };
     
-    // 根据EventTypeRegister监听器
+    // 根据事件类型注册监听器
     if (handler.eventType === '*') {
       this.emitter.on('event', eventListener);
     } else {
       this.emitter.on(`event:${handler.eventType}`, eventListener);
     }
     
-    // UpdateStatistics
+    // 更新统计
     this.stats.activeHandlers = this.handlers.size;
     
     return handler.id;
   }
   
-  // removeEventProcess器
+  // 移除事件处理器
   unregisterHandler(handlerId: string): boolean {
     const handler = this.handlers.get(handlerId);
     if (!handler) return false;
     
-    // FromEvent发射器remove监听器
-    // 注意: due to我们Unable to 直接FetcheventListener引用, 这里简化Process
-    // in实际ApplicationCenter, need to存储eventListener引用
+    // 从事件发射器移除监听器
+    // 注意：由于我们无法直接获取eventListener引用，这里简化处理
+    // 在实际应用中，需要存储eventListener引用
     
     this.handlers.delete(handlerId);
     this.stats.activeHandlers = this.handlers.size;
@@ -223,7 +223,7 @@ export class EventSystem {
     return true;
   }
   
-  // CreateEvent规then
+  // 创建事件规则
   createRule(ruleData: Omit<EventRule, 'id' | 'metadata'>): string {
     const rule: EventRule = {
       ...ruleData,
@@ -241,17 +241,17 @@ export class EventSystem {
     return rule.id;
   }
   
-  // ProcessEvent规then
+  // 处理事件规则
   private processEventRules(event: AutomationEvent): void {
     for (const rule of this.rules.values()) {
       if (!rule.enabled) continue;
       
-      // CheckEventType匹配
+      // 检查事件类型匹配
       if (rule.condition.eventType !== event.type) {
         continue;
       }
       
-      // Checkfilter器
+      // 检查过滤器
       if (rule.condition.filters) {
         let matches = true;
         
@@ -299,26 +299,26 @@ export class EventSystem {
         if (!matches) continue;
       }
       
-      // Trigger规then
+      // 触发规则
       this.triggerRule(rule, event);
     }
   }
   
-  // Trigger规then
+  // 触发规则
   private triggerRule(rule: EventRule, event: AutomationEvent): void {
-    // Update规thenStatistics
+    // 更新规则统计
     rule.metadata.lastTriggered = new Date().toISOString();
     rule.metadata.triggerCount++;
     rule.metadata.updated = new Date().toISOString();
     
-    // Execute规then动作
+    // 执行规则动作
     for (const action of rule.actions) {
       try {
         this.executeRuleAction(action, event, rule);
       } catch (error) {
         logger.error('Rule action failed', error, { module: 'EventSystem', ruleId: rule.id });
         
-        // TriggererrorEvent
+        // 触发错误事件
         this.emit({
           type: 'rule-action-error',
           source: 'event-system',
@@ -336,18 +336,18 @@ export class EventSystem {
       }
     }
     
-    // UpdateStatistics
+    // 更新统计
     this.stats.ruleTriggerRate = 
       (this.stats.totalEvents > 0) 
         ? (Object.values(this.rules).reduce((sum, r) => sum + r.metadata.triggerCount, 0) / this.stats.totalEvents) * 100
         : 0;
   }
   
-  // Execute规then动作
+  // 执行规则动作
   private executeRuleAction(action: EventRule['actions'][0], event: AutomationEvent, rule: EventRule): void {
     switch (action.type) {
       case 'emit':
-        // TriggerNewEvent
+        // 触发新事件
         this.emit({
           type: action.target,
           source: `rule:${rule.id}`,
@@ -364,13 +364,13 @@ export class EventSystem {
         break;
         
       case 'call':
-        // 调用function(模拟)
+        // 调用函数（模拟）
         console.log(`[EventSystem] Rule ${rule.id} calling: ${action.target}`);
-        // in实际ApplicationCenter, 这里will调用Register'sfunction
+        // 在实际应用中，这里会调用注册的函数
         break;
         
       case 'log':
-        // LogLogging
+        // 记录日志
         console.log(`[EventSystem] Rule ${rule.id} log:`, {
           message: action.target,
           event: event,
@@ -379,7 +379,7 @@ export class EventSystem {
         break;
         
       case 'notify':
-        // SendNotification(模拟)
+        // 发送通知（模拟）
         console.log(`[EventSystem] Rule ${rule.id} notification:`, {
           target: action.target,
           message: action.parameters?.message || 'Event triggered',
@@ -389,7 +389,7 @@ export class EventSystem {
     }
   }
   
-  // FetchEventField值
+  // 获取事件字段值
   private getEventFieldValue(event: AutomationEvent, fieldPath: string): unknown {
     const parts = fieldPath.split('.');
     let value: unknown = event;
@@ -405,7 +405,7 @@ export class EventSystem {
     return value;
   }
   
-  // FetchEvent历史
+  // 获取事件历史
   getEventHistory(options: {
     type?: string;
     source?: string;
@@ -423,7 +423,7 @@ export class EventSystem {
     
     let events = Array.from(this.events.values());
     
-    // filter
+    // 过滤
     if (type) {
       events = events.filter(evt => evt.type === type);
     }
@@ -439,36 +439,36 @@ export class EventSystem {
       events = events.filter(evt => new Date(evt.timestamp) <= end);
     }
     
-    // bytime倒序Sort
+    // 按时间倒序排序
     events.sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
     
-    // 限制quantity
+    // 限制数量
     return events.slice(0, limit);
   }
   
-  // FetchProcess器information
+  // 获取处理器信息
   getHandler(handlerId: string): EventHandler | undefined {
     return this.handlers.get(handlerId);
   }
   
-  // Fetch所AllProcess器
+  // 获取所有处理器
   getAllHandlers(): EventHandler[] {
     return Array.from(this.handlers.values());
   }
   
-  // Fetch规theninformation
+  // 获取规则信息
   getRule(ruleId: string): EventRule | undefined {
     return this.rules.get(ruleId);
   }
   
-  // Fetch所All规then
+  // 获取所有规则
   getAllRules(): EventRule[] {
     return Array.from(this.rules.values());
   }
   
-  // enabled/disabled规then
+  // 启用/禁用规则
   toggleRule(ruleId: string, enabled: boolean): boolean {
     const rule = this.rules.get(ruleId);
     if (!rule) return false;
@@ -479,9 +479,9 @@ export class EventSystem {
     return true;
   }
   
-  // FetchStatisticsinformation
+  // 获取统计信息
   getStats(): EventSystemStats {
-    // 计算Process器success率
+    // 计算处理器成功率
     let totalFires = 0;
     let totalSuccess = 0;
     
@@ -497,7 +497,7 @@ export class EventSystem {
     return { ...this.stats };
   }
   
-  // 清理OldEvent
+  // 清理旧事件
   cleanupOldEvents(maxAgeHours: number = 24): {
     deleted: number;
     kept: number;
@@ -522,7 +522,7 @@ export class EventSystem {
     return { deleted, kept };
   }
   
-  // ExportEventSystemStatus
+  // 导出事件系统状态
   exportState(): string {
     const state = {
       handlers: this.getAllHandlers(),
@@ -536,7 +536,7 @@ export class EventSystem {
     return JSON.stringify(state, null, 2);
   }
   
-  // ImportEventSystemStatus
+  // 导入事件系统状态
   importState(stateJson: string): {
     success: boolean;
     imported: {
@@ -554,12 +554,12 @@ export class EventSystem {
       let importedEvents = 0;
       const errors: string[] = [];
       
-      // ImportProcess器(注意: Unable to Importhandlerfunction, need tore-Register)
+      // 导入处理器（注意：无法导入handler函数，需要重新注册）
       if (state.handlers && Array.isArray(state.handlers)) {
         for (const handlerData of state.handlers) {
           try {
-            // in实际ApplicationCenter, need tore-RegisterProcess器function
-            // 这里只Import元data
+            // 在实际应用中，需要重新注册处理器函数
+            // 这里只导入元数据
             importedHandlers++;
           } catch (error) {
             errors.push(`Failed to import handler ${handlerData.id}: ${error}`);
@@ -567,7 +567,7 @@ export class EventSystem {
         }
       }
       
-      // Import规then
+      // 导入规则
       if (state.rules && Array.isArray(state.rules)) {
         for (const ruleData of state.rules) {
           try {
@@ -579,14 +579,14 @@ export class EventSystem {
         }
       }
       
-      // ImportEvent(Optional)
+      // 导入事件（可选）
       if (state.recentEvents && Array.isArray(state.recentEvents)) {
         for (const event of state.recentEvents) {
           try {
             this.events.set(event.id, event);
             importedEvents++;
           } catch (error) {
-            // 忽略EventImporterror
+            // 忽略事件导入错误
           }
         }
       }
@@ -609,7 +609,7 @@ export class EventSystem {
     }
   }
   
-  // 监听Event(Promise方式)
+  // 监听事件（Promise方式）
   waitForEvent(options: {
     type: string;
     timeout?: number;
@@ -619,7 +619,7 @@ export class EventSystem {
       const { type, timeout = 30000, filter } = options;
       let timeoutId: NodeJS.Timeout;
       
-      // CreateEventProcess器
+      // 创建事件处理器
       const handler = (event: AutomationEvent) => {
         if (event.type !== type) return;
         if (filter && !filter(event)) return;
@@ -629,13 +629,13 @@ export class EventSystem {
         resolve(event);
       };
       
-      // SettingsTimeout
+      // 设置超时
       timeoutId = setTimeout(() => {
         this.emitter.off(`event:${type}`, handler);
         reject(new Error(`Timeout waiting for event: ${type}`));
       }, timeout);
       
-      // Register监听器
+      // 注册监听器
       this.emitter.on(`event:${type}`, handler);
     });
   }

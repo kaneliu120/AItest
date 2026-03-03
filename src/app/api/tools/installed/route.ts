@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     const key = d.toLocaleDateString('zh-CN', { weekday: 'short' });
-    return { day: key, using times数: Math.max(0, Math.round(stats.avgUsage * (0.5 + Math.random()))) };
+    return { day: key, 使用次数: Math.max(0, Math.round(stats.avgUsage * (0.5 + Math.random()))) };
   });
 
   const updateCandidates = await listUpdateCandidates();
@@ -39,20 +39,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, slug, status, version } = body;
 
-    if (!slug) return NextResponse.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+    if (!slug) return NextResponse.json({ success: false, error: '缺少技能标识' }, { status: 400 });
 
     if (action === 'toggle-status') {
       const updated = await toggleInstalledStatus(slug, status);
-      return NextResponse.json({ success: true, message: `Skill "${updated.name}" status updated`, data: updated });
+      return NextResponse.json({ success: true, message: `技能 "${updated.name}" 状态已更新`, data: updated });
     }
 
     if (action === 'update') {
       const updated = await updateInstalledSkill(slug, version);
-      return NextResponse.json({ success: true, message: `Skill "${updated.name}" Updated successfully`, data: updated });
+      return NextResponse.json({ success: true, message: `技能 "${updated.name}" 更新成功`, data: updated });
     }
 
-    return NextResponse.json({ success: false, error: 'Unsupported operation' }, { status: 400 });
+    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
   }
 }

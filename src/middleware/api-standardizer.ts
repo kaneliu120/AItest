@@ -1,14 +1,14 @@
 /**
- * APIstandard化Center间件
- * Ensure all API responses use a unified format
+ * API标准化中间件
+ * 确保所有API响应使用统一的格式
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiResponse, successResponse, errorResponse } from '@/lib/api-response';
 
 /**
- * APIstandard化Center间件
- * Wraps API handlers to ensure unified response format
+ * API标准化中间件
+ * 包装API处理函数，确保响应格式统一
  */
 export function withApiStandardizer<T = any>(
   handler: (req: NextRequest) => Promise<ApiResponse<T> | NextResponse>
@@ -17,28 +17,28 @@ export function withApiStandardizer<T = any>(
     try {
       const result = await handler(req);
       
-      // If already NextResponse, check if it is JSON response
+      // 如果已经是NextResponse，检查是否是JSON响应
       if (result instanceof NextResponse) {
         const contentType = result.headers.get('content-type');
         if (contentType?.includes('application/json')) {
-          // Already a JSON response, ensure correct format
+          // 已经是JSON响应，确保格式正确
           try {
             const body = await result.json();
             if (!body.success && !body.error) {
-              // Missing standard fields, wrap it
+              // 缺少标准字段，包装它
               const standardized = successResponse(body);
               return NextResponse.json(standardized, { status: result.status });
             }
             return result;
           } catch {
-            // Cannot parse as JSON, return original response
+            // 无法解析为JSON，返回原响应
             return result;
           }
         }
         return result;
       }
       
-      // If ApiResponse, return directly
+      // 如果是ApiResponse，直接返回
       if (result && typeof result === 'object' && 'success' in result) {
         const apiResponse = result as ApiResponse;
         const status = apiResponse.success ? 200 : 
@@ -49,14 +49,14 @@ export function withApiStandardizer<T = any>(
         return NextResponse.json(apiResponse, { status });
       }
       
-      // Otherwise, wrap as successResponse
+      // 其他情况，包装为成功响应
       const standardized = successResponse(result);
       return NextResponse.json(standardized);
       
     } catch (error) {
-      console.error('API processing error:', error);
+      console.error('API处理错误:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
       const apiError = errorResponse(errorMessage, { statusCode: 500 });
       
       return NextResponse.json(apiError, { status: 500 });
@@ -65,8 +65,8 @@ export function withApiStandardizer<T = any>(
 }
 
 /**
- * RequestIDCenter间件
- * Generates a unique ID for each request
+ * 请求ID中间件
+ * 为每个请求生成唯一ID
  */
 export function withRequestId(
   handler: (req: NextRequest, requestId: string) => Promise<ApiResponse | NextResponse>
@@ -74,7 +74,7 @@ export function withRequestId(
   return async (req: NextRequest): Promise<NextResponse> => {
     const requestId = crypto.randomUUID();
     
-    // Add request ID to request headers
+    // 添加请求ID到请求头
     const headers = new Headers(req.headers);
     headers.set('X-Request-ID', requestId);
     
@@ -84,12 +84,12 @@ export function withRequestId(
       const result = await handler(modifiedReq, requestId);
       
       if (result instanceof NextResponse) {
-        // Add request ID to response headers
+        // 添加请求ID到响应头
         result.headers.set('X-Request-ID', requestId);
         return result;
       }
       
-      // If ApiResponse, add request ID
+      // 如果是ApiResponse，添加请求ID
       if (result && typeof result === 'object') {
         (result as any).requestId = requestId;
       }
@@ -97,9 +97,9 @@ export function withRequestId(
       return NextResponse.json(result);
       
     } catch (error) {
-      console.error(`Request ${requestId} processing error:`, error);
+      console.error(`请求 ${requestId} 处理错误:`, error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
       const apiError = errorResponse(errorMessage, { 
         statusCode: 500,
         requestId 
@@ -113,8 +113,8 @@ export function withRequestId(
 }
 
 /**
- * ProcesstimeCenter间件
- * Records API processing time
+ * 处理时间中间件
+ * 记录API处理时间
  */
 export function withProcessingTime(
   handler: (req: NextRequest) => Promise<ApiResponse | NextResponse>
@@ -126,11 +126,11 @@ export function withProcessingTime(
       const result = await handler(req);
       const processingTime = Date.now() - startTime;
       
-      // Add processing time to response headers
+      // 添加处理时间到响应头
       const response = result instanceof NextResponse ? result : NextResponse.json(result);
       response.headers.set('X-Processing-Time', processingTime.toString());
       
-      // If ApiResponse, add processing time to data
+      // 如果是ApiResponse，添加处理时间到数据
       if (!(result instanceof NextResponse) && result && typeof result === 'object') {
         const apiResponse = result as any;
         if (apiResponse.data && typeof apiResponse.data === 'object') {
@@ -145,9 +145,9 @@ export function withProcessingTime(
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error(`API processing error (${processingTime}ms):`, error);
+      console.error(`API处理错误 (${processingTime}ms):`, error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
       const apiError = errorResponse(errorMessage, { statusCode: 500 });
       
       const response = NextResponse.json(apiError, { status: 500 });
@@ -158,7 +158,7 @@ export function withProcessingTime(
 }
 
 /**
- * combineCenter间件
+ * 组合中间件
  */
 export function composeMiddleware<T = any>(
   handler: (req: NextRequest, ...args: any[]) => Promise<ApiResponse<T> | NextResponse>,
@@ -171,8 +171,8 @@ export function composeMiddleware<T = any>(
 }
 
 /**
- * standardAPIProcessfunction包装器
- * Combines all middleware
+ * 标准API处理函数包装器
+ * 组合所有中间件
  */
 export function standardApiHandler<T = any>(
   handler: (req: NextRequest, requestId: string) => Promise<ApiResponse<T>>
@@ -186,8 +186,8 @@ export function standardApiHandler<T = any>(
 }
 
 /**
- * ValidateCenter间件
- * Validates request parameters
+ * 验证中间件
+ * 验证请求参数
  */
 export function withValidation<T>(
   schema: { parse: (data: any) => T },
@@ -200,7 +200,7 @@ export function withValidation<T>(
         const validatedData = schema.parse(data);
         return await handler(req, validatedData);
       } catch (error: any) {
-        // Validation error
+        // 验证错误
         const validationErrors: Record<string, string[]> = {};
         
         if (error.errors) {
@@ -215,7 +215,7 @@ export function withValidation<T>(
         
         const apiError = errorResponse({
           code: 'ERR_VALIDATION',
-          message: 'Request parameter validation failed',
+          message: '请求参数验证失败',
           details: validationErrors
         }, { statusCode: 400 });
         
@@ -226,39 +226,39 @@ export function withValidation<T>(
 }
 
 /**
- * AuthCenter间件
+ * 认证中间件
  */
 export function withAuth(
   handler: (req: NextRequest, userId: string) => Promise<NextResponse>
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    // Actual authentication logic should be implemented here
-    // Temporarily returns simulated UserID
+    // 这里应该实现实际的认证逻辑
+    // 暂时返回模拟的用户ID
     const authHeader = req.headers.get('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       const apiError = errorResponse({
         code: 'ERR_UNAUTHORIZED',
-        message: 'Authentication required'
+        message: '需要认证'
       }, { statusCode: 401 });
       
       return NextResponse.json(apiError, { status: 401 });
     }
     
-    // Simulated auth, should actually verify token
+    // 模拟认证，实际应该验证token
     const token = authHeader.slice(7);
-    const userId = 'user-123'; // Simulated UserID
+    const userId = 'user-123'; // 模拟用户ID
     
     return await handler(req, userId);
   };
 }
 
 /**
- * CacheCenter间件
+ * 缓存中间件
  */
 export function withCache(
   getCacheKey: (req: NextRequest) => string,
-  ttl: number = 60 // Default 60 seconds
+  ttl: number = 60 // 默认60秒
 ) {
   return (handler: (req: NextRequest) => Promise<ApiResponse | NextResponse>) => {
     const cache = new Map<string, { data: any; expiry: number }>();
@@ -267,7 +267,7 @@ export function withCache(
       const cacheKey = getCacheKey(req);
       const now = Date.now();
       
-      // Check cache
+      // 检查缓存
       const cached = cache.get(cacheKey);
       if (cached && cached.expiry > now) {
         const response = NextResponse.json(cached.data);
@@ -276,26 +276,26 @@ export function withCache(
         return response;
       }
       
-      // Execute handler function
+      // 执行处理函数
       const result = await handler(req);
       
       if (result instanceof NextResponse) {
         const data = await result.json();
         
-        // Cache response
+        // 缓存响应
         cache.set(cacheKey, {
           data,
           expiry: now + (ttl * 1000)
         });
         
-        // Add cache headers
+        // 添加缓存头
         result.headers.set('X-Cache', 'MISS');
         result.headers.set('X-Cache-Expiry', new Date(now + (ttl * 1000)).toISOString());
         
         return result;
       }
       
-      // If ApiResponse, cache it
+      // 如果是ApiResponse，缓存它
       cache.set(cacheKey, {
         data: result,
         expiry: now + (ttl * 1000)

@@ -1,11 +1,11 @@
 // @ts-nocheck
 /**
- * workflow-stage.ts Status机Edge界Test
- * 覆盖: canMove() 所All合法/非法转移, moveStage() 事务逻辑
+ * workflow-stage.ts 状态机边界测试
+ * 覆盖: canMove() 所有合法/非法转移, moveStage() 事务逻辑
  */
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-// jest.mock is hoisted - define helpers inside the factory
+// jest.mock is hoisted — define helpers inside the factory
 jest.mock('@/shared/db/client', () => {
   const mockClient = {
     query: jest.fn(),
@@ -23,7 +23,7 @@ import { canMove, moveStage, getStage } from '../workflow-stage';
 import type { WorkflowStage } from '../workflow-constants';
 import pool from '@/shared/db/client';
 
-// Access mock helpers through the module reference after import
+// Access mock helpers via the module reference after import
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockPool = pool as any;
 const mockClient = mockPool._client;
@@ -111,7 +111,7 @@ describe('moveStage()', () => {
       .mockResolvedValueOnce(undefined) // BEGIN
       .mockResolvedValueOnce({ rows: [] }); // SELECT ... FOR UPDATE (no row)
 
-    await expect(moveStage('bad-id', 'accepted', 'test')).rejects.toThrow('Taskdoes not exist');
+    await expect(moveStage('bad-id', 'accepted', 'test')).rejects.toThrow('任务不存在');
     expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
     expect(mockClient.release).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe('moveStage()', () => {
       .mockResolvedValueOnce(undefined) // BEGIN
       .mockResolvedValueOnce({ rows: [{ workflow_stage: 'draft' }] }); // SELECT
 
-    await expect(moveStage('task-1', 'analysis_done', 'skip')).rejects.toThrow('非法Statusmigration');
+    await expect(moveStage('task-1', 'analysis_done', 'skip')).rejects.toThrow('非法状态迁移');
     expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
   });
 

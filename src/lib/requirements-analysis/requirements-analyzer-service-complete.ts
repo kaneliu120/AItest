@@ -1,10 +1,10 @@
 /**
- * 智canRequirements Analysisservervice
- * usingAIAnalyticsrequirementsdocument, 提取Off键information
+ * 智能需求分析服务
+ * 使用AI分析需求文档，提取关键信息
  */
 
 /**
- * SecurityParsedateString
+ * 安全解析日期字符串
  */
 const parseDate = (dateString: string): Date => {
   const timestamp = Date.parse(dateString);
@@ -23,14 +23,14 @@ export interface RequirementAnalysis {
   documentId: string;
   analysisDate: string;
   
-  // requirementsCategory
+  // 需求分类
   categories: {
     functional: Array<{
       id: string;
       description: string;
       priority: 'high' | 'medium' | 'low';
       complexity: 'simple' | 'medium' | 'complex';
-      estimatedEffort: number; // Small时
+      estimatedEffort: number; // 小时
     }>;
     nonFunctional: Array<{
       id: string;
@@ -46,7 +46,7 @@ export interface RequirementAnalysis {
     }>;
   };
   
-  // 技术栈recommended
+  // 技术栈推荐
   techStack: {
     frontend: Array<{
       framework: string;
@@ -78,7 +78,7 @@ export interface RequirementAnalysis {
     }>;
   };
   
-  // complexityEvaluation
+  // 复杂度评估
   complexity: {
     overall: number; // 1-10
     technical: {
@@ -95,7 +95,7 @@ export interface RequirementAnalysis {
     };
   };
   
-  // riskEvaluation
+  // 风险评估
   risks: Array<{
     id: string;
     description: string;
@@ -104,7 +104,7 @@ export interface RequirementAnalysis {
     mitigation: string;
   }>;
   
-  // Work量估算
+  // 工作量估算
   effortEstimation: {
     totalHours: number;
     breakdown: {
@@ -117,13 +117,13 @@ export interface RequirementAnalysis {
     };
     teamSize: number;
     timeline: {
-      optimistic: number; // d
+      optimistic: number; // 天
       realistic: number;
       pessimistic: number;
     };
   };
   
-  // 依赖Off系
+  // 依赖关系
   dependencies: Array<{
     from: string;
     to: string;
@@ -140,7 +140,7 @@ export interface RequirementAnalysis {
   };
 }
 
-export class RequirementsAnalyzerservervice {
+export class RequirementsAnalyzerService {
   private grokApiKey: string;
   private knowledgeBaseUrl: string;
 
@@ -150,25 +150,25 @@ export class RequirementsAnalyzerservervice {
   }
 
   /**
-   * Analyticsrequirementsdocument
+   * 分析需求文档
    */
   async analyzeDocument(document: ParsedDocument): Promise<RequirementAnalysis> {
     console.log(`Analyzing document: ${document.filename} (${document.metadata.wordCount} words)`);
     
-    // usingAIAnalyticsdocumentcontent
+    // 使用AI分析文档内容
     const aiAnalysis = await this.analyzeWithAI(document.content);
     
-    // 结合Knowledge Baserecommended技术栈
+    // 结合知识库推荐技术栈
     const techStack = await this.recommendTechStack(document.content, aiAnalysis);
     
-    // Evaluationcomplexity和risk
+    // 评估复杂度和风险
     const complexity = this.assessComplexity(document, aiAnalysis);
     const risks = this.identifyRisks(document, aiAnalysis);
     
-    // 估算Work量
+    // 估算工作量
     const effortEstimation = this.estimateEffort(document, aiAnalysis, complexity);
     
-    // GenerateAnalyticsresult
+    // 生成分析结果
     const analysis: RequirementAnalysis = {
       id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       documentId: document.id,
@@ -218,26 +218,26 @@ export class RequirementsAnalyzerservervice {
       
       recommendations: {
         immediateActions: [
-          '明确Project范围和目标',
-          '确定Off键利益相Off者',
-          '建立communication机制',
-          '制定Detailed'sProject计划',
+          '明确项目范围和目标',
+          '确定关键利益相关者',
+          '建立沟通机制',
+          '制定详细的项目计划',
         ],
         technicalDecisions: [
-          '选择合适's技术栈',
-          '设计可extend's架构',
-          '制定code规范和DevelopmentProcess',
+          '选择合适的技术栈',
+          '设计可扩展的架构',
+          '制定代码规范和开发流程',
         ],
         riskMitigations: [
-          '建立risk管理计划',
-          '定期In ProgressriskEvaluation',
+          '建立风险管理计划',
+          '定期进行风险评估',
           '准备应急预案',
         ],
         successFactors: [
-          '明确'srequirements定义',
-          'All效'scommunicationcollaboration',
-          '合理'sresource分配',
-          '持续's质量保证',
+          '明确的需求定义',
+          '有效的沟通协作',
+          '合理的资源分配',
+          '持续的质量保证',
         ],
       },
     };
@@ -246,39 +246,39 @@ export class RequirementsAnalyzerservervice {
   }
 
   /**
-   * usingAIAnalyticsdocumentcontent
+   * 使用AI分析文档内容
    */
   private async analyzeWithAI(content: string): Promise<any> {
-    // 简化实现: using规thenAnalytics
-    // 实际实现should调用Grok API
+    // 简化实现：使用规则分析
+    // 实际实现应该调用Grok API
     
     const truncatedContent = content.substring(0, 8000);
     
-    // 检测功canrequirementsOff键词
-    const functionalKeywords = ['功can', '特性', 'Module', '页面', 'by钮', '表单', 'Search', '登录', 'Register', '支付'];
-    const nonFunctionalKeywords = ['Performance', 'Security', 'available性', 'reliability', 'extend性', 'Responsetime', 'and发', 'Backup'];
-    const businessKeywords = ['业务', '商业', 'Income', '成本', '市场', 'client', '竞争', '价值'];
+    // 检测功能需求关键词
+    const functionalKeywords = ['功能', '特性', '模块', '页面', '按钮', '表单', '搜索', '登录', '注册', '支付'];
+    const nonFunctionalKeywords = ['性能', '安全', '可用性', '可靠性', '扩展性', '响应时间', '并发', '备份'];
+    const businessKeywords = ['业务', '商业', '收入', '成本', '市场', '客户', '竞争', '价值'];
     
     const functionalReqs: Array<{ id: string; description: string; priority: 'high' | 'medium' | 'low'; complexity: 'simple' | 'medium' | 'complex'; estimatedEffort: number }> = [];
     const nonFunctionalReqs: Array<{ id: string; type: 'performance' | 'security' | 'usability' | 'reliability' | 'scalability'; description: string; requirements: string[] }> = [];
     const businessReqs: Array<{ id: string; description: string; businessValue: 'critical' | 'high' | 'medium' | 'low'; stakeholders: string[] }> = [];
     
-    // 简单规thenAnalytics
+    // 简单规则分析
     const lines = truncatedContent.split('\n');
     let currentCategory = '';
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      if (line.includes('功canrequirements') || line.includes('Functional Requirements')) {
+      if (line.includes('功能需求') || line.includes('Functional Requirements')) {
         currentCategory = 'functional';
-      } else if (line.includes('非功canrequirements') || line.includes('Non-Functional')) {
+      } else if (line.includes('非功能需求') || line.includes('Non-Functional')) {
         currentCategory = 'nonFunctional';
-      } else if (line.includes('Business requirements') || line.includes('Business Requirements')) {
+      } else if (line.includes('业务需求') || line.includes('Business Requirements')) {
         currentCategory = 'business';
       }
       
-      // 检测requirements行
+      // 检测需求行
       if (line.match(/^\d+\.\s+/) || line.match(/^-\s+/) || line.match(/^\*\s+/)) {
         const requirementText = line.replace(/^\d+\.\s+/, '').replace(/^-\s+/, '').replace(/^\*\s+/, '');
         
@@ -294,10 +294,10 @@ export class RequirementsAnalyzerservervice {
       }
     }
     
-    // if没All检测to明确'srequirements, FromcontentCenter提取
+    // 如果没有检测到明确的需求，从内容中提取
     if (functionalReqs.length === 0) {
-      // 提取前5potential functional requirements
-      const sentences = truncatedContent.split(/[.!?. ! ? ]/).filter(s => s.trim().length > 20);
+      // 提取前5个可能的功能需求
+      const sentences = truncatedContent.split(/[.!?。！？]/).filter(s => s.trim().length > 20);
       for (let i = 0; i < Math.min(5, sentences.length); i++) {
         const sentence = sentences[i].trim();
         if (sentence.length > 10) {
@@ -323,35 +323,35 @@ export class RequirementsAnalyzerservervice {
   }
 
   /**
-   * recommended技术栈
+   * 推荐技术栈
    */
   private async recommendTechStack(content: string, aiAnalysis: any): Promise<RequirementAnalysis['techStack']> {
-    // 基于contentAnalyticsrecommended技术栈
+    // 基于内容分析推荐技术栈
     const contentLower = content.toLowerCase();
     
-    const isWebApp = contentLower.includes('web') || contentLower.includes('网站') || contentLower.includes('Application');
+    const isWebApp = contentLower.includes('web') || contentLower.includes('网站') || contentLower.includes('应用');
     const isMobile = contentLower.includes('mobile') || contentLower.includes('手机') || contentLower.includes('app');
-    const isApi = contentLower.includes('api') || contentLower.includes('Interface') || contentLower.includes('servervice');
-    const needsRealTime = contentLower.includes('实时') || contentLower.includes('i.e.时') || contentLower.includes('聊d');
+    const isApi = contentLower.includes('api') || contentLower.includes('接口') || contentLower.includes('服务');
+    const needsRealTime = contentLower.includes('实时') || contentLower.includes('即时') || contentLower.includes('聊天');
     const needsComplexUI = contentLower.includes('复杂') || contentLower.includes('交互') || contentLower.includes('动画');
     
-    // 前端recommended
+    // 前端推荐
     const frontendRecommendations = [];
     
     if (isWebApp) {
       frontendRecommendations.push({
         framework: 'Next.js',
-        recommendation: '适用于need toSEO, servervice端渲染'sWebApplication',
-        pros: ['Excellent'sSEO支持', 'servervice端渲染', '完整'sReact生态', 'TypeScript友好'],
-        cons: ['学习曲线较陡', 'Configuration相for复杂'],
+        recommendation: '适用于需要SEO、服务端渲染的Web应用',
+        pros: ['优秀的SEO支持', '服务端渲染', '完整的React生态', 'TypeScript友好'],
+        cons: ['学习曲线较陡', '配置相对复杂'],
         suitability: 90,
       });
       
       frontendRecommendations.push({
         framework: 'React + Vite',
-        recommendation: '适用于单页Application和快速原型Development',
-        pros: ['Development速度快', '热重载Excellent', '生态System丰富'],
-        cons: ['SEOneed to额外Configuration', '首屏Load可canSlow'],
+        recommendation: '适用于单页应用和快速原型开发',
+        pros: ['开发速度快', '热重载优秀', '生态系统丰富'],
+        cons: ['SEO需要额外配置', '首屏加载可能较慢'],
         suitability: 85,
       });
     }
@@ -359,85 +359,85 @@ export class RequirementsAnalyzerservervice {
     if (isMobile) {
       frontendRecommendations.push({
         framework: 'React Native',
-        recommendation: '适用于need to跨PlatformmoveApplication',
-        pros: ['跨PlatformDevelopment', 'React知识复用', '热重载'],
-        cons: ['Performance不如原生', '某些原生功canneed to桥接'],
+        recommendation: '适用于需要跨平台移动应用',
+        pros: ['跨平台开发', 'React知识复用', '热重载'],
+        cons: ['性能不如原生', '某些原生功能需要桥接'],
         suitability: 80,
       });
     }
     
-    // 后端recommended
+    // 后端推荐
     const backendRecommendations = [];
     
     backendRecommendations.push({
       framework: 'NestJS',
-      recommendation: '适用于enterprise级Application, need to严格架构',
-      pros: ['TypeScript原生支持', 'Module化架构', '丰富's生态System', '易于Test'],
-      cons: ['学习曲线较陡', 'Configuration相for复杂'],
+      recommendation: '适用于企业级应用，需要严格架构',
+      pros: ['TypeScript原生支持', '模块化架构', '丰富的生态系统', '易于测试'],
+      cons: ['学习曲线较陡', '配置相对复杂'],
       suitability: 85,
     });
     
     backendRecommendations.push({
       framework: 'Express.js',
-      recommendation: '适用于快速原型和Small型Project',
-      pros: ['简单易学', '轻量级', 'Center间件丰富', '社区Active'],
-      cons: ['架构need to自行设计', 'TypeScript支持need toConfiguration'],
+      recommendation: '适用于快速原型和小型项目',
+      pros: ['简单易学', '轻量级', '中间件丰富', '社区活跃'],
+      cons: ['架构需要自行设计', 'TypeScript支持需要配置'],
       suitability: 75,
     });
     
     if (needsRealTime) {
       backendRecommendations.push({
         framework: 'Socket.io',
-        recommendation: '适用于实时通信requirements',
-        pros: ['实时双to通信', '自动重连', '房间和命名null间'],
-        cons: ['need toWebSocket支持', '可canincreaseservervice器负载'],
+        recommendation: '适用于实时通信需求',
+        pros: ['实时双向通信', '自动重连', '房间和命名空间'],
+        cons: ['需要WebSocket支持', '可能增加服务器负载'],
         suitability: 95,
       });
     }
     
-    // data库recommended
+    // 数据库推荐
     const databaseRecommendations = [];
     
     databaseRecommendations.push({
       type: 'PostgreSQL',
-      recommendation: '适用于need toACID事务和复杂查询'sApplication',
-      pros: ['ACID兼容', 'JSON支持', '强Large's查询功can', 'extend性好'],
-      cons: ['Configuration相for复杂', '内存占用较High'],
+      recommendation: '适用于需要ACID事务和复杂查询的应用',
+      pros: ['ACID兼容', 'JSON支持', '强大的查询功能', '扩展性好'],
+      cons: ['配置相对复杂', '内存占用较高'],
       suitability: 90,
     });
     
     databaseRecommendations.push({
       type: 'MongoDB',
-      recommendation: '适用于document型data和快速iterate',
-      pros: ['灵活's模式', '水平extend容易', 'JSONdocument存储', 'Development速度快'],
-      cons: ['Transactions not supported (legacy version)', '查询Performance可can不如Off系型'],
+      recommendation: '适用于文档型数据和快速迭代',
+      pros: ['灵活的模式', '水平扩展容易', 'JSON文档存储', '开发速度快'],
+      cons: ['不支持事务（旧版本）', '查询性能可能不如关系型'],
       suitability: 80,
     });
     
-    // DeploymentPlatformrecommended
+    // 部署平台推荐
     const deploymentRecommendations = [];
     
     deploymentRecommendations.push({
-      platform: 'Azure App servervice',
-      recommendation: '适用于.NET和Node.jsApplication, enterprise级支持',
-      pros: ['自动extend', '集成Monitoring', '.NEToptimize', 'enterprise级Security'],
-      cons: ['成本相for较High', 'Configuration相for复杂'],
+      platform: 'Azure App Service',
+      recommendation: '适用于.NET和Node.js应用，企业级支持',
+      pros: ['自动扩展', '集成监控', '.NET优化', '企业级安全'],
+      cons: ['成本相对较高', '配置相对复杂'],
       suitability: 85,
     });
     
     deploymentRecommendations.push({
       platform: 'Vercel',
-      recommendation: '适用于Next.js前端Application',
-      pros: ['Next.jsoptimize', '自动Deployment', 'CDN集成', 'Development体验Excellent'],
-      cons: ['后端支持All限', '成本随流量growth'],
+      recommendation: '适用于Next.js前端应用',
+      pros: ['Next.js优化', '自动部署', 'CDN集成', '开发体验优秀'],
+      cons: ['后端支持有限', '成本随流量增长'],
       suitability: 95,
     });
     
     deploymentRecommendations.push({
       platform: 'AWS EC2/ECS',
-      recommendation: '适用于need to完Allcontrol'sInfrastructure',
-      pros: ['完Allcontrol', '灵活Configuration', '丰富'sservervice集成'],
-      cons: ['运维复杂', 'need to专业知识'],
+      recommendation: '适用于需要完全控制的基础设施',
+      pros: ['完全控制', '灵活配置', '丰富的服务集成'],
+      cons: ['运维复杂', '需要专业知识'],
       suitability: 70,
     });
     
@@ -450,37 +450,37 @@ export class RequirementsAnalyzerservervice {
   }
 
   /**
-   * Evaluationcomplexity
+   * 评估复杂度
    */
   private assessComplexity(document: ParsedDocument, aiAnalysis: any): RequirementAnalysis['complexity'] {
     const wordCount = document.metadata.wordCount;
     const sections = document.sections?.length || 1;
     
-    // 基于documentLargeSmall和结构Evaluationcomplexity
+    // 基于文档大小和结构评估复杂度
     let overall = 5;
     
     if (wordCount > 5000) overall += 2;
     if (wordCount > 10000) overall += 1;
     if (sections > 10) overall += 1;
     
-    // 技术complexity
+    // 技术复杂度
     const technicalFactors: string[] = [];
-    if (wordCount > 3000) technicalFactors.push('requirements规模较Large');
-    if (sections > 5) technicalFactors.push('功canModule较More');
+    if (wordCount > 3000) technicalFactors.push('需求规模较大');
+    if (sections > 5) technicalFactors.push('功能模块较多');
     
-    // Business complexity
+    // 业务复杂度
     const businessFactors: string[] = [];
     if (document.content.includes('业务') || document.content.includes('business')) {
       businessFactors.push('涉及复杂业务逻辑');
     }
     
-    // 集成complexity
+    // 集成复杂度
     const integrationFactors: string[] = [];
     if (document.content.includes('集成') || document.content.includes('integration')) {
-      integrationFactors.push('need toSystem集成');
+      integrationFactors.push('需要系统集成');
     }
-    if (document.content.includes('API') || document.content.includes('Interface')) {
-      integrationFactors.push('涉及APIDevelopment');
+    if (document.content.includes('API') || document.content.includes('接口')) {
+      integrationFactors.push('涉及API开发');
     }
     
     return {
@@ -501,50 +501,50 @@ export class RequirementsAnalyzerservervice {
   }
 
   /**
-   * 识别risk
+   * 识别风险
    */
   private identifyRisks(document: ParsedDocument, aiAnalysis: any): RequirementAnalysis['risks'] {
     const risks: RequirementAnalysis['risks'] = [];
     const content = document.content.toLowerCase();
     
-    // requirements不明确risk
-    if (content.includes('待定') || content.includes('tbd') || content.includes('待Confirm')) {
+    // 需求不明确风险
+    if (content.includes('待定') || content.includes('tbd') || content.includes('待确认')) {
       risks.push({
         id: 'R1',
-        description: 'requirements不明确, 存in待定项',
+        description: '需求不明确，存在待定项',
         probability: 'high',
         impact: 'high',
-        mitigation: 'andclientConfirmrequirements细节, 建立requirements变更Process',
+        mitigation: '与客户确认需求细节，建立需求变更流程',
       });
     }
     
-    // 技术complexityrisk
-    if (content.includes('复杂') || content.includes('complex') || content.includes('New技术')) {
+    // 技术复杂度风险
+    if (content.includes('复杂') || content.includes('complex') || content.includes('新技术')) {
       risks.push({
         id: 'R2',
-        description: '技术complexity较High, 可can存in技术挑战',
+        description: '技术复杂度较高，可能存在技术挑战',
         probability: 'medium',
         impact: 'high',
-        mitigation: 'In Progress技术Validate, 准备备用方案, increase技术调研time',
+        mitigation: '进行技术验证，准备备用方案，增加技术调研时间',
       });
     }
     
-    // timerisk
+    // 时间风险
     if (document.metadata.wordCount > 5000) {
       risks.push({
         id: 'R3',
-        description: 'Project规模较Large, 可can存intime压力',
+        description: '项目规模较大，可能存在时间压力',
         probability: 'medium',
         impact: 'medium',
-        mitigation: '制定Detailed'stime计划, Settingsmilestone, 定期ProgressCheck',
+        mitigation: '制定详细的时间计划，设置里程碑，定期进度检查',
       });
     }
     
-    // 集成risk
+    // 集成风险
     if (content.includes('集成') || content.includes('integration') || content.includes('第三方')) {
       risks.push({
         id:
-        id: `risk-${risks.length}`, title: '集成risk', description: '存in第三方集成risk', severity: 'medium', probability: 'medium', impact: 'medium', mitigation: 'Evaluation集成complexity'
+        id: `risk-${risks.length}`, title: '集成风险', description: '存在第三方集成风险', severity: 'medium', probability: 'medium', impact: 'medium', mitigation: '评估集成复杂度'
       });
     }
     return risks;

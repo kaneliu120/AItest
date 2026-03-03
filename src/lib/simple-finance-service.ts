@@ -1,76 +1,76 @@
 /**
- * 基于简单data库'sFinanceservervice
- * 用于Test和dev environment
+ * 基于简单数据库的财务服务
+ * 用于测试和开发环境
  */
 
 import { simpleDb, dbUtils } from './simple-db';
 import { Transaction, Budget, FinancialSummary } from './finance-service';
 
-export class SimpleFinanceservervice {
+export class SimpleFinanceService {
   constructor() {
-    // Initialize表
+    // 初始化表
     simpleDb.createTable('transactions');
     simpleDb.createTable('budgets');
     
-    // Add一些Testdata
+    // 添加一些测试数据
     this.initializeTestData();
   }
 
   private initializeTestData(): void {
-    // Checkwhether italreadyAlldata
+    // 检查是否已有数据
     const existingTransactions = simpleDb.query('transactions');
     if (existingTransactions.length === 0) {
-      // AddTest交易data
+      // 添加测试交易数据
       const testTransactions: Omit<Transaction, 'id'>[] = [
         {
           date: '2026-02-21',
           type: 'income',
-          category: 'AIOutsourceProject',
-          description: 'Client A AI integration project',
+          category: 'AI外包项目',
+          description: '客户A的AI集成项目',
           amount: 50000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['Outsource', 'AI', 'Project'],
+          tags: ['外包', 'AI', '项目'],
         },
         {
           date: '2026-02-20',
           type: 'income',
-          category: 'Skill Sales',
-          description: 'My Skill Shop platform sales',
+          category: '技能销售',
+          description: 'My Skill Shop平台销售',
           amount: 25000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['Platform', 'Sales', 'Digital Product'],
+          tags: ['平台', '销售', '数字产品'],
         },
         {
           date: '2026-02-19',
           type: 'expense',
-          category: 'Server Costs',
-          description: 'Azure Cloud server monthly fee',
+          category: '服务器费用',
+          description: 'Azure云服务器月费',
           amount: 15000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['Cloud servervice', 'Infrastructure'],
+          tags: ['云服务', '基础设施'],
         },
         {
           date: '2026-02-18',
           type: 'expense',
-          category: 'Marketing & Promotion',
-          description: 'Google Ads advertising cost',
+          category: '营销推广',
+          description: 'Google Ads广告费用',
           amount: 8000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['Marketing', 'Ads', 'Acquisition'],
+          tags: ['营销', '广告', '获客'],
         },
         {
           date: '2026-02-17',
           type: 'expense',
-          category: 'Software Development Tools',
-          description: 'Development tools and software subscriptions',
+          category: '软件开发工具',
+          description: '开发工具和软件订阅',
           amount: 5000,
           currency: 'PHP',
           status: 'completed',
-          tags: ['Tool', 'Subscription', 'Development'],
+          tags: ['工具', '订阅', '开发'],
         },
       ];
 
@@ -79,14 +79,14 @@ export class SimpleFinanceservervice {
       });
     }
 
-    // Checkwhether italreadyAllbudgetdata
+    // 检查是否已有预算数据
     const existingBudgets = simpleDb.query('budgets');
     if (existingBudgets.length === 0) {
-      // AddTestbudgetdata
+      // 添加测试预算数据
       const testBudgets: Omit<Budget, 'id'>[] = [
         {
-          name: 'Server Budget',
-          category: 'Server Costs',
+          name: '服务器预算',
+          category: '服务器费用',
           allocated: 20000,
           spent: 15000,
           remaining: 5000,
@@ -94,8 +94,8 @@ export class SimpleFinanceservervice {
           status: 'on-track',
         },
         {
-          name: 'Marketing Budget',
-          category: 'Marketing & Promotion',
+          name: '营销预算',
+          category: '营销推广',
           allocated: 10000,
           spent: 8000,
           remaining: 2000,
@@ -103,8 +103,8 @@ export class SimpleFinanceservervice {
           status: 'on-track',
         },
         {
-          name: 'Toolbudget',
-          category: 'Software Development Tools',
+          name: '工具预算',
+          category: '软件开发工具',
           allocated: 6000,
           spent: 5000,
           remaining: 1000,
@@ -147,7 +147,7 @@ export class SimpleFinanceservervice {
   }): Promise<{ transactions: Transaction[]; total: number }> {
     let allTransactions = simpleDb.query<Transaction>('transactions');
     
-    // Applicationfilter器
+    // 应用过滤器
     if (filters?.type) {
       allTransactions = allTransactions.filter(t => t.type === filters.type);
     }
@@ -164,10 +164,10 @@ export class SimpleFinanceservervice {
       allTransactions = allTransactions.filter(t => t.date <= filters.endDate!);
     }
     
-    // Sort
+    // 排序
     allTransactions = allTransactions.sort((a, b) => b.date.localeCompare(a.date));
     
-    // Pagination
+    // 分页
     const page = filters?.page || 1;
     const pageSize = filters?.pageSize || 20;
     const startIndex = (page - 1) * pageSize;
@@ -175,7 +175,7 @@ export class SimpleFinanceservervice {
     
     const paginatedTransactions = allTransactions.slice(startIndex, endIndex);
     
-    // Parsetags
+    // 解析tags
     const transactions = paginatedTransactions.map(tx => ({
       ...tx,
       tags: dbUtils.parseJson<string[]>(tx.tags as any, []),
@@ -214,7 +214,7 @@ export class SimpleFinanceservervice {
     return changes > 0;
   }
 
-  // ===== budget管理 =====
+  // ===== 预算管理 =====
 
   async addBudget(data: Omit<Budget, 'id'>): Promise<Budget> {
     const budget: Budget = {
@@ -254,7 +254,7 @@ export class SimpleFinanceservervice {
     return changes > 0;
   }
 
-  // ===== FinanceAnalytics =====
+  // ===== 财务分析 =====
 
   async getFinancialSummary(): Promise<FinancialSummary> {
     const { transactions } = await this.getTransactions({ page: 1, pageSize: 1000 });
@@ -296,7 +296,7 @@ export class SimpleFinanceservervice {
       }))
       .sort((a, b) => b.month.localeCompare(a.month));
 
-    // CategoryAnalytics
+    // 分类分析
     const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
     
     transactions.forEach(t => {
@@ -368,7 +368,7 @@ export class SimpleFinanceservervice {
       this.getBudgets(),
     ]);
 
-    // 月度趋势Analytics
+    // 月度趋势分析
     const monthlyData: Record<string, { income: number; expense: number; profit: number }> = {};
     
     transactions.transactions.forEach(t => {
@@ -394,7 +394,7 @@ export class SimpleFinanceservervice {
       }))
       .sort((a, b) => b.month.localeCompare(a.month));
 
-    // CategoryAnalytics
+    // 分类分析
     const categoryAnalysis: Record<string, { income: number; expense: number }> = {};
     
     transactions.transactions.forEach(t => {
@@ -416,7 +416,7 @@ export class SimpleFinanceservervice {
       netProfit: data.income - data.expense,
     }));
 
-    // budgetExecute情况
+    // 预算执行情况
     const budgetPerformance = budgets.map(budget => {
       const actualSpent = transactions.transactions
         .filter(t => t.type === 'expense' && t.category === budget.category)
@@ -474,5 +474,5 @@ export class SimpleFinanceservervice {
   }
 }
 
-// Global实例
-export const simpleFinanceservervice = new SimpleFinanceservervice();
+// 全局实例
+export const simpleFinanceService = new SimpleFinanceService();

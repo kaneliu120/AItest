@@ -1,16 +1,16 @@
-// Data Bus - Module间data通信
+// 数据总线 - 模块间数据通信
 import { EventEmitter } from 'events';
 
 export interface DataMessage {
   id: string;
   type: string;
   source: string;
-  destination?: string; // iffornull, 广播给所AllModule
+  destination?: string; // 如果为空，广播给所有模块
   timestamp: string;
   payload: unknown;
   metadata?: {
     priority?: 'low' | 'normal' | 'high' | 'critical';
-    ttl?: number; // 生存time(毫s)
+    ttl?: number; // 生存时间（毫秒）
     retryCount?: number;
     correlationId?: string;
   };
@@ -19,7 +19,7 @@ export interface DataMessage {
 export interface DataChannel {
   name: string;
   description: string;
-  subscribers: string[]; // ModuleIDArray
+  subscribers: string[]; // 模块ID数组
   messageCount: number;
   lastMessage?: string;
 }
@@ -38,7 +38,7 @@ export class DataBus {
   private channels: Map<string, DataChannel>;
   private messages: Map<string, DataMessage>;
   private stats: DataBusStats;
-  private moduleConnections: Map<string, Set<string>>; // ModuleID -> 订阅'sChannel
+  private moduleConnections: Map<string, Set<string>>; // 模块ID -> 订阅的频道
   
   constructor() {
     this.emitter = new EventEmitter();
@@ -55,14 +55,14 @@ export class DataBus {
       averageLatency: 0
     };
     
-    // CreateDefaultChannel
-    this.createChannel('system', 'SystemMessageChannel');
-    this.createChannel('module-events', 'ModuleEventChannel');
-    this.createChannel('task-events', 'TaskEventChannel');
-    this.createChannel('error-events', 'errorEventChannel');
+    // 创建默认频道
+    this.createChannel('system', '系统消息频道');
+    this.createChannel('module-events', '模块事件频道');
+    this.createChannel('task-events', '任务事件频道');
+    this.createChannel('error-events', '错误事件频道');
   }
   
-  // CreateNewChannel
+  // 创建新频道
   createChannel(name: string, description: string): DataChannel {
     const channel: DataChannel = {
       name,
@@ -78,12 +78,12 @@ export class DataBus {
     return channel;
   }
   
-  // DeleteChannel
+  // 删除频道
   deleteChannel(name: string): boolean {
     const channel = this.channels.get(name);
     if (!channel) return false;
     
-    // Notification所All订阅者
+    // 通知所有订阅者
     for (const moduleId of channel.subscribers) {
       this.unsubscribe(moduleId, name);
     }
@@ -94,20 +94,20 @@ export class DataBus {
     return true;
   }
   
-  // Module订阅Channel
+  // 模块订阅频道
   subscribe(moduleId: string, channelName: string): boolean {
     const channel = this.channels.get(channelName);
     if (!channel) return false;
     
-    // Checkwhether italready订阅
+    // 检查是否已订阅
     if (channel.subscribers.includes(moduleId)) {
-      return true; // already经订阅
+      return true; // 已经订阅
     }
     
-    // Add订阅者
+    // 添加订阅者
     channel.subscribers.push(moduleId);
     
-    // UpdateModuleConnect
+    // 更新模块连接
     if (!this.moduleConnections.has(moduleId)) {
       this.moduleConnections.set(moduleId, new Set());
     }
@@ -117,18 +117,18 @@ export class DataBus {
     return true;
   }
   
-  // ModuleCancelled订阅
+  // 模块取消订阅
   unsubscribe(moduleId: string, channelName: string): boolean {
     const channel = this.channels.get(channelName);
     if (!channel) return false;
     
-    // remove订阅者
+    // 移除订阅者
     const index = channel.subscribers.indexOf(moduleId);
     if (index === -1) return false;
     
     channel.subscribers.splice(index, 1);
     
-    // UpdateModuleConnect
+    // 更新模块连接
     const moduleChannels = this.moduleConnections.get(moduleId);
     if (moduleChannels) {
       moduleChannels.delete(channelName);
@@ -141,7 +141,7 @@ export class DataBus {
     return true;
   }
   
-  // SendMessage
+  // 发送消息
   sendMessage(message: Omit<DataMessage, 'id' | 'timestamp'>): string {
     const fullMessage: DataMessage = {
       ...message,
@@ -149,27 +149,27 @@ export class DataBus {
       timestamp: new Date().toISOString()
     };
     
-    // 存储Message
+    // 存储消息
     this.messages.set(fullMessage.id, fullMessage);
     
-    // UpdateStatistics
+    // 更新统计
     this.stats.totalMessages++;
     this.stats.messagesByType[fullMessage.type] = 
       (this.stats.messagesByType[fullMessage.type] || 0) + 1;
     
-    // Sendto指定Channelor广播
+    // 发送到指定频道或广播
     if (fullMessage.destination) {
-      // 点for点Message
+      // 点对点消息
       this.emitter.emit(`message:${fullMessage.destination}`, fullMessage);
     } else {
-      // 广播Message
+      // 广播消息
       this.emitter.emit('message:broadcast', fullMessage);
       
-      // 同时Sendto特定Type'sEvent
+      // 同时发送到特定类型的事件
       this.emitter.emit(`message:type:${fullMessage.type}`, fullMessage);
     }
     
-    // UpdateChannelStatistics
+    // 更新频道统计
     if (fullMessage.type.includes(':')) {
       const [channelType] = fullMessage.type.split(':');
       const channel = this.channels.get(channelType);
@@ -182,29 +182,29 @@ export class DataBus {
     return fullMessage.id;
   }
   
-  // ReceiveMessage(回调方式)
+  // 接收消息（回调方式）
   onMessage(moduleId: string, callback: (message: DataMessage) => void): void {
     this.emitter.on(`message:${moduleId}`, callback);
     this.emitter.on('message:broadcast', callback);
   }
   
-  // Receive特定TypeMessage
+  // 接收特定类型消息
   onMessageType(type: string, callback: (message: DataMessage) => void): void {
     this.emitter.on(`message:type:${type}`, callback);
   }
   
-  // removeMessage监听器
+  // 移除消息监听器
   offMessage(moduleId: string, callback: (message: DataMessage) => void): void {
     this.emitter.off(`message:${moduleId}`, callback);
     this.emitter.off('message:broadcast', callback);
   }
   
-  // remove特定TypeMessage监听器
+  // 移除特定类型消息监听器
   offMessageType(type: string, callback: (message: DataMessage) => void): void {
     this.emitter.off(`message:type:${type}`, callback);
   }
   
-  // Request-Response模式
+  // 请求-响应模式
   async request<T = unknown>(
     source: string,
     destination: string,
@@ -216,7 +216,7 @@ export class DataBus {
       const correlationId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       let timeoutId: NodeJS.Timeout;
       
-      // SettingsResponse监听器
+      // 设置响应监听器
       const responseHandler = (response: DataMessage) => {
         if (response.metadata?.correlationId === correlationId) {
           clearTimeout(timeoutId);
@@ -225,16 +225,16 @@ export class DataBus {
         }
       };
       
-      // SettingsTimeout
+      // 设置超时
       timeoutId = setTimeout(() => {
         this.offMessage(source, responseHandler);
         reject(new Error(`Request timeout after ${timeout}ms`));
       }, timeout);
       
-      // 监听Response
+      // 监听响应
       this.onMessage(source, responseHandler);
       
-      // SendRequest
+      // 发送请求
       this.sendMessage({
         type,
         source,
@@ -248,7 +248,7 @@ export class DataBus {
     });
   }
   
-  // ResponseRequest
+  // 响应请求
   respond(
     source: string,
     destination: string,
@@ -267,7 +267,7 @@ export class DataBus {
     });
   }
   
-  // 获Cancelled息历史
+  // 获取消息历史
   getMessageHistory(options: {
     type?: string;
     source?: string;
@@ -287,7 +287,7 @@ export class DataBus {
     
     let messages = Array.from(this.messages.values());
     
-    // filter
+    // 过滤
     if (type) {
       messages = messages.filter(msg => msg.type === type);
     }
@@ -306,44 +306,44 @@ export class DataBus {
       messages = messages.filter(msg => new Date(msg.timestamp) <= end);
     }
     
-    // bytime倒序Sort
+    // 按时间倒序排序
     messages.sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
     
-    // 限制quantity
+    // 限制数量
     return messages.slice(0, limit);
   }
   
-  // FetchChannelinformation
+  // 获取频道信息
   getChannel(name: string): DataChannel | undefined {
     return this.channels.get(name);
   }
   
-  // Fetch所AllChannel
+  // 获取所有频道
   getAllChannels(): DataChannel[] {
     return Array.from(this.channels.values());
   }
   
-  // FetchModule订阅'sChannel
+  // 获取模块订阅的频道
   getModuleChannels(moduleId: string): string[] {
     const channels = this.moduleConnections.get(moduleId);
     return channels ? Array.from(channels) : [];
   }
   
-  // FetchStatisticsinformation
+  // 获取统计信息
   getStats(): DataBusStats {
-    // 计算平均latency(模拟)
+    // 计算平均延迟（模拟）
     const totalMessages = this.stats.totalMessages;
     if (totalMessages > 0) {
-      this.stats.averageLatency = 5 + Math.random() * 10; // 5-15ms 模拟latency
-      this.stats.errorRate = 0.1 + Math.random() * 0.5; // 0.1-0.6% error率
+      this.stats.averageLatency = 5 + Math.random() * 10; // 5-15ms 模拟延迟
+      this.stats.errorRate = 0.1 + Math.random() * 0.5; // 0.1-0.6% 错误率
     }
     
     return { ...this.stats };
   }
   
-  // 清理OldMessage
+  // 清理旧消息
   cleanupOldMessages(maxAgeHours: number = 24): {
     deleted: number;
     kept: number;
@@ -368,7 +368,7 @@ export class DataBus {
     return { deleted, kept };
   }
   
-  // ExportData BusStatus
+  // 导出数据总线状态
   exportState(): string {
     const state = {
       channels: this.getAllChannels(),
@@ -387,7 +387,7 @@ export class DataBus {
     return JSON.stringify(state, null, 2);
   }
   
-  // ImportData BusStatus
+  // 导入数据总线状态
   importState(stateJson: string): {
     success: boolean;
     imported: {
@@ -400,7 +400,7 @@ export class DataBus {
     try {
       const state = JSON.parse(stateJson);
       
-      // ValidatedataFormat
+      // 验证数据格式
       if (!state.channels || !Array.isArray(state.channels)) {
         return {
           success: false,
@@ -414,7 +414,7 @@ export class DataBus {
       let importedMessages = 0;
       const errors: string[] = [];
       
-      // ImportChannel
+      // 导入频道
       for (const channel of state.channels) {
         try {
           this.createChannel(channel.name, channel.description);
@@ -424,7 +424,7 @@ export class DataBus {
         }
       }
       
-      // ImportModuleConnect
+      // 导入模块连接
       if (state.moduleConnections && Array.isArray(state.moduleConnections)) {
         for (const connection of state.moduleConnections) {
           try {
@@ -440,14 +440,14 @@ export class DataBus {
         }
       }
       
-      // ImportMessage(Optional)
+      // 导入消息（可选）
       if (state.recentMessages && Array.isArray(state.recentMessages)) {
         for (const message of state.recentMessages) {
           try {
             this.messages.set(message.id, message);
             importedMessages++;
           } catch (error) {
-            // 忽略MessageImporterror
+            // 忽略消息导入错误
           }
         }
       }

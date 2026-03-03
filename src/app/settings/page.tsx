@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Settings, Sun, Moon, Globe, Database, serverver, Activity,
+  Settings, Sun, Moon, Globe, Database, Server, Activity,
   RefreshCw, CheckCircle, AlertTriangle,
 } from 'lucide-react';
 
@@ -83,26 +83,26 @@ export default function SettingsPage() {
         refresh: 'Refresh',
       }
     : {
-        title: 'Settings',
-        subtitle: '应用偏好Settings和Systeminformation',
+        title: '设置',
+        subtitle: '应用偏好设置和系统信息',
         appearance: '外观',
-        appearanceDesc: 'custom界面风格',
+        appearanceDesc: '自定义界面风格',
         themeLabel: '主题',
         light: '浅色',
         dark: '深色',
-        languageLabel: 'language',
-        system: 'Systeminformation',
-        systemDesc: '运行环境和HealthStatus',
-        version: 'version',
+        languageLabel: '语言',
+        system: '系统信息',
+        systemDesc: '运行环境和健康状态',
+        version: '版本',
         environment: '环境',
-        database: 'data库',
-        uptime: '运行time',
+        database: '数据库',
+        uptime: '运行时间',
         cpu: 'CPU',
         memory: '内存',
         heap: '堆内存',
-        healthScore: 'Health分数',
+        healthScore: '健康分数',
         components: '组件',
-        refresh: 'Refresh',
+        refresh: '刷新',
       };
 
   return (
@@ -149,7 +149,7 @@ export default function SettingsPage() {
                 onClick={() => switchLanguage('zh')}
                 className="gap-1"
               >
-                <Globe className="w-4 h-4" /> ZH
+                <Globe className="w-4 h-4" /> 中文
               </Button>
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <serverver className="w-5 h-5" />
+                <Server className="w-5 h-5" />
                 {t.system}
               </CardTitle>
               <CardDescription>{t.systemDesc}</CardDescription>

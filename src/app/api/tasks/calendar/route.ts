@@ -1,7 +1,7 @@
 /**
- * /api/tasks/calendar - Apple Calendar 集成
- * POST: willTaskAddto Apple Calendar
- * GET:  列出available日历
+ * /api/tasks/calendar — Apple Calendar 集成
+ * POST: 将任务添加到 Apple Calendar
+ * GET:  列出可用日历
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
@@ -14,13 +14,13 @@ const MONTH_NAMES = [
   'July','August','September','October','November','December',
 ];
 
-// ── Fetchavailable日历List ──────────────────────────────────────────────────────────
+// ── 获取可用日历列表 ──────────────────────────────────────────────────────────
 export async function GET() {
   try {
     const { stdout } = await execAsync(
       `osascript -e 'tell application "Calendar" to get name of calendars'`
     );
-    const exclude = new Set(['Birthday','Philippines Holidays','Philippines Holidays','Siri Suggestions','kaneliu10@gmail.com']);
+    const exclude = new Set(['生日','菲律宾节假日','Philippines Holidays','Siri建议','kaneliu10@gmail.com']);
     const calendars = stdout.trim().split(', ').filter(c => c && !exclude.has(c));
     return NextResponse.json({ success: true, data: { calendars } });
   } catch (err: any) {
@@ -28,16 +28,16 @@ export async function GET() {
   }
 }
 
-// ── AddTaskto Apple Calendar ─────────────────────────────────────────────────
+// ── 添加任务到 Apple Calendar ─────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
-    const { title, description = '', dueDate, calendarName = 'Work' } = await request.json();
+    const { title, description = '', dueDate, calendarName = '工作' } = await request.json();
 
     if (!title) {
-      return NextResponse.json({ success: false, error: 'Missing task title' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少任务标题' }, { status: 400 });
     }
 
-    // Parse目标date
+    // 解析目标日期
     let d: Date;
     if (dueDate) {
       d = new Date(dueDate);
@@ -54,13 +54,13 @@ export async function POST(request: NextRequest) {
     const startSec = startH * 3600;
     const endSec   = (startH + 1) * 3600;
 
-    // 清理文本(防止注入)
+    // 清理文本（防止注入）
     const safeTitle = title.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, '').slice(0, 120);
-    const safeDesc  = (description + '\n\nSource: Mission Control Task Management')
+    const safeDesc  = (description + '\n\n来源: Mission Control 任务管理')
                       .replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, '').slice(0, 500);
     const safeCal   = calendarName.replace(/'/g, '');
 
-    // 用Property赋值避免Local化dateFormat问题
+    // 用属性赋值避免本地化日期格式问题
     const script = [
       `tell application "Calendar"`,
       `  tell calendar "${safeCal}"`,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       `return "ok"`,
     ].join('\n');
 
-    // 写入temporaryfile避免 shell 转义问题
+    // 写入临时文件避免 shell 转义问题
     const tmpFile = `/tmp/mc_cal_${Date.now()}.scpt`;
     const { writeFileSync, unlinkSync } = await import('fs');
     writeFileSync(tmpFile, script, 'utf-8');
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        message:   `Added to Apple Calendar"${calendarName}"`,
+        message:   `已添加到 Apple Calendar「${calendarName}」`,
         title,
         calendar:  calendarName,
         date:      `${yr}-${String(d.getMonth()+1).padStart(2,'0')}-${String(dy).padStart(2,'0')}`,

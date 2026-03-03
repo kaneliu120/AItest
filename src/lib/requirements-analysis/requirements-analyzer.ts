@@ -1,5 +1,5 @@
 /**
- * 智canRequirements Analysisservervice - 简化Version
+ * 智能需求分析服务 - 简化版本
  */
 
 import { ParsedDocument } from './document-parser-service';
@@ -9,7 +9,7 @@ export interface RequirementAnalysis {
   documentId: string;
   analysisDate: string;
   
-  // requirementsCategory
+  // 需求分类
   categories: {
     functional: Array<{
       id: string;
@@ -32,7 +32,7 @@ export interface RequirementAnalysis {
     }>;
   };
   
-  // 技术栈recommended
+  // 技术栈推荐
   techStack: {
     frontend: Array<{
       framework: string;
@@ -56,7 +56,7 @@ export interface RequirementAnalysis {
     }>;
   };
   
-  // complexityEvaluation
+  // 复杂度评估
   complexity: {
     overall: number;
     technical: { score: number; factors: string[] };
@@ -64,7 +64,7 @@ export interface RequirementAnalysis {
     integration: { score: number; factors: string[] };
   };
   
-  // riskEvaluation
+  // 风险评估
   risks: Array<{
     id: string;
     description: string;
@@ -73,7 +73,7 @@ export interface RequirementAnalysis {
     mitigation: string;
   }>;
   
-  // Work量估算
+  // 工作量估算
   effortEstimation: {
     totalHours: number;
     breakdown: {
@@ -107,21 +107,21 @@ export class RequirementsAnalyzer {
   async analyzeDocument(document: ParsedDocument): Promise<RequirementAnalysis> {
     console.log(`Analyzing document: ${document.filename}`);
     
-    // 提取功canrequirements
+    // 提取功能需求
     const functionalReqs = this.extractFunctionalRequirements(document.content);
     const nonFunctionalReqs = this.extractNonFunctionalRequirements(document.content);
     const businessReqs = this.extractBusinessRequirements(document.content);
     
-    // recommended技术栈
+    // 推荐技术栈
     const techStack = this.recommendTechStack(document.content);
     
-    // Evaluationcomplexity
+    // 评估复杂度
     const complexity = this.assessComplexity(document);
     
-    // 识别risk
+    // 识别风险
     const risks = this.identifyRisks(document);
     
-    // 估算Work量
+    // 估算工作量
     const effortEstimation = this.estimateEffort(document, functionalReqs.length);
     
     return {
@@ -145,26 +145,26 @@ export class RequirementsAnalyzer {
       
       recommendations: {
         immediateActions: [
-          '明确Project范围和目标',
-          '确定Off键利益相Off者',
-          '建立communication机制',
-          '制定Detailed'sProject计划',
+          '明确项目范围和目标',
+          '确定关键利益相关者',
+          '建立沟通机制',
+          '制定详细的项目计划',
         ],
         technicalDecisions: [
-          '选择合适's技术栈',
-          '设计可extend's架构',
-          '制定code规范和DevelopmentProcess',
+          '选择合适的技术栈',
+          '设计可扩展的架构',
+          '制定代码规范和开发流程',
         ],
         riskMitigations: [
-          '建立risk管理计划',
-          '定期In ProgressriskEvaluation',
+          '建立风险管理计划',
+          '定期进行风险评估',
           '准备应急预案',
         ],
         successFactors: [
-          '明确'srequirements定义',
-          'All效'scommunicationcollaboration',
-          '合理'sresource分配',
-          '持续's质量保证',
+          '明确的需求定义',
+          '有效的沟通协作',
+          '合理的资源分配',
+          '持续的质量保证',
         ],
       },
     };
@@ -177,7 +177,7 @@ export class RequirementsAnalyzer {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      // 检测requirements行
+      // 检测需求行
       if (line.match(/^\d+\.\s+/) || line.match(/^-\s+/) || line.match(/^\*\s+/)) {
         const text = line.replace(/^\d+\.\s+/, '').replace(/^-\s+/, '').replace(/^\*\s+/, '');
         
@@ -193,9 +193,9 @@ export class RequirementsAnalyzer {
       }
     }
     
-    // if没All检测to明确'srequirements, FromcontentCenter提取
+    // 如果没有检测到明确的需求，从内容中提取
     if (requirements.length === 0) {
-      const sentences = content.split(/[.!?. ! ? ]/).filter(s => s.trim().length > 20);
+      const sentences = content.split(/[.!?。！？]/).filter(s => s.trim().length > 20);
       for (let i = 0; i < Math.min(5, sentences.length); i++) {
         const sentence = sentences[i].trim();
         if (sentence.length > 10) {
@@ -217,23 +217,23 @@ export class RequirementsAnalyzer {
     const requirements: RequirementAnalysis['categories']['nonFunctional'] = [];
     const contentLower = content.toLowerCase();
     
-    // Performancerequirements
-    if (contentLower.includes('Performance') || contentLower.includes('performance')) {
+    // 性能需求
+    if (contentLower.includes('性能') || contentLower.includes('performance')) {
       requirements.push({
         id: 'NFR1',
         type: 'performance',
-        description: 'SystemPerformanceneed to求',
-        requirements: ['Responsetime < 2s', '支持100and发User', '99.9%available性'],
+        description: '系统性能要求',
+        requirements: ['响应时间 < 2秒', '支持100并发用户', '99.9%可用性'],
       });
     }
     
-    // Securityrequirements
-    if (contentLower.includes('Security') || contentLower.includes('security')) {
+    // 安全需求
+    if (contentLower.includes('安全') || contentLower.includes('security')) {
       requirements.push({
         id: 'NFR2',
         type: 'security',
-        description: 'SystemSecurityneed to求',
-        requirements: ['UserAuth和authorize', 'dataEncrypt', '防止SQL injection'],
+        description: '系统安全要求',
+        requirements: ['用户认证和授权', '数据加密', '防止SQL注入'],
       });
     }
     
@@ -247,9 +247,9 @@ export class RequirementsAnalyzer {
     if (contentLower.includes('业务') || contentLower.includes('business')) {
       requirements.push({
         id: 'BR1',
-        description: 'Business goals and value',
+        description: '业务目标和价值',
         businessValue: 'high',
-        stakeholders: ['client', 'User', '管理Team'],
+        stakeholders: ['客户', '用户', '管理团队'],
       });
     }
     
@@ -265,48 +265,48 @@ export class RequirementsAnalyzer {
       frontend: [
         {
           framework: 'Next.js',
-          recommendation: '适用于need toSEO, servervice端渲染'sWebApplication',
+          recommendation: '适用于需要SEO、服务端渲染的Web应用',
           suitability: isWebApp ? 90 : 70,
         },
         {
           framework: 'React + Vite',
-          recommendation: '适用于单页Application和快速原型Development',
+          recommendation: '适用于单页应用和快速原型开发',
           suitability: isWebApp ? 85 : 75,
         },
       ],
       backend: [
         {
           framework: 'NestJS',
-          recommendation: '适用于enterprise级Application, need to严格架构',
+          recommendation: '适用于企业级应用，需要严格架构',
           suitability: 85,
         },
         {
           framework: 'Express.js',
-          recommendation: '适用于快速原型和Small型Project',
+          recommendation: '适用于快速原型和小型项目',
           suitability: 75,
         },
       ],
       database: [
         {
           type: 'PostgreSQL',
-          recommendation: '适用于need toACID事务和复杂查询'sApplication',
+          recommendation: '适用于需要ACID事务和复杂查询的应用',
           suitability: 90,
         },
         {
           type: 'MongoDB',
-          recommendation: '适用于document型data和快速iterate',
+          recommendation: '适用于文档型数据和快速迭代',
           suitability: 80,
         },
       ],
       deployment: [
         {
-          platform: 'Azure App servervice',
-          recommendation: '适用于.NET和Node.jsApplication, enterprise级支持',
+          platform: 'Azure App Service',
+          recommendation: '适用于.NET和Node.js应用，企业级支持',
           suitability: 85,
         },
         {
           platform: 'Vercel',
-          recommendation: '适用于Next.js前端Application',
+          recommendation: '适用于Next.js前端应用',
           suitability: 95,
         },
       ],
@@ -321,13 +321,13 @@ export class RequirementsAnalyzer {
     if (wordCount > 10000) overall += 1;
     
     const technicalFactors: string[] = [];
-    if (wordCount > 3000) technicalFactors.push('requirements规模较Large');
+    if (wordCount > 3000) technicalFactors.push('需求规模较大');
     
     const businessFactors: string[] = [];
     if (document.content.includes('业务')) businessFactors.push('涉及业务逻辑');
     
     const integrationFactors: string[] = [];
-    if (document.content.includes('集成')) integrationFactors.push('need toSystem集成');
+    if (document.content.includes('集成')) integrationFactors.push('需要系统集成');
     
     return {
       overall: Math.min(10, Math.max(1, overall)),
@@ -344,30 +344,30 @@ export class RequirementsAnalyzer {
     if (content.includes('待定') || content.includes('tbd')) {
       risks.push({
         id: 'R1',
-        description: 'requirements不明确, 存in待定项',
+        description: '需求不明确，存在待定项',
         probability: 'high',
         impact: 'high',
-        mitigation: 'andclientConfirmrequirements细节',
+        mitigation: '与客户确认需求细节',
       });
     }
     
     if (content.includes('复杂') || content.includes('complex')) {
       risks.push({
         id: 'R2',
-        description: '技术complexity较High',
+        description: '技术复杂度较高',
         probability: 'medium',
         impact: 'high',
-        mitigation: 'In Progress技术Validate, 准备备用方案',
+        mitigation: '进行技术验证，准备备用方案',
       });
     }
     
     if (document.metadata.wordCount > 5000) {
       risks.push({
         id: 'R3',
-        description: 'Project规模较Large, time压力',
+        description: '项目规模较大，时间压力',
         probability: 'medium',
         impact: 'medium',
-        mitigation: '制定Detailedtime计划, Settingsmilestone',
+        mitigation: '制定详细时间计划，设置里程碑',
       });
     }
     
@@ -399,15 +399,15 @@ export class RequirementsAnalyzer {
 
   private determinePriority(text: string): 'high' | 'medium' | 'low' {
     const lowerText = text.toLowerCase();
-    if (lowerText.includes('must') || lowerText.includes('必need to') || lowerText.includes('核心')) return 'high';
-    if (lowerText.includes('重need to') || lowerText.includes('Off键')) return 'medium';
+    if (lowerText.includes('必须') || lowerText.includes('必要') || lowerText.includes('核心')) return 'high';
+    if (lowerText.includes('重要') || lowerText.includes('关键')) return 'medium';
     return 'low';
   }
 
   private determineComplexity(text: string): 'simple' | 'medium' | 'complex' {
     const lowerText = text.toLowerCase();
     if (lowerText.includes('复杂') || lowerText.includes('困难') || lowerText.includes('挑战')) return 'complex';
-    if (lowerText.includes('Center等') || lowerText.includes('Normal')) return 'medium';
+    if (lowerText.includes('中等') || lowerText.includes('一般')) return 'medium';
     return 'simple';
   }
 

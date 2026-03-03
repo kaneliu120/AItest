@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     if (!fs.existsSync(CONFIG_PATH)) {
       return NextResponse.json({
         success: false,
-        error: 'Integration config file not found',
+        error: '集成配置文件不存在',
         timestamp: new Date().toISOString()
       }, { status: 404 });
     }
@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
     try {
       config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
     } catch {
-      return NextResponse.json({ success: false, error: 'Config file format error or unreadable' }, { status: 500 });
+      return NextResponse.json({ success: false, error: '配置文件格式错误或无法读取' }, { status: 500 });
     }
     
-    // 实时CheckSystemStatus
+    // 实时检查系统状态
     const systems = Object.entries(config.systems).map(([name, sys]: [string, any]) => ({
       name,
       path: sys.path,
@@ -42,10 +42,10 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Business integration status API error:', error);
+    console.error('业务集成状态API错误:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : '未知错误',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

@@ -1,9 +1,9 @@
 /**
- * /api/missions - Task center aggregation API (fully real data)
- * Data sources:
- *   · Taskdata     → /api/tasks (SQLite)
- *   · Financedata     → /api/finance (SQLite)
- *   · OutsourceProjectdata → /api/freelance (built-in)
+ * /api/missions — 任务中心聚合 API（全真实数据）
+ * 数据来源：
+ *   · 任务数据     → /api/tasks (SQLite)
+ *   · 财务数据     → /api/finance (SQLite)
+ *   · 外包项目数据 → /api/freelance (内置)
  */
 import { NextResponse } from 'next/server';
 
@@ -28,10 +28,10 @@ export async function GET() {
     safe<unknown>(`${BASE}/api/freelance?action=projects`, null),
   ]);
 
-  // ── TaskList(true实 SQLite data)────────────────────────────────────────────
+  // ── 任务列表（真实 SQLite 数据）────────────────────────────────────────────
   const tasks = ((tasksRaw as any)?.data?.tasks ?? []) as Array<Record<string, any>>;
 
-  // 映射for mission 卡片Format
+  // 映射为 mission 卡片格式
   const missions = tasks.map((t) => ({
     id:          t.id,
     title:       t.title,
@@ -42,14 +42,14 @@ export async function GET() {
                   : t.status === 'in-progress' ? 50
                   : t.status === 'cancelled'   ? 0
                   : 0,
-    deadline:    t.dueDate ? t.dueDate.split('T')[0] : '-',
-    assignedTo:  t.assignedTo ?? 'Unassigned',
+    deadline:    t.dueDate ? t.dueDate.split('T')[0] : '—',
+    assignedTo:  t.assignedTo ?? '未指定',
     tags:        t.tags ?? [],
     createdAt:   t.createdAt,
     updatedAt:   t.updatedAt,
   }));
 
-  // ── TaskStatistics(real data)───────────────────────────────────────────────────
+  // ── 任务统计（真实数据）───────────────────────────────────────────────────
   const stats = ((statsRaw as any)?.data ?? {}) as Record<string, any>;
   const taskStats = {
     total:          stats.totalTasks      ?? tasks.length,
@@ -61,7 +61,7 @@ export async function GET() {
     cancelled:      tasks.filter((t) => t.status === 'cancelled').length,
   };
 
-  // ── FinanceSummary(real data)───────────────────────────────────────────────────
+  // ── 财务摘要（真实数据）───────────────────────────────────────────────────
   const fin = ((financeRaw as any)?.data ?? {}) as Record<string, any>;
   const financeSummary = {
     totalIncome:   fin.totalIncome   ?? 0,
@@ -71,7 +71,7 @@ export async function GET() {
     currency:      fin.currency      ?? 'PHP',
   };
 
-  // ── 最近交易作forFinancemilestone(real data)────────────────────────────────────
+  // ── 最近交易作为财务里程碑（真实数据）────────────────────────────────────
   const transactions = (((txRaw as any)?.data?.transactions) ?? []) as Array<Record<string, any>>;
   const financeMilestones = transactions
     .filter((t) => t.type === 'income')
@@ -86,13 +86,13 @@ export async function GET() {
       status:      t.status === 'completed' ? 'completed' : 'pending',
     }));
 
-  // ── OutsourceProject(true实Registerdata, 模拟ProjectDetails)───────────────────────────────
+  // ── 外包项目（真实注册数据，模拟项目详情）───────────────────────────────
   const freelanceProjects = (((freelanceRaw as any)?.data?.projects) ?? []) as Array<Record<string, any>>;
   const activeProjects = freelanceProjects.filter((p: any) => p.status === 'active');
 
-  // ── milestone(TaskDue Date + FinanceIncomeEvent合and)─────────────────────────────
+  // ── 里程碑（任务截止日期 + 财务收入事件合并）─────────────────────────────
   const milestones = [
-    // Completed tasks as milestones
+    // 已完成任务作为里程碑
     ...tasks
       .filter((t) => t.status === 'completed')
       .map((t) => ({
@@ -100,9 +100,9 @@ export async function GET() {
         date:   (t.dueDate ?? t.updatedAt ?? '').split('T')[0],
         title:  `✅ ${t.title}`,
         status: 'completed',
-        impact: t.priority === 'critical' ? 'Critical' : t.priority === 'high' ? 'High' : t.priority === 'medium' ? 'Medium' : 'Low',
+        impact: t.priority === 'critical' ? '极高' : t.priority === 'high' ? '高' : t.priority === 'medium' ? '中' : '低',
       })),
-    // Todo task due dates
+    // 待办任务截止日期
     ...tasks
       .filter((t) => ['pending', 'in-progress'].includes(t.status) && t.dueDate)
       .map((t) => ({
@@ -110,21 +110,21 @@ export async function GET() {
         date:   t.dueDate.split('T')[0],
         title:  t.title,
         status: t.status === 'in-progress' ? 'in-progress' : 'pending',
-        impact: t.priority === 'critical' ? 'Critical' : t.priority === 'high' ? 'High' : t.priority === 'medium' ? 'Medium' : 'Low',
+        impact: t.priority === 'critical' ? '极高' : t.priority === 'high' ? '高' : t.priority === 'medium' ? '中' : '低',
       })),
-    // Income milestones
+    // 收入里程碑
     ...financeMilestones.map((m) => ({
       type:   'finance',
       date:   m.date,
       title:  `💰 ${m.title}`,
       status: m.status,
-      impact: m.amount >= 50000 ? 'Critical' : m.amount >= 20000 ? 'High' : 'Medium',
+      impact: m.amount >= 50000 ? '极高' : m.amount >= 20000 ? '高' : '中',
     })),
   ]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 8);
 
-  // ── Overall completion rate (tasks + outsourcing)─────────────────────────────────────────────
+  // ── 整体完成率（任务 + 外包）─────────────────────────────────────────────
   const projectAvgProgress = activeProjects.length
     ? Math.round(activeProjects.reduce((s: number, p) => s + p.progress, 0) / activeProjects.length)
     : 0;

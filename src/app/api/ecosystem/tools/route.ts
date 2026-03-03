@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ecosystemservervice } from '@/lib/ecosystem-service';
+import { ecosystemService } from '@/lib/ecosystem-service';
 
-// GET: Fetch所AllToolor特定Tool
+// GET: 获取所有工具或特定工具
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -9,9 +9,9 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const status = searchParams.get('status');
     
-    let tools = await ecosystemservervice.getToolsStatus();
+    let tools = await ecosystemService.getToolsStatus();
     
-    // Applicationfilter器
+    // 应用过滤器
     if (toolId) {
       tools = tools.filter(t => t.name.toLowerCase().includes(toolId.toLowerCase()));
     }
@@ -29,16 +29,16 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Tool API error:', error);
+    console.error('工具API错误:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : '未知错误',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
 }
 
-// POST: AddNewToolorUpdateToolStatus
+// POST: 添加新工具或更新工具状态
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (!action) {
       return NextResponse.json({
         success: false,
-        error: 'Missing action parameter',
+        error: '缺少 action 参数',
         timestamp: new Date().toISOString()
       }, { status: 400 });
     }
@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
       if (!tool || !tool.id || !tool.name) {
         return NextResponse.json({
           success: false,
-          error: 'Missing required tool information',
+          error: '缺少必要的工具信息',
           timestamp: new Date().toISOString()
         }, { status: 400 });
       }
       
-      // AddNewTool(模拟)
+      // 添加新工具（模拟）
       const newTool = {
         ...tool,
         lastChecked: new Date().toISOString(),
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: newTool,
-        message: 'Tool added successfully',
+        message: '工具添加成功',
         timestamp: new Date().toISOString()
       });
       
@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
       if (!toolId || !status) {
         return NextResponse.json({
           success: false,
-          error: 'Missing toolId or status parameter',
+          error: '缺少 toolId 或 status 参数',
           timestamp: new Date().toISOString()
         }, { status: 400 });
       }
       
-      // UpdateToolStatus(模拟)
+      // 更新工具状态（模拟）
       return NextResponse.json({
         success: true,
         data: {
@@ -94,22 +94,22 @@ export async function POST(request: NextRequest) {
           status,
           updatedAt: new Date().toISOString()
         },
-        message: 'Tool status updated successfully',
+        message: '工具状态更新成功',
         timestamp: new Date().toISOString()
       });
       
     } else {
       return NextResponse.json({
         success: false,
-        error: `Unknown operation: ${action}`,
+        error: `未知操作: ${action}`,
         timestamp: new Date().toISOString()
       }, { status: 400 });
     }
   } catch (error) {
-    console.error('Tool API error:', error);
+    console.error('工具API错误:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : '未知错误',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

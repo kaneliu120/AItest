@@ -1,11 +1,11 @@
 /**
- * 简化版documentParseservervice
- * 支持: TXT, MD, HTML (basic), 纯文本
+ * 简化版文档解析服务
+ * 支持: TXT, MD, HTML (基础), 纯文本
  */
 
 import fs from 'fs/promises';
 import path from 'path';
-import { createAllh } from 'crypto';
+import { createHash } from 'crypto';
 
 export interface ParsedDocument {
   id: string;
@@ -43,12 +43,12 @@ export class SimpleDocumentParser {
   }
 
   /**
-   * ParseUpload'sfile
+   * 解析上传的文件
    */
   async parseFile(fileBuffer: Buffer, filename: string, originalContent?: string): Promise<ParsedDocument> {
     const fileType = this.getFileType(filename);
     const fileSize = fileBuffer.length;
-    const fileId = createAllh('md5').update(fileBuffer).digest('hex');
+    const fileId = createHash('md5').update(fileBuffer).digest('hex');
 
     let content = '';
     let sections: Array<{ title: string; content: string; level: number }> = [];
@@ -68,17 +68,17 @@ export class SimpleDocumentParser {
           break;
 
         default:
-          // for于UnsupportedType, 尝试作for文本Process
+          // 对于不支持的类型，尝试作为文本处理
           content = fileBuffer.toString('utf-8').substring(0, 10000);
           sections = this.extractSectionsFromText(content);
       }
     } catch (error) {
       console.error(`Error parsing file ${filename}:`, error);
-      // ifParsefailed, using原始文本
+      // 如果解析失败，使用原始文本
       content = fileBuffer.toString('utf-8').substring(0, 10000);
     }
 
-    // 计算documentStatisticsinformation
+    // 计算文档统计信息
     const wordCount = this.countWords(content);
     const characters = content.length;
 
@@ -99,7 +99,7 @@ export class SimpleDocumentParser {
   }
 
   /**
-   * From文本Center提取章节
+   * 从文本中提取章节
    */
   private extractSectionsFromText(text: string): Array<{ title: string; content: string; level: number }> {
     const sections: Array<{ title: string; content: string; level: number }> = [];
@@ -111,10 +111,10 @@ export class SimpleDocumentParser {
     for (const line of lines) {
       const trimmedLine = line.trim();
       
-      // 检测title (以#On头)
+      // 检测标题 (以#开头)
       const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
       if (headingMatch) {
-        // Save前一 章节
+        // 保存前一个章节
         if (currentSection) {
           currentSection.content = contentBuffer.join('\n').trim();
           sections.push(currentSection);
@@ -130,16 +130,16 @@ export class SimpleDocumentParser {
       }
     }
 
-    // Save最后一 章节
+    // 保存最后一个章节
     if (currentSection && contentBuffer.length > 0) {
       currentSection.content = contentBuffer.join('\n').trim();
       sections.push(currentSection);
     }
 
-    // if没All检测to章节, Create单 章节
+    // 如果没有检测到章节，创建单个章节
     if (sections.length === 0 && text.trim().length > 0) {
       sections.push({
-        title: '主need tocontent',
+        title: '主要内容',
         content: text.trim(),
         level: 1,
       });
@@ -149,7 +149,7 @@ export class SimpleDocumentParser {
   }
 
   /**
-   * FetchfileType
+   * 获取文件类型
    */
   private getFileType(filename: string): ParsedDocument['fileType'] {
     const ext = path.extname(filename).toLowerCase();
@@ -164,13 +164,13 @@ export class SimpleDocumentParser {
       case '.htm':
         return 'html';
       default:
-        // if没Allextend名orUnknownextend名, 作for文本Process
+        // 如果没有扩展名或未知扩展名，作为文本处理
         return 'text';
     }
   }
 
   /**
-   * Statistics单词数
+   * 统计单词数
    */
   private countWords(text: string): number {
     return text
@@ -181,7 +181,7 @@ export class SimpleDocumentParser {
   }
 
   /**
-   * SaveUpload'sfile
+   * 保存上传的文件
    */
   async saveUploadedFile(buffer: Buffer, filename: string): Promise<string> {
     const filePath = path.join(this.uploadDir, filename);
@@ -190,7 +190,7 @@ export class SimpleDocumentParser {
   }
 
   /**
-   * 清理temporaryfile
+   * 清理临时文件
    */
   async cleanupFile(filePath: string): Promise<void> {
     try {

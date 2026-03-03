@@ -1,7 +1,7 @@
 /**
- * SystemHealthCheck API - real dataVersion
- * Returns CPU/内存/磁盘/进程 实时metrics
- * Redis Optional(不影响主功can)
+ * 系统健康检查 API — 真实数据版本
+ * 返回 CPU/内存/磁盘/进程 实时指标
+ * Redis 可选（不影响主功能）
  */
 import { NextResponse } from 'next/server';
 import os from 'os';
@@ -9,7 +9,7 @@ import os from 'os';
 export async function GET() {
   const startTime = Date.now();
 
-  // ── true实Systemmetrics ─────────────────────────────────────────────────────────
+  // ── 真实系统指标 ─────────────────────────────────────────────────────────
   const totalMem   = os.totalmem();
   const freeMem    = os.freemem();
   const usedMem    = totalMem - freeMem;
@@ -18,7 +18,7 @@ export async function GET() {
   const cpus       = os.cpus();
   const loadAvg    = os.loadavg(); // [1m, 5m, 15m]
   const coreCount  = cpus.length;
-  // 估算CPUusage rate: load1m / cores * 100, 上限100
+  // 估算CPU使用率：load1m / cores * 100, 上限100
   const cpuUsage   = Math.min(100, Math.round((loadAvg[0] / coreCount) * 100));
 
   const uptimeSec  = Math.round(process.uptime());
@@ -28,10 +28,10 @@ export async function GET() {
 
   const responseTime = Date.now() - startTime;
 
-  // ── ComponentStatus ──────────────────────────────────────────────────────────────
+  // ── 组件状态 ──────────────────────────────────────────────────────────────
   const components = [
     {
-      name: 'Mission Control Frontend',
+      name: 'Mission Control 前端',
       status: 'healthy',
       uptime: `${Math.round(uptimeSec / 3600 * 10) / 10}h`,
       version: '2.0.0',
@@ -44,10 +44,10 @@ export async function GET() {
       uptime: `${Math.round(uptimeSec / 3600 * 10) / 10}h`,
       version: '-',
       lastCheck: new Date().toISOString(),
-      description: `Port 3001 | Response ${responseTime}ms`,
+      description: `Port 3001 | 响应 ${responseTime}ms`,
     },
     {
-      name: 'Host Machine (macOS)',
+      name: '宿主机 (macOS)',
       status: memPct > 90 ? 'warning' : 'healthy',
       uptime: `${Math.round(os.uptime() / 3600 * 10) / 10}h`,
       version: `${os.type()} | ${coreCount} cores`,
@@ -55,7 +55,7 @@ export async function GET() {
       description: `CPU ${cpuUsage}% | Mem ${memPct}% | Load ${loadAvg[0].toFixed(2)}`,
     },
     {
-      name: 'Node.js Process',
+      name: 'Node.js 进程',
       status: heapUsedMB > heapTotalMB * 0.9 ? 'warning' : 'healthy',
       uptime: `${Math.round(uptimeSec / 3600 * 10) / 10}h`,
       version: process.version,
@@ -64,7 +64,7 @@ export async function GET() {
     },
   ];
 
-  // ── 整体Health分 (0-100) ────────────────────────────────────────────────────
+  // ── 整体健康分 (0-100) ────────────────────────────────────────────────────
   let overallHealth = 100;
   if (cpuUsage  > 90) overallHealth -= 30;
   else if (cpuUsage > 70) overallHealth -= 10;
@@ -84,7 +84,7 @@ export async function GET() {
       metrics: {
         cpuUsage,
         memoryUsage:  memPct,
-        diskUsage:    0,   // need to额外Tool, 暂留0
+        diskUsage:    0,   // 需要额外工具，暂留0
         networkLatency: responseTime,
         responseTime,
         heapUsedMB,

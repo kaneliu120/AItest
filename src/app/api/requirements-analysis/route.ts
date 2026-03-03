@@ -4,7 +4,7 @@ import { RequirementsAnalyzer, RequirementAnalysis } from '@/lib/requirements-an
 import { DocumentGenerator, TechnicalDocument } from '@/lib/requirements-analysis/document-generator';
 
 /**
- * SecurityParsedateString
+ * 安全解析日期字符串
  */
 const parseDate = (dateString: string): Date => {
   const timestamp = Date.parse(dateString);
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     
     if (!file && !textContent) {
       return NextResponse.json(
-        { error: 'Please provide a file or text content' },
+        { error: '请提供文件或文本内容' },
         { status: 400 }
       );
     }
@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
     let parsedDocument: ParsedDocument;
     
     if (file) {
-      // ProcessfileUpload
+      // 处理文件上传
       const buffer = Buffer.from(await file.arrayBuffer());
       parsedDocument = await documentParser.parseFile(buffer, file.name);
     } else {
-      // Process文本content
+      // 处理文本内容
       parsedDocument = await documentParser.parseFile(
         Buffer.from(textContent),
         'text-input.txt',
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Analyticsrequirements
+    // 分析需求
     const analysis = await requirementsAnalyzer.analyzeDocument(parsedDocument);
     
-    // Generate技术document(ifRequest)
+    // 生成技术文档（如果请求）
     let documents: Record<string, TechnicalDocument> = {};
     if (generateDocs) {
       documents = documentGenerator.generateAllDocuments(analysis);
@@ -74,11 +74,11 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Requirements Analysiserror:', error);
+    console.error('需求分析错误:', error);
     return NextResponse.json(
       { 
-        error: 'Requirements Analysisfailed',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: '需求分析失败',
+        details: error instanceof Error ? error.message : '未知错误'
       },
       { status: 500 }
     );
@@ -105,12 +105,12 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
     data: {
-      message: 'Requirements AnalysisAPI',
+      message: '需求分析API',
       endpoints: {
-        POST: '/api/requirements-analysis - Analyze requirements documents',
-        GET: '/api/requirements-analysis?action=status - Get service status',
+        POST: '/api/requirements-analysis - 分析需求文档',
+        GET: '/api/requirements-analysis?action=status - 获取服务状态',
       },
-      usage: 'Upload a file or provide text content for requirements analysis',
+      usage: '上传文件或提供文本内容进行需求分析',
     },
   });
 }

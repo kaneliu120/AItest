@@ -8,7 +8,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json().catch(() => ({}));
     let url = String(body?.analysis_doc_url || '').trim();
 
-    // 未提供then自动Export markdown document
+    // 未提供则自动导出 markdown 文档
     if (!url) {
       const out = await generateAnalysisDoc(id);
       url = out.downloadUrl;
@@ -18,6 +18,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const res = await moveStage(id, 'analysis_done', 'analysis-complete', body?.actor, { ...(body?.payload || {}), analysis_doc_url: url });
     return NextResponse.json({ success: true, data: res });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 400 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 400 });
   }
 }

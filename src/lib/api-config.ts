@@ -1,5 +1,5 @@
 /**
- * API Configuration - 指to独立'sExpress APIservervice器
+ * API 配置 - 指向独立的Express API服务器
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
@@ -15,7 +15,7 @@ export const apiConfig = {
   }
 };
 
-// APIclient端function
+// API客户端函数
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
   
@@ -30,17 +30,17 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(url, { ...defaultOptions, ...options });
     
     if (!response.ok) {
-      throw new Error(`APIRequest failed: ${response.status} ${response.statusText}`);
+      throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('APIRequesterror:', error);
+    console.error('API请求错误:', error);
     throw error;
   }
 }
 
-// 特定APIfunction
+// 特定API函数
 export async function getTaskStats() {
   return fetchAPI('/api/tasks');
 }

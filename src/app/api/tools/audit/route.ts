@@ -8,6 +8,6 @@ export async function GET(request: Request) {
     const logs = await listMcpAuditLogs(limit);
     return NextResponse.json({ success: true, data: logs, count: logs.length });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
   }
 }

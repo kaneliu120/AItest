@@ -48,20 +48,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, slug, version } = body;
 
-    if (!slug) return NextResponse.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+    if (!slug) return NextResponse.json({ success: false, error: '缺少技能标识' }, { status: 400 });
 
     if (action === 'install') {
       const out = await installSkill(slug, version);
-      return NextResponse.json({ success: true, message: `Skill "${slug}" installed successfully`, data: out });
+      return NextResponse.json({ success: true, message: `技能 "${slug}" 安装成功`, data: out });
     }
 
     if (action === 'uninstall') {
       await uninstallSkill(slug);
-      return NextResponse.json({ success: true, message: `Skill "${slug}" uninstalled successfully` });
+      return NextResponse.json({ success: true, message: `技能 "${slug}" 卸载成功` });
     }
 
-    return NextResponse.json({ success: false, error: 'Unsupported operation' }, { status: 400 });
+    return NextResponse.json({ success: false, error: '不支持的操作' }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
   }
 }

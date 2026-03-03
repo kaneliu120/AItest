@@ -1,9 +1,9 @@
-// 智canDispatchSystemCache集成修复
+// 智能分发系统缓存集成修复
 
-import { unifiedGatewayservervice, UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
+import { unifiedGatewayService, UnifiedRequest, UnifiedResponse } from './unified-gateway-service';
 import { intelligentTaskDispatcher } from './intelligent-task-dispatcher';
 
-// CacheStatistics
+// 缓存统计
 interface CacheStats {
   hits: number;
   misses: number;
@@ -12,10 +12,10 @@ interface CacheStats {
   size: number;
 }
 
-// 增强's智canDispatch器, 修复Cache集成问题
+// 增强的智能分发器，修复缓存集成问题
 class EnhancedIntelligentTaskDispatcher {
   private cache: Map<string, { response: UnifiedResponse; timestamp: number }> = new Map();
-  private cacheTTL = 5 * 60 * 1000; // 5minCache
+  private cacheTTL = 5 * 60 * 1000; // 5分钟缓存
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -24,22 +24,22 @@ class EnhancedIntelligentTaskDispatcher {
     size: 0
   };
   
-  // 增强'sdispatchTaskmethod, 集成Cache
+  // 增强的dispatchTask方法，集成缓存
   async dispatchTaskWithCache(request: UnifiedRequest): Promise<UnifiedResponse> {
     const startTime = Date.now();
     
     try {
-      // 1. Check cache
+      // 1. 检查缓存
       const cacheKey = this.generateCacheKey(request);
       const cached = this.cache.get(cacheKey);
       
       if (cached && (Date.now() - cached.timestamp) < this.cacheTTL) {
-        // UpdateStatistics
+        // 更新统计
         this.stats.hits++;
         this.stats.total++;
         this.stats.hitRate = this.stats.hits / this.stats.total;
         
-        // 返回Cache response, UpdateResponsetime
+        // 返回缓存响应，更新响应时间
         const cachedResponse = {
           ...cached.response,
           data: {
@@ -50,7 +50,7 @@ class EnhancedIntelligentTaskDispatcher {
             dispatchDecision: cached.response.data.dispatchDecision || {
               system: 'cached',
               strategy: 'cache',
-              reason: 'Cache命Center',
+              reason: '缓存命中',
               confidence: 1.0,
               estimatedTime: Date.now() - startTime,
               estimatedCost: 0.1,
@@ -60,25 +60,25 @@ class EnhancedIntelligentTaskDispatcher {
           timestamp: new Date().toISOString()
         };
         
-        console.log(`🎯 Cache命Center: ${cacheKey}`);
+        console.log(`🎯 缓存命中: ${cacheKey}`);
         return cachedResponse;
       }
       
-      // 2. using原始智canDispatch器Process
+      // 2. 使用原始智能分发器处理
       const response = await intelligentTaskDispatcher.dispatchTask(request);
       
-      // UpdateStatistics
+      // 更新统计
       this.stats.misses++;
       this.stats.total++;
       this.stats.hitRate = this.stats.hits / this.stats.total;
       
-      // 3. Cache response
+      // 3. 缓存响应
       if (response.success) {
         const responseToCache = {
           ...response,
           data: {
             ...response.data,
-            cached: false // 原始Response不YesCache
+            cached: false // 原始响应不是缓存
           }
         };
         
@@ -89,7 +89,7 @@ class EnhancedIntelligentTaskDispatcher {
         
         this.stats.size = this.cache.size;
         
-        // 限制CacheLargeSmall
+        // 限制缓存大小
         if (this.cache.size > 100) {
           const oldestKey = Array.from(this.cache.keys())[0];
           this.cache.delete(oldestKey);
@@ -100,12 +100,12 @@ class EnhancedIntelligentTaskDispatcher {
       return response;
       
     } catch (error) {
-      console.error('增强Dispatchfailed:', error);
-      return await unifiedGatewayservervice.processRequest(request);
+      console.error('增强分发失败:', error);
+      return await unifiedGatewayService.processRequest(request);
     }
   }
   
-  // GenerateCache键
+  // 生成缓存键
   private generateCacheKey(request: UnifiedRequest): string {
     const keyParts = [
       request.query.toLowerCase().replace(/\s+/g, '_').substring(0, 100),
@@ -113,7 +113,7 @@ class EnhancedIntelligentTaskDispatcher {
       request.system || 'auto'
     ];
     
-    // AddTaskType识别
+    // 添加任务类型识别
     if (request.context?.queryType) {
       keyParts.push(request.context.queryType);
     }
@@ -121,7 +121,7 @@ class EnhancedIntelligentTaskDispatcher {
     return keyParts.join('|');
   }
   
-  // FetchCacheStatistics
+  // 获取缓存统计
   getCacheStats(): CacheStats {
     return {
       ...this.stats,
@@ -129,11 +129,11 @@ class EnhancedIntelligentTaskDispatcher {
     };
   }
   
-  // ClearCache
+  // 清空缓存
   clearCache(): void {
     this.cache.clear();
   }
 }
 
-// Export增强实例
+// 导出增强实例
 export const enhancedIntelligentDispatcher = new EnhancedIntelligentTaskDispatcher();

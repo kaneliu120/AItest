@@ -1,4 +1,4 @@
-// 生态Systemservervice - 深度集成toMission Control
+// 生态系统服务 - 深度集成到Mission Control
 
 export interface ToolStatus {
   name: string;
@@ -40,7 +40,7 @@ export interface EcosystemData {
   tools: ToolStatus[];
 }
 
-class Ecosystemservervice {
+class EcosystemService {
   private tools: ToolStatus[] = [
     {
       name: 'Mission Control',
@@ -48,79 +48,79 @@ class Ecosystemservervice {
       type: 'dashboard',
       version: '2.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Master Control System - Unified management of all subsystems',
+      details: '主控制系统 - 统一管理所有子系统',
     },
     {
-      name: 'Tool Ecosystem',
+      name: '工具生态系统',
       status: 'healthy',
       type: 'monitoring',
       version: '2.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Tool monitoring and management - 42/62 tools connected',
+      details: '工具监控和管理 - 42/62工具已连接',
     },
     {
-      name: 'Skill evaluationSystem',
+      name: '技能评估系统',
       status: 'healthy',
       type: 'evaluation',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Skill quality evaluation - Score: 76/100',
+      details: '技能质量评估 - 评分: 76/100',
     },
     {
-      name: 'HealthMonitoringSystem',
+      name: '健康监控系统',
       status: 'healthy',
       type: 'health',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'System health monitoring - Health: 95%',
+      details: '系统健康监控 - 健康度: 95%',
     },
     {
-      name: 'FinanceSystem',
+      name: '财务系统',
       status: 'healthy',
       type: 'finance',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Finance management and tracking - 20% automated',
+      details: '财务管理和跟踪 - 自动化20%',
     },
     {
-      name: 'OutsourceSystem',
+      name: '外包系统',
       status: 'warning',
       type: 'freelance',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Outsource project management - Platform registration required',
+      details: '外包项目管理 - 需平台注册',
     },
     {
-      name: 'TaskSystem',
+      name: '任务系统',
       status: 'healthy',
       type: 'task',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Daily task management - 70% automated',
+      details: '日常任务管理 - 自动化70%',
     },
     {
-      name: 'AI Assistant',
+      name: 'AI助手',
       status: 'healthy',
       type: 'ai',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AI intelligent assistant - Deeply integrated',
+      details: 'AI智能助手 - 深度集成',
     },
     {
-      name: 'AutomationSystem',
+      name: '自动化系统',
       status: 'healthy',
       type: 'automation',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'WorkflowAutomation - 40%Automation',
+      details: '工作流自动化 - 40%自动化',
     },
     {
-      name: '知识管理System',
+      name: '知识管理系统',
       status: 'healthy',
       type: 'knowledge',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'RAGKnowledge Base - 100%Completed',
+      details: 'RAG知识库 - 100%完成',
     },
     {
       name: 'Google Analytics',
@@ -136,7 +136,7 @@ class Ecosystemservervice {
       type: 'ads',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Ads API - need toOAuthConfiguration',
+      details: 'Ads API - 需要OAuth配置',
     },
     {
       name: 'Facebook API',
@@ -152,7 +152,7 @@ class Ecosystemservervice {
       type: 'social',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'LinkedIn API集成 - alreadyConfiguration',
+      details: 'LinkedIn API集成 - 已配置',
     },
     {
       name: 'GitHub Actions',
@@ -160,7 +160,7 @@ class Ecosystemservervice {
       type: 'ci-cd',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'CI/CDAutomation - alreadyConfiguration',
+      details: 'CI/CD自动化 - 已配置',
     },
     {
       name: 'Docker',
@@ -168,7 +168,7 @@ class Ecosystemservervice {
       type: 'container',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'Container管理 - need toInstall',
+      details: '容器管理 - 需要安装',
     },
     {
       name: 'Azure云',
@@ -176,7 +176,7 @@ class Ecosystemservervice {
       type: 'cloud',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AzureDeployment - myskillstore.dev',
+      details: 'Azure部署 - myskillstore.dev',
     },
     {
       name: 'OpenClaw',
@@ -184,7 +184,7 @@ class Ecosystemservervice {
       type: 'framework',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AI代理Framework - 深度集成',
+      details: 'AI代理框架 - 深度集成',
     },
     {
       name: 'Antigravity',
@@ -192,7 +192,7 @@ class Ecosystemservervice {
       type: 'skill',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'SkillDevelopmentFramework - 90%Completed',
+      details: '技能开发框架 - 90%完成',
     },
     {
       name: 'My Skill Shop',
@@ -200,7 +200,7 @@ class Ecosystemservervice {
       type: 'product',
       version: '1.0.0',
       lastChecked: new Date().toISOString(),
-      details: 'AISkillPlatform - 生产Environment运行',
+      details: 'AI技能平台 - 生产环境运行',
     },
   ];
 
@@ -213,33 +213,33 @@ class Ecosystemservervice {
     recentAlerts: [
       {
         level: 'error',
-        message: 'Docker未Install, Container管理功canunavailable',
+        message: 'Docker未安装，容器管理功能不可用',
         timestamp: new Date().toISOString(),
         tool: 'Docker',
       },
       {
         level: 'warning',
-        message: 'Google Ads APIneed toOAuthConfiguration',
+        message: 'Google Ads API需要OAuth配置',
         timestamp: new Date().toISOString(),
         tool: 'Google Ads',
       },
       {
         level: 'warning',
-        message: 'OutsourceSystemneed toPlatformRegister',
+        message: '外包系统需要平台注册',
         timestamp: new Date().toISOString(),
-        tool: 'OutsourceSystem',
+        tool: '外包系统',
       },
       {
         level: 'info',
-        message: '知识管理System100%Completed, 生产就绪',
+        message: '知识管理系统100%完成，生产就绪',
         timestamp: new Date().toISOString(),
-        tool: '知识管理System',
+        tool: '知识管理系统',
       },
       {
         level: 'info',
-        message: 'Tool生态SystemConnect率68%',
+        message: '工具生态系统连接率68%',
         timestamp: new Date().toISOString(),
-        tool: 'Tool生态System',
+        tool: '工具生态系统',
       },
     ],
   };
@@ -255,9 +255,9 @@ class Ecosystemservervice {
     lastUpdate: new Date().toISOString(),
   };
 
-  // Fetch生态Systemdata
+  // 获取生态系统数据
   async getEcosystemData(): Promise<EcosystemData> {
-    // 模拟dataUpdate
+    // 模拟数据更新
     this.updateMockData();
     
     return {
@@ -267,25 +267,25 @@ class Ecosystemservervice {
     };
   }
 
-  // FetchMonitoringStatisticsdata
+  // 获取监控统计数据
   async getMonitoringStats(): Promise<MonitoringStats> {
     this.updateMockData();
     return this.monitoringStats;
   }
 
-  // FetchScheduling器Statisticsdata
+  // 获取调度器统计数据
   async getSchedulerStats(): Promise<SchedulerStats> {
     this.updateMockData();
     return this.schedulerStats;
   }
 
-  // FetchToolStatus
+  // 获取工具状态
   async getToolsStatus(): Promise<ToolStatus[]> {
     this.updateMockData();
     return this.tools;
   }
 
-  // ExecuteHealthCheck
+  // 执行健康检查
   async performHealthCheck(): Promise<{
     success: boolean;
     message: string;
@@ -299,22 +299,22 @@ class Ecosystemservervice {
     
     return {
       success: true,
-      message: `HealthCheckCompleted: ${healthyCount}/${totalCount}  ToolHealth (${healthPercentage}%)`,
+      message: `健康检查完成: ${healthyCount}/${totalCount} 个工具健康 (${healthPercentage}%)`,
       timestamp: new Date().toISOString(),
     };
   }
 
-  // 模拟dataUpdate
+  // 模拟数据更新
   private updateMockData() {
     const now = new Date();
     
-    // Update最后Checktime
+    // 更新最后检查时间
     this.tools = this.tools.map(tool => ({
       ...tool,
       lastChecked: now.toISOString(),
     }));
     
-    // UpdateMonitoringStatistics
+    // 更新监控统计
     this.monitoringStats = {
       ...this.monitoringStats,
       lastUpdate: now.toISOString(),
@@ -323,7 +323,7 @@ class Ecosystemservervice {
       errorTools: this.tools.filter(t => t.status === 'error').length,
     };
     
-    // UpdateScheduling器Statistics
+    // 更新调度器统计
     this.schedulerStats = {
       ...this.schedulerStats,
       lastUpdate: now.toISOString(),
@@ -331,7 +331,7 @@ class Ecosystemservervice {
     };
   }
 
-  // AddNewTool
+  // 添加新工具
   async addTool(tool: Omit<ToolStatus, 'lastChecked'>): Promise<ToolStatus> {
     const newTool: ToolStatus = {
       ...tool,
@@ -344,7 +344,7 @@ class Ecosystemservervice {
     return newTool;
   }
 
-  // UpdateToolStatus
+  // 更新工具状态
   async updateToolStatus(name: string, status: ToolStatus['status']): Promise<ToolStatus | null> {
     const toolIndex = this.tools.findIndex(t => t.name === name);
     
@@ -361,7 +361,7 @@ class Ecosystemservervice {
     return this.tools[toolIndex];
   }
 
-  // FetchSystemHealth度
+  // 获取系统健康度
   getSystemHealth(): number {
     const healthyCount = this.tools.filter(t => t.status === 'healthy').length;
     const totalCount = this.tools.length;
@@ -369,4 +369,4 @@ class Ecosystemservervice {
   }
 }
 
-export const ecosystemservervice = new Ecosystemservervice();
+export const ecosystemService = new EcosystemService();

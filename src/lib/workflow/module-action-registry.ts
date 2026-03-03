@@ -28,7 +28,7 @@ class ModuleActionRegistry {
   private tryLoadPlugins() {
     if (this.loadedPlugins) return;
     this.loadedPlugins = true;
-    // lightweight hook for future dynamic plugins through global injection
+    // lightweight hook for future dynamic plugins via global injection
     const anyGlobal = globalThis as any;
     const plugins = anyGlobal.__WORKFLOW_MODULE_PLUGINS__;
     if (Array.isArray(plugins)) {
@@ -49,7 +49,7 @@ class ModuleActionRegistry {
     const wildcard = this.handlers.get(`${ctx.module}.*`);
     if (wildcard) return wildcard(ctx);
 
-    throw new Error(`未支持'sModule动作: ${ctx.module}.${ctx.action}`);
+    throw new Error(`未支持的模块动作: ${ctx.module}.${ctx.action}`);
   }
 }
 
@@ -57,8 +57,8 @@ export const moduleActionRegistry = new ModuleActionRegistry();
 
 moduleActionRegistry.register('tasks', 'select_priority_task', async ({ merged }) => {
   const created = await createTask({
-    title: `[WF] 优先Task选择 - ${new Date().toLocaleDateString('zh-CN')}`,
-    description: `由Workflow自动Create, Priority: ${merged.priority || 'highest'}`,
+    title: `[WF] 优先任务选择 - ${new Date().toLocaleDateString('zh-CN')}`,
+    description: `由工作流自动创建，优先级: ${merged.priority || 'highest'}`,
     priority: merged.priority === 'highest' ? 'high' : 'medium',
     status: 'pending',
     dueDate: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
@@ -66,14 +66,14 @@ moduleActionRegistry.register('tasks', 'select_priority_task', async ({ merged }
     tags: ['workflow', 'auto', 'priority-selection'],
     source: 'workflow',
   } as any);
-  if (!created) throw new Error('TaskCreate failed');
+  if (!created) throw new Error('任务创建失败');
   return { selectedTaskId: created.id, priority: merged.priority || 'highest' };
 });
 
 moduleActionRegistry.register('tasks', 'record_progress', async () => {
   const created = await createTask({
-    title: `[WF] 进展Log - ${new Date().toLocaleTimeString('zh-CN')}`,
-    description: '由Workflow自动Generate's进展LogTask',
+    title: `[WF] 进展记录 - ${new Date().toLocaleTimeString('zh-CN')}`,
+    description: '由工作流自动生成的进展记录任务',
     priority: 'low',
     status: 'pending',
     dueDate: new Date(Date.now() + 12 * 3600 * 1000).toISOString(),
@@ -81,7 +81,7 @@ moduleActionRegistry.register('tasks', 'record_progress', async () => {
     tags: ['workflow', 'progress'],
     source: 'workflow',
   } as any);
-  if (!created) throw new Error('进展TaskCreate failed');
+  if (!created) throw new Error('进展任务创建失败');
   return { recorded: true, taskId: created.id };
 });
 
@@ -90,8 +90,8 @@ moduleActionRegistry.register('automation', '*', async ({ action }) => ({ execut
 
 moduleActionRegistry.register('reporting', '*', async ({ stepId, action }) => {
   const reportTask = await createTask({
-    title: `[WF] ReportGenerate - ${action}`,
-    description: `WorkflowReportTask, 来源Step: ${stepId}`,
+    title: `[WF] 报告生成 - ${action}`,
+    description: `工作流报告任务，来源步骤: ${stepId}`,
     priority: 'medium',
     status: 'pending',
     dueDate: new Date(Date.now() + 6 * 3600 * 1000).toISOString(),
@@ -99,19 +99,19 @@ moduleActionRegistry.register('reporting', '*', async ({ stepId, action }) => {
     tags: ['workflow', 'reporting'],
     source: 'workflow',
   } as any);
-  if (!reportTask) throw new Error('ReportTaskCreate failed');
+  if (!reportTask) throw new Error('报告任务创建失败');
   return { reportGenerated: true, reportType: action, title: `Workflow Report - ${stepId}`, reportTaskId: reportTask.id };
 });
 
 moduleActionRegistry.register('notification', '*', async ({ stepId, action, merged, queueNotification }) => {
-  const title = merged.title || `WorkflowNotification: ${action}`;
-  const message = merged.message || `Step ${stepId} alreadyExecute`;
+  const title = merged.title || `工作流通知: ${action}`;
+  const message = merged.message || `步骤 ${stepId} 已执行`;
 
   TeamCollaborationManager.sendNotification('kane', {
     title,
     message,
     type: 'info',
-    action: { label: 'ViewWorkflow', url: '/workflows' },
+    action: { label: '查看工作流', url: '/workflows' },
   });
 
   const q = queueNotification({
@@ -136,8 +136,8 @@ moduleActionRegistry.register('finance', 'collect_weekly_data', async ({ stepId,
   const summary = await addTransaction({
     date: new Date().toISOString().slice(0, 10),
     amount: Number(merged.amount || 0),
-    category: 'Workflow采集',
-    description: '每周Finance采集Log(自动)',
+    category: '工作流采集',
+    description: '每周财务采集记录（自动）',
     type: 'income',
     currency: 'PHP',
     status: 'completed',
@@ -156,7 +156,7 @@ moduleActionRegistry.register('freelance', 'search_projects', async ({ action })
 moduleActionRegistry.register('freelance', 'apply_to_projects', async ({ merged, action }) => {
   const project = await addProject({
     title: `[WF] Auto Follow-up ${new Date().toISOString().slice(0, 10)}`,
-    description: 'Workflow自动Create'sOutsourceProject跟进',
+    description: '工作流自动创建的外包项目跟进',
     status: 'active',
     source: 'workflow',
     businessSource: 'workflow-automation',
@@ -165,9 +165,9 @@ moduleActionRegistry.register('freelance', 'apply_to_projects', async ({ merged,
     currency: 'PHP',
     deadline: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
     progress: 0,
-    category: 'AIservervice',
+    category: 'AI服务',
     automationStatus: 'queued',
-    notes: '由Workflow自动Generate',
+    notes: '由工作流自动生成',
   } as any);
   return { done: true, freelanceAction: action, projectId: project.id };
 });

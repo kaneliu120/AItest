@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
           type: 'stalled',
           taskId: t.id,
           title: t.title,
-          message: `Stage ${stage} has been stalled for ${Math.floor(idleHours)}h`,
+          message: `阶段 ${stage} 已停滞 ${Math.floor(idleHours)}h`,
         });
       }
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
           type: 'test_failed',
           taskId: t.id,
           title: t.title,
-          message: 'Test failed, immediate troubleshooting required',
+          message: '测试失败，需立即进入排障流程',
         });
       }
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           type: 'pending_invoice',
           taskId: t.id,
           title: t.title,
-          message: 'Released but not yet recorded, please execute finance process',
+          message: '已发布但未入账，请执行财务流程',
         });
       }
     }
@@ -60,6 +60,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: { summary, alerts } });
   } catch (e) {
-    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: e instanceof Error ? e.message : '未知错误' }, { status: 500 });
   }
 }

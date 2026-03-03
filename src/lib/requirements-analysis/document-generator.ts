@@ -1,5 +1,5 @@
 /**
- * 技术documentGenerateservervice - 简化Version
+ * 技术文档生成服务 - 简化版本
  */
 
 import { RequirementAnalysis } from './requirements-analyzer';
@@ -20,7 +20,7 @@ export interface TechnicalDocument {
 
 export class DocumentGenerator {
   /**
-   * Generate所All技术document
+   * 生成所有技术文档
    */
   generateAllDocuments(analysis: RequirementAnalysis): {
     srs: TechnicalDocument;
@@ -37,44 +37,44 @@ export class DocumentGenerator {
   }
 
   /**
-   * Generaterequirements规格说明书
+   * 生成需求规格说明书
    */
   generateSRS(analysis: RequirementAnalysis): TechnicalDocument {
-    const content = `# requirements规格说明书 (SRS)
+    const content = `# 需求规格说明书 (SRS)
 
-## Project概述
-基于Requirements Analysis自动Generate's规格说明书. 
+## 项目概述
+基于需求分析自动生成的规格说明书。
 
-## 功canrequirements
+## 功能需求
 ${analysis.categories.functional.map(req => `- **${req.id}**: ${req.description}`).join('\n')}
 
-## Technical Architecture
+## 技术架构
 - **前端**: ${analysis.techStack.frontend[0]?.framework || 'Next.js'}
 - **后端**: ${analysis.techStack.backend[0]?.framework || 'NestJS'}
-- **data库**: ${analysis.techStack.database[0]?.type || 'PostgreSQL'}
+- **数据库**: ${analysis.techStack.database[0]?.type || 'PostgreSQL'}
 
-## Project约束
-- 预计工期: ${analysis.effortEstimation.timeline.realistic} d
-- Team规模: ${analysis.effortEstimation.teamSize} 人
-- 总工时: ${analysis.effortEstimation.totalHours} Small时
+## 项目约束
+- 预计工期: ${analysis.effortEstimation.timeline.realistic} 天
+- 团队规模: ${analysis.effortEstimation.teamSize} 人
+- 总工时: ${analysis.effortEstimation.totalHours} 小时
 
-## riskEvaluation
+## 风险评估
 ${analysis.risks.map(risk => `- **${risk.id}**: ${risk.description} (概率: ${risk.probability}, 影响: ${risk.impact})`).join('\n')}
 
 ---
-*Generatetime: ${new Date().toLocaleString()}*`;
+*生成时间: ${new Date().toLocaleString()}*`;
 
-    return this.createDocument('srs', 'requirements规格说明书', content, analysis.id);
+    return this.createDocument('srs', '需求规格说明书', content, analysis.id);
   }
 
   /**
-   * Generate技术设计document
+   * 生成技术设计文档
    */
   generateTDD(analysis: RequirementAnalysis): TechnicalDocument {
-    const content = `# 技术设计document (TDD)
+    const content = `# 技术设计文档 (TDD)
 
-## System架构
-采用分层架构设计, 确保maintainability和可extend性. 
+## 系统架构
+采用分层架构设计，确保可维护性和可扩展性。
 
 ## 技术选型
 ### 前端
@@ -83,12 +83,12 @@ ${analysis.techStack.frontend.map(tech => `- **${tech.framework}**: ${tech.recom
 ### 后端
 ${analysis.techStack.backend.map(tech => `- **${tech.framework}**: ${tech.recommendation} (适合度: ${tech.suitability}%)`).join('\n')}
 
-### data库
+### 数据库
 ${analysis.techStack.database.map(db => `- **${db.type}**: ${db.recommendation} (适合度: ${db.suitability}%)`).join('\n')}
 
-## data库设计
+## 数据库设计
 \`\`\`sql
--- 核心表结构Example
+-- 核心表结构示例
 CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
@@ -100,101 +100,101 @@ CREATE TABLE projects (
 
 ## API设计
 - RESTful API设计
-- JWT TokenAuth
-- Versioncontrol: /api/v1/
+- JWT Token认证
+- 版本控制: /api/v1/
 
-## Deployment架构
-- **计算**: Azure App servervice
-- **data库**: Azure Database for PostgreSQL
+## 部署架构
+- **计算**: Azure App Service
+- **数据库**: Azure Database for PostgreSQL
 - **存储**: Azure Blob Storage
-- **Cache**: Azure Cache for Redis
+- **缓存**: Azure Cache for Redis
 
 ---
-*Generatetime: ${new Date().toLocaleString()}*`;
+*生成时间: ${new Date().toLocaleString()}*`;
 
-    return this.createDocument('tdd', '技术设计document', content, analysis.id);
+    return this.createDocument('tdd', '技术设计文档', content, analysis.id);
   }
 
   /**
-   * GenerateProject计划
+   * 生成项目计划
    */
   generateProjectPlan(analysis: RequirementAnalysis): TechnicalDocument {
     const weeks = Math.ceil(analysis.effortEstimation.timeline.realistic / 5);
     
-    const content = `# ProjectDevelopment计划
+    const content = `# 项目开发计划
 
-## Projectinformation
-- **ProjectName**: ${this.extractProjectName(analysis)}
-- **工期**: ${analysis.effortEstimation.timeline.realistic} d (${weeks} 周)
-- **Team**: ${analysis.effortEstimation.teamSize} 人
-- **总工时**: ${analysis.effortEstimation.totalHours} Small时
+## 项目信息
+- **项目名称**: ${this.extractProjectName(analysis)}
+- **工期**: ${analysis.effortEstimation.timeline.realistic} 天 (${weeks} 周)
+- **团队**: ${analysis.effortEstimation.teamSize} 人
+- **总工时**: ${analysis.effortEstimation.totalHours} 小时
 
-## Stage划分
-### Stage1: basic架构 (第1周)
-- Environment搭建
-- data库设计
-- 核心APIDevelopment
+## 阶段划分
+### 阶段1: 基础架构 (第1周)
+- 环境搭建
+- 数据库设计
+- 核心API开发
 
-### Stage2: 核心功can (第2-3周)
+### 阶段2: 核心功能 (第2-3周)
 ${analysis.categories.functional.slice(0, 5).map(req => `- ${req.id}: ${req.description}`).join('\n')}
 
-### Stage3: 前端Develop (第4周)
-- User界面设计
-- 页面Development
+### 阶段3: 前端开发 (第4周)
+- 用户界面设计
+- 页面开发
 - 交互实现
 
-### Stage4: TestDeployment (第5-6周)
-- 单元Test
-- 集成Test
-- 生产Deployment
+### 阶段4: 测试部署 (第5-6周)
+- 单元测试
+- 集成测试
+- 生产部署
 
-## resource分配
+## 资源分配
 \`\`\`
-Analytics设计: ${analysis.effortEstimation.breakdown.analysis} Small时
-Development实现: ${analysis.effortEstimation.breakdown.development} Small时
-TestValidate: ${analysis.effortEstimation.breakdown.testing} Small时
-Deploymentdocument: ${analysis.effortEstimation.breakdown.deployment + analysis.effortEstimation.breakdown.documentation} Small时
+分析设计: ${analysis.effortEstimation.breakdown.analysis} 小时
+开发实现: ${analysis.effortEstimation.breakdown.development} 小时
+测试验证: ${analysis.effortEstimation.breakdown.testing} 小时
+部署文档: ${analysis.effortEstimation.breakdown.deployment + analysis.effortEstimation.breakdown.documentation} 小时
 \`\`\`
 
-## milestone
-1. **M1** (第1周): basic架构Completed
-2. **M2** (第3周): 核心功canCompleted
-3. **M3** (第4周): 前端Completed
-4. **M4** (第6周): 生产Deployment
+## 里程碑
+1. **M1** (第1周): 基础架构完成
+2. **M2** (第3周): 核心功能完成
+3. **M3** (第4周): 前端完成
+4. **M4** (第6周): 生产部署
 
 ---
-*Generatetime: ${new Date().toLocaleString()}*`;
+*生成时间: ${new Date().toLocaleString()}*`;
 
-    return this.createDocument('project-plan', 'ProjectDevelopment计划', content, analysis.id);
+    return this.createDocument('project-plan', '项目开发计划', content, analysis.id);
   }
 
   /**
-   * GenerateDeploymentdocument
+   * 生成部署文档
    */
   generateDeploymentDoc(analysis: RequirementAnalysis): TechnicalDocument {
     const projectName = this.extractProjectName(analysis).toLowerCase().replace(/[^a-z0-9]/g, '-');
     
-    const content = `# AzureDeploymentdocument
+    const content = `# Azure部署文档
 
-## InfrastructureConfiguration
+## 基础设施配置
 
-### 1. resource组
+### 1. 资源组
 \`\`\`bash
 az group create --name rg-${projectName} --location southeastasia
 \`\`\`
 
-### 2. App servervice
+### 2. App Service
 \`\`\`bash
 az appservice plan create --name asp-${projectName} --resource-group rg-${projectName} --sku P1v2 --is-linux
 az webapp create --name app-${projectName} --resource-group rg-${projectName} --plan asp-${projectName} --runtime "NODE|18-lts"
 \`\`\`
 
-### 3. PostgreSQLdata库
+### 3. PostgreSQL数据库
 \`\`\`bash
 az postgres flexible-server create --name psql-${projectName} --resource-group rg-${projectName} --location southeastasia --admin-user adminuser --admin-password ChangeMe123!
 \`\`\`
 
-## DockerConfiguration
+## Docker配置
 \`\`\`dockerfile
 # Dockerfile
 FROM node:18-alpine
@@ -207,7 +207,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 \`\`\`
 
-## GitHub ActionsConfiguration
+## GitHub Actions配置
 \`\`\`yaml
 # .github/workflows/deploy.yml
 name: Deploy to Azure
@@ -240,7 +240,7 @@ jobs:
         publish-profile: \${{ secrets.AZURE_PUBLISH_PROFILE }}
 \`\`\`
 
-## Environmentvariable
+## 环境变量
 \`\`\`bash
 # .env.production
 DATABASE_URL=postgresql://adminuser:password@psql-${projectName}.postgres.database.azure.com:5432/${projectName}
@@ -248,19 +248,19 @@ REDIS_URL=redis://redis-${projectName}.redis.cache.windows.net:6380
 STORAGE_ACCOUNT=st${projectName.replace(/-/g, '')}
 \`\`\`
 
-## MonitoringConfiguration
-- **Application Insights**: ApplicationPerformanceMonitoring
-- **Azure Monitor**: InfrastructureMonitoring
-- **Log Analytics**: LoggingAnalytics
+## 监控配置
+- **Application Insights**: 应用性能监控
+- **Azure Monitor**: 基础设施监控
+- **Log Analytics**: 日志分析
 
 ---
-*Generatetime: ${new Date().toLocaleString()}*`;
+*生成时间: ${new Date().toLocaleString()}*`;
 
-    return this.createDocument('deployment', 'AzureDeploymentdocument', content, analysis.id);
+    return this.createDocument('deployment', 'Azure部署文档', content, analysis.id);
   }
 
   /**
-   * CreatedocumentObject
+   * 创建文档对象
    */
   private createDocument(
     type: TechnicalDocument['type'],
@@ -284,10 +284,10 @@ STORAGE_ACCOUNT=st${projectName.replace(/-/g, '')}
   }
 
   /**
-   * 提取ProjectName
+   * 提取项目名称
    */
   private extractProjectName(analysis: RequirementAnalysis): string {
-    // FromAnalyticsCenter提取orGenerateProjectName
+    // 从分析中提取或生成项目名称
     const firstReq = analysis.categories.functional[0];
     if (firstReq) {
       const words = firstReq.description.split(' ').slice(0, 3);
@@ -297,7 +297,7 @@ STORAGE_ACCOUNT=st${projectName.replace(/-/g, '')}
   }
 
   /**
-   * Statistics单词数
+   * 统计单词数
    */
   private countWords(text: string): number {
     return text.split(/\s+/).filter(word => word.length > 0).length;

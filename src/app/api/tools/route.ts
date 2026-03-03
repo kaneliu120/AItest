@@ -1,43 +1,43 @@
 /**
- * /api/tools - Unified tool management API
- * Data sources:
- * 1. /api/ecosystem/status(Tool ecosystem health check)
- * 2. /api/tools/marketplace(Tool marketplace data)
- * 3. /api/tools/installed(Installed skill management)
+ * /api/tools — 统一工具管理 API
+ * 数据来源：
+ * 1. /api/ecosystem/status（工具生态健康检查）
+ * 2. /api/tools/marketplace（工具市场数据）
+ * 3. /api/tools/installed（已安装技能管理）
  */
 import { NextResponse } from 'next/server';
 import { appendMcpAuditLog } from '@/lib/mcp-audit';
 import { listMarketplace, listInstalled, installSkill, uninstallSkill, toggleInstalledStatus, updateInstalledSkill } from '@/lib/mcp-store';
 
 const TYPE_LABEL: Record<string, string> = {
-  dashboard:  'Dashboard',
-  monitoring: 'Monitoring',
-  evaluation: 'Evaluation',
-  health:     'Health',
-  finance:    'Finance',
-  freelance:  'Outsource',
-  task:       'Task',
+  dashboard:  '控制台',
+  monitoring: '监控',
+  evaluation: '评估',
+  health:     '健康',
+  finance:    '财务',
+  freelance:  '外包',
+  task:       '任务',
   ai:         'AI',
-  automation: 'Automation',
-  knowledge:  'Knowledge Base',
-  analytics:  'Analytics',
-  ads:        'Ads',
-  social:     'Social',
+  automation: '自动化',
+  knowledge:  '知识库',
+  analytics:  '分析',
+  ads:        '广告',
+  social:     '社交',
   'ci-cd':    'CI/CD',
-  container:  'Container',
-  cloud:      'Cloud servervice',
-  framework:  'Framework',
-  skill:      'Skill',
-  product:    'Product',
+  container:  '容器',
+  cloud:      '云服务',
+  framework:  '框架',
+  skill:      '技能',
+  product:    '产品',
 };
 
 const CATEGORY_MAP: Record<string, string> = {
-  dashboard: 'System Core', monitoring: 'System Core', health: 'System Core',
-  finance:   'Business System', task: 'Business System', freelance: 'Business System', knowledge: 'Business System',
-  ai:        'AI & Automation', automation: 'AI & Automation', skill: 'AI & Automation',
-  analytics: 'Data & Marketing', ads: 'Data & Marketing', social: 'Data & Marketing',
-  'ci-cd':   'Infrastructure', container: 'Infrastructure', cloud: 'Infrastructure',
-  framework: 'Infrastructure', evaluation: 'Quality Assurance', product: 'Product',
+  dashboard: '系统核心', monitoring: '系统核心', health: '系统核心',
+  finance:   '业务系统', task: '业务系统', freelance: '业务系统', knowledge: '业务系统',
+  ai:        'AI与自动化', automation: 'AI与自动化', skill: 'AI与自动化',
+  analytics: '数据与营销', ads: '数据与营销', social: '数据与营销',
+  'ci-cd':   '基础设施', container: '基础设施', cloud: '基础设施',
+  framework: '基础设施', evaluation: '质量保障', product: '产品',
 };
 
 export async function GET(request: Request) {
@@ -59,13 +59,13 @@ export async function GET(request: Request) {
   const monitoring     = ((ecosystemData as any)?.data?.monitoring ?? {}) as Record<string, any>;
   const scheduler      = ((ecosystemData as any)?.data?.scheduler  ?? {}) as Record<string, any>;
 
-  // ── Tool list standardization ────────────────────────────────────────────────────────
+  // ── 工具列表标准化 ────────────────────────────────────────────────────────
   const tools = rawTools.map(t => ({
     name:        t.name,
     status:      t.status,        // healthy | warning | error
     type:        t.type,
     typeLabel:   TYPE_LABEL[t.type] ?? t.type,
-    category:    CATEGORY_MAP[t.type] ?? 'Other',
+    category:    CATEGORY_MAP[t.type] ?? '其他',
     version:     t.version ?? '—',
     description: t.details ?? '',
     lastChecked: t.lastChecked,
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
   const start = (safePage - 1) * pageSize;
   const pagedTools = filteredTools.slice(start, start + pageSize);
 
-  // ── Group by category ────────────────────────────────────────────────────────────
+  // ── 按分类分组 ────────────────────────────────────────────────────────────
   const categories: Record<string, typeof filteredTools> = {};
   filteredTools.forEach(t => {
     if (!categories[t.category]) categories[t.category] = [];
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
     tools: items,
   }));
 
-  // ── Statistics ─────────────────────────────────────────────────────────────────
+  // ── 统计 ─────────────────────────────────────────────────────────────────
   const stats = {
     total:      monitoring.totalTools   ?? tools.length,
     healthy:    monitoring.healthyTools ?? tools.filter(t => t.status === 'healthy').length,
@@ -114,7 +114,7 @@ export async function GET(request: Request) {
       : 0,
   };
 
-  // ── Scheduling器Summary ────────────────────────────────────────────────────────────
+  // ── 调度器摘要 ────────────────────────────────────────────────────────────
   const schedulerStats = {
     pending:   scheduler.pending   ?? 0,
     running:   scheduler.running   ?? 0,
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
     health:    scheduler.health    ?? 0,
   };
 
-  // ── Alert(by级别Sort)────────────────────────────────────────────────────
+  // ── 告警（按级别排序）────────────────────────────────────────────────────
   const alerts = (((monitoring as any).recentAlerts ?? []) as Array<Record<string, any>>).sort((a, b) => {
     const order: Record<string, number> = { error: 0, warning: 1, info: 2 };
     return (order[a.level] ?? 3) - (order[b.level] ?? 3);
@@ -166,7 +166,7 @@ export async function GET(request: Request) {
     categories:  categoryList,
     scheduler:   schedulerStats,
     alerts,
-    unifiedStats, // New增统一Statistics
+    unifiedStats, // 新增统一统计
     pagination: {
       page: safePage,
       pageSize,
@@ -187,17 +187,17 @@ export async function GET(request: Request) {
   });
 }
 
-// ─── POST: 统一Tool操作 ───────────────────────────────────────────────────
+// ─── POST: 统一工具操作 ───────────────────────────────────────────────────
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action, toolId, issue, url, testType, slug, version, status } = body;
     const origin = new URL(request.url).origin;
 
-    // ── Tool生态操作 ──
+    // ── 工具生态操作 ──
     if (action === 'diagnose') {
-      if (!issue) return Response.json({ success: false, error: 'Missing issue description' }, { status: 400 });
-      // Trigger完整HealthCheck + Returns AI 建议
+      if (!issue) return Response.json({ success: false, error: '缺少问题描述' }, { status: 400 });
+      // 触发完整健康检查 + 返回 AI 建议
       const testRes = await fetch(`${origin}/api/test`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run-all-health' }),
@@ -208,15 +208,15 @@ export async function POST(request: Request) {
       const failed   = total - passed;
 
       const suggestions = failed > 0
-        ? [`Found ${failed} failed items, recommend visiting the Test Center for details`, 'Check that the corresponding API route file correctly exports the handler', 'Restart Next.js dev server and retry']
-        : ['All API health checks passed', 'Issue may be from frontend rendering, check console errors', 'Try clearing browser cache and retry'];
+        ? [`发现 ${failed} 个失败项，建议前往测试中心查看详情`, '检查对应 API 路由文件是否正确导出 handler', '重启 Next.js 开发服务器后重试']
+        : ['所有 API 健康检查通过', '问题可能来自前端渲染，检查 console 错误', '尝试清除浏览器缓存后重试'];
 
       return Response.json({
         success: true,
         data: {
           toolId: toolId ?? 'system',
           issue,
-          result: `System diagnosis completed. API checks ${passed}/${total}  passed. ${failed > 0 ? `Found ${failed} abnormal items. ` : 'System running normally. '}`,
+          result: `系统诊断完成。API 检测 ${passed}/${total} 通过。${failed > 0 ? `发现 ${failed} 个异常。` : '系统运行正常。'}`,
           suggestions,
           healthCheck: { passed, total, failed },
           timestamp: new Date().toISOString(),
@@ -224,7 +224,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // ── Web Test(true实 URL 检测) ──
+    // ── Web 测试（真实 URL 检测） ──
     if (action === 'run-web-test') {
       const target = url || `${origin}/`;
       const start  = Date.now();
@@ -250,14 +250,14 @@ export async function POST(request: Request) {
           data: {
             toolId: toolId ?? 'cortexaai', url: target,
             status: 'error', httpStatus: 0, duration: dur,
-            result: `❌ Connection failed: ${e instanceof Error ? e.message : 'Timeout'}`,
+            result: `❌ 连接失败: ${e instanceof Error ? e.message : '超时'}`,
             timestamp: new Date().toISOString(),
           }
         });
       }
     }
 
-    // ── TriggerAutomation联动(NotificationAutomationModule) ──
+    // ── 触发自动化联动（通知自动化模块） ──
     if (action === 'sync-automation') {
       await fetch(`${origin}/api/automation`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -266,44 +266,44 @@ export async function POST(request: Request) {
       return Response.json({ success: true, data: { synced: true, at: new Date().toISOString() } });
     }
 
-    // ── Tool Marketplace操作 ──
+    // ── 工具市场操作 ──
     if (action === 'install-skill') {
-      if (!slug) return Response.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+      if (!slug) return Response.json({ success: false, error: '缺少技能标识' }, { status: 400 });
       const out = await installSkill(slug, version);
       await appendMcpAuditLog({ action, slug, success: true, detail: 'install success' });
       return Response.json({ success: true, data: { ...out, installed: true, installedAt: new Date().toISOString() } });
     }
 
     if (action === 'uninstall-skill') {
-      if (!slug) return Response.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+      if (!slug) return Response.json({ success: false, error: '缺少技能标识' }, { status: 400 });
       await uninstallSkill(slug);
       await appendMcpAuditLog({ action, slug, success: true, detail: 'uninstall success' });
       return Response.json({ success: true, data: { slug, uninstalled: true, uninstalledAt: new Date().toISOString() } });
     }
 
-    // ── alreadyInstallSkill操作 ──
+    // ── 已安装技能操作 ──
     if (action === 'toggle-skill-status') {
-      if (!slug) return Response.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+      if (!slug) return Response.json({ success: false, error: '缺少技能标识' }, { status: 400 });
       const updated = await toggleInstalledStatus(slug, status);
       await appendMcpAuditLog({ action, slug, success: true, detail: `toggle to ${updated.status}` });
       return Response.json({ success: true, data: { ...updated, updatedAt: new Date().toISOString() } });
     }
 
     if (action === 'update-skill') {
-      if (!slug) return Response.json({ success: false, error: 'Missing skill identifier' }, { status: 400 });
+      if (!slug) return Response.json({ success: false, error: '缺少技能标识' }, { status: 400 });
       const updated = await updateInstalledSkill(slug, version);
       await appendMcpAuditLog({ action, slug, success: true, detail: `update to ${updated.version}` });
       return Response.json({ success: true, data: { ...updated, updatedAt: new Date().toISOString(), updated: true } });
     }
 
-    return Response.json({ success: false, error: 'Unsupported operation' }, { status: 400 });
+    return Response.json({ success: false, error: '不支持的操作' }, { status: 400 });
   } catch (error) {
     await appendMcpAuditLog({
       action: 'unknown',
       slug: undefined,
       success: false,
-      detail: error instanceof Error ? error.message : 'Unknown error',
+      detail: error instanceof Error ? error.message : '未知错误',
     });
-    return Response.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    return Response.json({ success: false, error: error instanceof Error ? error.message : '未知错误' }, { status: 500 });
   }
 }

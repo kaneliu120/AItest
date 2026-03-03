@@ -1,6 +1,6 @@
 /**
- * PostgreSQL data库兼容Module
- * temporary替代原来's SQLite data库Module
+ * PostgreSQL 数据库兼容模块
+ * 临时替代原来的 SQLite 数据库模块
  */
 
 import { Pool } from 'pg';
@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// PostgreSQL Connect池
+// PostgreSQL 连接池
 let pool: Pool | null = null;
 
 export interface DatabaseConnection {
@@ -33,7 +33,7 @@ export async function getDatabaseConnection(dbPath?: string): Promise<DatabaseCo
         const result = await pool!.query(sql, params);
         return { rows: result.rows, changes: result.rowCount };
       } catch (error) {
-        console.error('PostgreSQL查询error:', error);
+        console.error('PostgreSQL查询错误:', error);
         throw error;
       }
     },
@@ -46,15 +46,15 @@ export async function getDatabaseConnection(dbPath?: string): Promise<DatabaseCo
   };
 }
 
-// 兼容性function
+// 兼容性函数
 export async function backupDatabase(sourcePath: string, backupPath: string): Promise<void> {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
-    console.warn('⚠️  DATABASE_URL 未Settings, 跳过Backup');
+    console.warn('⚠️  DATABASE_URL 未设置，跳过备份');
     return;
   }
 
-  // 确保Backup目录存in
+  // 确保备份目录存在
   const backupDir = path.dirname(backupPath);
   if (!fs.existsSync(backupDir)) {
     fs.mkdirSync(backupDir, { recursive: true });
@@ -65,12 +65,12 @@ export async function backupDatabase(sourcePath: string, backupPath: string): Pr
     ? backupPath
     : path.join(backupDir, `backup-${timestamp}.sql`);
 
-  console.log(`📋 On始 pg_dump Backup -> ${outFile}`);
+  console.log(`📋 开始 pg_dump 备份 -> ${outFile}`);
   execSync(`pg_dump "${dbUrl}" -f "${outFile}" --no-password`, {
     stdio: 'pipe',
     timeout: 60000,
   });
-  console.log(`✅ BackupCompleted: ${outFile}`);
+  console.log(`✅ 备份完成: ${outFile}`);
 }
 
 export function getDatabaseStats() {

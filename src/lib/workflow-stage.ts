@@ -28,9 +28,9 @@ export function canMove(from: Stage, to: Stage): boolean {
 }
 
 /**
- * Saga 补偿Interface: 每 副作用须提供 compensate(), 
- * in事务Rollback后撤销不可Rollback'sExternal操作(如发邮件, 调External APIs). 
- * 纯data库副作用None需Register补偿(already由事务自动Rollback). 
+ * Saga 补偿接口：每个副作用须提供 compensate()，
+ * 在事务回滚后撤销不可回滚的外部操作（如发邮件、调外部API）。
+ * 纯数据库副作用无需注册补偿（已由事务自动回滚）。
  */
 interface SideEffect {
   description: string;
@@ -41,13 +41,13 @@ interface SideEffect {
 async function runPostStageActions(client: any, taskId: string, to: Stage): Promise<SideEffect[]> {
   const sideEffects: SideEffect[] = [];
 
-  // analysis_done 自动Trigger"Test计划Draft"(纯 DB, 事务自动Rollback, None需补偿)
+  // analysis_done 自动触发"测试计划草稿"（纯 DB，事务自动回滚，无需补偿）
   if (to === 'analysis_done') {
     const t = await client.query('SELECT id, level, title FROM mission_tasks WHERE id=$1 LIMIT 1', [taskId]);
     const row = t.rows[0];
     if (!row) return sideEffects;
     const nextLevel = Math.min(3, Number(row.level || 1) + 1);
-    const autoTitle = `Test计划Draft - ${row.title}`;
+    const autoTitle = `测试计划草稿 - ${row.title}`;
 
     const exists = await client.query(
       `SELECT 1 FROM mission_tasks
@@ -67,7 +67,7 @@ async function runPostStageActions(client: any, taskId: string, to: Stage): Prom
           taskId,
           nextLevel,
           autoTitle,
-          '由ProcessTrigger器自动Generate, 请补充Test范围, 用例, acceptancestandard. ',
+          '由流程触发器自动生成，请补充测试范围、用例、验收标准。',
           'pending',
           0,
           'PHP',
@@ -78,8 +78,8 @@ async function runPostStageActions(client: any, taskId: string, to: Stage): Prom
     }
   }
 
-  // 未来extend: in此 push External副作用, and提供for应 compensate()
-  // e.g.: sideEffects.push({ description: 'SendNotification邮件', compensate: () => cancelEmail(emailId) });
+  // 未来扩展：在此 push 外部副作用，并提供对应 compensate()
+  // 例如: sideEffects.push({ description: '发送通知邮件', compensate: () => cancelEmail(emailId) });
 
   return sideEffects;
 }
@@ -90,9 +90,9 @@ export async function moveStage(taskId: string, to: Stage, eventType: string, ac
   try {
     await client.query('BEGIN');
     const rs = await client.query('SELECT workflow_stage FROM mission_tasks WHERE id=$1 LIMIT 1 FOR UPDATE', [taskId]);
-    if (!rs.rows[0]) throw new Error('Taskdoes not exist');
+    if (!rs.rows[0]) throw new Error('任务不存在');
     const from = rs.rows[0].workflow_stage as Stage;
-    if (!canMove(from, to)) throw new Error(`非法Statusmigration: ${from} -> ${to}`);
+    if (!canMove(from, to)) throw new Error(`非法状态迁移: ${from} -> ${to}`);
 
     const tsCols: Record<Stage, string | null> = {
       draft: null,
@@ -131,12 +131,12 @@ export async function moveStage(taskId: string, to: Stage, eventType: string, ac
   } catch (e) {
     await client.query('ROLLBACK');
 
-    // Saga 补偿: 撤销already发生's不可逆External副作用
+    // Saga 补偿：撤销已发生的不可逆外部副作用
     for (const effect of committedSideEffects) {
       try {
         await effect.compensate();
       } catch (compErr) {
-        logger.error(`[workflow-stage] 补偿failed: ${effect.description}`, compErr, { taskId, to });
+        logger.error(`[workflow-stage] 补偿失败: ${effect.description}`, compErr, { taskId, to });
       }
     }
 
